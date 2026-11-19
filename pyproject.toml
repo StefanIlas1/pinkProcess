@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pinkprocess"
+version = "0.1.0"
+description = "Synthetic database pool telemetry and a forecasting baseline"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools]
+packages = ["pinkprocess"]
