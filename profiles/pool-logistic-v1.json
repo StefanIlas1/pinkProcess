@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "model": "pool_wait_logistic",
+  "sample_ms": 100,
+  "observation_ms": 5000,
+  "forecast_ms": 10000,
+  "features": [
+    "current_busy_fraction",
+    "busy_fraction_change_per_second_over_2s",
+    "fraction_of_last_1s_readings_at_capacity"
+  ],
+  "weights": [
+    0.014192659535607891,
+    1.774665686612262,
+    -0.07741245748103523
+  ],
+  "intercept": 0.41518900918306473,
+  "threshold": -0.17163533317581997
+}

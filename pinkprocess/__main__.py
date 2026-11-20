@@ -2,13 +2,9 @@
 
 from statistics import median
 
-from .baseline import TREND_MS, Rule, evaluate, features, fit_rule
+from .baseline import TREND_MS, Rule, evaluate, feature_rows, features, fit_rule
 from .dataset import FORECAST_MS, TEST_SEEDS, TRAIN_SEEDS, Example, build_examples
 from .simulator import SAMPLE_MS, Run, simulate
-
-
-def feature_rows(run: Run, examples: list[Example]) -> list[tuple[int, float, float]]:
-    return [(example.time_ms, *features(example, run.capacity)) for example in examples]
 
 
 def forecast_readings(run: Run, time_ms: int):

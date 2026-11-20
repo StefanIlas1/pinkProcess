@@ -51,3 +51,75 @@ The episode count includes starts after the first possible prediction time
 (5 s) through run end. Near the end, later episodes have fewer eligible
 prediction times because prediction stops 10 seconds before run end. False
 alerts per hour use the total simulated duration of the held-out runs.
+
+## Fit and save a logistic profile
+
+```sh
+python3 -m pinkprocess.train --output /tmp/pinkprocess-logistic.json
+```
+
+The [reference profile](profiles/pool-logistic-v1.json) stores the three
+weights in feature order, the intercept, and the alert threshold. The
+features are current utilization, its change per second over two seconds, and
+the fraction of the last ten readings at full capacity. The prediction uses
+`intercept + sum(weight * feature)` and alerts when that score reaches the
+threshold. The sigmoid converts the score to a probability during training.
+Inference can compare the raw score directly because the sigmoid is monotonic.
+
+The trainer fits weights on seeds 100–105. On seeds 106–107, it sweeps score
+thresholds and chooses the one that warns about the most episodes within the
+baseline's validation false-alert count. Both models use the same event-level
+scoring on seeds 200–203. The demo reloads the JSON and checks that every
+held-out score and the decision threshold are reproduced exactly.
+
+For inference without fitting, load the JSON with `Profile.load(Path(...))`.
+Pass the result of `profile_features(example, capacity)` to
+`profile.score(...)` and compare the returned score to `profile.threshold`.
+
+## Try weight authoring on a second service
+
+This workload changes the mean connection hold from 850 ms to 1,100 ms.
+The capacity, arrival model, features, and label definition stay the same.
+Fit runs use seeds 300–305, validation uses 306–307, and test uses 400–403.
+
+```sh
+python3 -m pinkprocess.author --output-dir /tmp/pinkprocess-service-b
+```
+
+Open `/tmp/pinkprocess-service-b/astra-training.txt` and give it to Astra.
+It contains the instructions and a lossless grouping of the training
+examples by feature vector and label. Each row's count is its frequency in
+the training set. The conventional fit uses those same counts. Save the
+returned JSON object with `weights` and `intercept` to
+`/tmp/pinkprocess-astra-reply.json`, then run:
+
+```sh
+python3 -m pinkprocess.author --output-dir /tmp/pinkprocess-service-b \
+  --astra /tmp/pinkprocess-astra-reply.json
+```
+
+The command calibrates both profiles against the same validation
+false-alert budget, evaluates them on the same untouched test runs, and
+saves the imported weights and locally chosen threshold in
+`astra-profile.json`. It verifies the saved profile by reloading it and
+comparing all held-out scores. Future scoring can use that JSON directly.
+
+## Replay the Astra profile with fixed-point arithmetic
+
+```sh
+python3 -m pinkprocess.fixed_point --vectors /tmp/pinkprocess-fpga-vectors.json
+```
+
+The command loads the saved Astra profile and replays the four second-service
+test runs. Features and weights use scale 256. Products, the intercept, and
+the threshold use scale 65,536. Encoding rounds to nearest with ties to even,
+including for negative utilization trends. After encoding, inference performs
+three signed integer multiplications, adds the products to the integer
+intercept, and compares the sum with the integer threshold using `>=`.
+
+The [reference vectors](profiles/service-b-fixed-point-vectors.json) give
+the integer inputs, expected sum, and expected alert bit. Replay vectors
+include their run seed and timestamp. Two synthetic vectors exercise the
+minimum and maximum sum over independently bounded inputs. Widen signed
+products before adding them. The JSON lists the required signed widths for
+the operands, products, sum, and comparison for this profile.

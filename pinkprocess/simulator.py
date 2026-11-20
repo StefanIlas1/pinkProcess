@@ -31,7 +31,7 @@ class Run:
     episodes: tuple[WaitEpisode, ...]
 
 
-def arrivals(rng: Random, duration_ms: int):
+def arrivals(rng: Random, duration_ms: int, mean_hold_ms: int = 850):
     """Yield (arrival time, connection hold time) in milliseconds."""
     start_ms = 0
     rate = 7.0
@@ -42,7 +42,7 @@ def arrivals(rng: Random, duration_ms: int):
             time_ms += rng.expovariate(rate / 1000)
             if time_ms >= end_ms or time_ms >= duration_ms:
                 break
-            hold_ms = max(1, round(rng.expovariate(1 / 850)))
+            hold_ms = max(1, round(rng.expovariate(1 / mean_hold_ms)))
             yield int(time_ms), hold_ms
 
         start_ms = end_ms
@@ -54,11 +54,13 @@ def arrivals(rng: Random, duration_ms: int):
             end_ms += rng.randint(12_000, 32_000)
 
 
-def simulate(seed: int, duration_ms: int = 600_000, capacity: int = 12) -> Run:
-    if duration_ms <= 0 or duration_ms % SAMPLE_MS or capacity <= 0:
-        raise ValueError("Use a positive capacity and duration divisible by 100 ms.")
+def simulate(
+    seed: int, duration_ms: int = 600_000, capacity: int = 12, *, mean_hold_ms: int = 850
+) -> Run:
+    if duration_ms <= 0 or duration_ms % SAMPLE_MS or capacity <= 0 or mean_hold_ms <= 0:
+        raise ValueError("Use a positive capacity, hold mean, and duration divisible by 100 ms.")
 
-    requests = iter(arrivals(Random(seed), duration_ms))
+    requests = iter(arrivals(Random(seed), duration_ms, mean_hold_ms))
     incoming = next(requests, None)
     releases: list[int] = []
     queue: deque[int] = deque()
