@@ -1,6 +1,16 @@
-# Cartridges: one device, any expert
+# pinkProcess spec
 
-Handoff for whoever picks this up next, human or agent. It covers what was added, why, how it fits the code that was already here, and what is still open.
+Everything about the cartridge system in one file: the problem, the design, the file map, what is measured, what is not done and what to do next. Agents picking up this repo should read all of it before changing code. Track and demo notes for Hack Western are in [docs/hack-western.md](docs/hack-western.md).
+
+## Run it
+
+```sh
+python3 -m cartridge.build     # train and quantise the cartridges from decks/
+python3 -m cartridge.check     # held-out score, writes hw/vectors.txt
+python3 -m cartridge.server    # http://127.0.0.1:5320
+```
+
+Python 3.10 or later, standard library only. `scoping/` needs torch and transformers and is not needed to run the app.
 
 ## The problem
 
@@ -87,18 +97,31 @@ Skipped neurons are the part that matters on the board: decoding is limited by m
 
 The held-out questions were also used to pick training settings, so treat the first three rows as optimistic.
 
+## Board status
+
+The FPGA only runs a design after it is compiled into a **bitstream**, the file that configures the chip. Compiling needs Xilinx Vivado and Vitis HLS, which run on x86 Linux or Windows and not on a Mac. That step has not been done.
+
+Two ways to demo on the board:
+
+| mode | needs | what runs where |
+|---|---|---|
+| Board CPU | nothing new: copy the repo to the board, run `python3 -m cartridge.server --host 0.0.0.0` | same integer arithmetic on the board's ARM processor; the app shows "software replay" |
+| FPGA kernel | the bitstream built from `hw/` (steps in `hw/README.md`) | scores computed in the FPGA logic; the app shows "PYNQ-Z2 overlay" and stops if they differ from the reference |
+
+Both give the same answers by construction. Say which one is running.
+
 ## Not done
 
 - No bitstream yet. The kernel has only been compiled and replayed as C++.
-- `cartridge/board.py` has never touched a board. Register offsets come from the HLS output.
+- `cartridge/board.py` has never touched a board. Its register offsets come from the HLS output.
 - The decks were written quickly and have not been reviewed by a clinician, a financial planner or a guide.
 - Eight of 60 held-out questions get the wrong card or a refusal. More example questions per card is the fix.
-- Scope packs are measured on GPT-2 only, one seed.
+- The app answers from 30 written cards. Free-form answers need a language model with scope packs, which are measured on GPT-2 only, one seed.
 
 ## Next steps, in order
 
-1. Synthesize the kernel and pass `vectors.txt` on the board.
-2. Serve the app from the board (`--host 0.0.0.0`) so a laptop needs only a cable and a browser.
+1. Serve the app from the board's CPU (`--host 0.0.0.0`) so a laptop needs only a cable and a browser.
+2. Build the bitstream on a machine with Vivado and pass `vectors.txt` on the board.
 3. Add 10 more questions per card and re-score on fresh held-out questions.
 4. Author one cartridge with the `author.py` flow and compare.
 5. Run a blind weight reader over a cartridge with one planted bad card, under the rules in `research.md` section 2.

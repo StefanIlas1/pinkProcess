@@ -10,7 +10,7 @@ python3 -m cartridge.server    # http://127.0.0.1:5320
 
 ![The app answering a first-aid question](docs/app.png)
 
-- [docs/cartridges.md](docs/cartridges.md): the design, measurements and open work.
+- [SPEC.md](SPEC.md): the full spec. Agents start here.
 - [hw/README.md](hw/README.md): the FPGA kernel and how to check it.
 - [research.md](research.md): the weight-reading research this builds on.
 - [docs/hack-western.md](docs/hack-western.md): tracks and demo plan.
