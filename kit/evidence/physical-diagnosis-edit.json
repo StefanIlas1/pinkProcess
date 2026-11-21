@@ -1,0 +1,24 @@
+{
+  "capture_id": "7d07fa35a7588339abb5cf7448ef58434c9187d7ea189476db388c96207368a7",
+  "question": "What should the next on-call engineer know about this pool before investigating?",
+  "original": {
+    "name": "original",
+    "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+    "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+    "target_row": null
+  },
+  "selected": {
+    "name": "Astra Now 0f137b5e",
+    "checkpoint_sha256": "f999e7e8702926b53fac296b01db4bdcf0f5d7e5213015e159c04b7de67a2b3b",
+    "classifier_sha256": "e8a86ac9e3caa3cd0a1fbe21070f2b480a6470e02ec0ba70f657b4eca1ceeebf",
+    "target_row": 852
+  },
+  "astra_model": "gpt-6.2-astra",
+  "instruction": "Change the first token on the captured question to Now. Use the smallest verified sufficient increase.",
+  "changed_weight_bytes": 380,
+  "original_answer": "The backlog is ongoing: 39 requests are waiting now. The peak was 39. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+  "edited_answer": "Now 39 requests are waiting Now the peak was 39 Now the FPGA predicts the queue will remain nonempty over the next ten seconds. Now the cause is unknown. Measure request arrivals and connection hold times. Now are all over Now. Now are all over Now. Now are all over Now. Now",
+  "edited_elapsed_seconds": 860.8387107849121,
+  "fabric_projections": 4744,
+  "observation": "The edit changes the first word as requested. It also repeats Now later and generates a repetitive ending."
+}
