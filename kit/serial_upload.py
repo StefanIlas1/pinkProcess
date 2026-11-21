@@ -19,7 +19,7 @@ import zlib
 
 # The board flushes each acknowledgment before switching baud or restoring its shell.
 RECEIVER = """
-import hashlib, os, select, sys, tempfile, termios, tty
+import base64, binascii, hashlib, os, select, sys, tempfile, termios, tty, zlib
 from pathlib import Path
 name, size, digest, baud = sys.argv[1:]
 fd = os.open('/dev/tty', os.O_RDWR)
@@ -38,20 +38,33 @@ try:
     check = hashlib.sha256()
     with tempfile.NamedTemporaryFile(dir=directory, delete=False) as output:
         partial = Path(output.name)
+        seq = 0
+        pending = bytearray()
         while total:
-            block = min(total, 1024)
-            remaining = block
-            while remaining:
-                if not select.select([fd], [], [], 8)[0]:
-                    raise TimeoutError('upload timed out')
-                data = os.read(fd, remaining)
-                if not data:
-                    raise IOError('console closed')
-                output.write(data)
-                check.update(data)
-                remaining -= len(data)
-            total -= block
-            os.write(fd, b'+')
+            if not select.select([fd], [], [], 15)[0]:
+                raise TimeoutError('upload timed out')
+            pending.extend(os.read(fd, 8192))
+            while b'\\n' in pending:
+                line, _, pending = pending.partition(b'\\n')
+                if not line:
+                    continue
+                try:
+                    label, number, checksum, encoded = line.split()
+                    index = int(number)
+                    data = base64.b64decode(encoded, validate=True)
+                    if label != b'PPD' or zlib.crc32(data) != int(checksum, 16):
+                        continue
+                    if index == seq and len(data) == min(total, 2048):
+                        check.update(data)
+                        output.write(data)
+                        total -= len(data)
+                        seq += 1
+                    if index == seq - 1:
+                        os.write(fd, ('K%d\\n' % index).encode())
+                except (ValueError, binascii.Error):
+                    continue
+            if len(pending) > 8192:
+                pending.clear()
         output.flush()
         os.fsync(output.fileno())
     if check.hexdigest() != digest:
@@ -114,12 +127,31 @@ def upload(device, source, baud):
         reply = b''
         started = time.monotonic()
         with source.open('rb') as stream:
-            for block in iter(lambda: stream.read(1024), b''):
-                write_all(fd, block)
-                reply = wait_read(fd, 8)
-                if not reply.startswith(b'+'):
-                    raise IOError('Unexpected USB console acknowledgment.')
-                reply = reply[1:]
+            for seq, block in enumerate(iter(lambda: stream.read(2048), b'')):
+                # A leading delimiter lets the board discard an interrupted frame.
+                frame = (f'\nPPD {seq} {zlib.crc32(block):08x} '.encode() +
+                         base64.b64encode(block) + b'\n')
+                expected = f'K{seq}'.encode()
+                for attempt in range(5):
+                    write_all(fd, frame)
+                    deadline = time.monotonic() + 2
+                    acknowledged = False
+                    while time.monotonic() < deadline:
+                        while b'\n' in reply:
+                            line, _, reply = reply.partition(b'\n')
+                            if line == expected:
+                                acknowledged = True
+                                break
+                        if acknowledged:
+                            break
+                        try:
+                            reply += wait_read(fd, max(.01, deadline - time.monotonic()))
+                        except TimeoutError:
+                            break
+                    if acknowledged:
+                        break
+                else:
+                    raise IOError(f'Board did not acknowledge frame {seq} after retransmission.')
         while b'\n' not in reply:
             reply += wait_read(fd, 8)
         if reply.splitlines()[0] != b'PP-VERIFIED ' + digest.encode():
