@@ -71,6 +71,7 @@ class Flan:
         self.first_output_activation = None
         self.first_output_max = None
         self.fabric_projections = 0
+        self.partial_answer = ""
 
     def restore_head(self):
         if self._original is not None:
@@ -175,6 +176,7 @@ class Flan:
         self.first_output_activation = None
         self.first_output_max = None
         self.fabric_projections = 0
+        self.partial_answer = ""
         ids = self.tokenizer.encode(prompt)
         if len(ids) > 512:
             raise ValueError("The evidence and question exceed the model's 512-token input.")
@@ -188,4 +190,5 @@ class Flan:
             if previous == 1:
                 break
             tokens.append(previous)
+            self.partial_answer = self.tokenizer.decode(tokens)
         return self.tokenizer.decode(tokens)

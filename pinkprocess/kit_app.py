@@ -10,7 +10,10 @@ import webbrowser
 from .live_analyst import analyze as analyze_live_evidence
 from .backlog import VERSION as BACKLOG_VERSION
 from .kit_dataset import DEMO_CAPACITY, demo_csv, prepare_dataset
+from .astra_edit import propose
 from .kit_transport import BoardTransport
+from .kit_evidence import analyst_evidence, live_answer
+from time import sleep
 
 
 PAGE = Path(__file__).with_name("kit.html")
@@ -28,88 +31,6 @@ QUICK_READS = {
     "What does the FPGA predict for the next ten seconds?": ("stream_forecast", None, []),
 }
 LIVE_EXAMPLES = (DIAGNOSIS_EXAMPLE, *QUICK_READS)
-
-
-def live_answer(snapshot, intent, metrics):
-    state = snapshot["state"]
-    latest = snapshot.get("latest")
-    if latest is None:
-        return "The board has no telemetry readings for this stream."
-    if not snapshot["fresh"]:
-        return "The board's telemetry is stale. It last saw {} busy and {} waiting.".format(
-            latest["busy"], latest["waiting"])
-    if intent == "stream_status":
-        if metrics == ["busy"]:
-            return f'{latest["busy"]} of {snapshot["capacity"]} connections are busy.'
-        if metrics == ["waiting"]:
-            return f'Waiting requests: {latest["waiting"]}.'
-        return f'{latest["busy"]} of {snapshot["capacity"]} connections busy, with {latest["waiting"]} requests waiting.'
-    if intent in ("peak", "trend"):
-        observations = snapshot["observations"]
-        if intent == "trend" and observations["sample_count"] < 2:
-            return "The board needs at least two readings to report a trend."
-        labels = {"busy": "Busy connections", "waiting": "Waiting requests"}
-        statements = []
-        for metric in metrics:
-            if intent == "peak":
-                peak = observations[f"peak_{metric}"]
-                statements.append(f'{labels[metric]} peaked at {peak[metric]} at {peak["time_ms"] / 1000:g} s.')
-            else:
-                first, last = observations["first"][metric], observations["latest"][metric]
-                if first == last:
-                    statements.append(f"{labels[metric]} started and ended at {first}.")
-                else:
-                    direction = "rose" if last > first else "fell"
-                    statements.append(f"{labels[metric]} {direction} from {first} to {last}.")
-        span = (observations["end_ms"] - observations["start_ms"]) / 1000
-        statements.append(f'Based on {observations["sample_count"]} readings spanning {span:g} seconds.')
-        return " ".join(statements)
-    forecast = snapshot.get("forecast")
-    if not forecast:
-        if state == "warming":
-            return "The board is collecting five seconds of continuous readings for a forecast."
-        return "The FPGA forecast is unavailable for this stream."
-    if forecast["model"] == "queue_outlook":
-        persists, grows = [score >= 0 for score in forecast["scores"]]
-        n = latest["waiting"]
-        persistence = "remain nonempty" if persists else "drain at least once"
-        growth = "more than" if grows else "at most"
-        return (f"The FPGA predicts the queue will {persistence} over the next ten seconds. "
-                f"It expects {growth} the current {n} waiting at the end of that period.")
-    if forecast["model"] == "pool_wait_logistic":
-        if forecast["alert"]:
-            return "The FPGA warns that requests may start waiting within the next ten seconds."
-        return "The FPGA issued no queue-onset warning for the next ten seconds."
-    return "The board returned an unsupported forecast model."
-
-
-def analyst_evidence(snapshot):
-    """Give the analyst a readable view of the timestamped data used for the answer."""
-    fields = ("origin", "source", "capacity", "state", "latest", "observations", "limitations",
-              "forecast_reading")
-    evidence = {key: snapshot[key] for key in fields if key in snapshot}
-    latest = snapshot["latest"]
-    capacity = snapshot.get("capacity")
-    if capacity:
-        evidence["observed_now"] = (
-            f'{latest["busy"]} of {capacity} connections occupied '
-            f'({100 * latest["busy"] / capacity:.1f}%); {latest["waiting"]} requests waiting.'
-        )
-    observations = snapshot.get("observations") or {}
-    peak = observations.get("peak_waiting")
-    if peak:
-        evidence["observed_peak"] = (
-            f'{peak["waiting"]} requests were waiting at the window maximum, '
-            f'{(latest["time_ms"] - peak["time_ms"]) / 1000:g} seconds before the latest reading. '
-            f'{peak["busy"]} connections were occupied at that instant.'
-        )
-    forecast = snapshot.get("forecast")
-    if forecast:
-        scored = {**snapshot, "latest": snapshot.get("forecast_reading") or latest}
-        evidence["forecast"] = {key: forecast[key] for key in ("version", "time_ms", "horizon_ms")
-                                if key in forecast}
-        evidence["forecast_interpretation"] = live_answer(scored, "stream_forecast", [])
-    return evidence
 
 
 class Kit:
@@ -187,7 +108,7 @@ class Kit:
         }
 
     def query_live(self, data):
-        if set(data) - {"action", "question"}:
+        if set(data) - {"action", "question", "capture_id"}:
             raise ValueError("Live questions accept only question text. The board supplies the telemetry.")
         question = data.get("question")
         if not isinstance(question, str) or not 0 < len(question.strip()) <= 500:
@@ -195,12 +116,23 @@ class Kit:
         question = question.strip()
         with self.lock:
             host = self.host
-            if question in QUICK_READS:
+            if question in QUICK_READS and "capture_id" not in data:
                 intent, window_ms, metrics = QUICK_READS[question]
                 snapshot = (self.board(intent) if window_ms is None else
                             self.board("stream_observations", window_ms=window_ms))
                 return dict(host=host, snapshot=snapshot, answer=live_answer(snapshot, intent, metrics))
-            if self.evidence_supported:
+            if getattr(self, "lm_supported", False):
+                options = {"question": question}
+                if "capture_id" in data:
+                    options["capture_id"] = data["capture_id"]
+                job = self.board("lm_start", **options)
+            else:
+                job = None
+                if "capture_id" in data:
+                    raise ValueError("This board does not support saved incident replay.")
+            if job is not None:
+                snapshot = job["snapshot"]
+            elif self.evidence_supported:
                 snapshot = self.board("stream_evidence", window_ms=60000)
             else:
                 # Earlier kit services expose measurements and inference as two timestamped reads.
@@ -211,6 +143,20 @@ class Kit:
                         raise ValueError("The live source changed during capture. Ask again.")
                     snapshot["forecast"] = scored.get("forecast")
                     snapshot["forecast_reading"] = scored.get("latest")
+        if job is not None:
+            if data["action"] == "ask_begin":
+                return {**job, "host": host}
+            while job["state"] == "running":
+                sleep(1)
+                with self.lock:
+                    if self.host != host:
+                        raise RuntimeError("The board changed during diagnosis.")
+                    job = self.board("lm_result", job_id=job["job_id"])
+            if job["state"] != "complete":
+                raise RuntimeError(job.get("error", "Board inference did not complete."))
+            return dict(host=host, snapshot=snapshot, answer=job["answer"],
+                        analyst_model=job["model"], analyst_location="PYNQ-Z2",
+                        capture_id=job["capture_id"], active=job["active"])
         if not snapshot.get("latest") or not snapshot.get("fresh"):
             return dict(host=host, snapshot=snapshot, answer=live_answer(snapshot, "stream_status", []))
         diagnosis = analyze_live_evidence(question, analyst_evidence(snapshot))
@@ -223,9 +169,22 @@ class Kit:
         if not isinstance(data, dict):
             raise ValueError("Expected a JSON object.")
         action = data.get("action")
-        if action == "ask_live":
+        if action == "lm_author":
+            with self.lock:
+                address = self.host
+                context = self.board("lm_row", target_row=data.get("target_row"))
+            response = propose(data.get("instruction"), context)
+            with self.lock:
+                if not address or self.host != address:
+                    raise ValueError("Reconnect the original board to author this version.")
+                return dict(host=self.host, **self.board("lm_save", name=data.get("name"),
+                            target_row=context["target_row"], response=response,
+                            base_sha256=context["base_sha256"]))
+        if action in ("ask_live", "ask_begin"):
             return self.query_live(data)
         with self.lock:
+            if action == "answer_progress":
+                return {**self.board("lm_result", job_id=data.get("job_id")), "host": self.host}
             if action == "discover":
                 return {"boards": self.transport.discover()}
             if action == "connect":
@@ -241,6 +200,7 @@ class Kit:
                     self.disconnect()
                     raise
                 self.evidence_supported = bool(status.get("stream_evidence_supported"))
+                self.lm_supported = bool(status.get("lm_supported"))
                 self.host = host.strip()
                 return {"host": self.host, "status": status}
             if action == "disconnect":
@@ -254,6 +214,16 @@ class Kit:
                 if set(data) != {"action"}:
                     raise ValueError("Live status takes no parameters.")
                 return {"host": self.host, "snapshot": self.board("stream_status")}
+            if action in ("lm_versions", "lm_save", "lm_select", "lm_restore"):
+                fields = {
+                    "lm_versions": (),
+                    "lm_save": ("name", "target_row", "response"),
+                    "lm_select": ("name",),
+                    "lm_restore": (),
+                }[action]
+                if set(data) != {"action", *fields}:
+                    raise ValueError("Invalid language-model version request.")
+                return {"host": self.host, **self.board(action, **{field: data[field] for field in fields})}
             if action in ("apply", "rollback"):
                 params = {"version": data.get("version")} if action == "apply" else {}
                 return {"host": self.host, "status": self.board(action, **params)}

@@ -56,6 +56,25 @@ class KitTest(unittest.TestCase):
         self.transport = MockBoard()
         self.kit = Kit(self.transport)
 
+    def test_language_model_version_commands_are_forwarded(self):
+        self.kit.action({"action": "connect", "host": "pynq.local"})
+        active = {"name": "original", "checkpoint_sha256": "0" * 64}
+        with patch.object(self.transport, "request", return_value={"ok": True, "active": active}) as send:
+            for action, fields in (
+                ("lm_versions", {}),
+                ("lm_save", {"name": "Astra", "target_row": 12, "response": {"row": [1, 2]}}),
+                ("lm_select", {"name": "Astra"}),
+                ("lm_restore", {}),
+            ):
+                with self.subTest(action=action):
+                    result = self.kit.action({"action": action, **fields})
+                    send.assert_called_with(action, **fields)
+                    self.assertEqual(result["host"], "pynq.local")
+                    self.assertEqual(result["active"], active)
+            with self.assertRaisesRegex(ValueError, "Invalid language-model version request"):
+                self.kit.action({"action": "lm_select", "name": "Astra", "weights": ...})
+            self.assertEqual(send.call_count, 4)
+
     def test_select_then_query_latest(self):
         self.assertIsNone(self.kit.action({"action": "status"})["host"])
         data = dict(action="query", question="latest", csv=demo_csv(), capacity=DEMO_CAPACITY)

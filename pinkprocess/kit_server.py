@@ -41,11 +41,19 @@ class Handler(BaseHTTPRequestHandler):
             if self.headers.get_content_type() != "application/json" or not 0 < length <= 65536:
                 raise ValueError("Expected a JSON request of at most 64 KiB.")
             command = json.loads(self.rfile.read(length))
+            if (self.path == "/v1/query" and isinstance(command, dict)
+                    and isinstance(command.get("op"), str) and command["op"].startswith("lm_")):
+                language = getattr(self.server, "language", None)
+                if language is None:
+                    raise ValueError("The kit has no installed language model.")
+                return self.reply(200, language.handle(command))
             with self.server.model_lock:
                 if self.path == "/v1/telemetry":
                     result = self.server.model.ingest(command)
                 else:
                     result = self.server.model.handle(command)
+                    if command.get("op") == "status":
+                        result["lm_supported"] = getattr(self.server, "language", None) is not None
         except (UnicodeError, ValueError, TypeError, KeyError) as exc:
             return self.reply(422, str(exc))
         except (RuntimeError, OSError) as exc:
@@ -79,7 +87,11 @@ def main():
     parser.add_argument("--profiles", required=True, type=Path)
     parser.add_argument("--state-file", required=True, type=Path)
     parser.add_argument("--demo-source", choices=("sqlite",))
+    parser.add_argument("--language-model", type=Path)
+    parser.add_argument("--manifest-sha256")
     args = parser.parse_args()
+    if bool(args.language_model) != bool(args.manifest_sha256):
+        parser.error("Supply both the language model directory and its pinned manifest hash.")
     token = (args.identity / "token").read_text().strip()
     if len(token) != 64:
         raise ValueError("Invalid kit token.")
@@ -92,6 +104,22 @@ def main():
             server.tls = tls
             server.model = model
             server.model_lock = Lock()
+            if args.language_model:
+                from lm_reference.fabric import TiledMatvec
+                from lm_reference.flan import Flan
+                from lm_reference.weight_versions import WeightVersionStore
+                from .board_language import BoardLanguage
+
+                state_dir = args.state_file.parent
+                versions = WeightVersionStore.from_flan(state_dir / "lm-versions.sqlite", args.language_model,
+                                                        manifest_sha256=args.manifest_sha256)
+                runtime = Flan(args.language_model, TiledMatvec(model.classifier, lock=server.model_lock))
+
+                def snapshot():
+                    with server.model_lock:
+                        return model.handle(dict(op="stream_evidence", window_ms=60000))
+
+                server.language = BoardLanguage(runtime, versions, state_dir, snapshot)
             server.authorization = ("Bearer " + token).encode()
             discovery = Thread(target=advertise, args=(token, stopped), daemon=True)
             discovery.start()

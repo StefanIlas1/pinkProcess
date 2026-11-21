@@ -75,7 +75,7 @@ code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{ove
   <details id="lm-editor" class="divider"><summary>Create a weight version</summary>
     <form id="lm-author-form" class="stack">
       <label class="field" for="lm-name">Version name<input id="lm-name" maxlength="80" required></label>
-      <label class="field" for="lm-row">Target token ID<input id="lm-row" type="number" min="0" max="32127" step="1" required></label>
+      <label class="field" for="lm-row">Target word or token ID<input id="lm-row" type="text" placeholder="e.g. Warning" maxlength="80" required></label>
       <label class="field" for="lm-instruction">Edit request<textarea id="lm-instruction" maxlength="1000" rows="3" aria-describedby="lm-calibration"></textarea></label>
       <small id="lm-calibration">Ask the board a calibration question before asking Astra to edit the weights.</small>
       <div class="buttons"><button id="lm-author" type="submit">Ask Astra and save</button></div>
@@ -344,8 +344,20 @@ function askLive(question, captured=null) {
     if (!captured) clearLiveAnswer();
     show(captured ? "Replaying captured evidence…" : "Reading board evidence and preparing your answer…");
     const fields = captured ? {question, capture_id:captured.id} : {question};
-    const data = await request("ask_live",fields);
-    if (!captured) displayStream(data.snapshot);
+    let data = await request(status?.lm_supported ? "ask_begin" : "ask_live", fields);
+    if (data.job_id) {
+      const snapshot = data.snapshot;
+      while (data.state === "running") {
+        const progress = data.partial_answer || "Processing the captured incident on the FPGA…";
+        show(progress);
+        await refreshStream();
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        data = await request("answer_progress", {job_id:data.job_id});
+      }
+      if (data.state !== "complete") throw new Error(data.error || "Board inference stopped.");
+      data = {...data, snapshot, analyst_model:data.model, analyst_location:"PYNQ-Z2"};
+    }
+    if (!captured && !data.job_id) displayStream(data.snapshot);
     answerSnapshot = data.snapshot;
     const version = data.active?.name;
     const baseline = captured?.baseline || {answer:data.answer, version};
@@ -393,7 +405,7 @@ for (const id of ["lm-name","lm-row","lm-instruction","lm-artifact","lm-selectio
   el(id).addEventListener("input", controls);
   el(id).addEventListener("change", controls);
 }
-const weightDraft = () => ({name:el("lm-name").value.trim(), target_row:Number(el("lm-row").value)});
+const weightDraft = () => ({name:el("lm-name").value.trim(), target_row:/^\d+$/.test(el("lm-row").value.trim()) ? Number(el("lm-row").value.trim()) : el("lm-row").value.trim()});
 el("lm-author-form").onsubmit = event => {
   event.preventDefault();
   if (el("lm-author").disabled) return;

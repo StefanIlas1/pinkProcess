@@ -1,0 +1,241 @@
+from contextlib import closing
+from hashlib import sha256
+from pathlib import Path
+import sqlite3
+from tempfile import TemporaryDirectory
+from threading import Event
+from time import monotonic, sleep
+import unittest
+
+from lm_reference.weight_versions import ORIGINAL, WeightLayout, WeightVersionStore
+from .board_language import BoardLanguage
+
+
+QUESTION = "Has this connection pool recovered?"
+
+
+class FakeRuntime:
+    def __init__(self, block=False):
+        self.block = block
+        self.started = Event()
+        self.release = Event()
+        self.fabric_projections = 3
+        self.first_output_activation = [1, -1, 0, 2]
+        self.tokenizer = self
+        self.installed = None
+        self.install_attempts = []
+        self.fail_installs = set()
+        self.prompts = []
+        self.generation_error = None
+        self.fabric = None
+
+    def decode(self, ids):
+        return str(ids[0])
+
+    def generate(self, prompt):
+        self.prompts.append(prompt)
+        self.started.set()
+        if self.block and not self.release.wait(3):
+            raise RuntimeError("Test generation timed out.")
+        if self.generation_error is not None:
+            raise self.generation_error
+        return f"{self.installed.name}: {prompt}"
+
+    def install_weight_version(self, version):
+        self.installed = version
+        self.install_attempts.append(version.name)
+        if version.name in self.fail_installs:
+            raise RuntimeError(f"Injected readback error for {version.name}")
+        return version.classifier_sha256
+
+    @property
+    def t(self):
+        return {"lm_head.weight": MockHead(self.installed.checkpoint[len(b"weights:"):])}
+
+
+class MockHead:
+    def __init__(self, matrix):
+        self.matrix = matrix
+
+    def __getitem__(self, row):
+        return memoryview(self.matrix)[row * 4:(row + 1) * 4]
+
+
+class MockFabric:
+    def __init__(self):
+        self.checked_rows = []
+        self.rejected_row = None
+
+    def verify_row_bytes(self, payload):
+        self.checked_rows.append(payload)
+        if payload == self.rejected_row:
+            raise RuntimeError("Injected physical row mismatch")
+
+
+class BoardLanguageTest(unittest.TestCase):
+    def setUp(self):
+        directory = TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.state_dir = Path(directory.name)
+        self.base = b"weights:" + bytes(range(12))
+        self.layout = WeightLayout(3, 4, len(b"weights:"), sha256(self.base).hexdigest(), "b" * 64)
+        self.observation = {
+            "fresh": True, "state": "ready", "origin": "live", "capacity": 10,
+            "latest": {"time_ms": 6000, "busy": 5, "waiting": 0},
+            "observations": {"peak_waiting": {"time_ms": 1000, "busy": 10, "waiting": 12}},
+        }
+
+    def store(self):
+        return WeightVersionStore(self.state_dir / "versions.sqlite", self.base, layout=self.layout)
+
+    def coordinator(self, runtime, snapshot=None):
+        return BoardLanguage(runtime, self.store(), self.state_dir,
+                             snapshot or (lambda: self.observation))
+
+    def start(self, coordinator, **kwargs):
+        return coordinator.handle({"op": "lm_start", "question": QUESTION, **kwargs})
+
+    def finish(self, coordinator, job):
+        deadline = monotonic() + 3
+        while monotonic() < deadline:
+            state = coordinator.handle({"op": "lm_result", "job_id": job["job_id"]})
+            if state["state"] != "running":
+                return state
+            sleep(.005)
+        self.fail("Language-model job did not finish.")
+
+    def save(self, coordinator, name="Astra attempt"):
+        return coordinator.handle({"op": "lm_save", "name": name, "target_row": 1,
+                                   "response": {"row": [-127, 0, 127, 22]}})
+
+    def test_capture_freezes_evidence_while_inference_and_telemetry_continue(self):
+        runtime = FakeRuntime(block=True)
+        self.addCleanup(runtime.release.set)
+        coordinator = self.coordinator(runtime)
+        recording = self.start(coordinator)
+        self.assertTrue(runtime.started.wait(1))
+        self.observation["latest"]["waiting"] = 9
+        self.assertEqual(recording["snapshot"]["latest"]["waiting"], 0)
+        self.assertEqual(self.save(coordinator)["active"]["name"], ORIGINAL)
+        with self.assertRaisesRegex(ValueError, "in progress"):
+            coordinator.handle({"op": "lm_select", "name": "Astra attempt"})
+        with self.assertRaisesRegex(ValueError, "in progress"):
+            self.start(coordinator)
+        runtime.release.set()
+        first = self.finish(coordinator, recording)
+        self.assertIn("Current queue: 0 waiting requests.", first["answer"])
+        self.assertEqual(first["active"]["name"], ORIGINAL)
+        self.assertEqual(first["fabric_projections"], 3)
+        second = self.finish(coordinator, self.start(coordinator))
+        self.assertNotEqual(second["capture_id"], first["capture_id"])
+        self.assertIn("Current queue: 9 waiting requests.", second["answer"])
+
+    def test_verified_selection_reloads_before_offline_capture_replay(self):
+        runtime = FakeRuntime()
+        coordinator = self.coordinator(runtime)
+        first = self.finish(coordinator, self.start(coordinator))
+        row = coordinator.handle({"op": "lm_row", "target_row": 1})
+        self.assertEqual(row["row"], [4, 5, 6, 7])
+        self.assertEqual(row["activation"], runtime.first_output_activation)
+        self.save(coordinator)
+        chosen = coordinator.handle({"op": "lm_select", "name": "Astra attempt"})["active"]
+        self.assertEqual(chosen, runtime.installed.metadata())
+        self.assertEqual(chosen, self.store().active().metadata())
+        self.assertEqual(runtime.installed.patch.payload, bytes([129, 0, 127, 22]))
+
+        def offline():
+            self.fail("Replay read live telemetry.")
+        rebooted_runtime = FakeRuntime()
+        rebooted = self.coordinator(rebooted_runtime, snapshot=offline)
+        self.assertEqual(rebooted_runtime.installed.metadata(), chosen)
+        replay = self.finish(rebooted, self.start(rebooted, capture_id=first["capture_id"]))
+        self.assertEqual(replay["active"], chosen)
+        self.assertEqual(rebooted_runtime.prompts, runtime.prompts)
+        self.assertNotEqual(replay["answer"], first["answer"])
+        restored = rebooted.handle({"op": "lm_restore"})
+        self.assertEqual(restored["active"]["name"], ORIGINAL)
+        self.assertEqual(rebooted_runtime.installed.checkpoint, self.base)
+        self.assertEqual([version["name"] for version in restored["versions"]], [ORIGINAL, chosen["name"]])
+        self.assertEqual(self.store().active().checkpoint, self.base)
+        self.assertEqual(self.finish(rebooted, self.start(rebooted, capture_id=first["capture_id"]))["answer"],
+                         first["answer"])
+
+    def test_replay_rejects_changed_question_and_corrupted_capture(self):
+        coordinator = self.coordinator(FakeRuntime())
+        captured = self.finish(coordinator, self.start(coordinator))["capture_id"]
+        with self.assertRaisesRegex(ValueError, "original question"):
+            coordinator.handle({"op": "lm_start", "question": "What is the latency?", "capture_id": captured})
+        with closing(sqlite3.connect(coordinator.capture_db)) as connection, connection:
+            connection.execute("UPDATE captures SET body = ? WHERE id = ?", (b"{}", captured))
+        with self.assertRaisesRegex(ValueError, "unavailable or damaged"):
+            self.start(coordinator, capture_id=captured)
+
+    def test_failed_version_selection_keeps_runtime_and_store_in_sync(self):
+        runtime = FakeRuntime()
+        coordinator = self.coordinator(runtime)
+        name = "Astra attempt"
+        self.save(coordinator, name)
+        runtime.fail_installs.add(name)
+        with self.assertRaisesRegex(RuntimeError, "Injected readback error"):
+            coordinator.handle({"op": "lm_select", "name": name})
+        self.assertEqual(runtime.install_attempts[-2:], [name, ORIGINAL])
+        self.assertEqual(runtime.installed.name, ORIGINAL)
+        self.assertEqual(self.store().active().name, ORIGINAL)
+        self.assertEqual(coordinator.handle({"op": "lm_versions"})["active"]["name"], ORIGINAL)
+
+        runtime.fail_installs.clear()
+        with closing(sqlite3.connect(coordinator.versions.database)) as connection, connection:
+            connection.execute("""CREATE TRIGGER interrupt_selection BEFORE UPDATE ON model_state
+                                  BEGIN SELECT RAISE(ABORT, 'interrupted'); END""")
+        with self.assertRaisesRegex(RuntimeError, "interrupted"):
+            coordinator.handle({"op": "lm_select", "name": name})
+        self.assertEqual(runtime.installed.name, ORIGINAL)
+        self.assertEqual(self.store().active().name, ORIGINAL)
+
+    def test_select_updates_persistence_only_after_fabric_readback(self):
+        runtime = FakeRuntime()
+        runtime.fabric = MockFabric()
+        coordinator = self.coordinator(runtime)
+        self.save(coordinator)
+        edit = bytes([129, 0, 127, 22])
+        runtime.fabric.rejected_row = edit
+        with self.assertRaisesRegex(RuntimeError, "physical row mismatch"):
+            coordinator.handle({"op": "lm_select", "name": "Astra attempt"})
+        self.assertIn(edit, runtime.fabric.checked_rows)
+        self.assertEqual(runtime.installed.name, ORIGINAL)
+        self.assertEqual(self.store().active().name, ORIGINAL)
+
+        runtime.fabric.rejected_row = None
+        coordinator.handle({"op": "lm_select", "name": "Astra attempt"})
+        self.assertEqual(runtime.fabric.checked_rows[-1], edit)
+        self.assertEqual(self.store().active().name, "Astra attempt")
+        coordinator.handle({"op": "lm_restore"})
+        self.assertEqual(runtime.fabric.checked_rows[-1], bytes([4, 5, 6, 7]))
+        self.assertEqual(self.store().active().name, ORIGINAL)
+
+    def test_failed_restoration_fences_inference_until_service_restart(self):
+        runtime = FakeRuntime()
+        coordinator = self.coordinator(runtime)
+        self.save(coordinator)
+        runtime.fail_installs.update(["Astra attempt", ORIGINAL])
+        with self.assertRaisesRegex(RuntimeError, "Could not restore"):
+            coordinator.handle({"op": "lm_select", "name": "Astra attempt"})
+        with self.assertRaisesRegex(RuntimeError, "require recovery"):
+            self.start(coordinator)
+        with self.assertRaisesRegex(RuntimeError, "require recovery"):
+            coordinator.handle({"op": "lm_versions"})
+        rebooted = self.coordinator(FakeRuntime())
+        self.assertEqual(rebooted.handle({"op": "lm_versions"})["active"]["name"], ORIGINAL)
+
+    def test_generation_failure_is_reported_and_releases_job_slot(self):
+        runtime = FakeRuntime()
+        coordinator = self.coordinator(runtime)
+        runtime.generation_error = OSError("Injected generation failure")
+        result = self.finish(coordinator, self.start(coordinator))
+        self.assertEqual((result["state"], result["error"]), ("failed", "Injected generation failure"))
+        runtime.generation_error = None
+        self.assertEqual(self.finish(coordinator, self.start(coordinator))["state"], "complete")
+
+
+if __name__ == "__main__":
+    unittest.main()
