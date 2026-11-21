@@ -56,6 +56,8 @@ class AcceptanceTest(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "unchanged"):
                 resumed.after()
             board.boot = str(uuid4())
+            with self.assertRaisesRegex(RuntimeError, "actual removal"):
+                resumed.after()
             resumed.after(witnessed=True)
             self.assertEqual(resumed.data["phase"], "complete")
             self.assertEqual(resumed.data["final"]["active"], board.base)

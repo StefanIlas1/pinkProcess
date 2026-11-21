@@ -134,6 +134,8 @@ class Verification:
         require(self.data.get("phase") in ("awaiting_power_cycle", "after"), "Complete the before phase first.")
         status = self.status()
         require(status["boot_id"] != self.data["before_boot"], "Linux boot ID is unchanged.")
+        require(witnessed or self.data.get("operator_witnessed_cold_power_cycle"),
+                "A changed Linux boot ID proves a restart. Confirm actual removal and restoration of power before cold-cycle acceptance.")
         if "after_boot" not in self.data:
             require(status["active"] == self.data["selected"]["active"] and
                     status["versions"] == self.data["selected"]["versions"], "Stored versions did not reload exactly.")
