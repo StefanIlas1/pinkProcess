@@ -117,22 +117,27 @@ class BoardTransport:
         self.directory = directory
         self.usb_relay = None
         self.usb_pairing = None
+        self.usb_paused = False
         self.close()
 
+    def start_usb_relay(self):
+        if self.usb_relay is None or self.usb_relay.stopped.is_set():
+            from .usb_uart import UsbRelay
+
+            self.usb_relay = UsbRelay(PORT)
+            self.usb_relay.start()
+        return self.usb_relay
+
     def reconnect_usb(self):
-        if sys.platform != "darwin":
+        if sys.platform != "darwin" or self.usb_paused:
             return None
         kits = paired_kits(self.directory)
         if self.usb_pairing is not None:
             kits = [kit for kit in kits if all(kit[key] == self.usb_pairing[key] for key in ("certificate", "token"))]
         if not kits:
             return None
-        if self.usb_relay is None or self.usb_relay.stopped.is_set():
-            from .usb_uart import UsbRelay
-
-            self.usb_relay = UsbRelay(PORT)
-            self.usb_relay.start()
-        if not self.usb_relay.ready.is_set():
+        relay = self.start_usb_relay()
+        if not relay.ready.is_set():
             return None
         for kit in kits:
             try:
@@ -143,22 +148,32 @@ class BoardTransport:
                 self.host, self.kit = "127.0.0.1", kit
                 self.usb_pairing = kit
                 return status
-        self.usb_relay.rejected.set()
+        relay.rejected.set()
         return None
 
     def stop_usb(self):
+        self.usb_paused = True
         if self.usb_relay is not None:
             self.usb_relay.stopped.set()
 
     def discover(self):
         kits = paired_kits(self.directory)
+        self.usb_paused = False
+        relay = None
+        usb_ready_deadline = time.monotonic() + 3
+        if sys.platform == "darwin" and kits:
+            from .usb_uart import matching_uart_ports
+
+            if matching_uart_ports():
+                relay = self.start_usb_relay()
         candidates = {kit["host"]: kit for kit in kits}
         candidates.update(lan_hosts(kits))
+        candidates.pop("127.0.0.1", None)
 
-        def probe(item):
+        def probe(item, timeout=1.2):
             host, kit = item
             try:
-                status = exchange(host, kit, {"op": "status"}, 1.2)
+                status = exchange(host, kit, {"op": "status"}, timeout)
                 if status.get("backend") == "PYNQ-Z2":
                     return {"host": host, "name": "pinkProcess · PYNQ-Z2"}
             except (OSError, HTTPException, ValueError, RuntimeError):
@@ -167,13 +182,21 @@ class BoardTransport:
 
         with ThreadPoolExecutor(max_workers=8) as pool:
             boards = [board for board in pool.map(probe, candidates.items()) if board]
-        if not boards:
+        relay_ready = relay is not None and relay.ready.wait(max(0, usb_ready_deadline - time.monotonic()))
+        if relay_ready or not boards:
+            deadline = time.monotonic() + 1.5
+            usb = None
             for kit in kits:
-                usb = probe(("127.0.0.1", kit))
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
+                usb = probe(("127.0.0.1", kit), min(1.2, remaining))
                 if usb:
                     usb["name"] = "pinkProcess · PYNQ-Z2 (local relay)"
                     boards.append(usb)
                     break
+            if relay_ready and usb is None:
+                relay.rejected.set()
         return boards
 
     def connect(self, host):
@@ -194,6 +217,7 @@ class BoardTransport:
             self.host, self.kit = host, kit
             if host == "127.0.0.1":
                 self.usb_pairing = kit
+                self.usb_paused = False
             else:
                 self.stop_usb()
             return status

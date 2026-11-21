@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 from threading import Event
 from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from .kit_transport import BoardTransport, discovery_proof, validate_host
 
@@ -39,7 +39,8 @@ class KitTransportTest(unittest.TestCase):
             self.transport.connect("192.168.2.99")
 
     def test_responding_paired_boards_only(self):
-        with patch("pinkprocess.kit_transport.lan_hosts", return_value={"192.168.2.100": self.pair}), \
+        with patch("pinkprocess.kit_transport.sys.platform", "linux"), \
+                patch("pinkprocess.kit_transport.lan_hosts", return_value={"192.168.2.100": self.pair}), \
                 patch("pinkprocess.kit_transport.exchange",
                       side_effect=lambda host, *_: {"backend": "PYNQ-Z2" if host.endswith(".100") else None}):
             self.assertEqual(self.transport.discover(),
@@ -67,6 +68,30 @@ class KitTransportTest(unittest.TestCase):
             self.assertIsNone(self.transport.host)
             self.assertTrue(rejected.is_set())
             exchange.assert_called_once_with("127.0.0.1", self.pair, {"op": "status"}, 1.2)
+
+    def test_find_boards_starts_usb_even_after_explicit_disconnect(self):
+        relay = SimpleNamespace(ready=Mock(), stopped=Event(), rejected=Event(), start=Mock())
+        relay.ready.wait.return_value = True
+        self.transport.stop_usb()
+
+        def status(host, kit, request, timeout):
+            self.assertEqual(kit, self.pair)
+            self.assertEqual(request, {"op": "status"})
+            return {"ok": True, "backend": "PYNQ-Z2"} if host == "127.0.0.1" else {"ok": False}
+
+        with (patch("pinkprocess.kit_transport.sys.platform", "darwin"),
+              patch("pinkprocess.kit_transport.lan_hosts", return_value={}),
+              patch("pinkprocess.kit_transport.exchange", side_effect=status),
+              patch("pinkprocess.usb_uart.matching_uart_ports", return_value=["fixture"]),
+              patch("pinkprocess.usb_uart.UsbRelay", return_value=relay)):
+            self.assertIsNone(self.transport.reconnect_usb())
+            relay.start.assert_not_called()
+            self.assertEqual(self.transport.discover(),
+                             [{"host": "127.0.0.1", "name": "pinkProcess · PYNQ-Z2 (local relay)"}])
+            relay.start.assert_called_once_with()
+            self.assertGreater(relay.ready.wait.call_args.args[0], 0)
+            self.assertLessEqual(relay.ready.wait.call_args.args[0], 3)
+            self.assertIsNone(self.transport.host)
 
     def test_urls_are_rejected(self):
         for value in ("http://192.168.2.99", "user@board", "board:8784", ""):
