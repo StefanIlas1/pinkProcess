@@ -7,14 +7,26 @@ sets of quantized model weights can be selected from the app.
 
 ## Product goal
 
-A Mac user can plug in a pinkProcess kit, discover and connect to its FPGA,
-ask an open-ended question about the live feed or inspect an imported dataset,
-and see a timely answer from the resident quantized model. The user can apply
-another set of weights, see how its answers change on the same data, and
-restore the original weights and answers. The first domain is connection-pool
-forecasting. The operator-facing quality measure is how often a warning appears
-on the Mac at least one second before a real request queues, alongside misses
-and false alarms.
+The kit generates answers about live data using a quantized language model
+whose inference runs on the FPGA. The Mac provides the operator interface.
+The first domain is connection-pool telemetry.
+
+- With the Mac’s model runtime turned off, I can plug in the kit, open pinkProcess, and ask an unfamiliar question while new data keeps arriving.
+- On incidents held out from development, the model can distinguish a problem that has cleared from one that is still happening. It cites the relevant readings, separates measurements from predictions, and tells me what to measure when the cause is uncertain.
+- I can replay the same incident and question before and after a weight edit, observe the intended behavior change, power-cycle the kit and verify the saved weights reload, then roll back and reproduce the original answer.
+- I can ask Astra to create a weight edit and save it as a named version. Selecting any saved version loads its exact weights for FPGA inference. The app confirms which version is active, and the kit reloads it after a power cycle.
+- I can select Restore original at any time. The kit verifies the original weights, and my saved versions remain available.
+
+**Current status.** The FPGA scores live telemetry and supports switching
+between two predefined queue-onset profiles. Open-ended answers currently
+use a language model on the Mac. A separate TinyStories experiment verified
+a reversible output-layer edit. The board-resident analyst, its held-out
+diagnosis evaluation, and its named-version and power-cycle workflow still
+require end-to-end verification. [Physical evidence and experiment records](kit/live-context.md)
+
+For the queue-onset predictor, the operator-facing quality measure is how often
+a warning appears on the Mac at least one second before a real request queues,
+alongside misses and false alarms.
 
 ## Query the pinkProcess kit
 
