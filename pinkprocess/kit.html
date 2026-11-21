@@ -65,6 +65,7 @@ code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{ove
   </div>
   <div id="live-result" class="stack divider" role="status" hidden>
     <h3 id="live-asked"></h3>
+    <p id="answer-timing" class="muted" aria-live="off" hidden></p>
     <p id="live-answer" class="answer"></p><small id="live-evidence"></small>
     <details id="answer-readings" hidden><summary>Readings behind this answer</summary><p id="answer-measurements"></p></details>
     <div><button id="replay-live" type="button" hidden>Replay captured evidence</button></div>
@@ -124,7 +125,7 @@ const el = id => document.getElementById(id);
 const seconds = ms => (ms / 1000).toLocaleString(undefined, {minimumFractionDigits:1,maximumFractionDigits:3}) + " s";
 let setup = null, status = null, address = "", csv = "", datasetName = "", busy = true;
 let result = null, visibleWarnings = 0, fileRevision = 0;
-let answerSnapshot = null, pollPending = false, interaction = 0, nextModelCheck = 0;
+let answerSnapshot = null, latestStream = null, pollPending = false, interaction = 0, nextModelCheck = 0;
 let answerCapture = null, languageWeights = null;
 let savedCaptures = [], olderCaptures = null;
 let autoUsb = true;
@@ -279,9 +280,32 @@ function streamSource(data) {
   const source = data.source || "Telemetry source";
   return data.origin === "demo" ? "Simulated · " + source : source;
 }
+function answerTiming(capture, stream) {
+  const sample = capture?.latest?.time_ms;
+  if (!Number.isFinite(sample)) return "";
+  const captured = "Captured sample at " + seconds(sample);
+  const newest = stream?.latest?.time_ms;
+  if (!Number.isFinite(newest)) return captured + " · Latest stream sample unavailable";
+  const latest = "Latest stream sample at " + seconds(newest) + (stream.fresh === false ? " (stale)" : "");
+  const times = captured + " · " + latest;
+  if (!capture.session || !stream.session) return times + " · Session comparison unavailable";
+  if (capture.session !== stream.session) return times + " · Different telemetry sessions";
+  if (newest < sample) return times + " · Stream timestamp moved backward";
+  if (newest === sample) return times + " · Same reading";
+  const elapsed = newest - sample;
+  const minutes = Math.floor(elapsed / 60000);
+  const remaining = Math.floor(elapsed / 1000) % 60;
+  const gap = minutes ? minutes + " min" + (remaining ? " " + remaining + " s" : "") : seconds(elapsed);
+  return times + " · Captured " + gap + " before the latest reading";
+}
+function displayAnswerTiming() {
+  const label = el("answer-timing");
+  label.textContent = answerTiming(answerSnapshot, latestStream);
+  label.hidden = !label.textContent;
+}
 function displayStream(data) {
-  if (!answerCapture && answerSnapshot && (!data || data.session !== answerSnapshot.session ||
-      data.fresh !== answerSnapshot.fresh)) clearLiveAnswer();
+  latestStream = data;
+  displayAnswerTiming();
   const labels = {
     idle:"Waiting for telemetry",
     warming:"Collecting forecast history",
@@ -392,24 +416,35 @@ el("disconnect").onclick = () => run(async () => {autoUsb = false; setState(awai
 el("live-question").oninput = controls;
 function askLive(question, captured=null) {
   run(async () => {
-    if (!captured) clearLiveAnswer();
+    clearLiveAnswer();
     show(captured ? "Replaying captured evidence…" : "Reading board evidence and preparing your answer…");
     const fields = captured ? {question, capture_id:captured.id} : {question};
     let data = await request(status?.lm_supported ? "ask_begin" : "ask_live", fields);
     if (data.job_id) {
       const snapshot = data.snapshot;
-      while (data.state === "running") {
-        const progress = data.partial_answer || "Processing the captured incident on the FPGA…";
-        show(progress);
-        await refreshStream();
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        data = await request("answer_progress", {job_id:data.job_id});
+      answerSnapshot = snapshot;
+      displayAnswerTiming();
+      el("live-asked").textContent = question;
+      el("live-answer").textContent = captured ? "Replaying on the FPGA…" : "Generating on the FPGA…";
+      el("live-evidence").textContent = "";
+      for (const id of ["answer-readings", "replay-live", "prior-answer"]) el(id).hidden = true;
+      el("live-result").hidden = false;
+      try {
+        while (data.state === "running") {
+          show(data.partial_answer || "");
+          await refreshStream();
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          data = await request("answer_progress", {job_id:data.job_id});
+        }
+        if (data.state !== "complete") throw new Error(data.error || "Board inference stopped.");
+      } catch (err) {
+        clearLiveAnswer();
+        throw err;
       }
-      if (data.state !== "complete") throw new Error(data.error || "Board inference stopped.");
       data = {...data, snapshot, analyst_model:data.model, analyst_location:"PYNQ-Z2"};
     }
-    if (!captured && !data.job_id) displayStream(data.snapshot);
     answerSnapshot = data.snapshot;
+    displayAnswerTiming();
     const version = data.active?.name;
     const baseline = data.baseline || (captured ? captured.baseline : {answer:data.answer, version:data.active});
     const captureId = data.capture_id || captured?.id;
@@ -423,7 +458,6 @@ function askLive(question, captured=null) {
     }
     const evidence = [status.backend + " at " + data.host];
     if (data.snapshot.session) evidence.unshift(streamSource(data.snapshot), "Session " + data.snapshot.session.slice(0, 8));
-    if (data.snapshot.latest) evidence.push("Reading at " + seconds(data.snapshot.latest.time_ms));
     if (data.snapshot.forecast) evidence.push(data.snapshot.forecast.version);
     if (data.analyst_model) evidence.push(data.analyst_model + " · " + data.analyst_location);
     if (version) evidence.push("Weight version " + version);
@@ -443,6 +477,7 @@ function askLive(question, captured=null) {
       el("answer-measurements").textContent = facts.join(" ");
     }
     el("live-result").hidden = false;
+    if (!data.job_id) await refreshStream();
     if (answerCapture && !captured && languageWeights?.capture_listing_supported) await refreshSavedCaptures();
     show("");
   });
