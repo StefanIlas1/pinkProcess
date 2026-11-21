@@ -1,0 +1,14 @@
+[Unit]
+Description=pinkProcess USB TLS relay on %I
+ConditionPathExists=/dev/%I
+After=pinkprocess-kit.service
+Conflicts=serial-getty@%i.service
+
+[Service]
+WorkingDirectory=/opt/pinkprocess-kit/current
+ExecStart=/usr/local/share/pynq-venv/bin/python3 -E -m pinkprocess.usb_uart %I
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

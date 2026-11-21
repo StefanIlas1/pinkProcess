@@ -127,6 +127,7 @@ let result = null, visibleWarnings = 0, fileRevision = 0;
 let answerSnapshot = null, pollPending = false, interaction = 0, nextModelCheck = 0;
 let answerCapture = null, languageWeights = null;
 let savedCaptures = [], olderCaptures = null;
+let autoUsb = true;
 const watcher = window.webkit?.messageHandlers?.watchCSV;
 let liveName = null, livePending = false;
 function stopWatching() {
@@ -326,7 +327,7 @@ async function discover() {
   const data = await request("discover");
   el("known").replaceChildren(...data.boards.map(board => new Option(board.name, board.host)));
   if (!el("host").value || data.boards.length === 1) el("host").value = data.boards[0]?.host || "";
-  el("discovery").textContent = data.boards.length === 1 ? "One kit found." : data.boards.length ? data.boards.length + " kits found. Select a network address." : (watcher ? "No kits found. Check Ethernet and allow pinkProcess in macOS Local Network settings. For a new kit, choose pinkProcess → Import Kit Pairing…." : "No kits found. Check power, Ethernet and the kit pairing, or enter the board address.");
+  el("discovery").textContent = data.boards.length === 1 ? "One kit found." : data.boards.length ? data.boards.length + " kits found. Select a network address." : (watcher ? "No kits found. Connect a provisioned USB kit or check Ethernet and macOS Local Network access. For a new kit, choose pinkProcess → Import Kit Pairing…." : "No kits found. Check power, Ethernet and the kit pairing, or enter the board address.");
 }
 function drawTrace() {
   const points = csv.trim().split(/\r?\n/).slice(1).map(row => row.split(",").map(Number));
@@ -384,9 +385,10 @@ el("refresh").onclick = () => run(discover);
 el("host").oninput = controls;
 el("connect").onclick = () => run(async () => {
   show("Connecting to the board…"); setState(await request("connect",{host:el("host").value.trim()})); livePending = Boolean(liveName && csv);
+  autoUsb = address === "127.0.0.1";
   el("discovery").textContent = ""; clearAnswer(); clearLiveAnswer(); await refreshStream(); await refreshWeightVersions(); show("");
 });
-el("disconnect").onclick = () => run(async () => {setState(await request("disconnect")); clearAnswer(); clearLiveAnswer(); show("Board disconnected.");});
+el("disconnect").onclick = () => run(async () => {autoUsb = false; setState(await request("disconnect")); clearAnswer(); clearLiveAnswer(); show("Board disconnected.");});
 el("live-question").oninput = controls;
 function askLive(question, captured=null) {
   run(async () => {
@@ -546,8 +548,25 @@ el("csv-workspace").ontoggle = async event => {
 };
 start();
 setInterval(async () => {
-  if (busy || pollPending || !status || document.hidden) return;
+  if (busy || pollPending || document.hidden) return;
   const startedAt = interaction;
+  if (!status) {
+    if (!autoUsb) return;
+    pollPending = true;
+    try {
+      const data = await request("usb_connect");
+      if (data.status && startedAt === interaction) {
+        setState(data);
+        el("discovery").textContent = "";
+        await refreshStream();
+        await refreshWeightVersions();
+        show("");
+      }
+    } catch (err) {
+      if (startedAt === interaction) show(err.message, true);
+    } finally {pollPending = false;}
+    return;
+  }
   const checkModel = Date.now() >= nextModelCheck;
   if (!status.stream_supported && !checkModel) return;
   pollPending = true;

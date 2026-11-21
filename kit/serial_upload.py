@@ -13,8 +13,13 @@ import shlex
 import sys
 import termios
 import time
-import tty
 import zlib
+
+
+if not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from pinkprocess.usb_uart import raw_port
 
 
 # The board flushes each acknowledgment before switching baud or restoring its shell.
@@ -105,14 +110,7 @@ def upload(device, source, baud):
     code = base64.b64encode(zlib.compress(RECEIVER.encode())).decode()
     loader = "import base64,zlib;exec(zlib.decompress(base64.b64decode(%r)))" % code
     command = shlex.join(['python3', '-c', loader, source.name, str(size), digest, str(baud)])
-    fd = os.open(device, os.O_RDWR | os.O_NOCTTY | os.O_NONBLOCK)
-    old = termios.tcgetattr(fd)
-    try:
-        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        tty.setraw(fd)
-        config = termios.tcgetattr(fd)
-        config[4] = config[5] = termios.B115200
-        termios.tcsetattr(fd, termios.TCSANOW, config)
+    with raw_port(device, claim=True, blocking=False) as fd:
         termios.tcflush(fd, termios.TCIFLUSH)
         write_all(fd, b'\x15' + command.encode() + b'\r')
         reply = b''
@@ -157,9 +155,6 @@ def upload(device, source, baud):
         if reply.splitlines()[0] != b'PP-VERIFIED ' + digest.encode():
             raise IOError('Board did not confirm the expected checksum.')
         print(f'{size} bytes in {time.monotonic()-started:.2f}s; verified ~/pinkprocess-transfer/{source.name} {digest}')
-    finally:
-        termios.tcsetattr(fd, termios.TCSANOW, old)
-        os.close(fd)
 
 
 if __name__ == '__main__':

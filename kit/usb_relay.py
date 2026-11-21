@@ -10,11 +10,11 @@ import argparse
 import base64
 import inspect
 import os
+from pathlib import Path
 import select
 import shlex
 import signal
 import socket
-import struct
 import sys
 import termios
 import time
@@ -22,99 +22,10 @@ import tty
 import zlib
 
 
-def write_all(fd, data):
-    while data:
-        count = os.write(fd, data)
-        if not count:
-            raise OSError("Serial connection closed while writing.")
-        data = data[count:]
+if not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-
-def frame(fd, kind, channel=0, data=b""):
-    write_all(fd, struct.pack("!cII", kind, channel, len(data)) + data)
-
-
-def relay(read_fd, write_fd, board_port, listener=None, running=lambda: True):
-    header = struct.Struct("!cII")
-    received = bytearray()
-    sockets = {}
-    next_channel = 0
-    last_seen = last_ping = time.monotonic()
-
-    def close(channel, notify=False):
-        peer = sockets.pop(channel, None)
-        if peer is not None:
-            peer.close()
-        if notify:
-            frame(write_fd, b"C", channel)
-
-    try:
-        while running():
-            now = time.monotonic()
-            if listener is None:
-                if now - last_seen > 8:
-                    return
-            elif now - last_ping >= 1:
-                frame(write_fd, b"P")
-                last_ping = now
-            sources = [read_fd, *sockets.values()]
-            if listener is not None:
-                sources.append(listener)
-            readable, _, _ = select.select(sources, [], [], 0.2)
-            if read_fd in readable:
-                part = os.read(read_fd, 8192)
-                if not part:
-                    return
-                last_seen = time.monotonic()
-                received.extend(part)
-                while len(received) >= header.size:
-                    kind, channel, size = header.unpack_from(received)
-                    if size > 4096:
-                        raise OSError("Invalid UART frame length.")
-                    end = header.size + size
-                    if len(received) < end:
-                        break
-                    data = bytes(received[header.size:end])
-                    del received[:end]
-                    if kind == b"P" and listener is None:
-                        continue
-                    if kind == b"X" and listener is None:
-                        return
-                    if kind == b"O" and listener is None:
-                        try:
-                            sockets[channel] = socket.create_connection(("127.0.0.1", board_port), 0.5)
-                        except OSError:
-                            frame(write_fd, b"C", channel)
-                    elif kind == b"C":
-                        close(channel)
-                    elif kind == b"D":
-                        if channel in sockets:
-                            try:
-                                sockets[channel].sendall(data)
-                            except OSError:
-                                close(channel, notify=True)
-                    else:
-                        raise OSError("Invalid UART frame type.")
-            if listener is not None and listener in readable:
-                peer, _ = listener.accept()
-                peer.settimeout(1)
-                next_channel = (next_channel % 0xffffffff) + 1
-                sockets[next_channel] = peer
-                frame(write_fd, b"O", next_channel)
-            for channel, peer in list(sockets.items()):
-                if peer not in readable:
-                    continue
-                try:
-                    data = peer.recv(4096)
-                except OSError:
-                    data = b""
-                if data:
-                    frame(write_fd, b"D", channel, data)
-                else:
-                    close(channel, notify=True)
-    finally:
-        for peer in sockets.values():
-            peer.close()
+from pinkprocess.usb_uart import claimed_port, frame, relay, write_all
 
 
 READY = b"PPUART/1 ready\r\n"
@@ -168,10 +79,11 @@ def main():
 
     signal.signal(signal.SIGINT, stop)
     signal.signal(signal.SIGTERM, stop)
-    with socket.create_server(("127.0.0.1", args.local_port)) as listener:
-        fd = os.open(args.tty, os.O_RDWR | os.O_NOCTTY)
+    with (socket.create_server(("127.0.0.1", args.local_port)) as listener,
+          claimed_port(args.tty) as fd):
+        os.set_blocking(fd, True)
+        old = termios.tcgetattr(fd)
         try:
-            old = termios.tcgetattr(fd)
             tty.setraw(fd)
             settings = termios.tcgetattr(fd)
             settings[2] |= termios.CLOCAL | termios.CREAD
@@ -194,11 +106,7 @@ def main():
                 except OSError as error:
                     print(f"Serial link closed during cleanup ({error}).", file=sys.stderr)
         finally:
-            try:
-                if 'old' in locals():
-                    termios.tcsetattr(fd, termios.TCSANOW, old)
-            finally:
-                os.close(fd)
+            termios.tcsetattr(fd, termios.TCSANOW, old)
 
 
 if __name__ == "__main__":

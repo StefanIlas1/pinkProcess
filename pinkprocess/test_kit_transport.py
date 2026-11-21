@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 import ssl
 from tempfile import TemporaryDirectory
+from threading import Event
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -44,6 +46,27 @@ class KitTransportTest(unittest.TestCase):
                              [{"host": "192.168.2.100", "name": "pinkProcess · PYNQ-Z2"}])
         self.assertNotEqual(discovery_proof("a" * 64, b"nonce"), discovery_proof("b" * 64, b"nonce"))
         self.assertNotEqual(discovery_proof("a" * 64, b"nonce"), discovery_proof("a" * 64, b"other"))
+
+    def test_automatic_usb_reopens_only_its_selected_tls_pairing(self):
+        ready, stopped, rejected = Event(), Event(), Event()
+        self.transport.usb_relay = SimpleNamespace(ready=ready, stopped=stopped, rejected=rejected)
+        status = {"ok": True, "backend": "PYNQ-Z2"}
+        with (patch("pinkprocess.kit_transport.sys.platform", "darwin"),
+              patch("pinkprocess.kit_transport.exchange", return_value=status) as exchange):
+            self.assertIsNone(self.transport.reconnect_usb())
+            exchange.assert_not_called()
+            ready.set()
+            self.assertEqual(self.transport.reconnect_usb(), status)
+            exchange.assert_called_once_with("127.0.0.1", self.pair, {"op": "status"}, 1.2)
+            self.transport.close()
+            exchange.reset_mock()
+            other = dict(host="other.local", certificate="other", token="b" * 64)
+            (self.directory_path / "other.json").write_text(json.dumps(other))
+            exchange.side_effect = ssl.SSLCertVerificationError
+            self.assertIsNone(self.transport.reconnect_usb())
+            self.assertIsNone(self.transport.host)
+            self.assertTrue(rejected.is_set())
+            exchange.assert_called_once_with("127.0.0.1", self.pair, {"op": "status"}, 1.2)
 
     def test_urls_are_rejected(self):
         for value in ("http://192.168.2.99", "user@board", "board:8784", ""):

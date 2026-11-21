@@ -115,7 +115,40 @@ def exchange(host, kit, request, timeout, *, path="/v1/query"):
 class BoardTransport:
     def __init__(self, directory=PAIRINGS):
         self.directory = directory
+        self.usb_relay = None
+        self.usb_pairing = None
         self.close()
+
+    def reconnect_usb(self):
+        if sys.platform != "darwin":
+            return None
+        kits = paired_kits(self.directory)
+        if self.usb_pairing is not None:
+            kits = [kit for kit in kits if all(kit[key] == self.usb_pairing[key] for key in ("certificate", "token"))]
+        if not kits:
+            return None
+        if self.usb_relay is None or self.usb_relay.stopped.is_set():
+            from .usb_uart import UsbRelay
+
+            self.usb_relay = UsbRelay(PORT)
+            self.usb_relay.start()
+        if not self.usb_relay.ready.is_set():
+            return None
+        for kit in kits:
+            try:
+                status = exchange("127.0.0.1", kit, {"op": "status"}, 1.2)
+            except (OSError, HTTPException, ValueError, RuntimeError):
+                continue
+            if status.get("backend") == "PYNQ-Z2":
+                self.host, self.kit = "127.0.0.1", kit
+                self.usb_pairing = kit
+                return status
+        self.usb_relay.rejected.set()
+        return None
+
+    def stop_usb(self):
+        if self.usb_relay is not None:
+            self.usb_relay.stopped.set()
 
     def discover(self):
         kits = paired_kits(self.directory)
@@ -159,6 +192,10 @@ class BoardTransport:
             if status.get("backend") != "PYNQ-Z2":
                 raise RuntimeError("The connected device did not identify a PYNQ-Z2 model.")
             self.host, self.kit = host, kit
+            if host == "127.0.0.1":
+                self.usb_pairing = kit
+            else:
+                self.stop_usb()
             return status
         raise RuntimeError("This board's certificate does not match a kit paired to this Mac.")
 

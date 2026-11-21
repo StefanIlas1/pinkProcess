@@ -103,6 +103,13 @@ prompt, close other serial clients and run
 running and select **Find boards**, then **Connect FPGA**. The app verifies
 the paired board's TLS certificate through the relay at `127.0.0.1`.
 
+An administrator can explicitly provision the optional USB appliance relay
+for an installed kit. It opens the board-side relay at boot, so a paired Mac
+can reconnect to a power-cycled board using the Digilent FTDI UART interface
+ending in `_tul1`. Close other Mac serial programs during automatic use. This
+mode takes over the board's serial console. See the provisioning and console
+recovery instructions before enabling it. [USB appliance setup](kit/usb-appliance.md)
+
 The physical acceptance run recorded 78 FPGA submissions over 7.8 seconds of
 stream time with the reader disconnected. Two subsequent reads of a controlled
 forecast produced zero extra submissions. See the [context tree](kit/live-context.md)

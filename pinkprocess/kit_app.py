@@ -193,6 +193,16 @@ class Kit:
                 return {**self.board("lm_captures", **fields), "host": self.host}
             if action == "discover":
                 return {"boards": self.transport.discover()}
+            if action == "usb_connect":
+                if self.host is not None:
+                    return {"host": self.host, "status": self.board("status")}
+                reconnect = getattr(self.transport, "reconnect_usb", None)
+                status = reconnect() if reconnect else None
+                if status:
+                    self.host = "127.0.0.1"
+                    self.evidence_supported = bool(status.get("stream_evidence_supported"))
+                    self.lm_supported = bool(status.get("lm_supported"))
+                return {"host": self.host, "status": status}
             if action == "connect":
                 host = data.get("host")
                 if not isinstance(host, str) or not host.strip():
@@ -210,6 +220,9 @@ class Kit:
                 self.host = host.strip()
                 return {"host": self.host, "status": status}
             if action == "disconnect":
+                stop_usb = getattr(self.transport, "stop_usb", None)
+                if stop_usb:
+                    stop_usb()
                 self.disconnect()
                 return {"host": None, "status": None}
             if action == "status":
