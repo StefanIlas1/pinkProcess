@@ -6,7 +6,7 @@ import random
 from lm_reference.flan_prompt import telemetry_prompt
 
 
-def example(rng, task, *, detailed=False):
+def example(rng, task, *, detailed=False, diagnostic=False):
     capacity = rng.choice([4, 6, 8, 12, 16, 24, 32, 64])
     waiting = rng.choice([0, 0, rng.randint(1, 90)])
     busy = capacity if waiting else rng.randint(0, capacity)
@@ -84,10 +84,36 @@ def example(rng, task, *, detailed=False):
                         f"The queue started at {first} and ended at {waiting} waiting requests.",
                         f"The recorded window is {obs['covered_ms'] / 1000:g} seconds and is {complete}.",
                         "The measurements only describe connection occupancy and queue depth."])
+    if diagnostic:
+        if waiting:
+            forecast = rng.choice([
+                "The FPGA predicts the queue will remain nonempty over the next ten seconds.",
+                "The FPGA predicts the queue will drain at least once over the next ten seconds."])
+        else:
+            forecast = rng.choice([
+                "The FPGA warns that requests may start waiting within the next ten seconds.",
+                "The FPGA issued no queue-onset warning for the next ten seconds."])
+        e["forecast_interpretation"] = forecast
+        status = ("The queue has cleared; 0 requests are waiting now." if peak else
+                  "No backlog was observed; 0 requests are waiting now.") if not waiting else (
+                  f"The backlog is ongoing: {waiting} requests are waiting now.")
+        answers[0] = (f"{status} The peak was {peak}. {forecast} "
+                      "The cause is unknown. Measure request arrivals and connection hold times.")
+        answers[6] = forecast
+        questions[0].extend([
+            "Brief a colleague taking over the incident. What can we conclude and what remains uncertain?",
+            "Give an incident assessment distinguishing actual symptoms, future risk, and possible causes.",
+            "Should I consider the issue resolved? Cite evidence, explain the outlook and recommend an investigation.",
+            "Talk me through what you see. Are the symptoms ongoing? How would you investigate?",
+            "What do these readings establish about the service, and which signals are missing?",
+            "Can I stand down now? Summarize recent load and distinguish a forecast from a measurement.",
+            "We got paged. What happened, what is happening now, and what information would help?",
+            "Prepare a handoff describing the current state, the worst point and the next measurement.",
+        ])
     return telemetry_prompt(rng.choice(questions[task]), e), answers[task]
 
 
-def train(source, tokenizer, out, steps, seed, detailed):
+def train(source, tokenizer, out, steps, seed, detailed, diagnostic=False):
     import sentencepiece as sp
     import torch
     from transformers import T5ForConditionalGeneration
@@ -133,8 +159,8 @@ def train(source, tokenizer, out, steps, seed, detailed):
 
     model.train()
     for i in range(steps):
-        tasks = [0, 0, 0] + list(range(1, 11 if detailed else 7))
-        qa = [example(rng, rng.choice(tasks), detailed=detailed) for _ in range(8)]
+        tasks = [0] * (16 if diagnostic else 3) + list(range(1, 11 if detailed else 7))
+        qa = [example(rng, rng.choice(tasks), detailed=detailed, diagnostic=diagnostic) for _ in range(8)]
         inp, labels = zip(*qa)
         x = batch(inp, 0)
         loss = model(input_ids=x, attention_mask=x.ne(0), labels=batch(labels, -100), use_cache=False).loss
@@ -160,5 +186,6 @@ if __name__ == "__main__":
     p.add_argument("--steps", type=int, default=160)
     p.add_argument("--seed", type=int, default=3717)
     p.add_argument("--detailed", action="store_true", help="Train with forecast, provenance, trend and coverage examples.")
+    p.add_argument("--diagnostic", action="store_true", help="Train state, forecast, uncertainty and follow-up in one incident report.")
     args = p.parse_args()
-    train(args.source, args.tokenizer, args.out, args.steps, args.seed, args.detailed)
+    train(args.source, args.tokenizer, args.out, args.steps, args.seed, args.detailed or args.diagnostic, args.diagnostic)
