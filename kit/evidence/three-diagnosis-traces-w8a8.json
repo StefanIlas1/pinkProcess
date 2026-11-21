@@ -1,0 +1,3930 @@
+{
+  "execution": "FIFO trace and integer forecast replay with W8A8 software generation",
+  "manifest_sha256": "14d7912c66a78edf407bbb272f7aa04b953af920827a9a035275194ec4f2f2f2",
+  "weights_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+  "runtime_sha256": "469273a10d70576d0013ce8c59e0f1b5e85c5e453117f9f9754ecf32f212cd9b",
+  "production_prompt_sha256": "21a5438477a480a24728c6613f7ffcf10f218c4f4aa62eff01a37a77c94ad0a8",
+  "evidence_adapter_sha256": "f4a12fb09628bcb0760d7077934fcac913a8be68131bd3df6e3573ad120f50a9",
+  "telemetry_stream_sha256": "e2ec7ee0261384fd6bfd9364694c3dcc573f5be7ff60048b960c0d22422c7d2e",
+  "forecast_profile_sha256": {
+    "pool-logistic-v1": "ac1f295ba1eb545ee0929e5d735eb53a6bdbf7462f05c90712f0b644b6093dcf",
+    "queue-outlook-v2": "ec59e6d8ac0ae2c652a280c9d10760d8e94001c5fce108492544ca49314f205c"
+  },
+  "question": "A teammate just saw our pool panel spike. Would you treat this as an active backlog, and what do the latest and worst counts actually say? Keep the ten-second prediction separate and tell me what measurement would help figure out why it happened.",
+  "cases": [
+    {
+      "case": "cleared",
+      "private_workload": {
+        "arrival_groups_fields": [
+          "time_ms",
+          "count",
+          "connection_hold_ms"
+        ],
+        "arrival_groups": [
+          [
+            0,
+            8,
+            100
+          ],
+          [
+            100,
+            8,
+            100
+          ],
+          [
+            200,
+            8,
+            100
+          ],
+          [
+            300,
+            8,
+            100
+          ],
+          [
+            400,
+            8,
+            100
+          ],
+          [
+            500,
+            8,
+            100
+          ],
+          [
+            600,
+            8,
+            100
+          ],
+          [
+            700,
+            8,
+            100
+          ],
+          [
+            800,
+            8,
+            100
+          ],
+          [
+            900,
+            8,
+            100
+          ],
+          [
+            1000,
+            8,
+            100
+          ],
+          [
+            1100,
+            8,
+            100
+          ],
+          [
+            1200,
+            8,
+            100
+          ],
+          [
+            1300,
+            8,
+            100
+          ],
+          [
+            1400,
+            8,
+            100
+          ],
+          [
+            1500,
+            8,
+            100
+          ],
+          [
+            1600,
+            8,
+            100
+          ],
+          [
+            1700,
+            8,
+            100
+          ],
+          [
+            1800,
+            8,
+            100
+          ],
+          [
+            1900,
+            8,
+            100
+          ],
+          [
+            2000,
+            8,
+            100
+          ],
+          [
+            2100,
+            8,
+            100
+          ],
+          [
+            2200,
+            8,
+            100
+          ],
+          [
+            2300,
+            8,
+            100
+          ],
+          [
+            2400,
+            8,
+            100
+          ],
+          [
+            2500,
+            8,
+            100
+          ],
+          [
+            2600,
+            8,
+            100
+          ],
+          [
+            2700,
+            8,
+            100
+          ],
+          [
+            2800,
+            8,
+            100
+          ],
+          [
+            2900,
+            8,
+            100
+          ],
+          [
+            3000,
+            27,
+            100
+          ],
+          [
+            3100,
+            8,
+            100
+          ],
+          [
+            3200,
+            8,
+            100
+          ],
+          [
+            3300,
+            8,
+            100
+          ],
+          [
+            3400,
+            8,
+            100
+          ],
+          [
+            3500,
+            8,
+            100
+          ],
+          [
+            3600,
+            8,
+            100
+          ],
+          [
+            3700,
+            8,
+            100
+          ],
+          [
+            3800,
+            8,
+            100
+          ],
+          [
+            3900,
+            8,
+            100
+          ],
+          [
+            4000,
+            8,
+            100
+          ],
+          [
+            4100,
+            8,
+            100
+          ],
+          [
+            4200,
+            8,
+            100
+          ],
+          [
+            4300,
+            8,
+            100
+          ],
+          [
+            4400,
+            8,
+            100
+          ],
+          [
+            4500,
+            8,
+            100
+          ],
+          [
+            4600,
+            8,
+            100
+          ],
+          [
+            4700,
+            8,
+            100
+          ],
+          [
+            4800,
+            8,
+            100
+          ],
+          [
+            4900,
+            8,
+            100
+          ],
+          [
+            5100,
+            8,
+            100
+          ],
+          [
+            5200,
+            8,
+            100
+          ],
+          [
+            5300,
+            8,
+            100
+          ],
+          [
+            5400,
+            8,
+            100
+          ],
+          [
+            5500,
+            8,
+            100
+          ],
+          [
+            5600,
+            8,
+            100
+          ],
+          [
+            5700,
+            8,
+            100
+          ],
+          [
+            5800,
+            8,
+            100
+          ],
+          [
+            5900,
+            8,
+            100
+          ],
+          [
+            6000,
+            8,
+            100
+          ],
+          [
+            6100,
+            8,
+            100
+          ],
+          [
+            6200,
+            8,
+            100
+          ],
+          [
+            6300,
+            8,
+            100
+          ],
+          [
+            6400,
+            8,
+            100
+          ],
+          [
+            6500,
+            8,
+            100
+          ],
+          [
+            6600,
+            8,
+            100
+          ],
+          [
+            6700,
+            8,
+            100
+          ],
+          [
+            6800,
+            8,
+            100
+          ],
+          [
+            6900,
+            8,
+            100
+          ],
+          [
+            7000,
+            8,
+            100
+          ],
+          [
+            7100,
+            8,
+            100
+          ],
+          [
+            7200,
+            8,
+            100
+          ],
+          [
+            7300,
+            8,
+            100
+          ],
+          [
+            7400,
+            8,
+            100
+          ],
+          [
+            7500,
+            8,
+            100
+          ],
+          [
+            7600,
+            8,
+            100
+          ],
+          [
+            7700,
+            8,
+            100
+          ],
+          [
+            7800,
+            8,
+            100
+          ],
+          [
+            7900,
+            8,
+            100
+          ],
+          [
+            8000,
+            8,
+            100
+          ],
+          [
+            8100,
+            8,
+            100
+          ],
+          [
+            8200,
+            8,
+            100
+          ],
+          [
+            8300,
+            8,
+            100
+          ],
+          [
+            8400,
+            8,
+            100
+          ],
+          [
+            8500,
+            8,
+            100
+          ],
+          [
+            8600,
+            8,
+            100
+          ],
+          [
+            8700,
+            8,
+            100
+          ],
+          [
+            8800,
+            8,
+            100
+          ],
+          [
+            8900,
+            8,
+            100
+          ],
+          [
+            9300,
+            4,
+            100
+          ],
+          [
+            9400,
+            4,
+            100
+          ],
+          [
+            9500,
+            4,
+            100
+          ],
+          [
+            9600,
+            4,
+            100
+          ],
+          [
+            9700,
+            4,
+            100
+          ],
+          [
+            9800,
+            4,
+            100
+          ],
+          [
+            9900,
+            4,
+            100
+          ],
+          [
+            10000,
+            4,
+            100
+          ],
+          [
+            10100,
+            4,
+            100
+          ],
+          [
+            10200,
+            4,
+            100
+          ],
+          [
+            10300,
+            4,
+            100
+          ],
+          [
+            10400,
+            4,
+            100
+          ],
+          [
+            10500,
+            4,
+            100
+          ],
+          [
+            10600,
+            4,
+            100
+          ],
+          [
+            10700,
+            4,
+            100
+          ],
+          [
+            10800,
+            4,
+            100
+          ],
+          [
+            10900,
+            4,
+            100
+          ],
+          [
+            11000,
+            4,
+            100
+          ],
+          [
+            11100,
+            4,
+            100
+          ],
+          [
+            11200,
+            4,
+            100
+          ],
+          [
+            11300,
+            4,
+            100
+          ],
+          [
+            11400,
+            4,
+            100
+          ],
+          [
+            11500,
+            4,
+            100
+          ],
+          [
+            11600,
+            4,
+            100
+          ],
+          [
+            11700,
+            4,
+            100
+          ],
+          [
+            11800,
+            4,
+            100
+          ],
+          [
+            11900,
+            4,
+            100
+          ],
+          [
+            12000,
+            4,
+            100
+          ]
+        ],
+        "total_requests": 843,
+        "hold_ms": 100
+      },
+      "raw_samples": [
+        {
+          "time_ms": 0,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 100,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 200,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 300,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 400,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 500,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 600,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 700,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 800,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 900,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1000,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1100,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1200,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1300,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1400,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1500,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1600,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1700,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1800,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1900,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2000,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2100,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2200,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2300,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2400,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2500,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2600,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2700,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2800,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2900,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 3000,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3100,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3200,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3300,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3400,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3500,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3600,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3700,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3800,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3900,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4000,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4100,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4200,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4300,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4400,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4500,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4600,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4700,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4800,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4900,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 5000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9000,
+          "busy": 8,
+          "waiting": 3
+        },
+        {
+          "time_ms": 9100,
+          "busy": 3,
+          "waiting": 0
+        },
+        {
+          "time_ms": 9200,
+          "busy": 0,
+          "waiting": 0
+        },
+        {
+          "time_ms": 9300,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 9400,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 9500,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 9600,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 9700,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 9800,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 9900,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 10000,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 10100,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 10200,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 10300,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 10400,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 10500,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 10600,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 10700,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 10800,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 10900,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 11000,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 11100,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 11200,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 11300,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 11400,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 11500,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 11600,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 11700,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 11800,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 11900,
+          "busy": 4,
+          "waiting": 0
+        },
+        {
+          "time_ms": 12000,
+          "busy": 4,
+          "waiting": 0
+        }
+      ],
+      "snapshot": {
+        "ok": true,
+        "backend": "software-reference",
+        "state": "ready",
+        "session": "eac838ba-c9d8-5eef-9020-389844ecd1f5",
+        "source": "Synthetic FIFO connection pool",
+        "origin": "demo",
+        "capacity": 8,
+        "sample_count": 121,
+        "latest": {
+          "time_ms": 12000,
+          "busy": 4,
+          "waiting": 0
+        },
+        "latest_time_ms": 12000,
+        "fresh": true,
+        "age_ms": 0,
+        "fpga_submissions": 0,
+        "forecast": {
+          "model": "pool_wait_logistic",
+          "version": "pool-logistic-v1",
+          "alert": true,
+          "score": 27722,
+          "threshold": -11248,
+          "time_ms": 12000,
+          "horizon_ms": 10000
+        },
+        "observations": {
+          "window_ms": 60000,
+          "sample_count": 121,
+          "start_ms": 0,
+          "end_ms": 12000,
+          "first": {
+            "time_ms": 0,
+            "busy": 8,
+            "waiting": 0
+          },
+          "latest": {
+            "time_ms": 12000,
+            "busy": 4,
+            "waiting": 0
+          },
+          "peak_busy": {
+            "time_ms": 0,
+            "busy": 8,
+            "waiting": 0
+          },
+          "peak_waiting": {
+            "time_ms": 3000,
+            "busy": 8,
+            "waiting": 19
+          },
+          "busy": {
+            "minimum": 0,
+            "maximum": 8,
+            "mean": 6.966942148760331,
+            "change": -4,
+            "full_samples": 91,
+            "mean_utilization": 0.8708677685950413
+          },
+          "waiting": {
+            "minimum": 0,
+            "maximum": 19,
+            "mean": 6.801652892561983,
+            "change": 0,
+            "positive_samples": 61,
+            "onsets": 1,
+            "clearances": 1
+          },
+          "covered_ms": 12100,
+          "complete": false,
+          "intervals": [
+            {
+              "start_ms": 0,
+              "end_ms": 2000,
+              "sample_count": 21,
+              "busy": {
+                "minimum": 8,
+                "maximum": 8,
+                "mean": 8.0,
+                "change": 0,
+                "full_samples": 21,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 0,
+                "maximum": 0,
+                "mean": 0.0,
+                "change": 0,
+                "positive_samples": 0,
+                "onsets": 0,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 2100,
+              "end_ms": 12000,
+              "sample_count": 100,
+              "busy": {
+                "minimum": 0,
+                "maximum": 8,
+                "mean": 6.75,
+                "change": -4,
+                "full_samples": 70,
+                "mean_utilization": 0.84375
+              },
+              "waiting": {
+                "minimum": 0,
+                "maximum": 19,
+                "mean": 8.23,
+                "change": 0,
+                "positive_samples": 61,
+                "onsets": 1,
+                "clearances": 1
+              }
+            }
+          ]
+        },
+        "sample_interval_ms": 100,
+        "forecast_input_window_ms": 5000,
+        "limitations": [
+          "Sample timestamps come from the telemetry source. The board measures receipt age.",
+          "Samples describe utilization and queue depth for one source. They do not identify causes or request-level latency.",
+          "The source is the board's demo telemetry.",
+          "The forecast is a model estimate for its stated horizon. Scores are not calibrated probabilities.",
+          "The requested lookback extends beyond the continuous samples retained for this session."
+        ]
+      },
+      "evidence": {
+        "origin": "demo",
+        "source": "Synthetic FIFO connection pool",
+        "capacity": 8,
+        "state": "ready",
+        "latest": {
+          "time_ms": 12000,
+          "busy": 4,
+          "waiting": 0
+        },
+        "observations": {
+          "window_ms": 60000,
+          "sample_count": 121,
+          "start_ms": 0,
+          "end_ms": 12000,
+          "first": {
+            "time_ms": 0,
+            "busy": 8,
+            "waiting": 0
+          },
+          "latest": {
+            "time_ms": 12000,
+            "busy": 4,
+            "waiting": 0
+          },
+          "peak_busy": {
+            "time_ms": 0,
+            "busy": 8,
+            "waiting": 0
+          },
+          "peak_waiting": {
+            "time_ms": 3000,
+            "busy": 8,
+            "waiting": 19
+          },
+          "busy": {
+            "minimum": 0,
+            "maximum": 8,
+            "mean": 6.966942148760331,
+            "change": -4,
+            "full_samples": 91,
+            "mean_utilization": 0.8708677685950413
+          },
+          "waiting": {
+            "minimum": 0,
+            "maximum": 19,
+            "mean": 6.801652892561983,
+            "change": 0,
+            "positive_samples": 61,
+            "onsets": 1,
+            "clearances": 1
+          },
+          "covered_ms": 12100,
+          "complete": false,
+          "intervals": [
+            {
+              "start_ms": 0,
+              "end_ms": 2000,
+              "sample_count": 21,
+              "busy": {
+                "minimum": 8,
+                "maximum": 8,
+                "mean": 8.0,
+                "change": 0,
+                "full_samples": 21,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 0,
+                "maximum": 0,
+                "mean": 0.0,
+                "change": 0,
+                "positive_samples": 0,
+                "onsets": 0,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 2100,
+              "end_ms": 12000,
+              "sample_count": 100,
+              "busy": {
+                "minimum": 0,
+                "maximum": 8,
+                "mean": 6.75,
+                "change": -4,
+                "full_samples": 70,
+                "mean_utilization": 0.84375
+              },
+              "waiting": {
+                "minimum": 0,
+                "maximum": 19,
+                "mean": 8.23,
+                "change": 0,
+                "positive_samples": 61,
+                "onsets": 1,
+                "clearances": 1
+              }
+            }
+          ]
+        },
+        "limitations": [
+          "Sample timestamps come from the telemetry source. The board measures receipt age.",
+          "Samples describe utilization and queue depth for one source. They do not identify causes or request-level latency.",
+          "The source is the board's demo telemetry.",
+          "The forecast is a model estimate for its stated horizon. Scores are not calibrated probabilities.",
+          "The requested lookback extends beyond the continuous samples retained for this session."
+        ],
+        "observed_now": "4 of 8 connections occupied (50.0%); 0 requests waiting.",
+        "observed_peak": "19 requests were waiting at the window maximum, 9 seconds before the latest reading. 8 connections were occupied at that instant.",
+        "forecast": {
+          "version": "pool-logistic-v1",
+          "time_ms": 12000,
+          "horizon_ms": 10000
+        },
+        "forecast_interpretation": "The FPGA warns that requests may start waiting within the next ten seconds."
+      },
+      "prompt": "Answer the question using the measurements. Connection pool demo measurements (ready). Current queue: 0 waiting requests. Current occupancy: 4 of 8 connections busy. Peak queue: 19 requests, 9 seconds ago. Queue at start: 0 requests. Recorded duration: 12.1 seconds. Only part of the requested window is available. Mean queue: 6.802 requests. Mean occupancy: 6.967 connections. The FPGA warns that requests may start waiting within the next ten seconds. Endpoint, root cause and request latency: unknown.\nQuestion: A teammate just saw our pool panel spike. Would you treat this as an active backlog, and what do the latest and worst counts actually say? Keep the ten-second prediction separate and tell me what measurement would help figure out why it happened.\nAnswer:",
+      "answer": "The queue has cleared; 0 requests are waiting now. The peak was 19. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "seconds": 1.038
+    },
+    {
+      "case": "ongoing",
+      "private_workload": {
+        "arrival_groups_fields": [
+          "time_ms",
+          "count",
+          "connection_hold_ms"
+        ],
+        "arrival_groups": [
+          [
+            0,
+            8,
+            100
+          ],
+          [
+            100,
+            8,
+            100
+          ],
+          [
+            200,
+            8,
+            100
+          ],
+          [
+            300,
+            8,
+            100
+          ],
+          [
+            400,
+            8,
+            100
+          ],
+          [
+            500,
+            8,
+            100
+          ],
+          [
+            600,
+            8,
+            100
+          ],
+          [
+            700,
+            8,
+            100
+          ],
+          [
+            800,
+            8,
+            100
+          ],
+          [
+            900,
+            8,
+            100
+          ],
+          [
+            1000,
+            8,
+            100
+          ],
+          [
+            1100,
+            8,
+            100
+          ],
+          [
+            1200,
+            8,
+            100
+          ],
+          [
+            1300,
+            8,
+            100
+          ],
+          [
+            1400,
+            8,
+            100
+          ],
+          [
+            1500,
+            8,
+            100
+          ],
+          [
+            1600,
+            8,
+            100
+          ],
+          [
+            1700,
+            8,
+            100
+          ],
+          [
+            1800,
+            8,
+            100
+          ],
+          [
+            1900,
+            8,
+            100
+          ],
+          [
+            2000,
+            8,
+            100
+          ],
+          [
+            2100,
+            8,
+            100
+          ],
+          [
+            2200,
+            8,
+            100
+          ],
+          [
+            2300,
+            8,
+            100
+          ],
+          [
+            2400,
+            8,
+            100
+          ],
+          [
+            2500,
+            8,
+            100
+          ],
+          [
+            2600,
+            8,
+            100
+          ],
+          [
+            2700,
+            8,
+            100
+          ],
+          [
+            2800,
+            8,
+            100
+          ],
+          [
+            2900,
+            8,
+            100
+          ],
+          [
+            3000,
+            27,
+            100
+          ],
+          [
+            3100,
+            8,
+            100
+          ],
+          [
+            3200,
+            8,
+            100
+          ],
+          [
+            3300,
+            8,
+            100
+          ],
+          [
+            3400,
+            8,
+            100
+          ],
+          [
+            3500,
+            8,
+            100
+          ],
+          [
+            3600,
+            8,
+            100
+          ],
+          [
+            3700,
+            8,
+            100
+          ],
+          [
+            3800,
+            8,
+            100
+          ],
+          [
+            3900,
+            8,
+            100
+          ],
+          [
+            4000,
+            8,
+            100
+          ],
+          [
+            4100,
+            8,
+            100
+          ],
+          [
+            4200,
+            8,
+            100
+          ],
+          [
+            4300,
+            8,
+            100
+          ],
+          [
+            4400,
+            8,
+            100
+          ],
+          [
+            4500,
+            8,
+            100
+          ],
+          [
+            4600,
+            8,
+            100
+          ],
+          [
+            4700,
+            8,
+            100
+          ],
+          [
+            4800,
+            8,
+            100
+          ],
+          [
+            4900,
+            8,
+            100
+          ],
+          [
+            5100,
+            8,
+            100
+          ],
+          [
+            5200,
+            8,
+            100
+          ],
+          [
+            5300,
+            8,
+            100
+          ],
+          [
+            5400,
+            8,
+            100
+          ],
+          [
+            5500,
+            8,
+            100
+          ],
+          [
+            5600,
+            8,
+            100
+          ],
+          [
+            5700,
+            8,
+            100
+          ],
+          [
+            5800,
+            8,
+            100
+          ],
+          [
+            5900,
+            8,
+            100
+          ],
+          [
+            6000,
+            8,
+            100
+          ],
+          [
+            6100,
+            8,
+            100
+          ],
+          [
+            6200,
+            8,
+            100
+          ],
+          [
+            6300,
+            8,
+            100
+          ],
+          [
+            6400,
+            8,
+            100
+          ],
+          [
+            6500,
+            8,
+            100
+          ],
+          [
+            6600,
+            8,
+            100
+          ],
+          [
+            6700,
+            8,
+            100
+          ],
+          [
+            6800,
+            8,
+            100
+          ],
+          [
+            6900,
+            8,
+            100
+          ],
+          [
+            7000,
+            8,
+            100
+          ],
+          [
+            7100,
+            8,
+            100
+          ],
+          [
+            7200,
+            8,
+            100
+          ],
+          [
+            7300,
+            8,
+            100
+          ],
+          [
+            7400,
+            8,
+            100
+          ],
+          [
+            7500,
+            8,
+            100
+          ],
+          [
+            7600,
+            8,
+            100
+          ],
+          [
+            7700,
+            8,
+            100
+          ],
+          [
+            7800,
+            8,
+            100
+          ],
+          [
+            7900,
+            8,
+            100
+          ],
+          [
+            8000,
+            8,
+            100
+          ],
+          [
+            8100,
+            8,
+            100
+          ],
+          [
+            8200,
+            8,
+            100
+          ],
+          [
+            8300,
+            8,
+            100
+          ],
+          [
+            8400,
+            8,
+            100
+          ],
+          [
+            8500,
+            8,
+            100
+          ],
+          [
+            8600,
+            8,
+            100
+          ],
+          [
+            8700,
+            8,
+            100
+          ],
+          [
+            8800,
+            8,
+            100
+          ],
+          [
+            8900,
+            8,
+            100
+          ],
+          [
+            9000,
+            8,
+            100
+          ],
+          [
+            9100,
+            8,
+            100
+          ],
+          [
+            9200,
+            8,
+            100
+          ],
+          [
+            9300,
+            8,
+            100
+          ],
+          [
+            9400,
+            8,
+            100
+          ],
+          [
+            9500,
+            8,
+            100
+          ],
+          [
+            9600,
+            8,
+            100
+          ],
+          [
+            9700,
+            8,
+            100
+          ],
+          [
+            9800,
+            8,
+            100
+          ],
+          [
+            9900,
+            8,
+            100
+          ],
+          [
+            10000,
+            8,
+            100
+          ],
+          [
+            10100,
+            8,
+            100
+          ],
+          [
+            10200,
+            8,
+            100
+          ],
+          [
+            10300,
+            8,
+            100
+          ],
+          [
+            10400,
+            8,
+            100
+          ],
+          [
+            10500,
+            8,
+            100
+          ],
+          [
+            10600,
+            8,
+            100
+          ],
+          [
+            10700,
+            8,
+            100
+          ],
+          [
+            10800,
+            8,
+            100
+          ],
+          [
+            10900,
+            8,
+            100
+          ],
+          [
+            11000,
+            8,
+            100
+          ],
+          [
+            11100,
+            8,
+            100
+          ],
+          [
+            11200,
+            8,
+            100
+          ],
+          [
+            11300,
+            8,
+            100
+          ],
+          [
+            11400,
+            8,
+            100
+          ],
+          [
+            11500,
+            8,
+            100
+          ],
+          [
+            11600,
+            8,
+            100
+          ],
+          [
+            11700,
+            8,
+            100
+          ],
+          [
+            11800,
+            8,
+            100
+          ],
+          [
+            11900,
+            8,
+            100
+          ],
+          [
+            12000,
+            8,
+            100
+          ]
+        ],
+        "total_requests": 979,
+        "hold_ms": 100
+      },
+      "raw_samples": [
+        {
+          "time_ms": 0,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 100,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 200,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 300,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 400,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 500,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 600,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 700,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 800,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 900,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1000,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1100,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1200,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1300,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1400,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1500,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1600,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1700,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1800,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1900,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2000,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2100,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2200,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2300,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2400,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2500,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2600,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2700,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2800,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2900,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 3000,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3100,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3200,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3300,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3400,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3500,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3600,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3700,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3800,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3900,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4000,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4100,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4200,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4300,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4400,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4500,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4600,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4700,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4800,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4900,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 5000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 12000,
+          "busy": 8,
+          "waiting": 11
+        }
+      ],
+      "snapshot": {
+        "ok": true,
+        "backend": "software-reference",
+        "state": "ready",
+        "session": "d12ee80b-797d-5ea9-bcd7-4153ceb1494d",
+        "source": "Synthetic FIFO connection pool",
+        "origin": "demo",
+        "capacity": 8,
+        "sample_count": 121,
+        "latest": {
+          "time_ms": 12000,
+          "busy": 8,
+          "waiting": 11
+        },
+        "latest_time_ms": 12000,
+        "fresh": true,
+        "age_ms": 0,
+        "fpga_submissions": 0,
+        "forecast": {
+          "model": "queue_outlook",
+          "version": "queue-outlook-v2",
+          "scores": [
+            43,
+            -1
+          ],
+          "time_ms": 12000,
+          "horizon_ms": 10000
+        },
+        "observations": {
+          "window_ms": 60000,
+          "sample_count": 121,
+          "start_ms": 0,
+          "end_ms": 12000,
+          "first": {
+            "time_ms": 0,
+            "busy": 8,
+            "waiting": 0
+          },
+          "latest": {
+            "time_ms": 12000,
+            "busy": 8,
+            "waiting": 11
+          },
+          "peak_busy": {
+            "time_ms": 0,
+            "busy": 8,
+            "waiting": 0
+          },
+          "peak_waiting": {
+            "time_ms": 3000,
+            "busy": 8,
+            "waiting": 19
+          },
+          "busy": {
+            "minimum": 8,
+            "maximum": 8,
+            "mean": 8.0,
+            "change": 0,
+            "full_samples": 121,
+            "mean_utilization": 1.0
+          },
+          "waiting": {
+            "minimum": 0,
+            "maximum": 19,
+            "mean": 9.59504132231405,
+            "change": 11,
+            "positive_samples": 91,
+            "onsets": 1,
+            "clearances": 0
+          },
+          "covered_ms": 12100,
+          "complete": false,
+          "intervals": [
+            {
+              "start_ms": 0,
+              "end_ms": 2000,
+              "sample_count": 21,
+              "busy": {
+                "minimum": 8,
+                "maximum": 8,
+                "mean": 8.0,
+                "change": 0,
+                "full_samples": 21,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 0,
+                "maximum": 0,
+                "mean": 0.0,
+                "change": 0,
+                "positive_samples": 0,
+                "onsets": 0,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 2100,
+              "end_ms": 12000,
+              "sample_count": 100,
+              "busy": {
+                "minimum": 8,
+                "maximum": 8,
+                "mean": 8.0,
+                "change": 0,
+                "full_samples": 100,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 0,
+                "maximum": 19,
+                "mean": 11.61,
+                "change": 11,
+                "positive_samples": 91,
+                "onsets": 1,
+                "clearances": 0
+              }
+            }
+          ]
+        },
+        "sample_interval_ms": 100,
+        "forecast_input_window_ms": 5000,
+        "limitations": [
+          "Sample timestamps come from the telemetry source. The board measures receipt age.",
+          "Samples describe utilization and queue depth for one source. They do not identify causes or request-level latency.",
+          "The source is the board's demo telemetry.",
+          "The forecast is a model estimate for its stated horizon. Scores are not calibrated probabilities.",
+          "The requested lookback extends beyond the continuous samples retained for this session."
+        ]
+      },
+      "evidence": {
+        "origin": "demo",
+        "source": "Synthetic FIFO connection pool",
+        "capacity": 8,
+        "state": "ready",
+        "latest": {
+          "time_ms": 12000,
+          "busy": 8,
+          "waiting": 11
+        },
+        "observations": {
+          "window_ms": 60000,
+          "sample_count": 121,
+          "start_ms": 0,
+          "end_ms": 12000,
+          "first": {
+            "time_ms": 0,
+            "busy": 8,
+            "waiting": 0
+          },
+          "latest": {
+            "time_ms": 12000,
+            "busy": 8,
+            "waiting": 11
+          },
+          "peak_busy": {
+            "time_ms": 0,
+            "busy": 8,
+            "waiting": 0
+          },
+          "peak_waiting": {
+            "time_ms": 3000,
+            "busy": 8,
+            "waiting": 19
+          },
+          "busy": {
+            "minimum": 8,
+            "maximum": 8,
+            "mean": 8.0,
+            "change": 0,
+            "full_samples": 121,
+            "mean_utilization": 1.0
+          },
+          "waiting": {
+            "minimum": 0,
+            "maximum": 19,
+            "mean": 9.59504132231405,
+            "change": 11,
+            "positive_samples": 91,
+            "onsets": 1,
+            "clearances": 0
+          },
+          "covered_ms": 12100,
+          "complete": false,
+          "intervals": [
+            {
+              "start_ms": 0,
+              "end_ms": 2000,
+              "sample_count": 21,
+              "busy": {
+                "minimum": 8,
+                "maximum": 8,
+                "mean": 8.0,
+                "change": 0,
+                "full_samples": 21,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 0,
+                "maximum": 0,
+                "mean": 0.0,
+                "change": 0,
+                "positive_samples": 0,
+                "onsets": 0,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 2100,
+              "end_ms": 12000,
+              "sample_count": 100,
+              "busy": {
+                "minimum": 8,
+                "maximum": 8,
+                "mean": 8.0,
+                "change": 0,
+                "full_samples": 100,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 0,
+                "maximum": 19,
+                "mean": 11.61,
+                "change": 11,
+                "positive_samples": 91,
+                "onsets": 1,
+                "clearances": 0
+              }
+            }
+          ]
+        },
+        "limitations": [
+          "Sample timestamps come from the telemetry source. The board measures receipt age.",
+          "Samples describe utilization and queue depth for one source. They do not identify causes or request-level latency.",
+          "The source is the board's demo telemetry.",
+          "The forecast is a model estimate for its stated horizon. Scores are not calibrated probabilities.",
+          "The requested lookback extends beyond the continuous samples retained for this session."
+        ],
+        "observed_now": "8 of 8 connections occupied (100.0%); 11 requests waiting.",
+        "observed_peak": "19 requests were waiting at the window maximum, 9 seconds before the latest reading. 8 connections were occupied at that instant.",
+        "forecast": {
+          "version": "queue-outlook-v2",
+          "time_ms": 12000,
+          "horizon_ms": 10000
+        },
+        "forecast_interpretation": "The FPGA predicts the queue will remain nonempty over the next ten seconds. It expects at most the current 11 waiting at the end of that period."
+      },
+      "prompt": "Answer the question using the measurements. Connection pool demo measurements (ready). Current queue: 11 waiting requests. Current occupancy: 8 of 8 connections busy. Peak queue: 19 requests, 9 seconds ago. Queue at start: 0 requests. Recorded duration: 12.1 seconds. Only part of the requested window is available. Mean queue: 9.595 requests. Mean occupancy: 8 connections. The FPGA predicts the queue will remain nonempty over the next ten seconds. It expects at most the current 11 waiting at the end of that period. Endpoint, root cause and request latency: unknown.\nQuestion: A teammate just saw our pool panel spike. Would you treat this as an active backlog, and what do the latest and worst counts actually say? Keep the ten-second prediction separate and tell me what measurement would help figure out why it happened.\nAnswer:",
+      "answer": "The backlog is ongoing: 11 requests are waiting now. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "seconds": 1.6814
+    },
+    {
+      "case": "ambiguous-cause",
+      "private_workload": {
+        "arrival_groups_fields": [
+          "time_ms",
+          "count",
+          "connection_hold_ms"
+        ],
+        "arrival_groups": [
+          [
+            0,
+            8,
+            500
+          ],
+          [
+            500,
+            8,
+            500
+          ],
+          [
+            1000,
+            8,
+            500
+          ],
+          [
+            1500,
+            8,
+            500
+          ],
+          [
+            2000,
+            8,
+            500
+          ],
+          [
+            2500,
+            8,
+            500
+          ],
+          [
+            3000,
+            27,
+            500
+          ],
+          [
+            3500,
+            8,
+            500
+          ],
+          [
+            4000,
+            8,
+            500
+          ],
+          [
+            4500,
+            8,
+            500
+          ],
+          [
+            5500,
+            8,
+            500
+          ],
+          [
+            6000,
+            8,
+            500
+          ],
+          [
+            6500,
+            8,
+            500
+          ],
+          [
+            7000,
+            8,
+            500
+          ],
+          [
+            7500,
+            8,
+            500
+          ],
+          [
+            8000,
+            8,
+            500
+          ],
+          [
+            8500,
+            8,
+            500
+          ],
+          [
+            9000,
+            8,
+            500
+          ],
+          [
+            9500,
+            8,
+            500
+          ],
+          [
+            10000,
+            8,
+            500
+          ],
+          [
+            10500,
+            8,
+            500
+          ],
+          [
+            11000,
+            8,
+            500
+          ],
+          [
+            11500,
+            8,
+            500
+          ],
+          [
+            12000,
+            8,
+            500
+          ]
+        ],
+        "total_requests": 211,
+        "hold_ms": 500
+      },
+      "raw_samples": [
+        {
+          "time_ms": 0,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 100,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 200,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 300,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 400,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 500,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 600,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 700,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 800,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 900,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1000,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1100,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1200,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1300,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1400,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1500,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1600,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1700,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1800,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 1900,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2000,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2100,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2200,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2300,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2400,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2500,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2600,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2700,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2800,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 2900,
+          "busy": 8,
+          "waiting": 0
+        },
+        {
+          "time_ms": 3000,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3100,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3200,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3300,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3400,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3500,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3600,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3700,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3800,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 3900,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4000,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4100,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4200,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4300,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4400,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4500,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4600,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4700,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4800,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 4900,
+          "busy": 8,
+          "waiting": 19
+        },
+        {
+          "time_ms": 5000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 5900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 6900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 7900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 8900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 9900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 10900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11000,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11100,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11200,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11300,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11400,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11500,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11600,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11700,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11800,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 11900,
+          "busy": 8,
+          "waiting": 11
+        },
+        {
+          "time_ms": 12000,
+          "busy": 8,
+          "waiting": 11
+        }
+      ],
+      "snapshot": {
+        "ok": true,
+        "backend": "software-reference",
+        "state": "ready",
+        "session": "4cd3dfed-6b2f-5b6f-80ba-4f12941168fe",
+        "source": "Synthetic FIFO connection pool",
+        "origin": "demo",
+        "capacity": 8,
+        "sample_count": 121,
+        "latest": {
+          "time_ms": 12000,
+          "busy": 8,
+          "waiting": 11
+        },
+        "latest_time_ms": 12000,
+        "fresh": true,
+        "age_ms": 0,
+        "fpga_submissions": 0,
+        "forecast": {
+          "model": "queue_outlook",
+          "version": "queue-outlook-v2",
+          "scores": [
+            43,
+            -1
+          ],
+          "time_ms": 12000,
+          "horizon_ms": 10000
+        },
+        "observations": {
+          "window_ms": 60000,
+          "sample_count": 121,
+          "start_ms": 0,
+          "end_ms": 12000,
+          "first": {
+            "time_ms": 0,
+            "busy": 8,
+            "waiting": 0
+          },
+          "latest": {
+            "time_ms": 12000,
+            "busy": 8,
+            "waiting": 11
+          },
+          "peak_busy": {
+            "time_ms": 0,
+            "busy": 8,
+            "waiting": 0
+          },
+          "peak_waiting": {
+            "time_ms": 3000,
+            "busy": 8,
+            "waiting": 19
+          },
+          "busy": {
+            "minimum": 8,
+            "maximum": 8,
+            "mean": 8.0,
+            "change": 0,
+            "full_samples": 121,
+            "mean_utilization": 1.0
+          },
+          "waiting": {
+            "minimum": 0,
+            "maximum": 19,
+            "mean": 9.59504132231405,
+            "change": 11,
+            "positive_samples": 91,
+            "onsets": 1,
+            "clearances": 0
+          },
+          "covered_ms": 12100,
+          "complete": false,
+          "intervals": [
+            {
+              "start_ms": 0,
+              "end_ms": 2000,
+              "sample_count": 21,
+              "busy": {
+                "minimum": 8,
+                "maximum": 8,
+                "mean": 8.0,
+                "change": 0,
+                "full_samples": 21,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 0,
+                "maximum": 0,
+                "mean": 0.0,
+                "change": 0,
+                "positive_samples": 0,
+                "onsets": 0,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 2100,
+              "end_ms": 12000,
+              "sample_count": 100,
+              "busy": {
+                "minimum": 8,
+                "maximum": 8,
+                "mean": 8.0,
+                "change": 0,
+                "full_samples": 100,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 0,
+                "maximum": 19,
+                "mean": 11.61,
+                "change": 11,
+                "positive_samples": 91,
+                "onsets": 1,
+                "clearances": 0
+              }
+            }
+          ]
+        },
+        "sample_interval_ms": 100,
+        "forecast_input_window_ms": 5000,
+        "limitations": [
+          "Sample timestamps come from the telemetry source. The board measures receipt age.",
+          "Samples describe utilization and queue depth for one source. They do not identify causes or request-level latency.",
+          "The source is the board's demo telemetry.",
+          "The forecast is a model estimate for its stated horizon. Scores are not calibrated probabilities.",
+          "The requested lookback extends beyond the continuous samples retained for this session."
+        ]
+      },
+      "evidence": {
+        "origin": "demo",
+        "source": "Synthetic FIFO connection pool",
+        "capacity": 8,
+        "state": "ready",
+        "latest": {
+          "time_ms": 12000,
+          "busy": 8,
+          "waiting": 11
+        },
+        "observations": {
+          "window_ms": 60000,
+          "sample_count": 121,
+          "start_ms": 0,
+          "end_ms": 12000,
+          "first": {
+            "time_ms": 0,
+            "busy": 8,
+            "waiting": 0
+          },
+          "latest": {
+            "time_ms": 12000,
+            "busy": 8,
+            "waiting": 11
+          },
+          "peak_busy": {
+            "time_ms": 0,
+            "busy": 8,
+            "waiting": 0
+          },
+          "peak_waiting": {
+            "time_ms": 3000,
+            "busy": 8,
+            "waiting": 19
+          },
+          "busy": {
+            "minimum": 8,
+            "maximum": 8,
+            "mean": 8.0,
+            "change": 0,
+            "full_samples": 121,
+            "mean_utilization": 1.0
+          },
+          "waiting": {
+            "minimum": 0,
+            "maximum": 19,
+            "mean": 9.59504132231405,
+            "change": 11,
+            "positive_samples": 91,
+            "onsets": 1,
+            "clearances": 0
+          },
+          "covered_ms": 12100,
+          "complete": false,
+          "intervals": [
+            {
+              "start_ms": 0,
+              "end_ms": 2000,
+              "sample_count": 21,
+              "busy": {
+                "minimum": 8,
+                "maximum": 8,
+                "mean": 8.0,
+                "change": 0,
+                "full_samples": 21,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 0,
+                "maximum": 0,
+                "mean": 0.0,
+                "change": 0,
+                "positive_samples": 0,
+                "onsets": 0,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 2100,
+              "end_ms": 12000,
+              "sample_count": 100,
+              "busy": {
+                "minimum": 8,
+                "maximum": 8,
+                "mean": 8.0,
+                "change": 0,
+                "full_samples": 100,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 0,
+                "maximum": 19,
+                "mean": 11.61,
+                "change": 11,
+                "positive_samples": 91,
+                "onsets": 1,
+                "clearances": 0
+              }
+            }
+          ]
+        },
+        "limitations": [
+          "Sample timestamps come from the telemetry source. The board measures receipt age.",
+          "Samples describe utilization and queue depth for one source. They do not identify causes or request-level latency.",
+          "The source is the board's demo telemetry.",
+          "The forecast is a model estimate for its stated horizon. Scores are not calibrated probabilities.",
+          "The requested lookback extends beyond the continuous samples retained for this session."
+        ],
+        "observed_now": "8 of 8 connections occupied (100.0%); 11 requests waiting.",
+        "observed_peak": "19 requests were waiting at the window maximum, 9 seconds before the latest reading. 8 connections were occupied at that instant.",
+        "forecast": {
+          "version": "queue-outlook-v2",
+          "time_ms": 12000,
+          "horizon_ms": 10000
+        },
+        "forecast_interpretation": "The FPGA predicts the queue will remain nonempty over the next ten seconds. It expects at most the current 11 waiting at the end of that period."
+      },
+      "prompt": "Answer the question using the measurements. Connection pool demo measurements (ready). Current queue: 11 waiting requests. Current occupancy: 8 of 8 connections busy. Peak queue: 19 requests, 9 seconds ago. Queue at start: 0 requests. Recorded duration: 12.1 seconds. Only part of the requested window is available. Mean queue: 9.595 requests. Mean occupancy: 8 connections. The FPGA predicts the queue will remain nonempty over the next ten seconds. It expects at most the current 11 waiting at the end of that period. Endpoint, root cause and request latency: unknown.\nQuestion: A teammate just saw our pool panel spike. Would you treat this as an active backlog, and what do the latest and worst counts actually say? Keep the ten-second prediction separate and tell me what measurement would help figure out why it happened.\nAnswer:",
+      "answer": "The backlog is ongoing: 11 requests are waiting now. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "seconds": 1.1874
+    }
+  ]
+}
