@@ -1,0 +1,27 @@
+{
+  "version": "queue-outlook-v2",
+  "inputs": [
+    "depth_scaled",
+    "change_4s_scaled",
+    "change_4s_clipped",
+    "bias"
+  ],
+  "targets": [
+    "persists",
+    "grows"
+  ],
+  "weights": [
+    [
+      4,
+      10,
+      0,
+      -1
+    ],
+    [
+      0,
+      0,
+      1,
+      -1
+    ]
+  ]
+}

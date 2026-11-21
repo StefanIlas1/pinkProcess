@@ -5,9 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pinkprocess"
 version = "0.1.0"
-description = "Synthetic database pool telemetry and a forecasting baseline"
+description = "FPGA-backed connection-pool telemetry analysis for the pinkProcess kit"
 requires-python = ">=3.10"
 dependencies = []
 
 [tool.setuptools]
 packages = ["pinkprocess"]
+
+[tool.setuptools.package-data]
+pinkprocess = ["kit.html"]
