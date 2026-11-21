@@ -1,0 +1,835 @@
+{
+  "execution": "W8A8 software reference",
+  "frozen_candidate": {
+    "manifest_sha256": "14d7912c66a78edf407bbb272f7aa04b953af920827a9a035275194ec4f2f2f2",
+    "weights_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+    "tokenizer_sha256": "f9a7146f8f1a6c28cd74c8c4da8efdf7b37b343434e45995149252a8ff946d13",
+    "runtime_sha256": "469273a10d70576d0013ce8c59e0f1b5e85c5e453117f9f9754ecf32f212cd9b",
+    "prompt_sha256": "21a5438477a480a24728c6613f7ffcf10f218c4f4aa62eff01a37a77c94ad0a8",
+    "evidence_adapter_sha256": "f4a12fb09628bcb0760d7077934fcac913a8be68131bd3df6e3573ad120f50a9"
+  },
+  "holdout_seed": 3498857091849149468,
+  "question_set": "replacement",
+  "policy": "All five checks must pass on each incident. Lexical scoring requires raw-answer review.",
+  "total_cases": 12,
+  "cases_passing_every_check": 9,
+  "checks_passing_by_criterion": {
+    "current_state": 12,
+    "cites_current_and_peak": 12,
+    "forecast_separated_and_correct": 9,
+    "uncertainty_about_cause": 12,
+    "concrete_next_measurement": 12
+  },
+  "cases": [
+    {
+      "id": "4972f038c496",
+      "question": "Walk me through what the latest sample and the worst point mean for callers. How does the forecast change what you expect, and what would you instrument to find out why?",
+      "snapshot": {
+        "origin": "demo",
+        "state": "ready",
+        "source": "Independent synthetic pool incident",
+        "fresh": true,
+        "capacity": 20,
+        "latest": {
+          "time_ms": 201000,
+          "busy": 17,
+          "waiting": 0
+        },
+        "forecast": {
+          "model": "pool_wait_logistic",
+          "version": "synthetic-onset",
+          "alert": true,
+          "time_ms": 201000,
+          "horizon_ms": 10000
+        },
+        "forecast_reading": {
+          "time_ms": 201000,
+          "busy": 17,
+          "waiting": 0
+        },
+        "observations": {
+          "first": {
+            "time_ms": 171000,
+            "busy": 17,
+            "waiting": 2
+          },
+          "latest": {
+            "time_ms": 201000,
+            "busy": 17,
+            "waiting": 0
+          },
+          "peak_waiting": {
+            "time_ms": 185500,
+            "busy": 20,
+            "waiting": 27
+          },
+          "start_ms": 171000,
+          "end_ms": 201000,
+          "sample_count": 301,
+          "covered_ms": 30000,
+          "complete": true
+        }
+      },
+      "expected": {
+        "now": "cleared",
+        "current_waiting": 0,
+        "peak_waiting": 27,
+        "forecast": "onset_warning"
+      },
+      "prompt": "Answer the question using the measurements. Connection pool demo measurements (ready). Current queue: 0 waiting requests. Current occupancy: 17 of 20 connections busy. Peak queue: 27 requests, 15.5 seconds ago. Queue at start: 2 requests. Recorded duration: 30 seconds. The FPGA warns that requests may start waiting within the next ten seconds. Endpoint, root cause and request latency: unknown.\nQuestion: Walk me through what the latest sample and the worst point mean for callers. How does the forecast change what you expect, and what would you instrument to find out why?\nAnswer:",
+      "answer": "The queue has cleared; 0 requests are waiting now. The peak was 27. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "checks": {
+        "current_state": true,
+        "cites_current_and_peak": true,
+        "forecast_separated_and_correct": false,
+        "uncertainty_about_cause": true,
+        "concrete_next_measurement": true
+      },
+      "seconds": 0.6554
+    },
+    {
+      "id": "4fbed0a3beaf",
+      "question": "Did the pool recover by the end of this interval? Use the actual counts and keep the forecast separate. Can we tell what drove the spike? What would you collect next?",
+      "snapshot": {
+        "origin": "demo",
+        "state": "ready",
+        "source": "Independent synthetic pool incident",
+        "fresh": true,
+        "capacity": 18,
+        "latest": {
+          "time_ms": 153100,
+          "busy": 10,
+          "waiting": 0
+        },
+        "forecast": {
+          "model": "pool_wait_logistic",
+          "version": "synthetic-onset",
+          "alert": true,
+          "time_ms": 153100,
+          "horizon_ms": 10000
+        },
+        "forecast_reading": {
+          "time_ms": 153100,
+          "busy": 10,
+          "waiting": 0
+        },
+        "observations": {
+          "first": {
+            "time_ms": 123100,
+            "busy": 10,
+            "waiting": 2
+          },
+          "latest": {
+            "time_ms": 153100,
+            "busy": 10,
+            "waiting": 0
+          },
+          "peak_waiting": {
+            "time_ms": 131100,
+            "busy": 18,
+            "waiting": 46
+          },
+          "start_ms": 123100,
+          "end_ms": 153100,
+          "sample_count": 301,
+          "covered_ms": 30000,
+          "complete": true
+        }
+      },
+      "expected": {
+        "now": "cleared",
+        "current_waiting": 0,
+        "peak_waiting": 46,
+        "forecast": "onset_warning"
+      },
+      "prompt": "Answer the question using the measurements. Connection pool demo measurements (ready). Current queue: 0 waiting requests. Current occupancy: 10 of 18 connections busy. Peak queue: 46 requests, 22 seconds ago. Queue at start: 2 requests. Recorded duration: 30 seconds. The FPGA warns that requests may start waiting within the next ten seconds. Endpoint, root cause and request latency: unknown.\nQuestion: Did the pool recover by the end of this interval? Use the actual counts and keep the forecast separate. Can we tell what drove the spike? What would you collect next?\nAnswer:",
+      "answer": "The queue has cleared; 0 requests are waiting now. The peak was 46. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "checks": {
+        "current_state": true,
+        "cites_current_and_peak": true,
+        "forecast_separated_and_correct": false,
+        "uncertainty_about_cause": true,
+        "concrete_next_measurement": true
+      },
+      "seconds": 0.635
+    },
+    {
+      "id": "35eae659bdca",
+      "question": "I'm taking over this incident. Tell me whether people are stuck right now and which numbers matter. Then tell me what the model expects and how you'd investigate the cause.",
+      "snapshot": {
+        "origin": "demo",
+        "state": "ready",
+        "source": "Independent synthetic pool incident",
+        "fresh": true,
+        "capacity": 13,
+        "latest": {
+          "time_ms": 96400,
+          "busy": 7,
+          "waiting": 0
+        },
+        "forecast": {
+          "model": "pool_wait_logistic",
+          "version": "synthetic-onset",
+          "alert": false,
+          "time_ms": 96400,
+          "horizon_ms": 10000
+        },
+        "forecast_reading": {
+          "time_ms": 96400,
+          "busy": 7,
+          "waiting": 0
+        },
+        "observations": {
+          "first": {
+            "time_ms": 66400,
+            "busy": 7,
+            "waiting": 1
+          },
+          "latest": {
+            "time_ms": 96400,
+            "busy": 7,
+            "waiting": 0
+          },
+          "peak_waiting": {
+            "time_ms": 78400,
+            "busy": 13,
+            "waiting": 46
+          },
+          "start_ms": 66400,
+          "end_ms": 96400,
+          "sample_count": 301,
+          "covered_ms": 30000,
+          "complete": true
+        }
+      },
+      "expected": {
+        "now": "cleared",
+        "current_waiting": 0,
+        "peak_waiting": 46,
+        "forecast": "no_onset_warning"
+      },
+      "prompt": "Answer the question using the measurements. Connection pool demo measurements (ready). Current queue: 0 waiting requests. Current occupancy: 7 of 13 connections busy. Peak queue: 46 requests, 18 seconds ago. Queue at start: 1 requests. Recorded duration: 30 seconds. The FPGA issued no queue-onset warning for the next ten seconds. Endpoint, root cause and request latency: unknown.\nQuestion: I'm taking over this incident. Tell me whether people are stuck right now and which numbers matter. Then tell me what the model expects and how you'd investigate the cause.\nAnswer:",
+      "answer": "The queue has cleared; 0 requests are waiting now. The peak was 46. The FPGA issued no queue-onset warning for the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "checks": {
+        "current_state": true,
+        "cites_current_and_peak": true,
+        "forecast_separated_and_correct": true,
+        "uncertainty_about_cause": true,
+        "concrete_next_measurement": true
+      },
+      "seconds": 0.6215
+    },
+    {
+      "id": "31c613bd409d",
+      "question": "Does this pool need immediate attention? Explain what you can verify from the readings, what is a prediction, and what new data would let us narrow the cause.",
+      "snapshot": {
+        "origin": "demo",
+        "state": "ready",
+        "source": "Independent synthetic pool incident",
+        "fresh": true,
+        "capacity": 17,
+        "latest": {
+          "time_ms": 178000,
+          "busy": 17,
+          "waiting": 7
+        },
+        "forecast": {
+          "model": "queue_outlook",
+          "version": "synthetic-outlook",
+          "scores": [
+            7,
+            11
+          ],
+          "time_ms": 178000,
+          "horizon_ms": 10000
+        },
+        "forecast_reading": {
+          "time_ms": 178000,
+          "busy": 17,
+          "waiting": 7
+        },
+        "observations": {
+          "first": {
+            "time_ms": 148000,
+            "busy": 17,
+            "waiting": 2
+          },
+          "latest": {
+            "time_ms": 178000,
+            "busy": 17,
+            "waiting": 7
+          },
+          "peak_waiting": {
+            "time_ms": 154100,
+            "busy": 17,
+            "waiting": 51
+          },
+          "start_ms": 148000,
+          "end_ms": 178000,
+          "sample_count": 301,
+          "covered_ms": 30000,
+          "complete": true
+        }
+      },
+      "expected": {
+        "now": "backlog persists",
+        "current_waiting": 7,
+        "peak_waiting": 51,
+        "forecast": "persist"
+      },
+      "prompt": "Answer the question using the measurements. Connection pool demo measurements (ready). Current queue: 7 waiting requests. Current occupancy: 17 of 17 connections busy. Peak queue: 51 requests, 23.9 seconds ago. Queue at start: 2 requests. Recorded duration: 30 seconds. The FPGA predicts the queue will remain nonempty over the next ten seconds. It expects more than the current 7 waiting at the end of that period. Endpoint, root cause and request latency: unknown.\nQuestion: Does this pool need immediate attention? Explain what you can verify from the readings, what is a prediction, and what new data would let us narrow the cause.\nAnswer:",
+      "answer": "The backlog is ongoing: 7 requests are waiting now. The peak was 51. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "checks": {
+        "current_state": true,
+        "cites_current_and_peak": true,
+        "forecast_separated_and_correct": true,
+        "uncertainty_about_cause": true,
+        "concrete_next_measurement": true
+      },
+      "seconds": 0.6688
+    },
+    {
+      "id": "47514ec8f5fc",
+      "question": "Walk me through what the latest sample and the worst point mean for callers. How does the forecast change what you expect, and what would you instrument to find out why?",
+      "snapshot": {
+        "origin": "demo",
+        "state": "ready",
+        "source": "Independent synthetic pool incident",
+        "fresh": true,
+        "capacity": 15,
+        "latest": {
+          "time_ms": 124800,
+          "busy": 15,
+          "waiting": 9
+        },
+        "forecast": {
+          "model": "queue_outlook",
+          "version": "synthetic-outlook",
+          "scores": [
+            7,
+            -13
+          ],
+          "time_ms": 124800,
+          "horizon_ms": 10000
+        },
+        "forecast_reading": {
+          "time_ms": 124800,
+          "busy": 15,
+          "waiting": 9
+        },
+        "observations": {
+          "first": {
+            "time_ms": 94800,
+            "busy": 15,
+            "waiting": 1
+          },
+          "latest": {
+            "time_ms": 124800,
+            "busy": 15,
+            "waiting": 9
+          },
+          "peak_waiting": {
+            "time_ms": 104900,
+            "busy": 15,
+            "waiting": 46
+          },
+          "start_ms": 94800,
+          "end_ms": 124800,
+          "sample_count": 301,
+          "covered_ms": 30000,
+          "complete": true
+        }
+      },
+      "expected": {
+        "now": "backlog persists",
+        "current_waiting": 9,
+        "peak_waiting": 46,
+        "forecast": "persist"
+      },
+      "prompt": "Answer the question using the measurements. Connection pool demo measurements (ready). Current queue: 9 waiting requests. Current occupancy: 15 of 15 connections busy. Peak queue: 46 requests, 19.9 seconds ago. Queue at start: 1 requests. Recorded duration: 30 seconds. The FPGA predicts the queue will remain nonempty over the next ten seconds. It expects at most the current 9 waiting at the end of that period. Endpoint, root cause and request latency: unknown.\nQuestion: Walk me through what the latest sample and the worst point mean for callers. How does the forecast change what you expect, and what would you instrument to find out why?\nAnswer:",
+      "answer": "The backlog is ongoing: 9 requests are waiting now. The peak was 46. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "checks": {
+        "current_state": true,
+        "cites_current_and_peak": true,
+        "forecast_separated_and_correct": true,
+        "uncertainty_about_cause": true,
+        "concrete_next_measurement": true
+      },
+      "seconds": 0.6681
+    },
+    {
+      "id": "362e6344da45",
+      "question": "Write a short status update for the incident channel. Include whether the backlog is active, the readings that support it, the forecast, and a useful measurement to follow up.",
+      "snapshot": {
+        "origin": "demo",
+        "state": "ready",
+        "source": "Independent synthetic pool incident",
+        "fresh": true,
+        "capacity": 35,
+        "latest": {
+          "time_ms": 130000,
+          "busy": 26,
+          "waiting": 0
+        },
+        "forecast": {
+          "model": "pool_wait_logistic",
+          "version": "synthetic-onset",
+          "alert": false,
+          "time_ms": 130000,
+          "horizon_ms": 10000
+        },
+        "forecast_reading": {
+          "time_ms": 130000,
+          "busy": 26,
+          "waiting": 0
+        },
+        "observations": {
+          "first": {
+            "time_ms": 100000,
+            "busy": 26,
+            "waiting": 4
+          },
+          "latest": {
+            "time_ms": 130000,
+            "busy": 26,
+            "waiting": 0
+          },
+          "peak_waiting": {
+            "time_ms": 116500,
+            "busy": 35,
+            "waiting": 17
+          },
+          "start_ms": 100000,
+          "end_ms": 130000,
+          "sample_count": 301,
+          "covered_ms": 30000,
+          "complete": true
+        }
+      },
+      "expected": {
+        "now": "cleared",
+        "current_waiting": 0,
+        "peak_waiting": 17,
+        "forecast": "no_onset_warning"
+      },
+      "prompt": "Answer the question using the measurements. Connection pool demo measurements (ready). Current queue: 0 waiting requests. Current occupancy: 26 of 35 connections busy. Peak queue: 17 requests, 13.5 seconds ago. Queue at start: 4 requests. Recorded duration: 30 seconds. The FPGA issued no queue-onset warning for the next ten seconds. Endpoint, root cause and request latency: unknown.\nQuestion: Write a short status update for the incident channel. Include whether the backlog is active, the readings that support it, the forecast, and a useful measurement to follow up.\nAnswer:",
+      "answer": "The queue has cleared; 0 requests are waiting now. The peak was 17. The FPGA issued no queue-onset warning for the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "checks": {
+        "current_state": true,
+        "cites_current_and_peak": true,
+        "forecast_separated_and_correct": true,
+        "uncertainty_about_cause": true,
+        "concrete_next_measurement": true
+      },
+      "seconds": 0.6081
+    },
+    {
+      "id": "0620e3d22fb1",
+      "question": "I'm taking over this incident. Tell me whether people are stuck right now and which numbers matter. Then tell me what the model expects and how you'd investigate the cause.",
+      "snapshot": {
+        "origin": "demo",
+        "state": "ready",
+        "source": "Independent synthetic pool incident",
+        "fresh": true,
+        "capacity": 22,
+        "latest": {
+          "time_ms": 94000,
+          "busy": 22,
+          "waiting": 3
+        },
+        "forecast": {
+          "model": "queue_outlook",
+          "version": "synthetic-outlook",
+          "scores": [
+            7,
+            -13
+          ],
+          "time_ms": 94000,
+          "horizon_ms": 10000
+        },
+        "forecast_reading": {
+          "time_ms": 94000,
+          "busy": 22,
+          "waiting": 3
+        },
+        "observations": {
+          "first": {
+            "time_ms": 64000,
+            "busy": 22,
+            "waiting": 1
+          },
+          "latest": {
+            "time_ms": 94000,
+            "busy": 22,
+            "waiting": 3
+          },
+          "peak_waiting": {
+            "time_ms": 77700,
+            "busy": 22,
+            "waiting": 19
+          },
+          "start_ms": 64000,
+          "end_ms": 94000,
+          "sample_count": 301,
+          "covered_ms": 30000,
+          "complete": true
+        }
+      },
+      "expected": {
+        "now": "backlog persists",
+        "current_waiting": 3,
+        "peak_waiting": 19,
+        "forecast": "persist"
+      },
+      "prompt": "Answer the question using the measurements. Connection pool demo measurements (ready). Current queue: 3 waiting requests. Current occupancy: 22 of 22 connections busy. Peak queue: 19 requests, 16.3 seconds ago. Queue at start: 1 requests. Recorded duration: 30 seconds. The FPGA predicts the queue will remain nonempty over the next ten seconds. It expects at most the current 3 waiting at the end of that period. Endpoint, root cause and request latency: unknown.\nQuestion: I'm taking over this incident. Tell me whether people are stuck right now and which numbers matter. Then tell me what the model expects and how you'd investigate the cause.\nAnswer:",
+      "answer": "The backlog is ongoing: 3 requests are waiting now. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "checks": {
+        "current_state": true,
+        "cites_current_and_peak": true,
+        "forecast_separated_and_correct": true,
+        "uncertainty_about_cause": true,
+        "concrete_next_measurement": true
+      },
+      "seconds": 0.6509
+    },
+    {
+      "id": "1b13edf6f6c1",
+      "question": "Does this pool need immediate attention? Explain what you can verify from the readings, what is a prediction, and what new data would let us narrow the cause.",
+      "snapshot": {
+        "origin": "demo",
+        "state": "ready",
+        "source": "Independent synthetic pool incident",
+        "fresh": true,
+        "capacity": 17,
+        "latest": {
+          "time_ms": 187600,
+          "busy": 13,
+          "waiting": 0
+        },
+        "forecast": {
+          "model": "pool_wait_logistic",
+          "version": "synthetic-onset",
+          "alert": false,
+          "time_ms": 187600,
+          "horizon_ms": 10000
+        },
+        "forecast_reading": {
+          "time_ms": 187600,
+          "busy": 13,
+          "waiting": 0
+        },
+        "observations": {
+          "first": {
+            "time_ms": 157600,
+            "busy": 13,
+            "waiting": 4
+          },
+          "latest": {
+            "time_ms": 187600,
+            "busy": 13,
+            "waiting": 0
+          },
+          "peak_waiting": {
+            "time_ms": 182000,
+            "busy": 17,
+            "waiting": 36
+          },
+          "start_ms": 157600,
+          "end_ms": 187600,
+          "sample_count": 301,
+          "covered_ms": 30000,
+          "complete": true
+        }
+      },
+      "expected": {
+        "now": "cleared",
+        "current_waiting": 0,
+        "peak_waiting": 36,
+        "forecast": "no_onset_warning"
+      },
+      "prompt": "Answer the question using the measurements. Connection pool demo measurements (ready). Current queue: 0 waiting requests. Current occupancy: 13 of 17 connections busy. Peak queue: 36 requests, 5.6 seconds ago. Queue at start: 4 requests. Recorded duration: 30 seconds. The FPGA issued no queue-onset warning for the next ten seconds. Endpoint, root cause and request latency: unknown.\nQuestion: Does this pool need immediate attention? Explain what you can verify from the readings, what is a prediction, and what new data would let us narrow the cause.\nAnswer:",
+      "answer": "The queue has cleared; 0 requests are waiting now. The peak was 36. The FPGA issued no queue-onset warning for the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "checks": {
+        "current_state": true,
+        "cites_current_and_peak": true,
+        "forecast_separated_and_correct": true,
+        "uncertainty_about_cause": true,
+        "concrete_next_measurement": true
+      },
+      "seconds": 0.6221
+    },
+    {
+      "id": "33a95b6a5c56",
+      "question": "Did the pool recover by the end of this interval? Use the actual counts and keep the forecast separate. Can we tell what drove the spike? What would you collect next?",
+      "snapshot": {
+        "origin": "demo",
+        "state": "ready",
+        "source": "Independent synthetic pool incident",
+        "fresh": true,
+        "capacity": 23,
+        "latest": {
+          "time_ms": 193500,
+          "busy": 23,
+          "waiting": 3
+        },
+        "forecast": {
+          "model": "queue_outlook",
+          "version": "synthetic-outlook",
+          "scores": [
+            7,
+            11
+          ],
+          "time_ms": 193500,
+          "horizon_ms": 10000
+        },
+        "forecast_reading": {
+          "time_ms": 193500,
+          "busy": 23,
+          "waiting": 3
+        },
+        "observations": {
+          "first": {
+            "time_ms": 163500,
+            "busy": 23,
+            "waiting": 1
+          },
+          "latest": {
+            "time_ms": 193500,
+            "busy": 23,
+            "waiting": 3
+          },
+          "peak_waiting": {
+            "time_ms": 168600,
+            "busy": 23,
+            "waiting": 35
+          },
+          "start_ms": 163500,
+          "end_ms": 193500,
+          "sample_count": 301,
+          "covered_ms": 30000,
+          "complete": true
+        }
+      },
+      "expected": {
+        "now": "backlog persists",
+        "current_waiting": 3,
+        "peak_waiting": 35,
+        "forecast": "persist"
+      },
+      "prompt": "Answer the question using the measurements. Connection pool demo measurements (ready). Current queue: 3 waiting requests. Current occupancy: 23 of 23 connections busy. Peak queue: 35 requests, 24.9 seconds ago. Queue at start: 1 requests. Recorded duration: 30 seconds. The FPGA predicts the queue will remain nonempty over the next ten seconds. It expects more than the current 3 waiting at the end of that period. Endpoint, root cause and request latency: unknown.\nQuestion: Did the pool recover by the end of this interval? Use the actual counts and keep the forecast separate. Can we tell what drove the spike? What would you collect next?\nAnswer:",
+      "answer": "The backlog is ongoing: 3 requests are waiting now. The peak was 35. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "checks": {
+        "current_state": true,
+        "cites_current_and_peak": true,
+        "forecast_separated_and_correct": true,
+        "uncertainty_about_cause": true,
+        "concrete_next_measurement": true
+      },
+      "seconds": 0.6629
+    },
+    {
+      "id": "04d31459c69e",
+      "question": "The alert just sent me here. Are clients waiting at present, or is this an earlier spike? Back that up with numbers, tell me the kit's outlook, and suggest a way to test why it happened.",
+      "snapshot": {
+        "origin": "demo",
+        "state": "ready",
+        "source": "Independent synthetic pool incident",
+        "fresh": true,
+        "capacity": 29,
+        "latest": {
+          "time_ms": 124100,
+          "busy": 29,
+          "waiting": 5
+        },
+        "forecast": {
+          "model": "queue_outlook",
+          "version": "synthetic-outlook",
+          "scores": [
+            -9,
+            -13
+          ],
+          "time_ms": 124100,
+          "horizon_ms": 10000
+        },
+        "forecast_reading": {
+          "time_ms": 124100,
+          "busy": 29,
+          "waiting": 5
+        },
+        "observations": {
+          "first": {
+            "time_ms": 94100,
+            "busy": 29,
+            "waiting": 4
+          },
+          "latest": {
+            "time_ms": 124100,
+            "busy": 29,
+            "waiting": 5
+          },
+          "peak_waiting": {
+            "time_ms": 109800,
+            "busy": 29,
+            "waiting": 42
+          },
+          "start_ms": 94100,
+          "end_ms": 124100,
+          "sample_count": 301,
+          "covered_ms": 30000,
+          "complete": true
+        }
+      },
+      "expected": {
+        "now": "backlog persists",
+        "current_waiting": 5,
+        "peak_waiting": 42,
+        "forecast": "drain"
+      },
+      "prompt": "Answer the question using the measurements. Connection pool demo measurements (ready). Current queue: 5 waiting requests. Current occupancy: 29 of 29 connections busy. Peak queue: 42 requests, 14.3 seconds ago. Queue at start: 4 requests. Recorded duration: 30 seconds. The FPGA predicts the queue will drain at least once over the next ten seconds. It expects at most the current 5 waiting at the end of that period. Endpoint, root cause and request latency: unknown.\nQuestion: The alert just sent me here. Are clients waiting at present, or is this an earlier spike? Back that up with numbers, tell me the kit's outlook, and suggest a way to test why it happened.\nAnswer:",
+      "answer": "The backlog is ongoing: 5 requests are waiting now. The peak was 42. The FPGA predicts the queue will drain at least once over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "checks": {
+        "current_state": true,
+        "cites_current_and_peak": true,
+        "forecast_separated_and_correct": true,
+        "uncertainty_about_cause": true,
+        "concrete_next_measurement": true
+      },
+      "seconds": 0.6669
+    },
+    {
+      "id": "65519071eb1e",
+      "question": "Write a short status update for the incident channel. Include whether the backlog is active, the readings that support it, the forecast, and a useful measurement to follow up.",
+      "snapshot": {
+        "origin": "demo",
+        "state": "ready",
+        "source": "Independent synthetic pool incident",
+        "fresh": true,
+        "capacity": 37,
+        "latest": {
+          "time_ms": 156500,
+          "busy": 37,
+          "waiting": 6
+        },
+        "forecast": {
+          "model": "queue_outlook",
+          "version": "synthetic-outlook",
+          "scores": [
+            -9,
+            -13
+          ],
+          "time_ms": 156500,
+          "horizon_ms": 10000
+        },
+        "forecast_reading": {
+          "time_ms": 156500,
+          "busy": 37,
+          "waiting": 6
+        },
+        "observations": {
+          "first": {
+            "time_ms": 126500,
+            "busy": 37,
+            "waiting": 1
+          },
+          "latest": {
+            "time_ms": 156500,
+            "busy": 37,
+            "waiting": 6
+          },
+          "peak_waiting": {
+            "time_ms": 138700,
+            "busy": 37,
+            "waiting": 55
+          },
+          "start_ms": 126500,
+          "end_ms": 156500,
+          "sample_count": 301,
+          "covered_ms": 30000,
+          "complete": true
+        }
+      },
+      "expected": {
+        "now": "backlog persists",
+        "current_waiting": 6,
+        "peak_waiting": 55,
+        "forecast": "drain"
+      },
+      "prompt": "Answer the question using the measurements. Connection pool demo measurements (ready). Current queue: 6 waiting requests. Current occupancy: 37 of 37 connections busy. Peak queue: 55 requests, 17.8 seconds ago. Queue at start: 1 requests. Recorded duration: 30 seconds. The FPGA predicts the queue will drain at least once over the next ten seconds. It expects at most the current 6 waiting at the end of that period. Endpoint, root cause and request latency: unknown.\nQuestion: Write a short status update for the incident channel. Include whether the backlog is active, the readings that support it, the forecast, and a useful measurement to follow up.\nAnswer:",
+      "answer": "The backlog is ongoing: 6 requests are waiting now. The peak was 55. The FPGA predicts the queue will drain at least once over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "checks": {
+        "current_state": true,
+        "cites_current_and_peak": true,
+        "forecast_separated_and_correct": true,
+        "uncertainty_about_cause": true,
+        "concrete_next_measurement": true
+      },
+      "seconds": 0.6648
+    },
+    {
+      "id": "ec87586efe9d",
+      "question": "The alert just sent me here. Are clients waiting at present, or is this an earlier spike? Back that up with numbers, tell me the kit's outlook, and suggest a way to test why it happened.",
+      "snapshot": {
+        "origin": "demo",
+        "state": "ready",
+        "source": "Independent synthetic pool incident",
+        "fresh": true,
+        "capacity": 18,
+        "latest": {
+          "time_ms": 112200,
+          "busy": 9,
+          "waiting": 0
+        },
+        "forecast": {
+          "model": "pool_wait_logistic",
+          "version": "synthetic-onset",
+          "alert": true,
+          "time_ms": 112200,
+          "horizon_ms": 10000
+        },
+        "forecast_reading": {
+          "time_ms": 112200,
+          "busy": 9,
+          "waiting": 0
+        },
+        "observations": {
+          "first": {
+            "time_ms": 82200,
+            "busy": 9,
+            "waiting": 2
+          },
+          "latest": {
+            "time_ms": 112200,
+            "busy": 9,
+            "waiting": 0
+          },
+          "peak_waiting": {
+            "time_ms": 93000,
+            "busy": 18,
+            "waiting": 47
+          },
+          "start_ms": 82200,
+          "end_ms": 112200,
+          "sample_count": 301,
+          "covered_ms": 30000,
+          "complete": true
+        }
+      },
+      "expected": {
+        "now": "cleared",
+        "current_waiting": 0,
+        "peak_waiting": 47,
+        "forecast": "onset_warning"
+      },
+      "prompt": "Answer the question using the measurements. Connection pool demo measurements (ready). Current queue: 0 waiting requests. Current occupancy: 9 of 18 connections busy. Peak queue: 47 requests, 19.2 seconds ago. Queue at start: 2 requests. Recorded duration: 30 seconds. The FPGA warns that requests may start waiting within the next ten seconds. Endpoint, root cause and request latency: unknown.\nQuestion: The alert just sent me here. Are clients waiting at present, or is this an earlier spike? Back that up with numbers, tell me the kit's outlook, and suggest a way to test why it happened.\nAnswer:",
+      "answer": "The queue has cleared; 0 requests are waiting now. The peak was 47. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "checks": {
+        "current_state": true,
+        "cites_current_and_peak": true,
+        "forecast_separated_and_correct": false,
+        "uncertainty_about_cause": true,
+        "concrete_next_measurement": true
+      },
+      "seconds": 0.6358
+    }
+  ]
+}
