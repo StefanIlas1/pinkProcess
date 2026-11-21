@@ -1,0 +1,53 @@
+{
+ "model": "gpt2",
+ "steps": 120,
+ "rank": 8,
+ "removedFraction": 0.5,
+ "packs": {
+  "finance": {
+   "maskOnly": {
+    "finance": 8065.4,
+    "code": 2575.51
+   },
+   "withPack": {
+    "finance": 163.55,
+    "code": 59.04
+   },
+   "size": {
+    "maskBytes": 4608,
+    "deltaValues": 737280,
+    "float32Bytes": 2953728,
+    "int8Bytes": 741888
+   }
+  },
+  "code": {
+   "maskOnly": {
+    "finance": 5511.25,
+    "code": 200.28
+   },
+   "withPack": {
+    "finance": 2648.03,
+    "code": 8.44
+   },
+   "size": {
+    "maskBytes": 4608,
+    "deltaValues": 737280,
+    "float32Bytes": 2953728,
+    "int8Bytes": 741888
+   }
+  }
+ },
+ "base": {
+  "finance": 212.34,
+  "code": 11.41
+ },
+ "baseDigest": "e60ca83522793cd829b8cbec9453adb5a914f914ebb6089de06276154fba80fe",
+ "switch": {
+  "medianMicroseconds": 0.17,
+  "note": "pointer swap between packs already in memory; the base weights are never written",
+  "digestAfterUnload": "e60ca83522793cd829b8cbec9453adb5a914f914ebb6089de06276154fba80fe",
+  "baseRestoredBitExact": true,
+  "sharedNeuronsKeptByBoth": 0.3129
+ },
+ "baseParams": 124439808
+}

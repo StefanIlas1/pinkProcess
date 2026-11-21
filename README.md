@@ -1,6 +1,24 @@
 # pinkProcess
 
-A deterministic simulator and forecasting baseline for a service with a finite
+Plug in a $150 FPGA board and a person with no training gets the right steps for the job in front of them. Each field of expertise is a 64 KB cartridge of integer weights. Loading a different cartridge changes the expert; the circuit stays the same.
+
+```sh
+python3 -m cartridge.build     # train and quantise the cartridges
+python3 -m cartridge.check     # held-out score and kernel test vectors
+python3 -m cartridge.server    # http://127.0.0.1:5320
+```
+
+![The app answering a first-aid question](docs/app.png)
+
+- [docs/cartridges.md](docs/cartridges.md): the design, measurements and open work.
+- [hw/README.md](hw/README.md): the FPGA kernel and how to check it.
+- [research.md](research.md): the weight-reading research this builds on.
+- [docs/hack-western.md](docs/hack-western.md): tracks and demo plan.
+
+## Connection-pool forecaster
+
+The first profile built in this repo is a
+deterministic simulator and forecasting baseline for a service with a finite
 database connection pool. Requires Python 3.10 or later and uses the standard
 library. From the project root, run:
 
