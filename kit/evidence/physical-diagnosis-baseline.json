@@ -1,0 +1,74 @@
+{
+  "backend": "PYNQ-Z2",
+  "model": "flan-t5-small",
+  "weights": {
+    "name": "original",
+    "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+    "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+    "target_row": null
+  },
+  "source": "Board SQLite demo (generated traffic)",
+  "origin": "demo",
+  "capture_id": "7d07fa35a7588339abb5cf7448ef58434c9187d7ea189476db388c96207368a7",
+  "question": "What should the next on-call engineer know about this pool before investigating?",
+  "reading": {
+    "busy": 4,
+    "time_ms": 5800,
+    "waiting": 39
+  },
+  "peak": {
+    "busy": 4,
+    "time_ms": 5800,
+    "waiting": 39
+  },
+  "forecast": {
+    "backend": "PYNQ-Z2",
+    "horizon_ms": 10000,
+    "model": "queue_outlook",
+    "ok": true,
+    "scores": [
+      465,
+      30
+    ],
+    "targets": [
+      "persists",
+      "grows"
+    ],
+    "time_ms": 5800,
+    "version": "queue-outlook-v2",
+    "weights_sha256": "13c28113cc4ef20b76d3c746f4c1192f33bd2341240ba4ed1e878b13ad4b6ce6"
+  },
+  "answer": "The backlog is ongoing: 39 requests are waiting now. The peak was 39. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+  "fabric_projections": 3795,
+  "elapsed_seconds": 739.1573388576508,
+  "live_samples": [
+    {
+      "session": "0acc3996-5ed3-411c-bcaa-09c455710ef1",
+      "latest_time_ms": 6500,
+      "fpga_submissions": 17,
+      "fresh": true
+    },
+    {
+      "session": "0acc3996-5ed3-411c-bcaa-09c455710ef1",
+      "latest_time_ms": 740600,
+      "fpga_submissions": 5214,
+      "fresh": true
+    }
+  ],
+  "mac_ollama_tcp_probe": {
+    "address": "127.0.0.1:11434",
+    "samples": 18,
+    "any_open": false
+  },
+  "first_observed_partial": {
+    "stage": "baseline",
+    "job_id": "33fd775e3a114d6da64b88aa4682b638",
+    "elapsed_seconds": 282.6,
+    "state": "running",
+    "projections": 290,
+    "partial": "The back",
+    "telemetry_ms": 288600,
+    "submissions": 694,
+    "mac_ollama_port_open": false
+  }
+}
