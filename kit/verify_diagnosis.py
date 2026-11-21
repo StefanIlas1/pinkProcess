@@ -29,10 +29,27 @@ QUESTIONS = (
     "Use the actual readings, distinguish the forecast, and suggest a measurement that could narrow the cause.",
 )
 
+REPLACEMENT_QUESTIONS = (
+    "The alert just sent me here. Are clients waiting at present, or is this an earlier spike? "
+    "Back that up with numbers, tell me the kit's outlook, and suggest a way to test why it happened.",
+    "Does this pool need immediate attention? Explain what you can verify from the readings, "
+    "what is a prediction, and what new data would let us narrow the cause.",
+    "Walk me through what the latest sample and the worst point mean for callers. "
+    "How does the forecast change what you expect, and what would you instrument to find out why?",
+    "Write a short status update for the incident channel. Include whether the backlog is active, "
+    "the readings that support it, the forecast, and a useful measurement to follow up.",
+    "Did the pool recover by the end of this interval? Use the actual counts and keep the forecast separate. "
+    "Can we tell what drove the spike? What would you collect next?",
+    "I'm taking over this incident. Tell me whether people are stuck right now and which numbers matter. "
+    "Then tell me what the model expects and how you'd investigate the cause.",
+)
 
-def generate_cases(seed):
+QUESTION_SETS = {"initial": QUESTIONS, "replacement": REPLACEMENT_QUESTIONS}
+
+
+def generate_cases(seed, questions=QUESTIONS):
     rng = Random(seed)
-    profiles = [(cleared, variant) for cleared in (True, False) for variant in range(len(QUESTIONS))]
+    profiles = [(cleared, variant) for cleared in (True, False) for variant in range(len(questions))]
     rng.shuffle(profiles)
     for cleared, variant in profiles:
         capacity = rng.randint(12, 43)
@@ -68,7 +85,7 @@ def generate_cases(seed):
         }
         yield {
             "id": sha256(json.dumps(snapshot, sort_keys=True).encode()).hexdigest()[:12],
-            "question": QUESTIONS[variant],
+            "question": questions[variant],
             "snapshot": snapshot,
             "expected": {
                 "now": "cleared" if cleared else "backlog persists", "current_waiting": waiting,
@@ -123,7 +140,7 @@ def grade(answer, expected):
     }
 
 
-def evaluate(model_dir, manifest_sha256, seed):
+def evaluate(model_dir, manifest_sha256, seed, question_set="initial"):
     verify_model(model_dir, manifest_sha256)
     from lm_reference import flan, flan_prompt
     from pinkprocess import kit_evidence
@@ -139,7 +156,7 @@ def evaluate(model_dir, manifest_sha256, seed):
     runtime = flan.Flan(model_dir, None, reference=True)
     checks_passed = Counter()
     cases = []
-    for case in generate_cases(seed):
+    for case in generate_cases(seed, QUESTION_SETS[question_set]):
         prompt = telemetry_prompt(case["question"], analyst_evidence(case["snapshot"]))
         start = perf_counter()
         answer = runtime.generate(prompt)
@@ -151,6 +168,7 @@ def evaluate(model_dir, manifest_sha256, seed):
         "execution": "W8A8 software reference",
         "frozen_candidate": frozen,
         "holdout_seed": seed,
+        "question_set": question_set,
         "policy": "All five checks must pass on each incident. Lexical scoring requires raw-answer review.",
         "total_cases": len(cases),
         "cases_passing_every_check": sum(all(case["checks"].values()) for case in cases),
@@ -165,10 +183,11 @@ def main():
     parser.add_argument("results", type=Path)
     parser.add_argument("--manifest-sha256", required=True)
     parser.add_argument("--seed", type=int, required=True, help="Draw after freezing the candidate.")
+    parser.add_argument("--question-set", choices=QUESTION_SETS, default="initial")
     args = parser.parse_args()
     if args.results.exists():
         parser.error("Choose a new evidence path to preserve the original result.")
-    result = evaluate(args.model, args.manifest_sha256, args.seed)
+    result = evaluate(args.model, args.manifest_sha256, args.seed, args.question_set)
     with args.results.open("x") as file:
         json.dump(result, file, indent=2)
         file.write("\n")
