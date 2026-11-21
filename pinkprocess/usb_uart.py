@@ -293,7 +293,7 @@ def run_board(terminal, port):
         with raw_port(Path("/dev") / terminal) as fd:
             login_requested = appliance_session(fd, port)
         if login_requested:
-            subprocess.run(["/sbin/agetty", "--noissue", "--noclear", "--local-line=always", "--timeout", "90",
+            subprocess.run(["/sbin/agetty", "--noissue", "--noclear", "-L", "--timeout", "90",
                             terminal, "115200", "vt100"], check=False, start_new_session=True)
 
 
