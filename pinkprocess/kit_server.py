@@ -8,12 +8,32 @@ from pathlib import Path
 import signal
 import socket
 import ssl
-from threading import Event, Lock, Thread
+from threading import Condition, Event, Thread
 
 from fpga.check_classifier import board_lock
 from lm_reference.live_demo import PynqClassifier
 from .kit_transport import DISCOVER, PORT, discovery_proof
 from .telemetry_device import TelemetryDevice
+
+
+class InferenceLock:
+    """Let waiting telemetry run before inference can submit its next tile."""
+
+    def __init__(self):
+        self.condition = Condition()
+        self.next_ticket = 0
+        self.serving = 0
+
+    def __enter__(self):
+        with self.condition:
+            ticket = self.next_ticket
+            self.next_ticket += 1
+            self.condition.wait_for(lambda: self.serving == ticket)
+
+    def __exit__(self, *_):
+        with self.condition:
+            self.serving += 1
+            self.condition.notify_all()
 
 
 def advertise(token, stopped):
@@ -103,7 +123,7 @@ def main():
         with KitServer(("", PORT), Handler) as server:
             server.tls = tls
             server.model = model
-            server.model_lock = Lock()
+            server.model_lock = InferenceLock()
             if args.language_model:
                 from lm_reference.fabric import TiledMatvec
                 from lm_reference.flan import Flan

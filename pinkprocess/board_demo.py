@@ -7,9 +7,30 @@ import sqlite3
 import uuid
 
 from .simulator import SAMPLE_MS
+from .telemetry_stream import FRESH_SECONDS
 
 CAPACITY = 4
 SOURCE = "Board SQLite demo (generated traffic)"
+
+
+async def _publish_samples(publish, stopped, samples):
+    session = str(uuid.uuid4())
+    while not stopped.is_set():
+        readings = [await samples.get()]
+        while not samples.empty():
+            readings.append(samples.get_nowait())
+        payload = dict(origin="demo", source=SOURCE, capacity=CAPACITY, session=session, readings=readings)
+        try:
+            await asyncio.to_thread(publish, payload)
+        except ValueError as error:
+            # Another producer can own the board. Retire only our own session.
+            try:
+                await asyncio.to_thread(publish, {"session": session, "stop": True})
+            except ValueError:
+                pass
+            logging.debug("SQLite demo waiting to publish: %s", error)
+            session = str(uuid.uuid4())
+            await asyncio.sleep(1)
 
 
 async def _run(publish, stopped):
@@ -53,38 +74,34 @@ async def _run(publish, stopped):
                 task.add_done_callback(tasks.discard)
 
     generator = asyncio.create_task(traffic())
-    session = str(uuid.uuid4())
+    samples = asyncio.Queue(maxsize=FRESH_SECONDS * 1000 // SAMPLE_MS)
+    publisher = asyncio.create_task(_publish_samples(publish, stopped, samples))
     last_tick = None
     try:
-        while not stopped.is_set():
+        while not stopped.is_set() and not publisher.done():
             tick = int((loop.time()-started)*1000) // SAMPLE_MS
             if last_tick is not None and tick == last_tick:
                 await asyncio.sleep(max(0, started+(last_tick+1)*SAMPLE_MS/1000-loop.time()))
                 continue
             sample = dict(time_ms=tick*SAMPLE_MS, busy=CAPACITY-pool.qsize(), waiting=waiting)
-            payload = dict(origin="demo", source=SOURCE, capacity=CAPACITY, session=session,
-                           readings=[sample])
-            try:
-                await asyncio.to_thread(publish, payload)
-            except ValueError as error:
-                # Another source owns the board, or this producer missed a tick.
-                # End only our session, so a real producer keeps running.
-                try:
-                    await asyncio.to_thread(publish, {"session":session, "stop":True})
-                except ValueError:
-                    pass
-                logging.debug("SQLite demo waiting to publish: %s", error)
-                session = str(uuid.uuid4())
-                await asyncio.sleep(1)
+            if samples.full():
+                # Leave a visible timestamp gap instead of retaining arbitrarily old readings.
+                samples.get_nowait()
+            samples.put_nowait(sample)
             last_tick = tick
     finally:
         generator.cancel()
+        publisher.cancel()
         outstanding = list(tasks)
         for task in outstanding:
             task.cancel()
         await asyncio.gather(generator, *outstanding, return_exceptions=True)
         for connection in connections:
             connection.close()
+        try:
+            await publisher
+        except asyncio.CancelledError:
+            pass
 
 
 def run_demo(publish, stopped):
