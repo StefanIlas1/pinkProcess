@@ -1,0 +1,612 @@
+{
+  "backend": "PYNQ-Z2",
+  "host": "10.0.0.206",
+  "initial_version": "pool-logistic-v1",
+  "runs": {
+    "7101": {
+      "transactions": 736,
+      "windows": 287,
+      "episodes_with_eligible_prior_window": 19,
+      "observed_episodes": [
+        {
+          "start_ms": 1296.806,
+          "end_ms": 1480.759
+        },
+        {
+          "start_ms": 2047.34,
+          "end_ms": 2048.787
+        },
+        {
+          "start_ms": 4762.869,
+          "end_ms": 4791.006
+        },
+        {
+          "start_ms": 7437.336,
+          "end_ms": 7523.209
+        },
+        {
+          "start_ms": 7547.977,
+          "end_ms": 7762.36
+        },
+        {
+          "start_ms": 7762.486,
+          "end_ms": 7875.72
+        },
+        {
+          "start_ms": 13014.959,
+          "end_ms": 13056.115
+        },
+        {
+          "start_ms": 13060.446,
+          "end_ms": 13098.515
+        },
+        {
+          "start_ms": 15238.929,
+          "end_ms": 15669.973
+        },
+        {
+          "start_ms": 15703.684,
+          "end_ms": 15719.712
+        },
+        {
+          "start_ms": 15802.419,
+          "end_ms": 15819.952
+        },
+        {
+          "start_ms": 15820.015,
+          "end_ms": 16012.081
+        },
+        {
+          "start_ms": 16015.447,
+          "end_ms": 21709.256
+        },
+        {
+          "start_ms": 32538.347,
+          "end_ms": 32590.189
+        },
+        {
+          "start_ms": 32932.683,
+          "end_ms": 32950.549
+        },
+        {
+          "start_ms": 35146.053,
+          "end_ms": 35203.84
+        },
+        {
+          "start_ms": 35406.634,
+          "end_ms": 35433.171
+        },
+        {
+          "start_ms": 36060.899,
+          "end_ms": 36067.984
+        },
+        {
+          "start_ms": 36908.036,
+          "end_ms": 37031.981
+        },
+        {
+          "start_ms": 37059.886,
+          "end_ms": 38614.497
+        },
+        {
+          "start_ms": 39081.941,
+          "end_ms": 39137.905
+        },
+        {
+          "start_ms": 39161.099,
+          "end_ms": 40020.354
+        },
+        {
+          "start_ms": 40020.544,
+          "end_ms": 40033.62
+        },
+        {
+          "start_ms": 40161.053,
+          "end_ms": 40162.057
+        },
+        {
+          "start_ms": 40168.513,
+          "end_ms": 40245.456
+        },
+        {
+          "start_ms": 40272.491,
+          "end_ms": 40339.295
+        },
+        {
+          "start_ms": 41056.609,
+          "end_ms": 41309.709
+        },
+        {
+          "start_ms": 41346.604,
+          "end_ms": 41380.4
+        },
+        {
+          "start_ms": 41386.585,
+          "end_ms": 41393.919
+        },
+        {
+          "start_ms": 41950.055,
+          "end_ms": 42000.071
+        },
+        {
+          "start_ms": 43152.225,
+          "end_ms": 43156.776
+        },
+        {
+          "start_ms": 43182.462,
+          "end_ms": 43183.892
+        },
+        {
+          "start_ms": 43201.162,
+          "end_ms": 43223.74
+        },
+        {
+          "start_ms": 43237.055,
+          "end_ms": 43272.777
+        },
+        {
+          "start_ms": 43300.827,
+          "end_ms": 43303.22
+        },
+        {
+          "start_ms": 43305.852,
+          "end_ms": 43401.482
+        },
+        {
+          "start_ms": 43472.243,
+          "end_ms": 43596.12
+        },
+        {
+          "start_ms": 43659.292,
+          "end_ms": 43702.832
+        },
+        {
+          "start_ms": 43704.726,
+          "end_ms": 43708.116
+        },
+        {
+          "start_ms": 43725.479,
+          "end_ms": 49708.534
+        }
+      ]
+    },
+    "7102": {
+      "transactions": 765,
+      "windows": 275,
+      "episodes_with_eligible_prior_window": 14,
+      "observed_episodes": [
+        {
+          "start_ms": 4095.815,
+          "end_ms": 4096.432
+        },
+        {
+          "start_ms": 4608.027,
+          "end_ms": 4626.536
+        },
+        {
+          "start_ms": 5326.693,
+          "end_ms": 5357.918
+        },
+        {
+          "start_ms": 8418.552,
+          "end_ms": 8757.479
+        },
+        {
+          "start_ms": 15237.524,
+          "end_ms": 15626.655
+        },
+        {
+          "start_ms": 15633.349,
+          "end_ms": 22959.499
+        },
+        {
+          "start_ms": 35670.846,
+          "end_ms": 37601.163
+        },
+        {
+          "start_ms": 38072.193,
+          "end_ms": 38155.862
+        },
+        {
+          "start_ms": 38213.065,
+          "end_ms": 38252.903
+        },
+        {
+          "start_ms": 38285.415,
+          "end_ms": 38321.339
+        },
+        {
+          "start_ms": 38418.21,
+          "end_ms": 38434.152
+        },
+        {
+          "start_ms": 38718.851,
+          "end_ms": 38838.411
+        },
+        {
+          "start_ms": 39904.38,
+          "end_ms": 39938.08
+        },
+        {
+          "start_ms": 40959.839,
+          "end_ms": 40968.541
+        },
+        {
+          "start_ms": 40999.914,
+          "end_ms": 41066.773
+        },
+        {
+          "start_ms": 41878.514,
+          "end_ms": 41887.044
+        },
+        {
+          "start_ms": 42515.151,
+          "end_ms": 42665.942
+        },
+        {
+          "start_ms": 42716.958,
+          "end_ms": 42731.055
+        },
+        {
+          "start_ms": 42741.174,
+          "end_ms": 42838.235
+        },
+        {
+          "start_ms": 43009.289,
+          "end_ms": 43024.864
+        },
+        {
+          "start_ms": 43041.557,
+          "end_ms": 50262.35
+        },
+        {
+          "start_ms": 50274.654,
+          "end_ms": 50280.432
+        },
+        {
+          "start_ms": 58439.703,
+          "end_ms": 58446.205
+        }
+      ]
+    },
+    "7103": {
+      "transactions": 758,
+      "windows": 291,
+      "episodes_with_eligible_prior_window": 23,
+      "observed_episodes": [
+        {
+          "start_ms": 3383.295,
+          "end_ms": 3480.989
+        },
+        {
+          "start_ms": 15034.994,
+          "end_ms": 15037.653
+        },
+        {
+          "start_ms": 15074.536,
+          "end_ms": 23297.726
+        },
+        {
+          "start_ms": 35627.694,
+          "end_ms": 35644.406
+        },
+        {
+          "start_ms": 35794.387,
+          "end_ms": 35805.491
+        },
+        {
+          "start_ms": 36602.932,
+          "end_ms": 36695.801
+        },
+        {
+          "start_ms": 37053.247,
+          "end_ms": 37208.871
+        },
+        {
+          "start_ms": 37216.156,
+          "end_ms": 37256.619
+        },
+        {
+          "start_ms": 37835.161,
+          "end_ms": 37838.107
+        },
+        {
+          "start_ms": 37856.91,
+          "end_ms": 38112.971
+        },
+        {
+          "start_ms": 38270.793,
+          "end_ms": 38276.463
+        },
+        {
+          "start_ms": 38296.924,
+          "end_ms": 38480.236
+        },
+        {
+          "start_ms": 38500.017,
+          "end_ms": 38631.239
+        },
+        {
+          "start_ms": 38642.882,
+          "end_ms": 38652.326
+        },
+        {
+          "start_ms": 39161.14,
+          "end_ms": 39223.237
+        },
+        {
+          "start_ms": 39249.419,
+          "end_ms": 39295.421
+        },
+        {
+          "start_ms": 39334.24,
+          "end_ms": 39402.626
+        },
+        {
+          "start_ms": 39422.39,
+          "end_ms": 39429.48
+        },
+        {
+          "start_ms": 39444.022,
+          "end_ms": 39574.966
+        },
+        {
+          "start_ms": 41013.012,
+          "end_ms": 41030.943
+        },
+        {
+          "start_ms": 41084.744,
+          "end_ms": 41151.393
+        },
+        {
+          "start_ms": 41237.6,
+          "end_ms": 41259.466
+        },
+        {
+          "start_ms": 41283.155,
+          "end_ms": 41372.636
+        },
+        {
+          "start_ms": 41387.347,
+          "end_ms": 41452.24
+        },
+        {
+          "start_ms": 41470.292,
+          "end_ms": 41653.245
+        },
+        {
+          "start_ms": 42292.126,
+          "end_ms": 42295.26
+        },
+        {
+          "start_ms": 42347.317,
+          "end_ms": 42526.482
+        },
+        {
+          "start_ms": 42649.158,
+          "end_ms": 42728.459
+        },
+        {
+          "start_ms": 42739.976,
+          "end_ms": 42753.493
+        },
+        {
+          "start_ms": 42762.282,
+          "end_ms": 42857.741
+        },
+        {
+          "start_ms": 42888.89,
+          "end_ms": 42895.563
+        },
+        {
+          "start_ms": 43154.237,
+          "end_ms": 43155.832
+        },
+        {
+          "start_ms": 43172.822,
+          "end_ms": 43275.48
+        },
+        {
+          "start_ms": 43305.059,
+          "end_ms": 43584.765
+        },
+        {
+          "start_ms": 43589.401,
+          "end_ms": 43624.147
+        },
+        {
+          "start_ms": 43736.062,
+          "end_ms": 43778.319
+        },
+        {
+          "start_ms": 43871.918,
+          "end_ms": 43960.994
+        },
+        {
+          "start_ms": 44116.554,
+          "end_ms": 44261.445
+        },
+        {
+          "start_ms": 44334.038,
+          "end_ms": 44349.621
+        },
+        {
+          "start_ms": 44471.314,
+          "end_ms": 44503.255
+        },
+        {
+          "start_ms": 44519.853,
+          "end_ms": 49545.768
+        },
+        {
+          "start_ms": 57385.599,
+          "end_ms": 57406.96
+        }
+      ]
+    }
+  },
+  "conditions": {
+    "pool-logistic-v1": {
+      "total": {
+        "episodes": 99,
+        "warned": 42,
+        "missed": 57,
+        "false_alerts": 11,
+        "repeat_alerts": 31,
+        "median_lead_ms": 377.0669999999991,
+        "warned_at_least_one_second": 11,
+        "alert_windows": 750,
+        "windows": 853,
+        "event_f1": 0.5526315789473685
+      },
+      "per_run": {
+        "7101": {
+          "episodes": 37,
+          "warned": 13,
+          "missed": 24,
+          "false_alerts": 2,
+          "repeat_alerts": 13,
+          "median_lead_ms": 438.9290000000001,
+          "warned_at_least_one_second": 4,
+          "alert_windows": 254,
+          "windows": 287,
+          "event_f1": 0.5
+        },
+        "7102": {
+          "episodes": 21,
+          "warned": 12,
+          "missed": 9,
+          "false_alerts": 3,
+          "repeat_alerts": 9,
+          "median_lead_ms": 516.0159999999996,
+          "warned_at_least_one_second": 4,
+          "alert_windows": 237,
+          "windows": 275,
+          "event_f1": 0.6666666666666666
+        },
+        "7103": {
+          "episodes": 41,
+          "warned": 17,
+          "missed": 24,
+          "false_alerts": 6,
+          "repeat_alerts": 9,
+          "median_lead_ms": 116.55399999999645,
+          "warned_at_least_one_second": 3,
+          "alert_windows": 259,
+          "windows": 291,
+          "event_f1": 0.53125
+        }
+      },
+      "weights_sha256": "164be8f44f45b9d0d18b8303b856eb37dd904af3c8a909a4631bddd2aaeabe81",
+      "profile_sha256": "ac1f295ba1eb545ee0929e5d735eb53a6bdbf7462f05c90712f0b644b6093dcf"
+    },
+    "service-b-astra-v1": {
+      "total": {
+        "episodes": 99,
+        "warned": 40,
+        "missed": 59,
+        "false_alerts": 1,
+        "repeat_alerts": 20,
+        "median_lead_ms": 65.04249999999956,
+        "warned_at_least_one_second": 5,
+        "alert_windows": 75,
+        "windows": 853,
+        "event_f1": 0.5714285714285714
+      },
+      "per_run": {
+        "7101": {
+          "episodes": 37,
+          "warned": 14,
+          "missed": 23,
+          "false_alerts": 0,
+          "repeat_alerts": 4,
+          "median_lead_ms": 52.67250000000058,
+          "warned_at_least_one_second": 1,
+          "alert_windows": 25,
+          "windows": 287,
+          "event_f1": 0.5490196078431373
+        },
+        "7102": {
+          "episodes": 21,
+          "warned": 11,
+          "missed": 10,
+          "false_alerts": 0,
+          "repeat_alerts": 6,
+          "median_lead_ms": 109.28899999999703,
+          "warned_at_least_one_second": 3,
+          "alert_windows": 20,
+          "windows": 275,
+          "event_f1": 0.6875
+        },
+        "7103": {
+          "episodes": 41,
+          "warned": 15,
+          "missed": 26,
+          "false_alerts": 1,
+          "repeat_alerts": 10,
+          "median_lead_ms": 70.79299999999785,
+          "warned_at_least_one_second": 1,
+          "alert_windows": 30,
+          "windows": 291,
+          "event_f1": 0.5263157894736842
+        }
+      },
+      "weights_sha256": "1a5418022fc45f7fa0d47f010ec6afd41f9924582e83a4616c7c57a7b2342a64",
+      "profile_sha256": "4c01c4a8d7a989d0cb7f1712e9f52bb9033641369d7642bb0979b0cf84479a01"
+    },
+    "at-capacity": {
+      "total": {
+        "episodes": 99,
+        "warned": 35,
+        "missed": 64,
+        "false_alerts": 1,
+        "repeat_alerts": 9,
+        "median_lead_ms": 38.34700000000157,
+        "warned_at_least_one_second": 3,
+        "alert_windows": 55,
+        "windows": 853,
+        "event_f1": 0.5185185185185185
+      },
+      "per_run": {
+        "7101": {
+          "episodes": 37,
+          "warned": 13,
+          "missed": 24,
+          "false_alerts": 0,
+          "repeat_alerts": 2,
+          "median_lead_ms": 38.34700000000157,
+          "warned_at_least_one_second": 0,
+          "alert_windows": 20,
+          "windows": 287,
+          "event_f1": 0.52
+        },
+        "7102": {
+          "episodes": 21,
+          "warned": 11,
+          "missed": 10,
+          "false_alerts": 0,
+          "repeat_alerts": 2,
+          "median_lead_ms": 26.69300000000021,
+          "warned_at_least_one_second": 2,
+          "alert_windows": 14,
+          "windows": 275,
+          "event_f1": 0.6875
+        },
+        "7103": {
+          "episodes": 41,
+          "warned": 11,
+          "missed": 30,
+          "false_alerts": 1,
+          "repeat_alerts": 5,
+          "median_lead_ms": 70.79299999999785,
+          "warned_at_least_one_second": 1,
+          "alert_windows": 21,
+          "windows": 291,
+          "event_f1": 0.41509433962264153
+        }
+      }
+    }
+  },
+  "restored_weights_sha256": "164be8f44f45b9d0d18b8303b856eb37dd904af3c8a909a4631bddd2aaeabe81",
+  "matched_board_scores": 1706
+}

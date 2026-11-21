@@ -1,0 +1,20 @@
+{
+  "backend": "PYNQ-Z2",
+  "versions": [
+    "pool-logistic-v1",
+    "service-b-astra-v1",
+    "pool-logistic-v1"
+  ],
+  "hashes": [
+    "164be8f44f45b9d0d18b8303b856eb37dd904af3c8a909a4631bddd2aaeabe81",
+    "1a5418022fc45f7fa0d47f010ec6afd41f9924582e83a4616c7c57a7b2342a64",
+    "164be8f44f45b9d0d18b8303b856eb37dd904af3c8a909a4631bddd2aaeabe81"
+  ],
+  "windows": 389,
+  "warnings": [
+    349,
+    23,
+    349
+  ],
+  "all_base_scores_restored": true
+}

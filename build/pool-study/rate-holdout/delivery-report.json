@@ -1,0 +1,172 @@
+{
+  "conditions": {
+    "pool-logistic-v1": {
+      "total": {
+        "episodes": 113,
+        "warned": 11,
+        "missed": 102,
+        "early": 5,
+        "false_alerts": 2,
+        "alerts_arriving_after_onset": 2
+      },
+      "per_run": {
+        "8301": {
+          "episodes": 39,
+          "warned": 3,
+          "missed": 36,
+          "early": 1,
+          "false_alerts": 1,
+          "alerts_arriving_after_onset": 1
+        },
+        "8302": {
+          "episodes": 25,
+          "warned": 4,
+          "missed": 21,
+          "early": 2,
+          "false_alerts": 1,
+          "alerts_arriving_after_onset": 0
+        },
+        "8303": {
+          "episodes": 49,
+          "warned": 4,
+          "missed": 45,
+          "early": 2,
+          "false_alerts": 0,
+          "alerts_arriving_after_onset": 1
+        }
+      },
+      "median_display_ms": 166.0,
+      "eligible_for_one_second_lead": 9
+    },
+    "service-b-astra-v1": {
+      "total": {
+        "episodes": 113,
+        "warned": 0,
+        "missed": 113,
+        "early": 0,
+        "false_alerts": 0,
+        "alerts_arriving_after_onset": 5
+      },
+      "per_run": {
+        "8301": {
+          "episodes": 39,
+          "warned": 0,
+          "missed": 39,
+          "early": 0,
+          "false_alerts": 0,
+          "alerts_arriving_after_onset": 1
+        },
+        "8302": {
+          "episodes": 25,
+          "warned": 0,
+          "missed": 25,
+          "early": 0,
+          "false_alerts": 0,
+          "alerts_arriving_after_onset": 2
+        },
+        "8303": {
+          "episodes": 49,
+          "warned": 0,
+          "missed": 49,
+          "early": 0,
+          "false_alerts": 0,
+          "alerts_arriving_after_onset": 2
+        }
+      },
+      "median_display_ms": 167.0,
+      "eligible_for_one_second_lead": 9
+    },
+    "service-b-with-arrival-rate": {
+      "total": {
+        "episodes": 113,
+        "warned": 1,
+        "missed": 112,
+        "early": 0,
+        "false_alerts": 0,
+        "alerts_arriving_after_onset": 4
+      },
+      "per_run": {
+        "8301": {
+          "episodes": 39,
+          "warned": 0,
+          "missed": 39,
+          "early": 0,
+          "false_alerts": 0,
+          "alerts_arriving_after_onset": 1
+        },
+        "8302": {
+          "episodes": 25,
+          "warned": 1,
+          "missed": 24,
+          "early": 0,
+          "false_alerts": 0,
+          "alerts_arriving_after_onset": 1
+        },
+        "8303": {
+          "episodes": 49,
+          "warned": 0,
+          "missed": 49,
+          "early": 0,
+          "false_alerts": 0,
+          "alerts_arriving_after_onset": 2
+        }
+      },
+      "median_display_ms": 167.0,
+      "eligible_for_one_second_lead": 9
+    },
+    "at-capacity": {
+      "total": {
+        "episodes": 113,
+        "warned": 0,
+        "missed": 113,
+        "early": 0,
+        "false_alerts": 0,
+        "alerts_arriving_after_onset": 5
+      },
+      "per_run": {
+        "8301": {
+          "episodes": 39,
+          "warned": 0,
+          "missed": 39,
+          "early": 0,
+          "false_alerts": 0,
+          "alerts_arriving_after_onset": 1
+        },
+        "8302": {
+          "episodes": 25,
+          "warned": 0,
+          "missed": 25,
+          "early": 0,
+          "false_alerts": 0,
+          "alerts_arriving_after_onset": 2
+        },
+        "8303": {
+          "episodes": 49,
+          "warned": 0,
+          "missed": 49,
+          "early": 0,
+          "false_alerts": 0,
+          "alerts_arriving_after_onset": 2
+        }
+      },
+      "median_display_ms": 167.0,
+      "eligible_for_one_second_lead": 9
+    }
+  },
+  "seeds": [
+    8301,
+    8302,
+    8303
+  ],
+  "method": "One update per second, 50 ms input phase. Shipping WebKit result view and live FPGA requests. Full-pool comparator uses the Service B display timestamps.",
+  "input_sha256": {
+    "8301/telemetry.csv": "6a4813e864970b1e65911b20f8629a53b3d1fccf4ea392e61a5f30cbd23c40e7",
+    "8301/events.csv": "bce4117e8b331151dbe65e91f002e5626e23619c657b104bbb83b4c2a16afe53",
+    "8302/telemetry.csv": "6720ca0ce2c4a5bb6cf7f81ab3a021a502a08b10ca6374dd474d6916b4794b2f",
+    "8302/events.csv": "1e8bb57166512b6230a0e4104babba215e90f78fb77e7363430b79040c4b3300",
+    "8303/telemetry.csv": "e4b48d9b7c863adf5d9eb416992c52a0fc74ab64ca2f2ae51884ac3ea76e2671",
+    "8303/events.csv": "3364dcbd8897a218afff1d80c4d6b9752d5678ae4d1777169acc8e19e7ca7954"
+  },
+  "acceptance_sha256": "689e384e7ef4df2b01cb5a6ff04ab3a9047309c3b9bba0870d05a26287dbe3c2",
+  "promote": false
+}

@@ -1,0 +1,136 @@
+{
+  "ok": true,
+  "backend": "PYNQ-Z2",
+  "state": "ready",
+  "session": "9dd076e9-888d-47c7-9f7d-eb8584c760c7",
+  "source": "Board SQLite demo (generated traffic)",
+  "origin": "demo",
+  "capacity": 4,
+  "sample_count": 101,
+  "latest": {
+    "time_ms": 10000,
+    "busy": 4,
+    "waiting": 39
+  },
+  "latest_time_ms": 10000,
+  "fresh": true,
+  "age_ms": 8,
+  "fpga_submissions": 52,
+  "forecast": {
+    "ok": true,
+    "backend": "PYNQ-Z2",
+    "model": "queue_outlook",
+    "version": "queue-outlook-v2",
+    "weights_sha256": "13c28113cc4ef20b76d3c746f4c1192f33bd2341240ba4ed1e878b13ad4b6ce6",
+    "scores": [
+      255,
+      9
+    ],
+    "horizon_ms": 10000,
+    "time_ms": 10000,
+    "targets": [
+      "persists",
+      "grows"
+    ]
+  },
+  "observations": {
+    "window_ms": 60000,
+    "sample_count": 101,
+    "start_ms": 0,
+    "end_ms": 10000,
+    "first": {
+      "time_ms": 0,
+      "busy": 0,
+      "waiting": 0
+    },
+    "latest": {
+      "time_ms": 10000,
+      "busy": 4,
+      "waiting": 39
+    },
+    "peak_busy": {
+      "time_ms": 200,
+      "busy": 4,
+      "waiting": 2
+    },
+    "peak_waiting": {
+      "time_ms": 9900,
+      "busy": 4,
+      "waiting": 41
+    },
+    "busy": {
+      "minimum": 0,
+      "maximum": 4,
+      "mean": 3.9207920792079207,
+      "change": 4,
+      "full_samples": 97,
+      "mean_utilization": 0.9801980198019802
+    },
+    "waiting": {
+      "minimum": 0,
+      "maximum": 41,
+      "mean": 22.376237623762375,
+      "change": 39,
+      "positive_samples": 99,
+      "onsets": 1,
+      "clearances": 0
+    },
+    "covered_ms": 10100,
+    "complete": false,
+    "intervals": [
+      {
+        "start_ms": 0,
+        "end_ms": 0,
+        "sample_count": 1,
+        "busy": {
+          "minimum": 0,
+          "maximum": 0,
+          "mean": 0.0,
+          "change": 0,
+          "full_samples": 0,
+          "mean_utilization": 0.0
+        },
+        "waiting": {
+          "minimum": 0,
+          "maximum": 0,
+          "mean": 0.0,
+          "change": 0,
+          "positive_samples": 0,
+          "onsets": 0,
+          "clearances": 0
+        }
+      },
+      {
+        "start_ms": 100,
+        "end_ms": 10000,
+        "sample_count": 100,
+        "busy": {
+          "minimum": 2,
+          "maximum": 4,
+          "mean": 3.96,
+          "change": 2,
+          "full_samples": 97,
+          "mean_utilization": 0.99
+        },
+        "waiting": {
+          "minimum": 0,
+          "maximum": 41,
+          "mean": 22.6,
+          "change": 39,
+          "positive_samples": 99,
+          "onsets": 1,
+          "clearances": 0
+        }
+      }
+    ]
+  },
+  "sample_interval_ms": 100,
+  "forecast_input_window_ms": 5000,
+  "limitations": [
+    "Sample timestamps come from the telemetry source. The board measures receipt age.",
+    "Samples describe utilization and queue depth for one source. They do not identify causes or request-level latency.",
+    "The source is the board's demo telemetry.",
+    "The forecast is a model estimate for its stated horizon. Scores are not calibrated probabilities.",
+    "The requested lookback extends beyond the continuous samples retained for this session."
+  ]
+}

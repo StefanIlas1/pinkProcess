@@ -1,0 +1,8 @@
+{
+  "protocol_sha256": "ce0c6ad2e272296ff1ac904151f6edb57b38b6d5288790d0706823bf0bd0960f",
+  "authoring_packet_sha256": "5771070820544d59fb8c74bef64a80f005ab0850c12eb9a256f2a8ef50d7db8c",
+  "conventional_payload_sha256": "1b3aeb993684c6ccfe324bfd82f2d6b8d1d1e24ac96810640e0b21b1f4e04cb0",
+  "astra_payload_sha256": "013a608823750ef7904a57bef7fdbb37d86555f5a04e7669342e885917008d46",
+  "astra_raw_response_sha256": "0f7bf8f29b70cc5d678ea2d2bc3304e86834f1fa8340fa3098e9c453c518ab5d",
+  "quantized_model_sha256": "8b9e81ba42f6906fd21014886757074f93db592eb66ca5e313c75228ed65cd48"
+}

@@ -1,0 +1,217 @@
+{
+  "state": {
+    "board": {
+      "active_row": null,
+      "expected_classifier_sha256": "deefa2b35690b9ed9fcdd29f617fc4f18b5eda1d25e5efb0b98e3c05012cbb23",
+      "observed_classifier_sha256": "deefa2b35690b9ed9fcdd29f617fc4f18b5eda1d25e5efb0b98e3c05012cbb23",
+      "prompt": "Once upon a time, there was a little girl named",
+      "model_sha256": "b0a507e7ad0f626624f17112325e66691f9076d622e1d3274d103d00299f2696",
+      "quantized_model_sha256": "8b9e81ba42f6906fd21014886757074f93db592eb66ca5e313c75228ed65cd48",
+      "bitstream_sha256": "ac260b425bbf0e5acc5c5883070f7b03ef6457d8f0d5f716cd041e6e55c1ba93",
+      "hardware_metadata_sha256": "6e34e76e9afee7bcc8ab788c863b8984faf84758d857da0915fbe67923297763"
+    },
+    "status": {
+      "active_row": null,
+      "expected_classifier_sha256": "deefa2b35690b9ed9fcdd29f617fc4f18b5eda1d25e5efb0b98e3c05012cbb23"
+    },
+    "candidates": [
+      "tim-fixed.patch"
+    ]
+  },
+  "actions": [
+    {
+      "command": "preview",
+      "ok": true,
+      "result": {
+        "row": 326,
+        "original_row_hex": "08fd05e9f6e413f6ff2013f81611d1e3edf8eecd0fe70c07ece005f600e220daef122b1e0bf817181d1effeef923f2f418f3ff0ed9f0dcec24d5ea0b09f2f2ec",
+        "edited_row_hex": "050904dff2d80a01fe0d11fa0607e0e6f1f6f1c40cf6fd09ede5fdf811e927e80414281411e8140b192c00fafe2cf50216fdff16d0f6e3f62cc9e41af6f2faec",
+        "changed_bytes": 61,
+        "prompts": [
+          {
+            "prompt": "Once upon a time, there was a little girl named",
+            "original": "Once upon a time, there was a little girl named Lily. She loved to play outside in the park. One",
+            "edited": "Once upon a time, there was a little girl named Tim. She loved to play outside in the sun. One day",
+            "first_change": {
+              "sample": 1,
+              "original_token": 317,
+              "edited_token": 326
+            }
+          },
+          {
+            "prompt": "Once upon a time, there was a little boy named",
+            "original": "Once upon a time, there was a little boy named Timmy. Timmy loved to play with his toys and run around",
+            "edited": "Once upon a time, there was a little boy named Timmy. Timmy loved to play with his toys and run around",
+            "first_change": null
+          },
+          {
+            "prompt": "Lily and Tim went to the park",
+            "original": "Lily and Tim went to the park. They saw a big box with a big box. They wanted to play with it",
+            "edited": "Lily and Tim went to the park. They saw a big box with a big box. They wanted to play with it",
+            "first_change": null
+          },
+          {
+            "prompt": "Once upon a time, there was a little girl who",
+            "original": "Once upon a time, there was a little girl who loved to play with her toys. One day, she went to",
+            "edited": "Once upon a time, there was a little girl who loved to play with her toys. One day, she went to",
+            "first_change": null
+          },
+          {
+            "prompt": "One day, a little dog went outside",
+            "original": "One day, a little dog went outside to play. He saw a big ball. The ball was very small",
+            "edited": "One day, a little dog went outside to play. He saw a big ball. The ball was very small",
+            "first_change": null
+          },
+          {
+            "prompt": "Once upon a time",
+            "original": "Once upon a time, there was a little girl named Lily. She loved to play outside in the park. One",
+            "edited": "Once upon a time, there was a little girl named Tim. She loved to play outside in the sun. One day",
+            "first_change": {
+              "sample": 10,
+              "original_token": 317,
+              "edited_token": 326
+            }
+          }
+        ]
+      }
+    },
+    {
+      "command": "generate",
+      "ok": true,
+      "result": {
+        "active_row": null,
+        "expected_classifier_sha256": "deefa2b35690b9ed9fcdd29f617fc4f18b5eda1d25e5efb0b98e3c05012cbb23",
+        "sampled_token_ids": [
+          317,
+          426,
+          338,
+          401,
+          396,
+          267,
+          337,
+          410,
+          408,
+          419,
+          292,
+          411,
+          322,
+          265,
+          282,
+          295,
+          433,
+          426,
+          385
+        ],
+        "generated_text": "Once upon a time, there was a little girl named Lily. She loved to play outside in the park. One",
+        "matched_scores": 16384,
+        "generation_seconds": 0.9200439939995704
+      }
+    },
+    {
+      "command": "apply",
+      "ok": true,
+      "result": {
+        "active_row": 326,
+        "expected_classifier_sha256": "576a368c0eaecdac7a1ff2611cb9eeaa31c851e43cdde6abea91d5281dfcd2da",
+        "row": 326,
+        "observed_row_sha256": "1b3aeb993684c6ccfe324bfd82f2d6b8d1d1e24ac96810640e0b21b1f4e04cb0"
+      }
+    },
+    {
+      "command": "generate",
+      "ok": true,
+      "result": {
+        "active_row": 326,
+        "expected_classifier_sha256": "576a368c0eaecdac7a1ff2611cb9eeaa31c851e43cdde6abea91d5281dfcd2da",
+        "row": 326,
+        "observed_row_sha256": "1b3aeb993684c6ccfe324bfd82f2d6b8d1d1e24ac96810640e0b21b1f4e04cb0",
+        "sampled_token_ids": [
+          326,
+          426,
+          338,
+          401,
+          396,
+          267,
+          337,
+          410,
+          408,
+          419,
+          292,
+          411,
+          322,
+          265,
+          262,
+          379,
+          426,
+          385,
+          328
+        ],
+        "generated_text": "Once upon a time, there was a little girl named Tim. She loved to play outside in the sun. One day",
+        "matched_scores": 16384,
+        "generation_seconds": 0.9341542789989035
+      }
+    },
+    {
+      "command": "verify",
+      "ok": true,
+      "result": {
+        "active_row": 326,
+        "expected_classifier_sha256": "576a368c0eaecdac7a1ff2611cb9eeaa31c851e43cdde6abea91d5281dfcd2da",
+        "row": 326,
+        "observed_row_sha256": "1b3aeb993684c6ccfe324bfd82f2d6b8d1d1e24ac96810640e0b21b1f4e04cb0",
+        "observed_classifier_sha256": "576a368c0eaecdac7a1ff2611cb9eeaa31c851e43cdde6abea91d5281dfcd2da"
+      }
+    },
+    {
+      "command": "rollback",
+      "ok": true,
+      "result": {
+        "active_row": null,
+        "expected_classifier_sha256": "deefa2b35690b9ed9fcdd29f617fc4f18b5eda1d25e5efb0b98e3c05012cbb23",
+        "row": 326,
+        "observed_row_sha256": "df600df85134ca298aa87d6fd22d5fc513c821f970c104190485bbc88fa042a5"
+      }
+    },
+    {
+      "command": "generate",
+      "ok": true,
+      "result": {
+        "active_row": null,
+        "expected_classifier_sha256": "deefa2b35690b9ed9fcdd29f617fc4f18b5eda1d25e5efb0b98e3c05012cbb23",
+        "sampled_token_ids": [
+          317,
+          426,
+          338,
+          401,
+          396,
+          267,
+          337,
+          410,
+          408,
+          419,
+          292,
+          411,
+          322,
+          265,
+          282,
+          295,
+          433,
+          426,
+          385
+        ],
+        "generated_text": "Once upon a time, there was a little girl named Lily. She loved to play outside in the park. One",
+        "matched_scores": 16384,
+        "generation_seconds": 0.9198858580020897
+      }
+    },
+    {
+      "command": "verify",
+      "ok": true,
+      "result": {
+        "active_row": null,
+        "expected_classifier_sha256": "deefa2b35690b9ed9fcdd29f617fc4f18b5eda1d25e5efb0b98e3c05012cbb23",
+        "observed_classifier_sha256": "deefa2b35690b9ed9fcdd29f617fc4f18b5eda1d25e5efb0b98e3c05012cbb23"
+      }
+    }
+  ]
+}

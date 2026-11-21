@@ -1,0 +1,10 @@
+{
+  "format": "pinkprocess.int8-output-row.v1",
+  "target_row": 326,
+  "model_sha256": "b0a507e7ad0f626624f17112325e66691f9076d622e1d3274d103d00299f2696",
+  "base_classifier_sha256": "deefa2b35690b9ed9fcdd29f617fc4f18b5eda1d25e5efb0b98e3c05012cbb23",
+  "original_row_sha256": "df600df85134ca298aa87d6fd22d5fc513c821f970c104190485bbc88fa042a5",
+  "payload_bytes": 64,
+  "payload_sha256": "c402ce727e47b4e4c4b254955282f0c9c7136bb91b7a0eaee07bd22f617228f4",
+  "payload_hex": "050904dff2d90901fe0d11fa0606e0e6f1f6f1c40cf6fd08ece5fef911e927e80414271412e7130b192cfffafe2cf50216fdff16d1f5e3f62cc9e41af6f2faec"
+}

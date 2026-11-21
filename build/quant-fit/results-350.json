@@ -1,0 +1,30 @@
+[
+  {
+    "model": "pinkprocess-fit:lfm350-qad",
+    "capture": "analyst-input.json",
+    "question": "What went wrong? Is it still happening, and can we tell if the database caused it?",
+    "facts": {
+      "observed_now": "2 of 4 connections occupied (50.0%); 0 requests waiting.",
+      "observed_peak": "117 requests were waiting at the window maximum, 50.8 seconds before the latest reading. 4 connections were occupied at that instant.",
+      "forecast_interpretation": "The FPGA warns that requests may start waiting within the next ten seconds."
+    },
+    "answer": "The database likely caused the issue. The FPGA's warning indicates that the database is likely the primary source of the waiting, and the database's capacity or performance may be insufficient to handle the current load. The 50% connection occupancy suggests the database is under heavy load, and the 4 connections occupied at the peak indicates a bottleneck. The forecast confirms this, as the database is approaching its maximum capacity.",
+    "generated_tokens": 86,
+    "prompt_tokens": 141,
+    "stop": "stop"
+  },
+  {
+    "model": "pinkprocess-fit:lfm350-qad",
+    "capture": "analyst-board-window.json",
+    "question": "What went wrong? Is it still happening, and can we tell if the database caused it?",
+    "facts": {
+      "observed_now": "4 of 4 connections occupied (100.0%); 39 requests waiting.",
+      "observed_peak": "41 requests were waiting at the window maximum, 0.1 seconds before the latest reading. 4 connections were occupied at that instant.",
+      "forecast_interpretation": "The FPGA predicts the queue will remain nonempty over the next ten seconds. It expects more than the current 39 waiting at the end of that period."
+    },
+    "answer": "The database likely caused the issue. The queue remains nonempty, but the database's response time is unusually slow, contributing to the high waiting rate. The database's latency is likely the primary factor preventing the queue from remaining nonempty.",
+    "generated_tokens": 48,
+    "prompt_tokens": 158,
+    "stop": "stop"
+  }
+]

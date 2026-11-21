@@ -1,0 +1,14 @@
+{
+  "backend": "pynq",
+  "boot_id": "57f80191-68a5-432a-ab04-da22fdd0ea03",
+  "reference_stdout": "Target Tim uses row 326.\nFirst sampled tokens before, edited, restored: [317, 326, 317]\nRollback restored the complete classifier matrix and original token sequence.\nINT8 replay matched across 28 sampled tokens and 32 forward passes.\nIndependent Python calculation matched all 16,384 integer scores.\nOnce upon a time, there was a little girl named Lily. She loved to play outside in the park. One\nSaved evidence/reference-vectors.json\n",
+  "rtl_replay_stdout": "Matched 17,920 scores, including row replacement and restoration.\n",
+  "live_stdout": "original: 16,384 matching scores, 1.333 ms median classifier time\nOnce upon a time, there was a little girl named Lily. She loved to play outside in the park. One\nedited: 16,384 matching scores, 1.331 ms median classifier time\nOnce upon a time, there was a little girl named Tim. She loved to play outside in the sun. One day\nrestored: 16,384 matching scores, 1.317 ms median classifier time\nOnce upon a time, there was a little girl named Lily. She loved to play outside in the park. One\n245,760 matching scores across the additional prompts and all three phases\nFirst sampled tokens: [317, 326, 317]\n",
+  "local_suite_seconds": 119.80128937500001,
+  "sha256": {
+    "reference-vectors.json": "3ae0d71d1bb35f8a71f90dae37f9e4468b71ee2d3532a74f0037500ad928ec23",
+    "live.json": "8c006cd968e447d87f224cd4856149b0529df9d466f0f842e5bdf1c118c11d28",
+    "tim.patch.json": "2afbac1c604795cad0c4e5843bf44309ef0dc8d2cfb4cd8739c8828a6bbda826",
+    "operator.jsonl": "e1031eb3ef62398f8c275a38d088f5257d4d55ec8cfd148dd430b7bf362a585a"
+  }
+}

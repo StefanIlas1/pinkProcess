@@ -1,0 +1,74 @@
+{
+  "run": 7101,
+  "profile": "pool-logistic-v1",
+  "samples": [
+    {
+      "sample_ms": 37700,
+      "rows": 378,
+      "csv_write_wall_ms": 1795289617409.7358,
+      "first_observed_wall_ms": 1795289617670,
+      "latency_upper_bound_ms": 260.3,
+      "waiting": 6
+    },
+    {
+      "sample_ms": 38700,
+      "rows": 388,
+      "csv_write_wall_ms": 1795289618409.791,
+      "first_observed_wall_ms": 1795289618617,
+      "latency_upper_bound_ms": 207.2,
+      "waiting": 0
+    },
+    {
+      "sample_ms": 39700,
+      "rows": 398,
+      "csv_write_wall_ms": 1795289619409.7976,
+      "first_observed_wall_ms": 1795289619781,
+      "latency_upper_bound_ms": 371.2,
+      "waiting": 3
+    },
+    {
+      "sample_ms": 40700,
+      "rows": 408,
+      "csv_write_wall_ms": 1795289620409.7983,
+      "first_observed_wall_ms": 1795289620737,
+      "latency_upper_bound_ms": 327.2,
+      "waiting": 0
+    },
+    {
+      "sample_ms": 41700,
+      "rows": 418,
+      "csv_write_wall_ms": 1795289621409.7727,
+      "first_observed_wall_ms": 1795289621669,
+      "latency_upper_bound_ms": 259.2,
+      "waiting": 0
+    },
+    {
+      "sample_ms": 42700,
+      "rows": 428,
+      "csv_write_wall_ms": 1795289622409.7407,
+      "first_observed_wall_ms": 1795289622830,
+      "latency_upper_bound_ms": 420.3,
+      "waiting": 0
+    },
+    {
+      "sample_ms": 43700,
+      "rows": 438,
+      "csv_write_wall_ms": 1795289623409.8572,
+      "first_observed_wall_ms": 1795289623758,
+      "latency_upper_bound_ms": 348.1,
+      "waiting": 1
+    },
+    {
+      "sample_ms": 44700,
+      "rows": 448,
+      "csv_write_wall_ms": 1795289624409.7078,
+      "first_observed_wall_ms": 1795289624934,
+      "latency_upper_bound_ms": 524.3,
+      "waiting": 14
+    }
+  ],
+  "median_ms": 337.65,
+  "minimum_ms": 207.2,
+  "maximum_ms": 524.3,
+  "method": "First AX observation of an updated native result for this timestamp minus the CSV append mtime. Polling adds observation delay. The initial, already visible result was excluded. Covers eight displayed updates while the live watcher sampled approximately once per second."
+}

@@ -1,0 +1,68 @@
+{
+  "ok": true,
+  "backend": "PYNQ-Z2",
+  "state": "ready",
+  "session": "2355137c-798e-49cf-9134-1c7b2afd4fcc",
+  "source": "Board SQLite demo (generated traffic)",
+  "origin": "demo",
+  "capacity": 4,
+  "sample_count": 600,
+  "latest": {
+    "time_ms": 504800,
+    "busy": 2,
+    "waiting": 0
+  },
+  "latest_time_ms": 504800,
+  "fresh": true,
+  "age_ms": 12,
+  "fpga_submissions": 4923,
+  "observations": {
+    "window_ms": 60000,
+    "sample_count": 600,
+    "start_ms": 444900,
+    "end_ms": 504800,
+    "first": {
+      "time_ms": 444900,
+      "busy": 4,
+      "waiting": 57
+    },
+    "latest": {
+      "time_ms": 504800,
+      "busy": 2,
+      "waiting": 0
+    },
+    "peak_busy": {
+      "time_ms": 444900,
+      "busy": 4,
+      "waiting": 57
+    },
+    "peak_waiting": {
+      "time_ms": 454000,
+      "busy": 4,
+      "waiting": 117
+    }
+  },
+  "forecast": {
+    "ok": true,
+    "backend": "PYNQ-Z2",
+    "model": "pool_wait_logistic",
+    "version": "pool-logistic-v1",
+    "weights_sha256": "164be8f44f45b9d0d18b8303b856eb37dd904af3c8a909a4631bddd2aaeabe81",
+    "threshold": -11248,
+    "versions": [
+      "pool-logistic-v1",
+      "service-b-astra-v1"
+    ],
+    "backlog_version": "queue-outlook-v2",
+    "score_scale": 65536,
+    "horizon_ms": 10000,
+    "time_ms": 505200,
+    "score": 12682,
+    "alert": true
+  },
+  "forecast_reading": {
+    "time_ms": 505200,
+    "busy": 0,
+    "waiting": 0
+  }
+}

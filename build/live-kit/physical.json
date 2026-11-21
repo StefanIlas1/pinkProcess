@@ -1,0 +1,215 @@
+{
+  "backend": "PYNQ-Z2",
+  "onset_profile": "pool-logistic-v1",
+  "without_reader": [
+    {
+      "ok": true,
+      "backend": "PYNQ-Z2",
+      "state": "ready",
+      "session": "bf5407ec-d9a7-4d79-bbbd-41211a4ebd69",
+      "source": "Board SQLite demo (generated traffic)",
+      "origin": "demo",
+      "capacity": 4,
+      "sample_count": 474,
+      "latest": {
+        "time_ms": 47300,
+        "busy": 4,
+        "waiting": 54
+      },
+      "latest_time_ms": 47300,
+      "fresh": true,
+      "age_ms": 13,
+      "fpga_submissions": 425
+    },
+    {
+      "ok": true,
+      "backend": "PYNQ-Z2",
+      "state": "ready",
+      "session": "bf5407ec-d9a7-4d79-bbbd-41211a4ebd69",
+      "source": "Board SQLite demo (generated traffic)",
+      "origin": "demo",
+      "capacity": 4,
+      "sample_count": 552,
+      "latest": {
+        "time_ms": 55100,
+        "busy": 4,
+        "waiting": 85
+      },
+      "latest_time_ms": 55100,
+      "fresh": true,
+      "age_ms": 52,
+      "fpga_submissions": 503
+    }
+  ],
+  "external_publisher": {
+    "accepted": {
+      "ok": true,
+      "backend": "PYNQ-Z2",
+      "state": "ready",
+      "session": "6a354f46-59ee-437c-bc2a-5cf3078de23d",
+      "source": "Known verification readings",
+      "origin": "live",
+      "capacity": 4,
+      "sample_count": 50,
+      "latest": {
+        "time_ms": 4900,
+        "busy": 2,
+        "waiting": 0
+      },
+      "latest_time_ms": 4900,
+      "fresh": true,
+      "age_ms": 12,
+      "fpga_submissions": 510,
+      "accepted": 50
+    },
+    "first": {
+      "ok": true,
+      "backend": "PYNQ-Z2",
+      "state": "ready",
+      "session": "6a354f46-59ee-437c-bc2a-5cf3078de23d",
+      "source": "Known verification readings",
+      "origin": "live",
+      "capacity": 4,
+      "sample_count": 50,
+      "latest": {
+        "time_ms": 4900,
+        "busy": 2,
+        "waiting": 0
+      },
+      "latest_time_ms": 4900,
+      "fresh": true,
+      "age_ms": 450,
+      "fpga_submissions": 510,
+      "forecast": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "model": "pool_wait_logistic",
+        "version": "pool-logistic-v1",
+        "weights_sha256": "164be8f44f45b9d0d18b8303b856eb37dd904af3c8a909a4631bddd2aaeabe81",
+        "threshold": -11248,
+        "versions": [
+          "pool-logistic-v1",
+          "service-b-astra-v1"
+        ],
+        "backlog_version": "queue-outlook-v2",
+        "score_scale": 65536,
+        "horizon_ms": 10000,
+        "time_ms": 4900,
+        "score": 27722,
+        "alert": true
+      }
+    },
+    "second": {
+      "ok": true,
+      "backend": "PYNQ-Z2",
+      "state": "ready",
+      "session": "6a354f46-59ee-437c-bc2a-5cf3078de23d",
+      "source": "Known verification readings",
+      "origin": "live",
+      "capacity": 4,
+      "sample_count": 50,
+      "latest": {
+        "time_ms": 4900,
+        "busy": 2,
+        "waiting": 0
+      },
+      "latest_time_ms": 4900,
+      "fresh": true,
+      "age_ms": 930,
+      "fpga_submissions": 510,
+      "forecast": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "model": "pool_wait_logistic",
+        "version": "pool-logistic-v1",
+        "weights_sha256": "164be8f44f45b9d0d18b8303b856eb37dd904af3c8a909a4631bddd2aaeabe81",
+        "threshold": -11248,
+        "versions": [
+          "pool-logistic-v1",
+          "service-b-astra-v1"
+        ],
+        "backlog_version": "queue-outlook-v2",
+        "score_scale": 65536,
+        "horizon_ms": 10000,
+        "time_ms": 4900,
+        "score": 27722,
+        "alert": true
+      }
+    },
+    "appended": {
+      "ok": true,
+      "backend": "PYNQ-Z2",
+      "state": "ready",
+      "session": "6a354f46-59ee-437c-bc2a-5cf3078de23d",
+      "source": "Known verification readings",
+      "origin": "live",
+      "capacity": 4,
+      "sample_count": 51,
+      "latest": {
+        "time_ms": 5000,
+        "busy": 4,
+        "waiting": 3
+      },
+      "latest_time_ms": 5000,
+      "fresh": true,
+      "age_ms": 1,
+      "fpga_submissions": 511,
+      "accepted": 1
+    },
+    "final": {
+      "ok": true,
+      "backend": "PYNQ-Z2",
+      "state": "ready",
+      "session": "6a354f46-59ee-437c-bc2a-5cf3078de23d",
+      "source": "Known verification readings",
+      "origin": "live",
+      "capacity": 4,
+      "sample_count": 51,
+      "latest": {
+        "time_ms": 5000,
+        "busy": 4,
+        "waiting": 3
+      },
+      "latest_time_ms": 5000,
+      "fresh": true,
+      "age_ms": 406,
+      "fpga_submissions": 511,
+      "forecast": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "model": "queue_outlook",
+        "version": "queue-outlook-v2",
+        "weights_sha256": "13c28113cc4ef20b76d3c746f4c1192f33bd2341240ba4ed1e878b13ad4b6ce6",
+        "scores": [
+          41,
+          2
+        ],
+        "horizon_ms": 10000,
+        "time_ms": 5000,
+        "targets": [
+          "persists",
+          "grows"
+        ]
+      }
+    }
+  },
+  "resumed": {
+    "ok": true,
+    "backend": "PYNQ-Z2",
+    "state": "ready",
+    "session": "2355137c-798e-49cf-9134-1c7b2afd4fcc",
+    "source": "Board SQLite demo (generated traffic)",
+    "origin": "demo",
+    "capacity": 4,
+    "sample_count": 52,
+    "latest": {
+      "time_ms": 63900,
+      "busy": 4,
+      "waiting": 0
+    },
+    "latest_time_ms": 63900,
+    "fresh": true,
+    "age_ms": 52,
+    "fpga_submissions": 514
+  }
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "model": "pinkprocess-fit:lfm12b-iq1s",
+    "capture": "analyst-input.json",
+    "question": "What went wrong? Is it still happening, and can we tell if the database caused it?",
+    "facts": {
+      "observed_now": "2 of 4 connections occupied (50.0%); 0 requests waiting.",
+      "observed_peak": "117 requests were waiting at the window maximum, 50.8 seconds before the latest reading. 4 connections were occupied at that instant.",
+      "forecast_interpretation": "The FPGA warns that requests may start waiting within the next ten seconds."
+    },
+    "answer": "\"ask_\": all_\"me\"\n\n[/Section_]=maintenance_requums_=statement()\n\nObs.123=all_reducing_question_to_=r(me:_that)\n\nFascancy data_mark: \"it's the latest_\"_data\"\n\n[/`=0`]\n\nThe first_fore_se_>____question_response_question_quer_comments=>\n> the problem_no_question_>s_marked_=0\"\n\nFasc_notes= \"the problem sol_>\"\n>",
+    "generated_tokens": 130,
+    "prompt_tokens": 141,
+    "stop": "length"
+  },
+  {
+    "model": "pinkprocess-fit:lfm12b-iq1s",
+    "capture": "analyst-board-window.json",
+    "question": "What went wrong? Is it still happening, and can we tell if the database caused it?",
+    "facts": {
+      "observed_now": "4 of 4 connections occupied (100.0%); 39 requests waiting.",
+      "observed_peak": "41 requests were waiting at the window maximum, 0.1 seconds before the latest reading. 4 connections were occupied at that instant.",
+      "forecast_interpretation": "The FPGA predicts the queue will remain nonempty over the next ten seconds. It expects more than the current 39 waiting at the end of that period."
+    },
+    "answer": "\"est\" is still working data. The first question: The primary solution is watching. Let us go through the data. The first question, the first and the second, the data. The first time, the first and the first.\"",
+    "generated_tokens": 49,
+    "prompt_tokens": 158,
+    "stop": "stop"
+  }
+]
