@@ -156,7 +156,8 @@ class Kit:
                 raise RuntimeError(job.get("error", "Board inference did not complete."))
             return dict(host=host, snapshot=snapshot, answer=job["answer"],
                         analyst_model=job["model"], analyst_location="PYNQ-Z2",
-                        capture_id=job["capture_id"], active=job["active"])
+                        capture_id=job["capture_id"], active=job["active"], baseline=job.get("baseline"),
+                        captured_at_ms=job.get("captured_at_ms"))
         if not snapshot.get("latest") or not snapshot.get("fresh"):
             return dict(host=host, snapshot=snapshot, answer=live_answer(snapshot, "stream_status", []))
         diagnosis = analyze_live_evidence(question, analyst_evidence(snapshot))
@@ -185,6 +186,11 @@ class Kit:
         with self.lock:
             if action == "answer_progress":
                 return {**self.board("lm_result", job_id=data.get("job_id")), "host": self.host}
+            if action == "lm_captures":
+                if set(data) - {"action", "before"}:
+                    raise ValueError("Invalid saved-capture listing request.")
+                fields = {"before": data["before"]} if "before" in data else {}
+                return {**self.board("lm_captures", **fields), "host": self.host}
             if action == "discover":
                 return {"boards": self.transport.discover()}
             if action == "connect":

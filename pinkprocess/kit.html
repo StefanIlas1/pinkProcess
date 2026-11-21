@@ -55,6 +55,14 @@ code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{ove
     <button class="primary" id="ask-live" type="submit" disabled>Ask</button>
   </form>
   <div class="buttons examples" id="live-examples" aria-label="Example questions"></div>
+  <div id="saved-incidents" class="stack divider" hidden>
+    <label class="field" for="saved-incident">Saved incident<select id="saved-incident"></select></label>
+    <small id="saved-incident-meta"></small>
+    <div class="buttons">
+      <button id="replay-saved" type="button">Replay with active weights</button>
+      <button id="more-incidents" type="button" hidden>Show older captures</button>
+    </div>
+  </div>
   <div id="live-result" class="stack divider" role="status" hidden>
     <h3 id="live-asked"></h3>
     <p id="live-answer" class="answer"></p><small id="live-evidence"></small>
@@ -118,6 +126,7 @@ let setup = null, status = null, address = "", csv = "", datasetName = "", busy 
 let result = null, visibleWarnings = 0, fileRevision = 0;
 let answerSnapshot = null, pollPending = false, interaction = 0, nextModelCheck = 0;
 let answerCapture = null, languageWeights = null;
+let savedCaptures = [], olderCaptures = null;
 const watcher = window.webkit?.messageHandlers?.watchCSV;
 let liveName = null, livePending = false;
 function stopWatching() {
@@ -170,6 +179,9 @@ function controls() {
   el("lm-author").disabled = !languageAvailable || !versionNamed || !el("lm-instruction").value.trim();
   el("lm-save").disabled = !languageAvailable || !versionNamed || !el("lm-artifact").files.length;
   el("replay-live").disabled = busy || !status?.lm_supported || !answerCapture;
+  el("saved-incident").disabled = busy || !savedCaptures.length;
+  el("replay-saved").disabled = busy || !status?.lm_supported || !el("saved-incident").value;
+  el("more-incidents").disabled = busy;
   for (const id of ["demo","upload","capacity","watch"]) el(id).disabled = busy || !setup;
   el("weight").disabled = busy;
   el("question").disabled = busy;
@@ -185,7 +197,10 @@ async function request(action, extra={}) {
   return data;
 }
 function setState(data) {
-  if (data.host !== address || !data.status?.lm_supported) displayWeightVersions(null);
+  if (data.host !== address || !data.status?.lm_supported) {
+    displayWeightVersions(null);
+    displaySavedCaptures();
+  }
   status = data.status; address = data.host || "";
   el("lm-versions").hidden = !status?.lm_supported;
   el("live-description").textContent = status?.lm_supported ?
@@ -223,7 +238,41 @@ function displayWeightVersions(data) {
   controls();
 }
 async function refreshWeightVersions() {
-  if (status?.lm_supported) displayWeightVersions(await request("lm_versions"));
+  if (status?.lm_supported) {
+    displayWeightVersions(await request("lm_versions"));
+    if (languageWeights.capture_listing_supported) await refreshSavedCaptures();
+  }
+}
+function savedCapture() {
+  return savedCaptures.find(capture => capture.id === el("saved-incident").value);
+}
+function captureTime(capture) {
+  return capture.captured_at_ms == null ? "Capture date unavailable" :
+    new Date(capture.captured_at_ms).toLocaleString();
+}
+function showSavedCaptureDetails() {
+  const capture = savedCapture();
+  el("saved-incident-meta").textContent = capture ?
+    "Reading at " + seconds(capture.reading_time_ms) + " · " +
+    (capture.baseline ? "First answer by " + capture.baseline.version.name : "First answer unavailable") :
+    "Ask a question to capture an incident on the board.";
+  controls();
+}
+function displaySavedCaptures(data=null, append=false) {
+  const selector = el("saved-incident");
+  const previous = selector.value;
+  savedCaptures = append ? [...savedCaptures, ...data.captures] : data?.captures || [];
+  olderCaptures = data?.before ?? null;
+  el("saved-incidents").hidden = !data;
+  el("more-incidents").hidden = olderCaptures === null;
+  selector.replaceChildren(...savedCaptures.map(capture =>
+    new Option(captureTime(capture) + " · " + capture.question, capture.id)));
+  if (savedCaptures.some(capture => capture.id === previous)) selector.value = previous;
+  showSavedCaptureDetails();
+}
+async function refreshSavedCaptures(before=null) {
+  const data = await request("lm_captures", before === null ? {} : {before});
+  displaySavedCaptures(data, before !== null);
 }
 function streamSource(data) {
   const source = data.source || "Telemetry source";
@@ -360,14 +409,15 @@ function askLive(question, captured=null) {
     if (!captured && !data.job_id) displayStream(data.snapshot);
     answerSnapshot = data.snapshot;
     const version = data.active?.name;
-    const baseline = captured?.baseline || {answer:data.answer, version};
+    const baseline = data.baseline || (captured ? captured.baseline : {answer:data.answer, version:data.active});
     const captureId = data.capture_id || captured?.id;
     answerCapture = typeof captureId === "string" ? {id:captureId, question, baseline} : null;
     el("replay-live").hidden = !answerCapture;
     el("prior-answer").hidden = !captured;
     if (captured) {
-      el("prior-answer-title").textContent = "First answer · " + (baseline.version || "Captured evidence");
-      el("prior-answer-text").textContent = baseline.answer;
+      el("prior-answer").open = true;
+      el("prior-answer-title").textContent = baseline ? "First answer · " + baseline.version.name : "First answer unavailable";
+      el("prior-answer-text").textContent = baseline?.answer || "This capture has no stored first answer.";
     }
     const evidence = [status.backend + " at " + data.host];
     if (data.snapshot.session) evidence.unshift(streamSource(data.snapshot), "Session " + data.snapshot.session.slice(0, 8));
@@ -391,6 +441,7 @@ function askLive(question, captured=null) {
       el("answer-measurements").textContent = facts.join(" ");
     }
     el("live-result").hidden = false;
+    if (answerCapture && !captured && languageWeights?.capture_listing_supported) await refreshSavedCaptures();
     show("");
   });
 }
@@ -401,6 +452,12 @@ el("ask-form").onsubmit = event => {
 el("replay-live").onclick = () => {
   if (answerCapture) askLive(answerCapture.question, answerCapture);
 };
+el("saved-incident").onchange = showSavedCaptureDetails;
+el("replay-saved").onclick = () => {
+  const capture = savedCapture();
+  if (capture) askLive(capture.question, capture);
+};
+el("more-incidents").onclick = () => run(() => refreshSavedCaptures(olderCaptures));
 for (const id of ["lm-name","lm-row","lm-instruction","lm-artifact","lm-selection"]) {
   el(id).addEventListener("input", controls);
   el(id).addEventListener("change", controls);

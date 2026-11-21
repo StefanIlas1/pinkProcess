@@ -148,10 +148,19 @@ class BoardLanguageTest(unittest.TestCase):
         rebooted_runtime = FakeRuntime()
         rebooted = self.coordinator(rebooted_runtime, snapshot=offline)
         self.assertEqual(rebooted_runtime.installed.metadata(), chosen)
-        replay = self.finish(rebooted, self.start(rebooted, capture_id=first["capture_id"]))
+        listed = rebooted.handle({"op": "lm_captures"})
+        expected_capture = dict(id=first["capture_id"], question=QUESTION, captured_at_ms=first["captured_at_ms"],
+                                reading_time_ms=6000, baseline={"answer": first["answer"], "version": first["active"]})
+        self.assertGreater(first["captured_at_ms"], 0)
+        self.assertEqual(listed, {"ok": True, "captures": [expected_capture], "before": None})
+        replay_job = self.start(rebooted, capture_id=first["capture_id"])
+        self.assertEqual(replay_job["baseline"], expected_capture["baseline"])
+        replay = self.finish(rebooted, replay_job)
         self.assertEqual(replay["active"], chosen)
+        self.assertEqual(replay["baseline"], expected_capture["baseline"])
         self.assertEqual(rebooted_runtime.prompts, runtime.prompts)
         self.assertNotEqual(replay["answer"], first["answer"])
+        self.assertEqual(rebooted.handle({"op": "lm_captures"}), listed)
         restored = rebooted.handle({"op": "lm_restore"})
         self.assertEqual(restored["active"]["name"], ORIGINAL)
         self.assertEqual(rebooted_runtime.installed.checkpoint, self.base)
@@ -169,6 +178,30 @@ class BoardLanguageTest(unittest.TestCase):
             connection.execute("UPDATE captures SET body = ? WHERE id = ?", (b"{}", captured))
         with self.assertRaisesRegex(ValueError, "unavailable or damaged"):
             self.start(coordinator, capture_id=captured)
+        self.assertEqual(coordinator.handle({"op": "lm_captures"})["captures"], [])
+
+    def test_capture_listing_paginates_legacy_records_without_inventing_baselines(self):
+        import json
+
+        coordinator = self.coordinator(FakeRuntime())
+        records = []
+        for index in range(22):
+            body = json.dumps(dict(question=QUESTION, prompt=f"Legacy prompt {index}",
+                                   snapshot=self.observation)).encode()
+            records.append((sha256(body).hexdigest(), body))
+        with coordinator.open_captures() as db:
+            db.executemany('INSERT INTO captures VALUES (?,?)', records)
+        recent = coordinator.handle({"op": "lm_captures"})
+        older = coordinator.handle({"op": "lm_captures", "before": recent["before"]})
+        self.assertEqual(len(recent["captures"]), 20)
+        self.assertEqual([item["id"] for item in older["captures"]], [records[1][0], records[0][0]])
+        self.assertIsNone(older["before"])
+        self.assertIsNone(older["captures"][0]["captured_at_ms"])
+        legacy = self.finish(coordinator, self.start(coordinator, capture_id=records[0][0]))
+        self.assertIn("Legacy prompt 0", legacy["answer"])
+        self.assertIsNone(legacy["baseline"])
+        with self.assertRaisesRegex(ValueError, "Invalid saved-capture page"):
+            coordinator.handle({"op": "lm_captures", "before": True})
 
     def test_failed_version_selection_keeps_runtime_and_store_in_sync(self):
         runtime = FakeRuntime()

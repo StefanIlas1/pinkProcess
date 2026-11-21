@@ -75,6 +75,17 @@ class KitTest(unittest.TestCase):
                 self.kit.action({"action": "lm_select", "name": "Astra", "weights": ...})
             self.assertEqual(send.call_count, 4)
 
+    def test_saved_capture_pages_are_forwarded(self):
+        self.kit.action({"action": "connect", "host": "pynq.local"})
+        with patch.object(self.transport, "request", return_value={"ok": True, "captures": [], "before": None}) as send:
+            result = self.kit.action({"action": "lm_captures"})
+            self.assertEqual(result, {"ok": True, "captures": [], "before": None, "host": "pynq.local"})
+            send.assert_called_once_with("lm_captures")
+            self.kit.action({"action": "lm_captures", "before": 4})
+            send.assert_called_with("lm_captures", before=4)
+            with self.assertRaisesRegex(ValueError, "Invalid saved-capture listing request"):
+                self.kit.action({"action": "lm_captures", "question": "private"})
+
     def test_select_then_query_latest(self):
         self.assertIsNone(self.kit.action({"action": "status"})["host"])
         data = dict(action="query", question="latest", csv=demo_csv(), capacity=DEMO_CAPACITY)
