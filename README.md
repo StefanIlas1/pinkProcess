@@ -17,12 +17,14 @@ The first domain is connection-pool telemetry.
 - I can ask Astra to create a weight edit and save it as a named version. Selecting any saved version loads its exact weights for FPGA inference. The app confirms which version is active, and the kit reloads it after a power cycle.
 - I can select Restore original at any time. The kit verifies the original weights, and my saved versions remain available.
 
-**Current status.** The FPGA scores live telemetry and supports switching
-between two predefined queue-onset profiles. Open-ended answers currently
-use a language model on the Mac. A separate TinyStories experiment verified
-a reversible output-layer edit. The board-resident analyst, its held-out
-diagnosis evaluation, and its named-version and power-cycle workflow still
-require end-to-end verification. [Physical evidence and experiment records](kit/live-context.md)
+**Current status.** The FPGA scores live telemetry. A provisioned language-model
+kit also supports a board-local FLAN encoder and decoder with FPGA INT8
+projections. Direct review of an independently seeded software evaluation
+found the frozen diagnostic weights answered 12 of 12 synthetic incidents
+correctly. The physical cold-power-cycle acceptance test is separate.
+[Checkpoint](profiles/flan-telemetry-diagnostic/README.md) ·
+[Held-out results](kit/evidence/blind-diagnosis-replacement-review.md) ·
+[Physical verification procedure](kit/verify_language_board.py)
 
 For the queue-onset predictor, the operator-facing quality measure is how often
 a warning appears on the Mac at least one second before a real request queues,
@@ -39,7 +41,7 @@ alongside misses and false alarms.
    kit starts a SQLite connection-pool demo on the board. Its generated traffic
    is labeled **Simulated**. The board gathers data while the app is closed.
 3. Ask a question in your own words, such as **What looks wrong with our system,
-   and what should I check next?** A quantized instruction model on the Mac
+   and what should I check next?** On kits provisioned with the resident model, FLAN runs on the board and
    receives the latest board measurements, their recent history and the FPGA
    forecast. It generates an answer for that capture. Expand **Readings behind
    this answer** to check it against the source. The four measurement and
@@ -59,6 +61,21 @@ A pool's occupancy and waiting counts can show when requests backed up and
 when the queue drained. Identifying a slow database query, a connection leak
 or a traffic spike requires additional measurements. An analyst response can
 suggest how to distinguish those explanations.
+
+### Edit and replay the resident language model
+
+After a generated answer, expand **Language model weights** and create a named
+version. Enter a word that corresponds to one output token (such as “Now”) or
+a token ID, and describe the intended first-token behavior. **Ask Astra and
+save** uses the signed-in Mac Codex CLI to design a row edit. The board
+stores the exact edited bytes against the original checkpoint. Select the
+name and press **Load version**. Each load verifies the classifier digest
+and probes an output row through FPGA scores. **Restore original** keeps the
+named versions in the library.
+
+Replay the captured question after a change to compare answers for identical
+data. The kit persists captures and answers so they can be reopened from the
+saved incident picker after reconnecting.
 
 ### Connect a live source
 
@@ -100,7 +117,7 @@ Mac. Add `--sqlite-demo` to enable generated board-local traffic. For another Ma
 **pinkProcess → Import Kit Pairing…**. The file grants access to query the kit
 and change its active profile.
 
-For open-ended analysis, install Ollama on the Mac and download the local Qwen3
+For older kits without a resident language checkpoint, install Ollama on the Mac and download the local Qwen3
 4B Instruct 2507 model once:
 
 ```sh
