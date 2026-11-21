@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from hashlib import sha256
 import json
+import mmap
 from pathlib import Path
 import re
 import sqlite3
@@ -55,13 +56,13 @@ class WeightVersion:
     checkpoint_sha256: str
     classifier_sha256: str
     patch: RowPatch | None
-    _base: bytes = field(repr=False, compare=False)
+    _base: bytes | memoryview = field(repr=False, compare=False)
     _layout: WeightLayout = field(repr=False, compare=False)
 
     @property
     def checkpoint(self):
         if self.patch is None:
-            return self._base
+            return bytes(self._base)
         start = self._layout.classifier_offset + self.patch.row * self._layout.width
         source = memoryview(self._base)
         return b"".join((source[:start], self.patch.payload, source[start + self._layout.width:]))
@@ -94,11 +95,18 @@ class WeightVersionStore:
         except (KeyError, TypeError, ValueError) as exc:
             raise ValueError("Invalid FLAN-T5 weights manifest.") from exc
         layout = WeightLayout(rows, width, offset, weights_sha256, manifest_sha256)
-        return cls(database, (model_dir / "weights.bin").read_bytes(), layout=layout)
+        # The installer publishes read-only, content-addressed model files. Both
+        # this verifier and the runtime can share the kernel's clean file pages.
+        with (model_dir / "weights.bin").open("rb") as source:
+            if not source.seek(0, 2):
+                raise ValueError("Base inference checkpoint is empty.")
+            mapped = memoryview(mmap.mmap(source.fileno(), 0, access=mmap.ACCESS_READ))
+        return cls(database, mapped, layout=layout)
 
     def __init__(self, database, base_checkpoint, *, layout=TINYSTORIES):
         self.database = Path(database)
-        self.base = bytes(base_checkpoint)
+        self.base = (base_checkpoint if isinstance(base_checkpoint, memoryview) and base_checkpoint.readonly
+                     and isinstance(base_checkpoint.obj, mmap.mmap) else bytes(base_checkpoint))
         self.layout = layout
         offset = layout.classifier_offset
         if any(type(value) is not int for value in (layout.rows, layout.width, offset)):

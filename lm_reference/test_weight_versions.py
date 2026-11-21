@@ -69,6 +69,9 @@ class WeightVersionTest(unittest.TestCase):
         database = model_dir / "flan.sqlite3"
         pin = sha256(manifest).hexdigest()
         store = WeightVersionStore.from_flan(database, model_dir, manifest_sha256=pin)
+        self.assertIsInstance(store.base, memoryview)
+        self.assertTrue(store.base.readonly)
+        self.assertIsInstance(store.active().checkpoint, bytes)
         self.assertEqual(store.active().checkpoint, self.base)
         with self.assertRaisesRegex(ValueError, "manifest SHA-256 mismatch"):
             WeightVersionStore.from_flan(database, model_dir, manifest_sha256="0" * 64)
