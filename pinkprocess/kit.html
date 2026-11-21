@@ -10,9 +10,9 @@
 header,.row,.spread,.buttons{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.spread,header{justify-content:space-between}
 header{padding-bottom:18px;border-bottom:1px solid var(--line)}.brand{font-weight:750;font-size:1.18rem;letter-spacing:-.055em}.brand span{color:var(--pink)}
 h1,h2,h3,p{margin:0}h1{font-size:clamp(1.8rem,4vw,2.65rem);letter-spacing:-.055em;line-height:1.15;margin:27px 0 17px}h2{font-size:1.2rem;letter-spacing:-.025em}h3{font-size:.96rem}
-button,input,select{font:inherit}button,input,select,.file{border-radius:7px;border:1px solid #545d60;color:var(--ink);background:#252a2d;padding:8px 12px;max-width:100%}button,.file{cursor:pointer;font-weight:600}
+button,input,select,textarea{font:inherit}button,input,select,textarea,.file{border-radius:7px;border:1px solid #545d60;color:var(--ink);background:#252a2d;padding:8px 12px;max-width:100%}button,.file{cursor:pointer;font-weight:600}
 button.primary{background:var(--pink);border-color:var(--pink);color:#27161e}button:disabled{opacity:.45;cursor:default}
-button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.file:focus-within{outline:2px solid var(--mint);outline-offset:3px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,.file:focus-within{outline:2px solid var(--mint);outline-offset:3px}
 input,select{min-width:0}label.field{display:grid;gap:5px;color:var(--dim);font-size:.9rem}label.field>*{color:var(--ink)}
 .panel{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:20px;min-width:0}.boardrow{display:flex;align-items:flex-end;flex-wrap:wrap;gap:10px;margin-top:10px}.boardrow label{flex:1;min-width:165px}
 .grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(204px,1fr);gap:16px;margin-top:16px;align-items:start}.stack{display:grid;gap:14px;min-width:0}.muted,small{color:var(--dim)}small{font-size:.82rem}
@@ -26,6 +26,8 @@ code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{ove
 #live-answer{white-space:pre-line;font-size:1.1rem;line-height:1.5} .live-reading{border-top:1px solid var(--line);padding-top:12px}.live-reading .answer{font-size:1.15rem}
 .ask{display:flex;align-items:end;gap:8px;flex-wrap:wrap}.ask .field{flex:1;min-width:185px}
 .examples{gap:6px}.examples button{font-size:.83rem;font-weight:500;padding:4px 8px}
+#lm-version{overflow-wrap:anywhere}#lm-editor form{margin-top:14px}#lm-instruction{resize:vertical}
+#prior-answer-text{white-space:pre-line}
 .csv-workspace{margin-top:16px}.csv-workspace>summary{font-weight:600}.csv-workspace h2{margin:10px 0 0}
 [hidden]{display:none!important}@media(max-width:675px){main{padding:16px}.grid{grid-template-columns:1fr}.panel{padding:16px}.boardrow label{flex-basis:100%}}
 </style>
@@ -46,7 +48,7 @@ code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{ove
 <p id="notice" role="status" aria-live="polite"></p>
 <div class="grid">
 <section class="panel stack" aria-labelledby="live-heading">
-  <div><h2 id="live-heading">Board telemetry</h2><p class="muted">Ask what looks wrong. The local language model on this Mac reads measurements and forecasts from the connected FPGA kit.</p></div>
+  <div><h2 id="live-heading">Board telemetry</h2><p class="muted" id="live-description">Ask about measurements and forecasts from the connected FPGA kit.</p></div>
   <div class="live-reading"><p id="stream-state" class="answer">Connect to a board</p><p id="stream-meta" class="muted"></p></div>
   <form class="ask" id="ask-form">
     <label class="field" for="live-question">Question<input id="live-question" type="text" maxlength="500" placeholder="What looks wrong with our system?" required></label>
@@ -57,7 +59,30 @@ code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{ove
     <h3 id="live-asked"></h3>
     <p id="live-answer" class="answer"></p><small id="live-evidence"></small>
     <details id="answer-readings" hidden><summary>Readings behind this answer</summary><p id="answer-measurements"></p></details>
+    <div><button id="replay-live" type="button" hidden>Replay captured evidence</button></div>
+    <details id="prior-answer" hidden><summary id="prior-answer-title"></summary><p id="prior-answer-text"></p></details>
   </div>
+</section>
+<aside class="stack">
+<section id="lm-versions" class="panel stack" aria-labelledby="lm-versions-heading" hidden>
+  <h2 id="lm-versions-heading">Language model weights</h2>
+  <div><small>Active version</small><p id="lm-version" aria-live="polite"></p></div>
+  <details><summary>Checkpoint SHA-256</summary><code id="lm-hash"></code></details>
+  <label class="field divider" for="lm-selection">Saved version<select id="lm-selection"></select></label>
+  <div class="buttons">
+    <button id="lm-select">Load version</button><button id="lm-restore">Restore original</button>
+  </div>
+  <details id="lm-editor" class="divider"><summary>Create a weight version</summary>
+    <form id="lm-author-form" class="stack">
+      <label class="field" for="lm-name">Version name<input id="lm-name" maxlength="80" required></label>
+      <label class="field" for="lm-row">Target token ID<input id="lm-row" type="number" min="0" max="32127" step="1" required></label>
+      <label class="field" for="lm-instruction">Edit request<textarea id="lm-instruction" maxlength="1000" rows="3" aria-describedby="lm-calibration"></textarea></label>
+      <small id="lm-calibration">Ask the board a calibration question before asking Astra to edit the weights.</small>
+      <div class="buttons"><button id="lm-author" type="submit">Ask Astra and save</button></div>
+      <label class="field" for="lm-artifact">Astra response JSON<input id="lm-artifact" type="file" accept=".json,application/json"></label>
+      <div class="buttons"><button id="lm-save" type="button">Save from JSON</button></div>
+    </form>
+  </details>
 </section>
 <section class="panel stack" aria-labelledby="model-heading">
   <h2 id="model-heading">Queue-onset model</h2><div><small>Active version</small><p id="version">Connect a board to read its model.</p></div>
@@ -65,7 +90,7 @@ code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{ove
   <details><summary>Weight fingerprint</summary><code id="hash"></code></details>
   <label class="field divider" for="weight">Queue-onset weight profile<select id="weight"></select></label>
   <div class="buttons"><button id="apply">Apply weights</button><button id="rollback">Restore base</button></div></div>
-</section></div>
+</section></aside></div>
 <details class="panel csv-workspace" id="csv-workspace">
 <summary>CSV analysis on this Mac</summary>
 <section class="stack" aria-labelledby="query-heading">
@@ -92,6 +117,7 @@ const seconds = ms => (ms / 1000).toLocaleString(undefined, {minimumFractionDigi
 let setup = null, status = null, address = "", csv = "", datasetName = "", busy = true;
 let result = null, visibleWarnings = 0, fileRevision = 0;
 let answerSnapshot = null, pollPending = false, interaction = 0, nextModelCheck = 0;
+let answerCapture = null, languageWeights = null;
 const watcher = window.webkit?.messageHandlers?.watchCSV;
 let liveName = null, livePending = false;
 function stopWatching() {
@@ -135,6 +161,15 @@ function controls() {
   el("query").disabled = busy || !status || !csv || !el("capacity").value || !el("question").value;
   el("apply").disabled = busy || !status || !el("weight").value || el("weight").value === status.version;
   el("rollback").disabled = busy || !status || status.version === "pool-logistic-v1";
+  const languageAvailable = !busy && Boolean(status?.lm_supported && languageWeights);
+  const versionNamed = el("lm-name").value.trim() && el("lm-row").value !== "" && el("lm-row").validity.valid;
+  el("lm-selection").disabled = !languageAvailable;
+  el("lm-select").disabled = !languageAvailable || el("lm-selection").value === languageWeights?.active.name;
+  el("lm-restore").disabled = !languageAvailable || languageWeights?.active.name === "original";
+  for (const id of ["lm-name", "lm-row", "lm-instruction", "lm-artifact"]) el(id).disabled = !languageAvailable;
+  el("lm-author").disabled = !languageAvailable || !versionNamed || !el("lm-instruction").value.trim();
+  el("lm-save").disabled = !languageAvailable || !versionNamed || !el("lm-artifact").files.length;
+  el("replay-live").disabled = busy || !status?.lm_supported || !answerCapture;
   for (const id of ["demo","upload","capacity","watch"]) el(id).disabled = busy || !setup;
   el("weight").disabled = busy;
   el("question").disabled = busy;
@@ -150,7 +185,12 @@ async function request(action, extra={}) {
   return data;
 }
 function setState(data) {
+  if (data.host !== address || !data.status?.lm_supported) displayWeightVersions(null);
   status = data.status; address = data.host || "";
+  el("lm-versions").hidden = !status?.lm_supported;
+  el("live-description").textContent = status?.lm_supported ?
+    "Ask about the system. The kit’s language model reads the measurements and forecasts." :
+    "Ask about measurements and forecasts from the connected FPGA kit.";
   if (address) el("host").value = address;
   el("resident").hidden = !status;
   el("version").textContent = status ? status.version : "Connect a board to read its model.";
@@ -168,13 +208,29 @@ function setState(data) {
 function clearLiveAnswer() {
   el("live-result").hidden = true;
   answerSnapshot = null;
+  answerCapture = null;
+}
+function displayWeightVersions(data) {
+  languageWeights = data;
+  const selector = el("lm-selection");
+  const previous = selector.value;
+  const versions = data?.versions || [];
+  const active = data?.active;
+  selector.replaceChildren(...versions.map(version => new Option(version.name, version.name)));
+  selector.value = versions.some(version => version.name === previous) ? previous : active?.name || "";
+  el("lm-version").textContent = active?.name || "Reading board versions…";
+  el("lm-hash").textContent = active?.checkpoint_sha256 || "";
+  controls();
+}
+async function refreshWeightVersions() {
+  if (status?.lm_supported) displayWeightVersions(await request("lm_versions"));
 }
 function streamSource(data) {
   const source = data.source || "Telemetry source";
   return data.origin === "demo" ? "Simulated · " + source : source;
 }
 function displayStream(data) {
-  if (answerSnapshot && (!data || data.session !== answerSnapshot.session ||
+  if (!answerCapture && answerSnapshot && (!data || data.session !== answerSnapshot.session ||
       data.fresh !== answerSnapshot.fresh)) clearLiveAnswer();
   const labels = {
     idle:"Waiting for telemetry",
@@ -279,35 +335,44 @@ el("refresh").onclick = () => run(discover);
 el("host").oninput = controls;
 el("connect").onclick = () => run(async () => {
   show("Connecting to the board…"); setState(await request("connect",{host:el("host").value.trim()})); livePending = Boolean(liveName && csv);
-  el("discovery").textContent = ""; clearAnswer(); clearLiveAnswer(); await refreshStream(); show("");
+  el("discovery").textContent = ""; clearAnswer(); clearLiveAnswer(); await refreshStream(); await refreshWeightVersions(); show("");
 });
 el("disconnect").onclick = () => run(async () => {setState(await request("disconnect")); clearAnswer(); clearLiveAnswer(); show("Board disconnected.");});
 el("live-question").oninput = controls;
-el("ask-form").onsubmit = event => {
-  event.preventDefault();
-  if (el("ask-live").disabled) return;
-  const question = el("live-question").value.trim();
+function askLive(question, captured=null) {
   run(async () => {
-    clearLiveAnswer();
-    show("Reading board evidence and preparing your answer…");
-    const data = await request("ask_live",{question});
-    displayStream(data.snapshot);
+    if (!captured) clearLiveAnswer();
+    show(captured ? "Replaying captured evidence…" : "Reading board evidence and preparing your answer…");
+    const fields = captured ? {question, capture_id:captured.id} : {question};
+    const data = await request("ask_live",fields);
+    if (!captured) displayStream(data.snapshot);
     answerSnapshot = data.snapshot;
+    const version = data.active?.name;
+    const baseline = captured?.baseline || {answer:data.answer, version};
+    const captureId = data.capture_id || captured?.id;
+    answerCapture = typeof captureId === "string" ? {id:captureId, question, baseline} : null;
+    el("replay-live").hidden = !answerCapture;
+    el("prior-answer").hidden = !captured;
+    if (captured) {
+      el("prior-answer-title").textContent = "First answer · " + (baseline.version || "Captured evidence");
+      el("prior-answer-text").textContent = baseline.answer;
+    }
     const evidence = [status.backend + " at " + data.host];
     if (data.snapshot.session) evidence.unshift(streamSource(data.snapshot), "Session " + data.snapshot.session.slice(0, 8));
     if (data.snapshot.latest) evidence.push("Reading at " + seconds(data.snapshot.latest.time_ms));
     if (data.snapshot.forecast) evidence.push(data.snapshot.forecast.version);
     if (data.analyst_model) evidence.push(data.analyst_model + " · " + data.analyst_location);
+    if (version) evidence.push("Weight version " + version);
     el("live-asked").textContent = question;
     el("live-answer").textContent = data.answer;
     el("live-evidence").textContent = evidence.join(" · ");
-    const captured = data.snapshot;
-    el("answer-readings").hidden = !data.analyst_model || !captured.latest;
+    const snapshot = data.snapshot;
+    el("answer-readings").hidden = !data.analyst_model || !snapshot.latest;
     el("answer-readings").open = false;
-    if (captured.latest) {
-      const facts = [captured.latest.busy + " of " + captured.capacity + " connections busy and " +
-        captured.latest.waiting + " requests waiting at " + seconds(captured.latest.time_ms) + "."];
-      const window = captured.observations;
+    if (snapshot.latest) {
+      const facts = [snapshot.latest.busy + " of " + snapshot.capacity + " connections busy and " +
+        snapshot.latest.waiting + " requests waiting at " + seconds(snapshot.latest.time_ms) + "."];
+      const window = snapshot.observations;
       if (window?.peak_waiting) facts.push("Peak queue: " + window.peak_waiting.waiting +
         " across " + window.sample_count + " readings from " + seconds(window.start_ms) +
         " to " + seconds(window.end_ms) + ".");
@@ -316,7 +381,46 @@ el("ask-form").onsubmit = event => {
     el("live-result").hidden = false;
     show("");
   });
+}
+el("ask-form").onsubmit = event => {
+  event.preventDefault();
+  if (!el("ask-live").disabled) askLive(el("live-question").value.trim());
 };
+el("replay-live").onclick = () => {
+  if (answerCapture) askLive(answerCapture.question, answerCapture);
+};
+for (const id of ["lm-name","lm-row","lm-instruction","lm-artifact","lm-selection"]) {
+  el(id).addEventListener("input", controls);
+  el(id).addEventListener("change", controls);
+}
+const weightDraft = () => ({name:el("lm-name").value.trim(), target_row:Number(el("lm-row").value)});
+el("lm-author-form").onsubmit = event => {
+  event.preventDefault();
+  if (el("lm-author").disabled) return;
+  run(async () => {
+    const draft = weightDraft();
+    show("Asking Astra to propose an INT8 row…");
+    displayWeightVersions(await request("lm_author", {...draft, instruction:el("lm-instruction").value.trim()}));
+    el("lm-selection").value = draft.name;
+    show("Saved weight version " + draft.name + ".");
+  });
+};
+el("lm-save").onclick = () => run(async () => {
+  const file = el("lm-artifact").files[0], draft = weightDraft();
+  if (file.size > 128 * 1024) throw new Error("Choose an Astra response JSON smaller than 128 KiB.");
+  const response = JSON.parse(await file.text());
+  displayWeightVersions(await request("lm_save", {...draft, response}));
+  el("lm-selection").value = draft.name;
+  el("lm-artifact").value = "";
+  show("Saved weight version " + draft.name + ".");
+});
+for (const action of ["select", "restore"]) el("lm-" + action).onclick = () => run(async () => {
+  const fields = action === "select" ? {name:el("lm-selection").value} : {};
+  const data = await request("lm_" + action, fields);
+  displayWeightVersions(data);
+  el("lm-selection").value = data.active.name;
+  show("Active language model version is " + data.active.name + ".");
+});
 el("watch").onclick = () => watcher.postMessage("pick");
 el("unwatch").onclick = () => {const name=liveName;stopWatching();fileRevision++;setDataset(csv,"Snapshot · " + name);show("Stopped watching the CSV.");};
 el("demo").onclick = () => {stopWatching(); fileRevision++; el("upload").value=""; el("capacity").value=setup.capacity; setDataset(setup.csv,"Simulated pool telemetry"); show("");};
@@ -331,8 +435,10 @@ el("question").onchange = () => {clearAnswer();livePending=Boolean(liveName && c
 el("weight").onchange = controls;
 for (const action of ["apply","rollback"]) el(action).onclick = () => run(async () => {
   const supportsStream = status.stream_supported;
+  const supportsLanguageModel = status.lm_supported;
   const update = await request(action,{version:el("weight").value});
   update.status.stream_supported ??= supportsStream;
+  update.status.lm_supported ??= supportsLanguageModel;
   setState(update); clearAnswer(); clearLiveAnswer(); await refreshStream(); livePending = Boolean(liveName && csv); show("Active board weights updated.");
 });
 el("query").onclick = () => run(async () => {
@@ -354,7 +460,7 @@ async function start() {
       el("live-examples").append(button);
     }
     setState(await request("status"));
-    if (status) await refreshStream();
+    if (status) {await refreshStream(); await refreshWeightVersions();}
     else await discover();
   } catch (err) {show(err.message,true);}
   finally {busy=false; controls();}
@@ -384,6 +490,10 @@ setInterval(async () => {
         clearAnswer(); clearLiveAnswer();
       }
       setState(data);
+      if (status?.lm_supported) {
+        const versions = await request("lm_versions");
+        if (startedAt === interaction) displayWeightVersions(versions);
+      }
       nextModelCheck = Date.now() + 10000;
     }
     if (status?.stream_supported) {

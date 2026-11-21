@@ -59,12 +59,12 @@ class RowPatch:
     quantized_model_hash: str | None = None
 
     @classmethod
-    def parse(cls, document):
+    def parse(cls, document, *, rows=ROWS, width=WIDTH):
         if not isinstance(document, dict) or document.get("format") != "pinkprocess.int8-output-row.v1":
             raise ValueError("Expected a pinkProcess INT8 output-row patch v1.")
         row = document.get("target_row")
-        if type(row) is not int or not 0 <= row < ROWS:
-            raise ValueError(f"Target row must be an integer from 0 to {ROWS - 1}.")
+        if type(row) is not int or not 0 <= row < rows:
+            raise ValueError(f"Target row must be an integer from 0 to {rows - 1}.")
         fields = ["model_sha256", "base_classifier_sha256", "original_row_sha256", "payload_sha256"]
         if "quantized_model_sha256" in document:
             fields.append("quantized_model_sha256")
@@ -74,9 +74,9 @@ class RowPatch:
                 raise ValueError(f"Invalid {field}.")
         encoded = document.get("payload_hex")
         payload_bytes = document.get("payload_bytes")
-        if (type(payload_bytes) is not int or payload_bytes != WIDTH or not isinstance(encoded, str)
-                or not re.fullmatch(rf"[0-9a-f]{{{2 * WIDTH}}}", encoded)):
-            raise ValueError(f"Patch payload must encode exactly {WIDTH} bytes.")
+        if (type(payload_bytes) is not int or payload_bytes != width or not isinstance(encoded, str)
+                or not re.fullmatch(rf"[0-9a-f]{{{2 * width}}}", encoded)):
+            raise ValueError(f"Patch payload must encode exactly {width} bytes.")
         payload = bytes.fromhex(encoded)
         if 128 in payload:
             raise ValueError("Patch weights must be in the symmetric INT8 range −127 to 127.")
