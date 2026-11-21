@@ -108,7 +108,8 @@ class Flan:
             # Float32 represents every integer sum exactly for these dimensions.
             dots = q.astype("float32") @ w.astype("float32").T
         else:
-            dots = np.asarray(self.fabric.matmat(memoryview(w), q, w.shape[0]), dtype="float32")
+            project = getattr(self.fabric, "matmat_array", None) or self.fabric.matmat
+            dots = np.asarray(project(memoryview(w), q, w.shape[0]), dtype="float32")
             self.fabric_projections += 1
         row_scales = self.t[name + ".weight.scale"]
         if name == "lm_head" and self.first_output_max is None:
