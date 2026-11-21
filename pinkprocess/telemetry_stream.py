@@ -16,6 +16,8 @@ WINDOW_SIZE = OBSERVATION_MS // SAMPLE_MS
 HISTORY_SIZE = MAX_LOOKBACK_MS // SAMPLE_MS
 MAX_BATCH = 512
 QUERY_OPS = ("stream_status", "stream_forecast", "stream_observations", "stream_evidence")
+BOARD_DEMO_SOURCE = "Board SQLite demo (generated traffic)"
+FIXTURE_SOURCE_PREFIX = "Synthetic acceptance fixture"
 
 
 def session_id(value):
@@ -109,13 +111,25 @@ class TelemetryStream:
             raise ValueError("Supply a telemetry source label of 1 to 128 characters.")
         if origin not in ("live", "demo"):
             raise ValueError("Telemetry origin must be live or demo.")
+        guarded = "fixture_after_session" in request
+        if guarded or source.startswith(FIXTURE_SOURCE_PREFIX):
+            if not guarded or origin != "demo" or not source.startswith(FIXTURE_SOURCE_PREFIX + " "):
+                raise ValueError("Synthetic acceptance fixtures need a guarded demo source.")
+            expected = request["fixture_after_session"]
+            if expected is not None:
+                expected = session_id(expected)
+            current = active.id if active else None
+            if current != expected or (active is not None and (
+                active.id == session or active.origin != "demo" or active.source != BOARD_DEMO_SOURCE
+            )):
+                raise ValueError("The expected SQLite demo or idle stream no longer owns the board.")
         rows = parse_batch(request.get("readings"), capacity)
 
         if active is None or active.id != session:
             if session in self.retired:
                 raise ValueError("Telemetry session has ended. Start a new session.")
             if active is not None:
-                takeover = active.origin == "demo" and origin == "live"
+                takeover = guarded or (active.origin == "demo" and origin == "live")
                 if active.fresh(now) and not takeover:
                     raise ValueError("Another telemetry session is active.")
                 self.retired.append(active.id)
@@ -168,6 +182,8 @@ class TelemetryStream:
         session = session_id(request["session"]) if "session" in request else None
         result = self.snapshot(self.clock(), session)
         op = request["op"]
+        if op == "stream_status":
+            result["fixture_guard_supported"] = True
         if op in ("stream_forecast", "stream_evidence"):
             result["forecast"] = self.active.forecast if result["state"] == "ready" else None
         if op in ("stream_observations", "stream_evidence"):

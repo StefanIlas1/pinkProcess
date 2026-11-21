@@ -7,10 +7,9 @@ import sqlite3
 import uuid
 
 from .simulator import SAMPLE_MS
-from .telemetry_stream import FRESH_SECONDS
+from .telemetry_stream import BOARD_DEMO_SOURCE as SOURCE, FRESH_SECONDS
 
 CAPACITY = 4
-SOURCE = "Board SQLite demo (generated traffic)"
 
 
 async def _publish_samples(publish, stopped, samples):

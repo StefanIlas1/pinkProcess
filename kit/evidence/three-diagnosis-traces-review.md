@@ -19,3 +19,15 @@ build/flan/venv/bin/python -m kit.verify_diagnosis_traces \
   build/flan/diagnostic build/flan/three-diagnosis-traces-w8a8.json \
   --manifest-sha256 14d7912c66a78edf407bbb272f7aa04b953af920827a9a035275194ec4f2f2f2
 ```
+
+## Optional paired-board replay
+
+Use a paired PYNQ-Z2 running firmware with guarded synthetic ingress. Leave the frozen original language-model version and the pool-logistic-v1 forecast profile selected. The board must be idle or publishing its SQLite demo.
+
+```sh
+python3 -m kit.verify_diagnosis_board pynq.local build/three-diagnosis-traces-board.json
+```
+
+For each frozen trace the runner submits the recorded samples through authenticated ingress. The board admits a labeled synthetic fixture only while the observed SQLite demo session still owns the stream or the board is still idle. The runner releases its own session immediately after capture, including when a request fails, so the demo or another producer can publish while generation finishes. This command runs without a local language-model runtime.
+
+The JSON report includes the exact captured evidence, capture digest, active weight fingerprints and Linux boot ID, FPGA forecast submission count, language-model fabric projection count, producer status after release, and comparison against the frozen expected answer. A paired physical run has yet to produce a report.
