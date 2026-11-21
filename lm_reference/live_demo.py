@@ -1,9 +1,11 @@
 """Drive live TinyStories generation with the PYNQ-Z2 output classifier."""
 
 import argparse
+import ctypes
 import hashlib
 import json
 from pathlib import Path
+import platform
 from statistics import median
 import tempfile
 from time import monotonic, perf_counter
@@ -17,13 +19,48 @@ from lm_reference.reference import (
 
 class PynqClassifier:
     def __init__(self, bitstream):
+        import numpy as np
         from pynq import Overlay
 
         self.overlay = Overlay(str(bitstream))
         self.mmio = self.overlay.classifier.mmio
+        array = self.mmio.array
+        self._np = np
+        self._mapped_words = (isinstance(array, np.ndarray) and array.dtype == np.dtype("<u4")
+                              and array.ndim == 1 and array.flags.c_contiguous and array.flags.aligned
+                              and array.flags.writeable)
+        self._arm_mmio = platform.system() == "Linux" and platform.machine().lower().startswith(("arm", "aarch64"))
+        self._native_mmio = None
+        if self._arm_mmio and self._mapped_words:
+            library = Path(__file__).resolve().parents[1] / "fpga" / "mmio_words.so"
+            try:
+                self._native_mmio = ctypes.CDLL(str(library))
+            except OSError:
+                pass  # The word-at-a-time Python MMIO API also works without a compiler.
+            else:
+                for access in (self._native_mmio.pp_mmio_write32, self._native_mmio.pp_mmio_read32):
+                    access.argtypes = (ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t)
+                    access.restype = None
+        self.weight_revision = 0
 
     def write(self, address, values):
         self.wait_for(idle=True)
+        if address < INPUT:
+            self.weight_revision += 1
+        # Leave activation and control writes on the ordinary MMIO path.
+        if (self._mapped_words and isinstance(values, (bytes, bytearray))
+                and 0 <= address < INPUT and address + len(values) <= INPUT
+                and address % 4 == 0 and len(values) % 4 == 0):
+            array = self.mmio.array
+            words = self._np.frombuffer(values, "<u4")
+            if self._native_mmio is not None:
+                if not words.flags.aligned:
+                    words = words.copy()
+                self._native_mmio.pp_mmio_write32(array.ctypes.data + address, words.ctypes.data, words.size)
+                return
+            if not self._arm_mmio:
+                array[address // 4:(address + len(values)) // 4] = words
+                return
         for _, offset, word in writes(address, values):
             self.mmio.write(offset, word)
 
@@ -42,9 +79,33 @@ class PynqClassifier:
         self.wait_for(idle=False)
 
     def score(self, activation):
+        return self.score_rows(activation, 0, ROWS)
+
+    def score_rows(self, activation, first_row, row_count):
+        if first_row < 0 or row_count < 0 or first_row + row_count > ROWS:
+            raise ValueError("The requested score rows are outside the overlay.")
+        output = self._np.empty(row_count, dtype=self._np.int32)
+        self.score_rows_into(activation, first_row, output)
+        return output.tolist()
+
+    def score_rows_into(self, activation, first_row, output):
+        """Read signed scores into a caller-owned, aligned int32 vector."""
+        if (output.ndim != 1 or output.dtype != self._np.int32 or not output.flags.c_contiguous
+                or not output.flags.aligned or not output.flags.writeable):
+            raise ValueError("Expected an aligned, writable, contiguous int32 vector.")
+        if first_row < 0 or first_row + output.size > ROWS:
+            raise ValueError("The requested score rows are outside the overlay.")
         self.submit(activation)
-        first_score = SCORES // 4
-        return self.mmio.array[first_score:first_score + ROWS].view("int32").tolist()
+        address = SCORES + 4 * first_row
+        if self._native_mmio is not None:
+            self._native_mmio.pp_mmio_read32(output.ctypes.data, self.mmio.array.ctypes.data + address, output.size)
+        elif self._mapped_words and not self._arm_mmio:
+            first = address // 4
+            output[:] = self.mmio.array[first:first + output.size].view("int32")
+        else:
+            for i in range(output.size):
+                word = self.mmio.read(address + 4 * i)
+                output[i] = word if word < (1 << 31) else word - (1 << 32)
 
     def read_row(self, row):
         # A single 1 in the input makes this token's score equal that weight.
