@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pinkProcess · TinyStories</title>
+<style>
+:root{color-scheme:dark;--page:#121419;--panel:#1a1e26;--rule:#363c49;--text:#f4f3f6;--muted:#afb6c7;--pink:#ff9bbd;--mint:#a6e8d5;font:16px/1.55 system-ui,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--text)}
+main{max-width:1080px;margin:auto;padding:44px 24px 72px}
+header{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-bottom:24px;border-bottom:1px solid var(--rule)}
+h1,h2,h3,p{margin:0}h1{font-size:2.1rem;letter-spacing:-.055em}h2{font-size:1.35rem;letter-spacing:-.02em}h3{font-size:1rem}
+header p,.muted,label{color:var(--muted)}header p{margin-top:4px}.board{color:var(--mint);font-size:.9rem;text-align:right}
+.layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(230px,1fr);gap:18px;margin-top:22px;align-items:start}
+section{border:1px solid var(--rule);background:var(--panel);border-radius:13px;padding:22px;min-width:0}
+.controls{display:grid;gap:14px}.actions{display:flex;gap:8px;flex-wrap:wrap}
+button,select,input{font:inherit;color:var(--text);background:#242a35;border:1px solid #50596b;border-radius:7px;padding:8px 12px}
+select,input{width:100%}button{cursor:pointer;font-weight:600}button.primary{background:var(--pink);color:#22131c;border-color:var(--pink)}
+button:disabled{opacity:.46;cursor:default}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
+code{font-family:ui-monospace,monospace;font-size:.82rem;overflow-wrap:anywhere;color:var(--mint)}
+.version{border-top:1px solid var(--rule);padding-top:14px}.version code{display:block;margin-top:4px}
+.story{font-size:1.32rem;line-height:1.65;margin-top:19px}.subline{margin-top:12px;color:var(--muted);font-size:.9rem}
+.query{display:grid;gap:10px;margin-top:12px}
+.story{overflow-wrap:anywhere}
+#notice{min-height:1.6em;margin-top:16px;color:var(--mint)}#notice[data-error="true"]{color:var(--pink)}
+#preview{margin-top:16px}#preview label{display:block;margin:14px 0 5px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.pair>div{border-left:2px solid var(--rule);padding-left:12px;min-width:0}
+.pair h3{color:var(--muted);margin-bottom:5px}.bytes{margin-top:15px}details summary{cursor:pointer;color:var(--mint)}
+details p{margin-top:8px}.byte-change{background:#733951;color:#fff;padding:1px}
+@media(max-width:720px){main{padding:28px 14px}.layout,.pair{grid-template-columns:1fr}header{align-items:flex-start}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div><h1>pinkProcess</h1><p>Quantized TinyStories</p></div>
+    <div id="board" class="board">Starting model</div>
+  </header>
+  <div class="layout">
+    <section aria-labelledby="story-heading">
+      <h2 id="story-heading">Live story</h2>
+      <form id="query" class="query">
+        <label for="prompt">Start a story</label>
+        <input id="prompt" type="text" maxlength="256" autocomplete="off" spellcheck="false" required>
+        <div class="actions"><button data-action="generate" class="primary" type="submit" disabled>Generate story</button></div>
+      </form>
+      <p id="story" class="story" aria-live="polite"></p>
+      <p id="scores" class="subline"></p>
+    </section>
+    <section class="controls" aria-labelledby="control-heading">
+      <h2 id="control-heading">Weight control</h2>
+      <div><label for="candidate">Patch bundle</label><select id="candidate"></select></div>
+      <div class="actions">
+        <button data-action="preview" disabled>Preview</button>
+        <button data-action="apply" class="primary" disabled>Apply patch</button>
+        <button data-action="rollback" disabled>Roll back</button>
+      </div>
+      <div class="version"><p class="muted">Active version</p><p id="version">Connecting</p><code id="hash"></code></div>
+      <div class="actions"><button data-action="verify" disabled>Verify weights</button></div>
+    </section>
+  </div>
+  <p id="notice" role="status"></p>
+  <section id="preview" aria-labelledby="preview-heading" hidden>
+    <h2 id="preview-heading">Patch preview</h2>
+    <p id="row" class="muted"></p>
+    <label for="example">Saved prompt</label><select id="example"></select>
+    <p id="difference" class="subline"></p>
+    <div class="pair">
+      <div><h3>Original weights</h3><p id="original"></p></div>
+      <div><h3>Candidate weights</h3><p id="edited"></p></div>
+    </div>
+    <details class="bytes"><summary>Compare all 64 row bytes</summary><p>Original <code id="original-bytes"></code></p><p>Candidate <code id="edited-bytes"></code></p></details>
+  </section>
+</main>
+<script>
+const byId = (id) => document.getElementById(id);
+const buttons = [...document.querySelectorAll("button[data-action]")];
+const pending = {preview:"Running the preview…",apply:"Applying the patch…",rollback:"Restoring the base row…",verify:"Reading all 512 rows…",generate:"Generating story…"};
+let busy = true;
+let active = null;
+let connected = false;
+let preview = null;
+
+function controls() {
+  const selected = Boolean(byId("candidate").value);
+  for (const button of buttons) {
+    const action = button.dataset.action;
+    button.disabled = busy || !connected
+      || (action === "rollback" && active === null)
+      || (action === "apply" && (active !== null || !selected))
+      || (action === "preview" && !selected)
+      || (action === "generate" && !byId("prompt").value.trim());
+  }
+}
+
+function setStatus(state) {
+  active = state.active_row;
+  byId("version").textContent = active === null ? "Base classifier" : "Patched row " + active;
+  byId("hash").textContent = state.expected_classifier_sha256;
+  controls();
+}
+
+function notice(message, error = false) {
+  byId("notice").textContent = message;
+  byId("notice").dataset.error = String(error);
+}
+
+function showExample() {
+  const row = preview.prompts[Number(byId("example").value)];
+  byId("original").textContent = row.original;
+  byId("edited").textContent = row.edited;
+  const diff = row.first_change;
+  byId("difference").textContent = diff
+    ? "First change at sampled token " + diff.sample + " · " + (diff.original_token ?? "end") + " to " + (diff.edited_token ?? "end")
+    : "Sampled tokens match.";
+}
+
+function showPreview(result) {
+  preview = result;
+  byId("preview").hidden = false;
+  byId("row").textContent = "Row " + result.row + " · " + result.changed_bytes + " of 64 bytes changed";
+  byId("example").replaceChildren(...result.prompts.map((p, index) => new Option(p.prompt, index)));
+  const original = result.original_row_hex.match(/../g);
+  const edited = result.edited_row_hex.match(/../g);
+  byId("original-bytes").textContent = original.join(" ");
+  byId("edited-bytes").replaceChildren(...edited.flatMap((byte, index) => {
+    const value = document.createElement("span");
+    value.textContent = byte;
+    if (original[index] !== byte) value.className = "byte-change";
+    return [value, " "];
+  }));
+  showExample();
+}
+
+async function action(name) {
+  busy = true;
+  controls();
+  notice(pending[name]);
+  try {
+    const payload = {action:name};
+    if (name === "preview" || name === "apply") payload.candidate = byId("candidate").value;
+    if (name === "generate") payload.prompt = byId("prompt").value;
+    const response = await fetch("/api/action", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
+    const result = data.result;
+    if (name === "preview") {
+      showPreview(result);
+      notice("Preview ready.");
+    } else {
+      setStatus(result);
+      if (name === "generate") {
+        byId("story").textContent = result.generated_text;
+        const count = result.matched_scores === null
+          ? result.sampled_token_ids.length + " tokens generated"
+          : new Intl.NumberFormat().format(result.matched_scores) + " scores matched the C reference";
+        byId("scores").textContent = count + " · " + result.generation_seconds.toFixed(2) + " s";
+        notice("Story generated.");
+      } else if (name === "verify") {
+        notice("All 512 rows match the active version.");
+      } else {
+        byId("story").textContent = "";
+        byId("scores").textContent = "";
+        notice(name === "apply" ? "Patch applied and verified." : "Base row restored and verified.");
+      }
+    }
+  } catch (error) {
+    notice(error.message, true);
+  } finally {
+    busy = false;
+    controls();
+  }
+}
+
+async function start() {
+  try {
+    const response = await fetch("/api/state");
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
+    byId("board").textContent = data.board.backend === "software" ? "This Mac" : "PYNQ-Z2";
+    byId("prompt").value = data.board.prompt;
+    byId("prompt").maxLength = data.board.max_prompt_bytes;
+    const candidates = data.candidates.map((candidate) => new Option(candidate, candidate));
+    byId("candidate").replaceChildren(...(candidates.length ? candidates : [new Option("No patch bundles loaded", "")]));
+    byId("candidate").disabled = !candidates.length;
+    connected = true;
+    setStatus(data.status);
+  } catch (error) {
+    byId("board").textContent = "Model unavailable";
+    notice(error.message, true);
+  } finally {
+    busy = false;
+    controls();
+  }
+}
+
+byId("example").addEventListener("change", showExample);
+byId("candidate").addEventListener("change", () => {
+  byId("preview").hidden = true;
+  controls();
+});
+byId("prompt").addEventListener("input", controls);
+byId("query").addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (!busy && connected) action("generate");
+});
+for (const button of buttons) {
+  if (button.dataset.action !== "generate") button.addEventListener("click", () => action(button.dataset.action));
+}
+start();
+</script>
+</body>
+</html>
