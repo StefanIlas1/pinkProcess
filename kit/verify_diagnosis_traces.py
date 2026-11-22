@@ -8,15 +8,11 @@ from pathlib import Path
 from time import perf_counter
 from uuid import NAMESPACE_URL, uuid5
 
+from kit.reference_forecast import ONSET_VERSION, OUTLOOK_VERSION, make_forecaster
 from lm_reference.flan_prompt import telemetry_prompt
 from lm_reference.model_assets import file_digest, verify_model
-from pinkprocess.backlog import VERSION as OUTLOOK_VERSION, features as outlook_features
-from pinkprocess.dataset import Example, FORECAST_MS
-from pinkprocess.fixed_point import FixedProfile, encode_features
 from pinkprocess.kit_evidence import analyst_evidence
-from pinkprocess.profile import Profile
 from pinkprocess.simulator import SAMPLE_MS
-from pinkprocess.telemetry_device import BASE as ONSET_VERSION
 from pinkprocess.telemetry_stream import TelemetryStream
 
 
@@ -65,23 +61,6 @@ def sample(groups):
                     waiting.append(hold_ms)
             incoming = next(groups, None)
         yield {"time_ms": time_ms, "busy": len(releases), "waiting": len(waiting)}
-
-
-def make_forecaster(profiles):
-    onset = FixedProfile.quantize(Profile.load(profiles / f"{ONSET_VERSION}.json"))
-    outlook = json.loads((profiles / f"{OUTLOOK_VERSION}.json").read_bytes())["weights"]
-
-    def forecast(window, capacity):
-        common = {"time_ms": window[-1].time_ms, "horizon_ms": FORECAST_MS}
-        if window[-1].waiting:
-            features = outlook_features(window, capacity)
-            scores = [sum(weight * value for weight, value in zip(row, features)) for row in outlook]
-            return {"model": "queue_outlook", "version": OUTLOOK_VERSION, "scores": scores, **common}
-        score = onset.score(encode_features(Example(window[-1].time_ms, window, None), capacity))
-        return {"model": "pool_wait_logistic", "version": ONSET_VERSION, "alert": score >= onset.threshold,
-                "score": score, "threshold": onset.threshold, **common}
-
-    return forecast
 
 
 def capture(name, rows, forecaster):

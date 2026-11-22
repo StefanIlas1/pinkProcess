@@ -6,7 +6,7 @@ import random
 from lm_reference.flan_prompt import telemetry_prompt
 
 
-def example(rng, task, *, detailed=False, diagnostic=False, balanced_history=False):
+def example(rng, task, *, detailed=False, diagnostic=False, balanced_history=False, history_prompt=False):
     capacity = rng.choice([4, 6, 8, 12, 16, 24, 32, 64])
     if balanced_history:
         state = rng.choice(("queue_free", "recovered", "active"))
@@ -119,10 +119,11 @@ def example(rng, task, *, detailed=False, diagnostic=False, balanced_history=Fal
             "We got paged. What happened, what is happening now, and what information would help?",
             "Prepare a handoff describing the current state, the worst point and the next measurement.",
         ])
-    return telemetry_prompt(rng.choice(questions[task]), e), answers[task]
+    return telemetry_prompt(rng.choice(questions[task]), e, history=history_prompt), answers[task]
 
 
-def train(source, tokenizer, out, steps, seed, detailed, diagnostic=False, balanced_history=False):
+def train(source, tokenizer, out, steps, seed, detailed, diagnostic=False, balanced_history=False,
+          *, example_factory=example):
     import sentencepiece as sp
     import torch
     from transformers import T5ForConditionalGeneration
@@ -169,8 +170,8 @@ def train(source, tokenizer, out, steps, seed, detailed, diagnostic=False, balan
     model.train()
     for i in range(steps):
         tasks = [0] * (16 if diagnostic else 3) + list(range(1, 11 if detailed else 7))
-        qa = [example(rng, rng.choice(tasks), detailed=detailed, diagnostic=diagnostic,
-                      balanced_history=balanced_history) for _ in range(8)]
+        qa = [example_factory(rng, rng.choice(tasks), detailed=detailed, diagnostic=diagnostic,
+                              balanced_history=balanced_history) for _ in range(8)]
         inp, labels = zip(*qa)
         x = batch(inp, 0)
         loss = model(input_ids=x, attention_mask=x.ne(0), labels=batch(labels, -100), use_cache=False).loss
