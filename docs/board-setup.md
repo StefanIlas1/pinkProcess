@@ -48,7 +48,12 @@ uploaded dataset it applies only to that dataset. Fresh questions on this
 checkpoint receive the measured queue-history description. Replaying an older
 capture preserves its frozen question and evidence prompt. Select **original**
 to return to the original checkpoint. Its previously saved row edits remain
-selectable. Authoring a new row edit uses the original checkpoint.
+selectable. Training with **Queue history v2** selected calibrates against
+that checkpoint and saves the new INT8 output-row bytes under a unique name.
+Every saved edit is anchored to one full checkpoint. Starting from an edited
+version uses its underlying full checkpoint for the new row calculation.
+Loading a v2 edit reports its base name and the edited checkpoint and classifier
+fingerprints. An imported v2 row artifact needs the matching `base_sha256`.
 
 ## Connect
 
@@ -77,7 +82,7 @@ The board stores the upload separately from its live feed and answers from one g
 
 Open the **Skills** tab for the board's versions and the **Train** tab to make a new one.
 
-- **Create a version.** In **Train**, name the version, give one output token such as `Now` (or a token ID) and describe the intended first-token behavior. **Train and save** asks the signed-in Mac Codex CLI to design a row edit. **From file** saves an Astra response you already have. The board stores the exact edited bytes against the original checkpoint.
+- **Create a version.** In **Train**, name the version, give one output token such as `Now` (or a token ID) and describe the intended first-token behavior. **Train and save** asks the signed-in Mac Codex CLI to design a row edit. **From file** saves an Astra response you already have. The board stores the exact edited bytes against the selected full checkpoint.
 - **Switch.** Pick a version under **Answer skill**. Each load verifies the classifier digest and probes an output row through FPGA scores. **Reset** returns to the original and keeps your named versions.
 - **Synthesize for a dataset.** With a file uploaded to the board, **Synthesize model** picks a starting point, a name and a plain-language request. The board calibrates on the upload if needed, Astra proposes the INT8 row and the board saves it under your name for that dataset.
 - **Replay.** The **Replay** tab lists saved incidents. **Replay** runs a new generation on the same captured evidence so you can compare answers before and after a change.
