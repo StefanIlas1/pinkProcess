@@ -28,7 +28,6 @@
   <h1 class="wordmark"><img src="assets/wordmark.svg" alt="PYNQ Process" width="782" height="189"></h1>
   <div class="hero-row">
     <p class="hero-ask bubbly">Ask your data anything.</p>
-    <a class="btn" href="downloads/pinkProcess-Mac-arm64.zip" download data-download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Get the app</a>
   </div>
   <div class="trace" data-series="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,2,4,3,3,4,6,5,12,15,20,21,21,24,27,32,31,35,37,36,37,39,39,42,42,47,48,49,49,49,51,52,52,57,58,55,55,54,53,53,52,54,54,53,50,49,48,48,48,47,47,45,39,37,37,37,33,30,28,26,26,23,20,21,21,20,17,14,13,11,10,9,8,7,5,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
     <div class="trace-head"><span class="sticker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="15" height="15"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>pool-sudden-spike.csv</span><span class="trace-meta mono">waiting · 600 readings</span></div>
@@ -43,7 +42,17 @@
   </div>
 </section>
 
-<div class="marquee" aria-hidden="true"><div class="marquee-track"><span>Calm connection pool</span><span>Pool, slow build</span><span>Pool, sudden spike</span><span>Pool, recovery</span><span>Pool, oscillating</span><span>API latency</span><span>Server thermal throttle</span><span>Disk IO</span><span>Network packet loss</span><span>Sales with seasonality</span><span>IoT sensor drift</span><span>Log events (JSON lines)</span><span>Malformed file</span><span>Large file (50,000 rows)</span></div></div>
+<section class="use-cases wrap" aria-labelledby="use-cases-title">
+  <h2 class="bubbly" id="use-cases-title">Use cases</h2>
+  <dl>
+    <dt>Check on a backlog</dt>
+    <dd>A queue hit 87 waiting requests overnight. Look at the last few readings to see whether anyone is still waiting.</dd>
+    <dt>Investigate a slowdown</dt>
+    <dd>Compare response times with the number of requests arriving. Did the service slow down before traffic picked up, or after?</dd>
+    <dt>Replay an incident</dt>
+    <dd>Ask the same question about the same recording with two versions of your model. Read the answers side by side with the original measurements.</dd>
+  </dl>
+</section>
 
 <section class="path">
   <div class="path-pin wrap">
