@@ -24,7 +24,7 @@ a{color:inherit;text-decoration:none}
 .mono{font-family:var(--mono)}
 
 .nav{position:fixed;top:14px;left:50%;translate:-50% 0;z-index:50;width:min(1180px,calc(100vw - 24px));display:flex;align-items:center;gap:8px;padding:8px 8px 8px 18px;border-radius:999px;background:rgba(36,31,39,.72);border:1.5px solid rgba(253,206,223,.12);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);transition:translate .5s var(--soft),background .3s;view-transition-name:nav}
-.nav.tuck{translate:-50% calc(-100% - 20px)}
+.nav.tuck:not(:focus-within){translate:-50% calc(-100% - 20px)}
 .nav-logo{display:flex;align-items:center;margin-right:auto}
 .nav{justify-content:space-between}
 .nav-logo img{height:34px;width:auto;transition:transform .5s var(--ease)}
@@ -177,6 +177,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap;
 @media (min-width:901px){.step .window{display:none}}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001s!important;animation-iteration-count:1!important;transition-duration:.001s!important}
+  html{scroll-behavior:auto}
   [data-reveal]{opacity:1;transform:none}
 }
 
@@ -214,4 +215,22 @@ footer .wrap{justify-content:space-between}
   .steps-media{display:none}
   .how{padding-top:110px}
   footer .wrap{flex-direction:column;align-items:start;gap:6px}
+}
+
+.hero-actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px 24px}
+.results-link{color:var(--pink);font-weight:600;text-decoration:underline;text-underline-offset:5px;text-decoration-color:var(--bow);padding-block:8px}
+.results-link:hover{text-decoration-thickness:2px}
+#board-results{scroll-margin-top:100px}
+.bench{margin-bottom:30px}
+.bench table{width:100%;border-collapse:collapse;text-align:right;font-variant-numeric:tabular-nums}
+.bench th,.bench td{padding:14px 10px;border-bottom:1px solid var(--line)}
+.bench th:first-child{text-align:left;padding-left:0}
+.bench th:last-child,.bench td:last-child{padding-right:0}
+.bench thead th{color:var(--dim);font-weight:500}
+.bench td{font-family:var(--mono);color:var(--pink);white-space:nowrap}
+.bench caption{caption-side:bottom;text-align:left;color:var(--dim);font-size:.85em;padding-top:12px}
+@media (max-width:560px){
+  .bench th,.bench td{padding:12px 5px;font-size:14px}
+  .section-head{padding:90px 0 26px}
+  .marquee{margin-top:70px}
 }
