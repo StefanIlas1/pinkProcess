@@ -28,12 +28,16 @@ and recommended measuring arrival rates and connection hold times when the cause
 was uncertain. Two timed answers took about 13 minutes each. The installed Mac
 app also answered an unfamiliar question while new readings arrived. After a witnessed power cycle and recovery from a startup
 overlay conflict, the kit reproduced the edited answer exactly. Restoring the
-original weights reproduced the baseline and preserved the named edit.
+original weights reproduced the baseline and preserved the named edit. With the
+startup fix installed, the board also reloaded the selected weights on an
+unattended software restart. The Mac app reconnected and restored the original
+while retaining both named edits.
 [Checkpoint](profiles/flan-telemetry-diagnostic/README.md) ·
 [Held-out results](kit/evidence/blind-diagnosis-replacement-review.md) ·
 [Physical incident results](kit/evidence/three-diagnosis-traces-physical.md) ·
 [Native Mac query](kit/evidence/physical-native-ask.json) ·
-[Physical cold-cycle record](kit/evidence/physical-diagnosis-cold-cycle.json)
+[Physical cold-cycle record](kit/evidence/physical-diagnosis-cold-cycle.json) ·
+[Native version switching and restart](kit/evidence/physical-diagnosis-warm-boot.json)
 
 For the queue-onset predictor, the operator-facing quality measure is how often
 a warning appears on the Mac at least one second before a real request queues,
