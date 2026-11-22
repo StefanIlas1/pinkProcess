@@ -544,7 +544,10 @@ python3 -m kit.benchmark_projection_overlay --bitstream NEW/pinkprocess.bit --ca
 ```
 
 The live kit server accepts `--projection-overlay` with its normal language
-model arguments. This enables the prototype for the first self-attention
+model arguments. The installed systemd service reads this opt-in from
+`PINKPROCESS_PROJECTION_ARGS=--projection-overlay` in
+`/etc/pinkprocess-kit/projection.conf` on restart. This enables the prototype
+for the first self-attention
 query projection in each FLAN stack on a compatible overlay. The other
 projections use the existing classifier. Compare complete answers and live
 telemetry separately from isolated projection times.
