@@ -376,3 +376,20 @@ class KitTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SignInPortTest(unittest.TestCase):
+    def test_busy_port_moves_to_next_allowed_port(self):
+        import socket
+
+        with socket.socket() as probe:
+            probe.bind(("127.0.0.1", 0))
+            base = probe.getsockname()[1]
+        with TemporaryDirectory() as data_dir, socket.socket() as blocker:
+            try:
+                blocker.bind(("127.0.0.1", base))
+                blocker.listen()
+            except OSError:
+                self.skipTest("Port taken.")
+            with make_server(port=base, data_dir=data_dir) as server:
+                self.assertIn(server.server_port, range(base + 1, base + 5))
