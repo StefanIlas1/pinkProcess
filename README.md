@@ -26,15 +26,21 @@ browser. **Watch demo instead** walks through the whole story without a board.
    likely signals such as queue, latency, errors, temperature or sales.
 2. **Pick a model.** The app recommends a quantized model from the library with a
    one-line reason and applies it as soon as the data loads. Use **Search models**
-   to switch to another one, or **Synthesize model** for a guided plan to make
-   your own. Steps that are not built yet are marked coming soon.
+   to open the model library, a small marketplace you can filter by task, maker
+   and size. The recommended model carries a star. Every model runs on the board.
+   Use **Synthesize model** for a guided plan to make your own, and **Publish** a
+   skill you trained so it shows up in your library. Published models are kept in
+   `~/Library/Application Support/PYNQ Process/models.json`. Online sharing is
+   coming soon. Steps that are not built yet are marked coming soon.
 3. **Watch the hot path.** A thin strip on the left edge shows five dots. Hover it
    to slide out Data, Profile, Model, PYNQ-Z2 and Answer with the time each stage
    took. While a question runs, the answer shows a skeleton with the current
    stage in bold. With no board connected, the fabric stage reads This Mac.
 4. **Ask.** Type a question and pick the answer style above the input: Short
    answer, Summary, Transcript (timestamped events) or Table. Press Enter or the
-   pink key to send. **Export** saves the session as Markdown, CSV or JSON, and
+   pink key to send. Answers arrive style by style: Short first, then Summary,
+   Transcript and Table, and you can switch between the ready ones on the answer.
+   The style row above the input only picks which one opens first. **Export** saves the session as Markdown, CSV or JSON, and
    **Connect to Claude** shows the config to paste into Claude Desktop. Open **Readings behind this answer**
    to check it. Queue-ready data also gets the board's forecast when a board is
    connected.

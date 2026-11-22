@@ -215,7 +215,7 @@ def recommend(table, found):
 def custom_plan(table):
     return [
         dict(step="Start from FLAN-T5-small", where="runs on the board", ready=True),
-        dict(step=f"Label examples from your {table['rows']:,} rows", where="runs on this Mac", ready=True),
+        dict(step=f"Label examples from your {table['rows']:,} rows", where="runs on the board", ready=True),
         dict(step="Write a skill for your data with Astra and save it as INT8", where="runs on the board", ready=True),
         dict(step="Fine-tune on your labels", where="coming soon", ready=False),
         dict(step="Quantize the tuned model and load it on the FPGA", where="coming soon", ready=False),

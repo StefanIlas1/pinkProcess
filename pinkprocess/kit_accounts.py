@@ -13,6 +13,8 @@ from urllib.error import URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+from .kit_models import BUILT_IN as MODEL_LIBRARY, ModelStore
+
 
 CALLBACK_PATH = "/auth/callback"
 HISTORY_DIR = Path.home() / "Library" / "Application Support" / "PYNQ Process" / "history"
@@ -22,18 +24,6 @@ MAX_EXTRA_BYTES = 200000
 LOGIN_TTL_SECONDS = 600
 MAX_PENDING_LOGINS = 8
 NUMBER_TYPES = (int, float)
-MODEL_LIBRARY = [
-    {"id": "flan-t5-small-int8", "name": "FLAN-T5-small INT8", "task": "Explains what is going wrong",
-     "kind": "language", "available": True},
-    {"id": "queue-onset-logistic", "name": "Queue-onset logistic", "task": "Early warning when requests start piling up",
-     "kind": "queue", "available": True},
-    {"id": "flan-t5-small-int8-runbook", "name": "FLAN-T5-small INT8 runbook", "task": "Suggests the next step to fix a problem",
-     "kind": "language", "available": False},
-    {"id": "timeseries-anomaly-int8", "name": "Anomaly spotter INT8", "task": "Spots unusual readings in any number stream",
-     "kind": "anomaly", "available": False},
-    {"id": "queue-onset-logistic-long", "name": "Queue-onset logistic long range", "task": "Early warning a full minute ahead",
-     "kind": "queue", "available": False},
-]
 
 
 def pkce_pair():
@@ -58,6 +48,26 @@ def clean_text(value, limit=MAX_TEXT):
     return value[:limit] if isinstance(value, str) else ""
 
 
+VARIANT_STYLES = ("short", "summary", "transcript", "table")
+
+
+def clean_variants(value):
+    if not isinstance(value, dict):
+        return {}
+    cleaned = {}
+    for style in VARIANT_STYLES:
+        item = value.get(style)
+        if not isinstance(item, dict):
+            continue
+        entry = {"text": clean_text(item.get("text"))}
+        if isinstance(item.get("table"), dict) and len(json.dumps(item["table"])) <= MAX_EXTRA_BYTES:
+            entry["table"] = item["table"]
+        if item.get("mono") is True:
+            entry["mono"] = True
+        cleaned[style] = entry
+    return cleaned
+
+
 def clean_message(message):
     if not isinstance(message, dict):
         return None
@@ -71,6 +81,9 @@ def clean_message(message):
             cleaned["mono"] = True
         if isinstance(message.get("style"), str):
             cleaned["style"] = message["style"][:20]
+        variants = clean_variants(message.get("variants"))
+        if variants:
+            cleaned["variants"] = variants
     return cleaned
 
 
@@ -106,9 +119,10 @@ def read_chat_file(path):
 
 
 class Accounts:
-    def __init__(self, history_dir=HISTORY_DIR, environ=None):
+    def __init__(self, history_dir=HISTORY_DIR, environ=None, models_path=None):
         environ = os.environ if environ is None else environ
         self.history_dir = Path(history_dir)
+        self.models = ModelStore(models_path or self.history_dir.parent / "models.json")
         self.domain = (environ.get("PYNQ_AUTH0_DOMAIN") or "").strip().removeprefix("https://").strip("/")
         self.client_id = (environ.get("PYNQ_AUTH0_CLIENT_ID") or "").strip()
         self.user = None
@@ -214,6 +228,11 @@ class Accounts:
             return self.save_exchange(data)
         if action == "session_save":
             return self.save_session(data)
+        if action == "model_publish":
+            return {"model": self.models.publish(data), "models": self.models.list()}
+        if action == "model_unpublish":
+            result = self.models.unpublish(data.get("id"))
+            return {**result, "models": self.models.list()}
         raise ValueError("Unknown account action.")
 
     def get_chat(self, chat_id):
@@ -263,7 +282,7 @@ class Accounts:
         if not question.strip() or len(question) > MAX_TEXT or len(answer) > MAX_TEXT or len(readings) > MAX_TEXT:
             raise ValueError("This chat message is too long to save.")
         extra = {"text": answer, "readings": readings}
-        for key in ("table", "mono", "style"):
+        for key in ("table", "mono", "style", "variants"):
             if key in data:
                 extra[key] = data[key]
         if "table" in extra and (not isinstance(extra["table"], dict) or len(json.dumps(extra["table"])) > MAX_EXTRA_BYTES):

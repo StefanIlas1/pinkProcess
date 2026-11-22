@@ -6,7 +6,7 @@ import io
 import json
 import re
 
-from .kit_accounts import clean_chat
+from .kit_accounts import VARIANT_STYLES, clean_chat
 
 FORMATS = {"md": "text/markdown", "csv": "text/csv", "json": "application/json"}
 HOT_PATH = (("data_ms", "Read the data"), ("profile_ms", "Profile the columns"), ("model_ms", "Pick the model"),
@@ -35,7 +35,7 @@ def exchanges(session):
             continue
         rows.append(dict(number=len(rows) + 1, question=question["text"] if question else "", answer=message["text"],
                          style=answer_style(message), readings=message.get("readings", ""), table=message.get("table"),
-                         mono=bool(message.get("mono")), asked_ms=(question or message)["time_ms"]))
+                         mono=bool(message.get("mono")), variants=message.get("variants") or {}, asked_ms=(question or message)["time_ms"]))
         question = None
     return rows
 
@@ -80,13 +80,24 @@ def to_markdown(session):
     if not items:
         lines += ["", "No questions were asked in this session."]
     for item in items:
-        lines += ["", f"### {item['number']}. {item['question'] or 'Answer'}", "", f"Answer style: {item['style']}", ""]
-        if item["mono"]:
-            lines += ["```", item["answer"], "```"]
+        lines += ["", f"### {item['number']}. {item['question'] or 'Answer'}"]
+        if item["variants"]:
+            for style in VARIANT_STYLES:
+                variant = item["variants"].get(style)
+                if not variant:
+                    continue
+                lines += ["", f"#### {style.capitalize()}", ""]
+                lines += ["```", variant["text"], "```"] if variant.get("mono") else [variant["text"]]
+                if variant.get("table"):
+                    lines += [""] + table_lines(variant["table"])
         else:
-            lines.append(item["answer"])
-        if item["table"]:
-            lines += [""] + table_lines(item["table"])
+            lines += ["", f"Answer style: {item['style']}", ""]
+            if item["mono"]:
+                lines += ["```", item["answer"], "```"]
+            else:
+                lines.append(item["answer"])
+            if item["table"]:
+                lines += [""] + table_lines(item["table"])
         if item["readings"]:
             lines += ["", f"Readings behind this answer: {item['readings']}"]
     lines += ["", "## Notes", "", session["notes"] or "No notes."]
@@ -103,9 +114,11 @@ def to_csv(session):
     writer = csv.writer(output, lineterminator="\r\n")
     writer.writerow(CSV_COLUMNS)
     for item in exchanges(session):
-        writer.writerow([item["number"], *(spreadsheet_safe(value) for value in (
-            item["question"], item["style"], item["answer"], item["readings"], session["dataset"], session["model"],
-            stamp(item["asked_ms"])))])
+        answers = [(style, item["variants"][style]["text"]) for style in VARIANT_STYLES if style in item["variants"]] or [(item["style"], item["answer"])]
+        for style, text in answers:
+            writer.writerow([item["number"], *(spreadsheet_safe(value) for value in (
+                item["question"], style, text, item["readings"], session["dataset"], session["model"],
+                stamp(item["asked_ms"])))])
     return output.getvalue()
 
 

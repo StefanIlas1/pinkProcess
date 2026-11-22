@@ -14,10 +14,12 @@ from .kit_dataset import DEMO_CAPACITY, demo_csv, prepare_dataset
 from .astra_edit import propose
 from .kit_transport import BoardTransport
 from .kit_data import DATA_DIR, MAX_IMPORT_BYTES, SAMPLES, STYLES, DatasetStore, answer_question, parse_table, profile_table, sample_csv, timed
-from .kit_accounts import CALLBACK_PATH, MODEL_LIBRARY, Accounts
+from .kit_accounts import CALLBACK_PATH, Accounts
 from .kit_export import export_action
 from .kit_evidence import analyst_evidence, live_answer
-from time import sleep
+from threading import Thread
+from time import sleep, time
+import secrets
 
 
 PAGE = Path(__file__).with_name("kit.html")
@@ -53,6 +55,8 @@ class Kit:
         self.table_profile = None
         self.lock = Lock()
         self.data_lock = Lock()
+        self.jobs = {}
+        self.jobs_lock = Lock()
 
     def import_data(self, name, text, remember=True):
         if not isinstance(name, str) or not name.strip() or len(name) > 200:
@@ -103,6 +107,79 @@ class Kit:
             result["readings"] += " " + verdict
         return dict(result, where=where, model=profile["recommendation"]["model_id"],
                     timings=dict(data_ms=0.0, profile_ms=0.0, model_ms=0.0, fabric_ms=fabric_ms, answer_ms=answer_ms))
+
+    def begin_data_job(self, data):
+        if set(data) - {"action", "question", "style"}:
+            raise ValueError("Data questions accept only a question and an answer style.")
+        question = data.get("question")
+        if not isinstance(question, str) or not 0 < len(question.strip()) <= 500:
+            raise ValueError("Enter a question of up to 500 characters.")
+        if data.get("style", "short") not in STYLES:
+            raise ValueError("Choose a short answer, summary, transcript or table.")
+        with self.data_lock:
+            table, profile = self.table, self.table_profile
+        if table is None:
+            raise ValueError("Import data first.")
+        job = dict(job_id=secrets.token_hex(8), state="running", ready={}, order=list(STYLES), where="this Mac",
+                   model=profile["recommendation"]["model_id"], timings={}, started=time())
+        with self.jobs_lock:
+            for old in sorted(self.jobs, key=lambda key: self.jobs[key]["started"])[:-19]:
+                del self.jobs[old]
+            self.jobs[job["job_id"]] = job
+        Thread(target=self.run_data_job, args=(job, table, profile, question.strip()), daemon=True).start()
+        return self.data_job_view(job)
+
+    def run_data_job(self, job, table, profile, question):
+        try:
+            timings = dict(data_ms=0.0, profile_ms=0.0, model_ms=0.0, fabric_ms=0.0, answer_ms=0.0)
+            verdict = None
+            for style in STYLES:
+                result, answer_ms = timed(answer_question, table, question, style)
+                timings["answer_ms"] += answer_ms
+                if style == "short":
+                    verdict, fabric_ms = self.board_verdict(table, profile)
+                    timings["fabric_ms"] = fabric_ms
+                    if verdict:
+                        job["where"] = "PYNQ-Z2"
+                if verdict:
+                    if result["style"] != "table":
+                        result["answer"] += "\n" + verdict
+                    result["readings"] += " " + verdict
+                job["ready"][style] = result
+                job["timings"] = dict(timings)
+            job["state"] = "complete"
+        except (ValueError, RuntimeError, OSError) as exc:
+            job["error"] = str(exc)
+            job["state"] = "error"
+
+    def board_verdict(self, table, profile):
+        if self.host is None or not profile["queue_ready"]:
+            return None, 0.0
+        csv_text = "time_ms,busy,waiting\n" + "".join(
+            f"{int(t)},{int(b)},{int(w)}\n" for t, b, w in zip(table["data"]["time_ms"], table["data"]["busy"], table["data"]["waiting"]))
+        try:
+            with self.lock:
+                forecast, fabric_ms = timed(self.analyze, dict(question="latest", csv=csv_text, capacity=profile["capacity"]))
+            latest = forecast["rows"][-1]
+            return ("The board's forecast: queue warning at " if latest["alert"] else "The board's forecast: no queue warning at ") + f"{latest['time_ms'] / 1000:.1f} s.", fabric_ms
+        except (ValueError, RuntimeError, OSError, KeyError, IndexError, TypeError):
+            return None, 0.0
+
+    def data_job_view(self, job):
+        view = {key: job[key] for key in ("job_id", "state", "order", "where", "model", "timings")}
+        view["ready"] = dict(job["ready"])
+        if job["state"] == "error":
+            view["error"] = job.get("error", "The answer could not be prepared.")
+        return view
+
+    def progress_data_job(self, data):
+        if set(data) != {"action", "job_id"}:
+            raise ValueError("Progress takes only a job id.")
+        with self.jobs_lock:
+            job = self.jobs.get(data["job_id"]) if isinstance(data["job_id"], str) else None
+        if job is None:
+            raise ValueError("That answer is no longer available. Ask again.")
+        return self.data_job_view(job)
 
     def disconnect(self):
         self.host = None
@@ -259,6 +336,10 @@ class Kit:
             if sample is None:
                 raise ValueError("Unknown sample.")
             return self.import_data(sample["name"] + ".csv", sample_csv(sample["id"]), remember=False)
+        if action == "data_ask_begin":
+            return self.begin_data_job(data)
+        if action == "data_ask_progress":
+            return self.progress_data_job(data)
         if action == "data_ask":
             return self.ask_data(data)
         with self.lock:
@@ -360,7 +441,7 @@ class KitHandler(BaseHTTPRequestHandler):
 
             return self.reply(200, mcp_config())
         if self.path == "/api/models":
-            return self.reply(200, {"models": MODEL_LIBRARY})
+            return self.reply(200, {"models": self.server.accounts.models.list()})
         if self.path == "/static/logo.png":
             if not LOGO.is_file():
                 return self.reply(404, {"error": "No logo."})

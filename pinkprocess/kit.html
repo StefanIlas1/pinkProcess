@@ -9,7 +9,7 @@
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;overflow:hidden}
 body{background:var(--bg);color:var(--ink)}
-h1,h2,h3,p{margin:0}h1,h2,h3,b,strong,th{font-weight:600}h1{font-size:2.3rem;line-height:1.2}h2{font-size:1rem}
+h1,h2,h3,p{margin:0}h1,h2,h3,b,strong,th{font-weight:600}h1{font-size:2.3rem;line-height:1.2}#greeting{font-weight:400}h2{font-size:1rem}
 [hidden]{display:none!important}
 .mono,code,.strip,.timer,.chat-item small,.t,.chip{font-family:var(--mono)}
 .ambient{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
@@ -37,16 +37,18 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 body[data-boot] .app{visibility:hidden}
 .app{position:relative;z-index:1;display:grid;height:100vh;grid-template-rows:60px minmax(0,1fr) 30px;grid-template-columns:26px auto minmax(0,1fr) clamp(280px,24vw,420px)}
 .side{grid-column:2;grid-row:2;width:clamp(200px,16vw,320px)}.center{grid-column:3;grid-row:2}.rail{grid-column:4;grid-row:2}.peek{grid-column:1;grid-row:2}
-.app.nosidebar{grid-template-columns:26px 0 minmax(0,1fr) clamp(280px,24vw,420px)}.app.nosidebar .side{display:none}
+.app.nosidebar{grid-template-columns:26px 0 minmax(0,1fr) clamp(280px,24vw,420px)}.app.nosidebar .center{padding-left:calc(var(--peek-w) - 12px)}.app.nosidebar .side{display:none}
 @media(max-width:699px),(max-height:479px){.app{display:none}#tiny{display:grid}dialog{display:none!important}}
 .top{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 28px;border-bottom:1px solid var(--line)}
 .logo{display:flex;align-items:center;gap:12px;user-select:none;white-space:nowrap}.logo img{max-height:34px;max-width:200px;display:block}
 .wordmark{display:inline-flex;align-items:baseline;font:600 1.45rem/1 ui-rounded,"SF Pro Rounded",system-ui,sans-serif;letter-spacing:-.045em;text-shadow:0 1px 2px rgba(0,0,0,.35)}.wordmark b{font-weight:600;color:var(--pink)}.wordmark span{color:#c9cdd1;margin-left:.15em}
 .top-right{display:flex;align-items:center;gap:20px}
-.chip{display:flex;align-items:center;gap:10px;font-size:.78rem;color:var(--dim)}
+.chip{position:relative;display:flex;align-items:center;gap:10px;font-size:.78rem;color:var(--dim);cursor:default}
 .chip svg{display:block}.leds{display:flex;gap:4px}.led{width:6px;height:6px;border-radius:50%;background:#3c4146}
-body.working .chip .led{background:var(--green);animation:blink .5s infinite alternate}body.working .chip .led:nth-child(2){animation-delay:.17s}body.working .chip .led:nth-child(3){animation-delay:.34s}
 .chip.online .led:first-child{background:var(--green)}
+.led.flash{animation:blink .22s 3 alternate}
+body.working .chip .led:nth-child(3){background:var(--green);animation:blink .5s infinite alternate}
+.chip:hover:after{content:attr(data-tip);position:absolute;right:0;top:calc(100% + 12px);z-index:9;white-space:pre;background:#2c3035;border:1px solid #3a3f44;border-radius:8px;padding:8px 12px;color:var(--ink);font:.76rem/1.6 var(--mono);box-shadow:0 10px 24px rgba(0,0,0,.45)}
 @keyframes blink{from{opacity:.25}to{opacity:1}}
 .conn{position:relative}
 button.pill{display:flex;align-items:center;gap:8px;font:.8rem var(--mono);font-weight:400;border:0;padding:6px 8px;color:var(--ink)}button.pill:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green)}button.pill.off:before{background:#6b7278}
@@ -56,22 +58,26 @@ button.pill{display:flex;align-items:center;gap:8px;font:.8rem var(--mono);font-
 #chat-list{flex:1;min-height:0;overflow-y:auto;display:grid;align-content:start;gap:2px}
 .chat-item{display:grid;gap:2px;text-align:left;border:0;border-radius:8px;padding:10px 12px;font-weight:400}.chat-item:hover:not(:disabled){background:var(--panel);border:0}.chat-item[aria-current="true"]{background:var(--panel)}
 .chat-item span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.chat-item small{font-size:.72rem}
-.peek{position:relative;z-index:4;border-right:1px solid var(--line);background:rgba(255,255,255,.02)}
-.peek:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(47,191,113,.16),transparent);opacity:.5;animation:breathe 4s ease-in-out infinite}
-.peek.pulse:before{animation:pulseglow .9s ease-out 2}
-@keyframes breathe{0%,100%{opacity:.25}50%{opacity:.8}}
-@keyframes pulseglow{0%{opacity:1;background:linear-gradient(90deg,rgba(47,191,113,.7),transparent)}100%{opacity:.4}}
-.peek-dots{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
-.peek-chev{margin-top:8px;color:#b4bcc2;animation:nudge 2.4s ease-in-out infinite}
-@keyframes nudge{0%,100%{transform:translateX(-1px);opacity:.5}50%{transform:translateX(2px);opacity:1}}
-.pdot{width:7px;height:7px;border-radius:50%;background:#464c52;opacity:.7}.pdot[data-state=done]{background:var(--green);opacity:.8}.pdot[data-state=active]{background:var(--green);opacity:1;box-shadow:0 0 8px rgba(47,191,113,.7);animation:blink .6s infinite alternate}
-.peek-panel{position:absolute;left:0;top:0;bottom:0;width:300px;max-width:80vw;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:16px 18px;background:#1a1c1f;border-right:1px solid var(--line);border-radius:0 12px 12px 0;box-shadow:12px 0 32px rgba(0,0,0,.45);transform:translateX(-100%);visibility:hidden;transition:transform .22s ease,visibility .22s}
-.peek:hover .peek-panel,.peek:focus-within .peek-panel,.peek.open .peek-panel{transform:none;visibility:visible}
-.peek.open .peek-panel{transition:none}
-.node{display:grid;grid-template-columns:12px 1fr auto;column-gap:10px;align-items:baseline;padding:8px 0;font:.82rem/1.4 var(--mono);color:var(--dim)}
-.node .led{align-self:center}.node .nm{white-space:nowrap}.node .t{text-align:right}.node .sub{grid-column:2/4;font-size:.72rem;opacity:.75;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.node[data-state=done]{color:var(--ink)}.node[data-state=done] .led{background:var(--green)}
-.node[data-state=active]{color:var(--ink);font-weight:600}.node[data-state=active] .led{background:var(--green);animation:blink .6s infinite alternate}
+.app{--peek-w:188px}
+.peek{position:relative;z-index:4}
+.peek-pill{position:absolute;left:6px;top:50%;transform:translateY(-50%);width:16px;padding:10px 0;border-radius:12px;background:rgba(47,191,113,.1);border:1px solid rgba(47,191,113,.3);box-shadow:0 6px 20px rgba(0,0,0,.35);overflow:hidden;transition:width .28s cubic-bezier(.2,.8,.2,1),background .2s,border-color .2s;animation:breathe 4s ease-in-out infinite}
+.peek:hover .peek-pill,.peek:focus-within .peek-pill,.peek.open .peek-pill{width:var(--peek-w);background:#1f2327;border-color:#3a3f44;animation:none}
+.peek.open .peek-pill,.peek.open .node .nm,.peek.open .node .t{transition:none}
+.peek.pulse .peek-pill{animation:pulsepill .9s ease-out 2}
+@keyframes breathe{0%,100%{box-shadow:0 6px 20px rgba(0,0,0,.35),0 0 0 rgba(47,191,113,0)}50%{box-shadow:0 6px 20px rgba(0,0,0,.35),0 0 14px rgba(47,191,113,.35)}}
+@keyframes pulsepill{0%{box-shadow:0 0 22px rgba(47,191,113,.85)}100%{box-shadow:0 6px 20px rgba(0,0,0,.35)}}
+.node{position:relative;display:grid;grid-template-columns:14px 1fr auto;column-gap:10px;align-items:center;height:30px;padding:0 12px 0 0;font:.8rem/1 var(--mono);color:var(--dim)}
+.node:before{content:"";position:absolute;left:6px;top:50%;height:100%;width:2px;background:#3a3f44}.node:last-of-type:before{display:none}
+.node[data-state=done]:before{background:var(--green)}
+.node .dot{position:relative;z-index:1;width:10px;height:10px;border-radius:50%;border:1.5px solid #5c636a;background:#1f2327;justify-self:center}
+.node[data-state=done] .dot{background:var(--green);border-color:var(--green)}
+.node[data-state=active] .dot{background:var(--green);border-color:var(--green);box-shadow:0 0 10px rgba(47,191,113,.9);animation:blink .6s infinite alternate}
+.node .nm,.node .t{opacity:0;transition:opacity .18s;white-space:nowrap}.node .t{text-align:right}
+.peek:hover .node .nm,.peek:hover .node .t,.peek:focus-within .node .nm,.peek:focus-within .node .t,.peek.open .node .nm,.peek.open .node .t{opacity:1;transition-delay:.12s}
+.node[data-state=done],.node[data-state=active]{color:var(--ink)}.node[data-state=active] .nm{font-weight:600}
+.peek-chev{position:absolute;left:3px;bottom:3px;color:#9fe3bd;transition:opacity .15s;animation:nudge 2.4s ease-in-out infinite}
+.peek:hover .peek-chev,.peek.open .peek-chev{opacity:0}
+@keyframes nudge{0%,100%{transform:translateX(-1px);opacity:.45}50%{transform:translateX(2px);opacity:1}}
 .center{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto auto auto;min-height:0;min-width:0;padding:0 0 18px}
 .toolbar{display:flex;align-items:center;gap:10px;padding:10px 28px;border-bottom:1px solid var(--line)}
 .dchip{position:relative;display:inline-flex;align-items:center;gap:8px;font:.82rem var(--mono);color:var(--ink);padding:5px 12px;border:1px solid var(--line);border-radius:999px;flex:0 1 auto;min-width:0;max-width:60%;white-space:nowrap}.dchip span{overflow:hidden;text-overflow:ellipsis}.dchip svg{flex:none;color:var(--dim)}
@@ -87,13 +93,19 @@ button.icon{width:32px;height:32px;padding:0;border-radius:50%;font-size:1.1rem;
 .msg .replay{margin-top:8px;padding:2px 0;font-size:.85rem}
 .msg .suggest{margin-top:12px;color:var(--dim)}
 .msg table{border-collapse:collapse;margin-top:6px;font:.8rem var(--mono);white-space:normal}.msg th,.msg td{text-align:left;padding:6px 14px 6px 0;border-bottom:1px solid var(--line)}.msg th{color:var(--dim)}
-.msg.answer:has(.skeleton){width:min(100%,560px)}
-.skeleton{display:grid;gap:12px;min-width:min(100%,360px)}
+.msg.answer{min-width:min(100%,420px)}
+.msg.answer:has(.skeleton){width:min(100%,600px)}
+.vtabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.vt{display:inline-flex;align-items:center;border:0;padding:3px 10px;border-radius:999px;font-size:.8rem;font-weight:400;color:var(--dim);background:transparent;white-space:nowrap}
+.vt:hover:not(:disabled){background:#2c3035;border:0}.vt[aria-pressed="true"]{background:#2c3035;color:var(--ink);font-weight:600}.vt:disabled{opacity:1;cursor:default}
+.vt i{display:inline-block;width:18px;height:6px;border-radius:3px;margin-left:7px;background:linear-gradient(100deg,#30353a 0%,#30353a 35%,#444b52 50%,#30353a 65%,#30353a 100%);background-size:260% 100%;animation:sweep 2.4s linear infinite}
+.vbody{white-space:pre-line}.vbody.mono{font:.85rem/1.6 var(--mono);white-space:pre-wrap}
+.skeleton{display:grid;gap:12px;min-width:min(100%,360px)}.vbody+.skeleton,.bars+.skeleton{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 .stg{display:flex;gap:16px;flex-wrap:wrap;font-size:.85rem}.stg span{color:var(--dim);opacity:.4;transition:opacity .3s}.stg span[data-s=past]{opacity:.6}.stg span[data-s=now]{opacity:1;color:var(--ink);font-weight:600}
 .thinking{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--dim);font:.82rem var(--mono)}.thinking .phase{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.thinking .timer{flex:none;white-space:nowrap}
 .bars{display:grid;gap:9px}.bars i{display:block;height:12px;border-radius:6px;background:linear-gradient(100deg,var(--c) 0%,var(--c) 35%,var(--h) 50%,var(--c) 65%,var(--c) 100%);background-size:260% 100%;animation:sweep 3s linear infinite}
 @keyframes sweep{from{background-position:130% 0}to{background-position:-130% 0}}
-@media(prefers-reduced-motion:reduce){.blob,.led,.pdot,.node .led,.bars i{animation:none}}
+@media(prefers-reduced-motion:reduce){.blob,.led,.node .dot,.bars i,.peek-pill,.peek-chev,.vt i{animation:none!important}}
 .empty{position:absolute;inset:0;display:grid;align-content:start;justify-items:start;gap:16px;text-align:left;padding:clamp(16px,10vh,120px) max(5%,calc((100% - 960px)/2)) 0}.empty p{color:var(--dim);max-width:520px}
 #samples{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-start;align-items:center}
 .offline-view{position:relative;z-index:1;display:none;height:100vh;align-content:center;justify-items:center;gap:16px;text-align:center;padding:24px}
@@ -115,18 +127,25 @@ body.offline .app{display:none}body.offline .offline-view{display:grid}
 .section{padding:20px 22px;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;justify-items:start;border-bottom:1px solid var(--line)}.section>*{justify-self:stretch}.section>.row,.section>button{justify-self:start}.section.fill{flex:1;min-height:0;overflow:hidden;align-content:start;border-bottom:0}
 .tabs{display:flex;gap:2px;align-items:center;min-height:30px}.tabs .grow{flex:1}
 .tabs button[role=tab]{border:0;border-bottom:1px solid transparent;border-radius:0;padding:4px 8px;font-size:.95rem;font-weight:400;color:var(--dim)}.tabs button[role=tab]:first-child{padding-left:0}.tabs button[role=tab][aria-selected="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+.selrow{display:flex;gap:8px;align-items:center}.selrow select{flex:1}.selrow button{flex:none;padding:6px 10px;font-size:.85rem}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}.pair button{width:100%;min-width:0;white-space:nowrap;padding:7px 6px;font-size:.88rem}
 @media(max-width:1200px){.pair{gap:6px}.pair button{font-size:.8rem;padding:7px 2px}}
 .section select{width:100%}.section label{display:grid;gap:6px;color:var(--dim);font-size:.85rem}.section label .row{gap:6px;flex-wrap:nowrap}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}#lm-instruction,#notes{resize:none;width:100%}#notes{min-height:84px;height:100%}
-.mname{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.mname .mono{font-size:.95rem}#model-use{font-size:.88rem}
+.mname{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}.mname .mono{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.star{position:relative;color:#e6c46b;font-size:.95rem;line-height:1;cursor:default}.star:hover:after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 8px);z-index:9;width:max-content;max-width:230px;white-space:normal;background:#2c3035;border:1px solid #3a3f44;border-radius:8px;padding:7px 10px;color:var(--ink);font:.78rem/1.4 var(--font,inherit);box-shadow:0 10px 24px rgba(0,0,0,.45)}#model-meta{font-size:.76rem}.mname .mono{font-size:.95rem}#model-use{font-size:.88rem}
 code{display:none}@media(min-height:780px){code{display:block}}
 .strip{grid-column:1/-1;grid-row:3;width:100%;border-top:1px solid var(--line);padding:0 28px;line-height:29px;font-size:.76rem;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.strip:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:9px}
-@media(max-width:900px){.toolbar .lbl{display:none}.toolbar button svg{margin-right:0}.app{grid-template-columns:26px auto minmax(0,1fr) 230px}.app.nosidebar{grid-template-columns:26px 0 minmax(0,1fr) 230px}.side{width:150px;padding:14px 10px}#new-chat{white-space:nowrap;padding:8px 10px}.tabs button[role=tab]{padding:4px 5px;font-size:.9rem}.top{padding:0 14px;gap:12px}.top-right{gap:12px}#chip-text{display:none}.section{padding:14px 16px}.toolbar,.strip{padding-left:16px;padding-right:16px}}
+@media(max-width:900px){.app{--peek-w:140px}.pair .x{display:none}.tabs{gap:0}.tabs button[role=tab]{padding:4px 3px;font-size:.82rem}.tabs .grow{flex:0 0 4px}.toolbar .lbl{display:none}.toolbar button svg{margin-right:0}.app{grid-template-columns:26px auto minmax(0,1fr) 230px}.app.nosidebar{grid-template-columns:26px 0 minmax(0,1fr) 230px}.side{width:150px;padding:14px 10px}#new-chat{white-space:nowrap;padding:8px 10px}.tabs button[role=tab]{padding:4px 5px;font-size:.9rem}.top{padding:0 14px;gap:12px}.top-right{gap:12px}#chip-text{display:none}.section{padding:14px 16px}.toolbar,.strip{padding-left:16px;padding-right:16px}}
 #connection,.chip,#chip-text{white-space:nowrap}
-@media(max-height:560px){.section>h2,#model-note{display:none}.section{padding:10px 14px;gap:8px}.rail .section button{padding:4px 10px;font-size:.85rem}.rail .section select,.rail .section input,.rail .section textarea{padding:4px 8px}.section.fill{padding-top:8px}.tabs button[role=tab]{padding:2px 5px}.stack{gap:6px}#lm-instruction{min-height:40px}.rail .section .row{gap:6px}.rail .section.fill{gap:6px}#notes-hint,.bars i:nth-child(n+3){display:none}.skeleton{gap:6px}#empty-sub,#samples small{display:none}.empty{padding-top:12px}.toolbar{padding:6px 28px}#login-note{margin-top:4px}.section.fill{padding-top:10px}#model-use{display:none}}
+@media(max-height:560px){.section>h2,#model-note,#model-meta{display:none}.section{padding:10px 14px;gap:8px}.rail .section button{padding:4px 10px;font-size:.85rem}.rail .section select,.rail .section input,.rail .section textarea{padding:4px 8px}.section.fill{padding-top:8px}.tabs button[role=tab]{padding:2px 5px}.stack{gap:6px}#lm-instruction{min-height:40px}.rail .section .row{gap:6px}.rail .section.fill{gap:6px}#notes-hint,.bars i:nth-child(n+3){display:none}.skeleton{gap:6px}#empty-sub,#samples small{display:none}.empty{padding-top:12px}.toolbar{padding:6px 28px}#login-note{margin-top:4px}.section.fill{padding-top:10px}#model-use{display:none}}
 @media(max-height:780px){.section>h2,#model-note{display:none}.section{padding:14px 18px;gap:8px}.rail .section button{padding:6px 12px}.rail .section select,.rail .section input,.rail .section textarea{padding:6px 10px}.stack{gap:8px}.section label{gap:4px}}
 @media(max-height:640px){.app{grid-template-rows:50px minmax(0,1fr) 26px}.toolbar{padding:6px 28px}.section{padding:12px 18px;gap:8px}.side{padding:12px}h1{font-size:1.7rem}.empty{gap:10px}#ask-form{margin-top:4px}.msg{padding:9px 12px}.skeleton{gap:8px}}
+#library-dialog{width:min(94vw,640px)}
+.lib-tools{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;margin-bottom:10px}.lib-tools select,.lib-tools input{padding:6px 10px;font-size:.85rem}
+#library-list{max-height:min(46vh,360px);overflow-y:auto}
+.model-item .meta{font:.74rem var(--mono);color:var(--dim);margin:2px 0}.model-item .acts{display:flex;align-items:center;gap:8px;flex:none}
+.rank{font:.74rem var(--mono);color:#e6c46b}
+.quiet{margin-top:10px;font-size:.8rem;color:var(--dim)}
 dialog{--r:20px;--p:18px;--rc:max(0px,calc(var(--r) - var(--p)));border:1px solid #3a3f44;border-radius:var(--r);padding:var(--p);width:min(92vw,480px);max-height:calc(100vh - 24px);overflow:hidden;color:var(--ink);background:var(--panel);box-shadow:0 16px 40px rgba(0,0,0,.5)}
 dialog::backdrop{background:rgba(0,0,0,.6)}
 dialog .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
@@ -168,13 +187,13 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
   </div>
 </header>
 <aside class="peek" id="path" tabindex="0" aria-label="How your question travels">
-  <div class="peek-dots"><i class="pdot" data-stage="0"></i><i class="pdot" data-stage="1"></i><i class="pdot" data-stage="2"></i><i class="pdot" data-stage="3"></i><i class="pdot" data-stage="4"></i><svg class="peek-chev" width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><path d="M2 2l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-  <div class="peek-panel">
-    <div class="node" data-stage="0"><i class="led"></i><span class="nm">Data</span><span class="t"></span><span class="sub"></span></div>
-    <div class="node" data-stage="1"><i class="led"></i><span class="nm">Profile</span><span class="t"></span><span class="sub"></span></div>
-    <div class="node" data-stage="2"><i class="led"></i><span class="nm">Model</span><span class="t"></span><span class="sub"></span></div>
-    <div class="node" data-stage="3"><i class="led"></i><span class="nm fabric-name">PYNQ-Z2</span><span class="t"></span><span class="sub"></span></div>
-    <div class="node" data-stage="4"><i class="led"></i><span class="nm">Answer</span><span class="t"></span><span class="sub"></span></div>
+  <div class="peek-pill">
+    <div class="node" data-stage="0"><i class="dot"></i><span class="nm">Data</span><span class="t"></span></div>
+    <div class="node" data-stage="1"><i class="dot"></i><span class="nm">Profile</span><span class="t"></span></div>
+    <div class="node" data-stage="2"><i class="dot"></i><span class="nm">Model</span><span class="t"></span></div>
+    <div class="node" data-stage="3"><i class="dot"></i><span class="nm fabric-name">PYNQ-Z2</span><span class="t"></span></div>
+    <div class="node" data-stage="4"><i class="dot"></i><span class="nm">Answer</span><span class="t"></span></div>
+    <svg class="peek-chev" width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><path d="M2 2l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </div>
 </aside>
 <aside class="side">
@@ -216,19 +235,20 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
 <aside class="rail">
   <section class="section">
     <h2>Model</h2>
-    <div class="mname"><span id="model-name" class="mono"></span></div>
+    <div class="mname"><span id="model-name" class="mono"></span><span id="model-star" class="star" tabindex="0" hidden>&#9733;</span></div>
+    <p id="model-meta" class="mono dim"></p>
     <p id="model-use" class="dim"></p>
     <small id="model-note" class="dim" hidden>Recommended for your data</small>
-    <div class="pair"><button id="open-library" type="button">Search models</button><button id="make-own" type="button">Synthesize model</button></div>
+    <div class="pair"><button id="open-library" type="button">Search<span class="x"> models</span></button><button id="make-own" type="button">Synthesize<span class="x"> model</span></button></div>
   </section>
   <section class="section fill">
     <div class="tabs" role="tablist">
       <button role="tab" data-tab="notes">Notes</button>
       <button role="tab" data-tab="incidents" id="tab-incidents">Replay</button>
       <button role="tab" data-tab="weights">Skills</button>
-      <button role="tab" data-tab="create">Teach</button>
+      <button role="tab" data-tab="create">Train</button>
       <span class="grow"></span>
-      <button class="help" type="button" data-help="Notes: jot things down. Replay: redo an event. Skills: pick one. Teach: add one." aria-label="Help">?</button>
+      <button class="help" type="button" data-help="tab" aria-label="Help">?</button>
     </div>
     <div data-panel="notes" class="stack">
       <textarea id="notes" placeholder="Write what you notice about this data" aria-label="Notes"></textarea>
@@ -241,17 +261,15 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
       <div class="row"><button id="replay-saved" type="button">Replay</button><button id="more-incidents" type="button" hidden>Older</button></div>
     </div>
     <div data-panel="weights" class="stack" hidden>
-      <label><span class="row">Early-warning skill<button class="help" type="button" data-help="The early-warning skill decides when the board warns you that requests are piling up.">?</button></span><select id="weight"></select></label>
-      <label id="lm-label"><span class="row">Answer skill<button class="help" type="button" data-help="The answer skill decides how the board explains what is going wrong in plain words.">?</button></span><select id="lm-selection"></select></label>
-      <div><code id="hash"></code></div>
-      <div id="lm-fingerprint" hidden><code id="lm-hash"></code></div>
-      <div class="row"><button id="rollback">Reset warning</button><button id="lm-restore">Reset answer</button></div>
+      <label><span class="row">Early-warning skill<button class="help" type="button" data-help="The early-warning skill decides when the board warns you that requests are piling up.">?</button></span><span class="selrow"><select id="weight"></select><button id="rollback" type="button">Reset</button></span></label>
+      <label id="lm-label"><span class="row">Answer skill<button class="help" type="button" data-help="The answer skill decides how the board explains what is going wrong in plain words.">?</button></span><span class="selrow"><select id="lm-selection"></select><button id="lm-restore" type="button">Reset</button></span></label>
+      <div class="row"><button id="publish-skill" type="button">Publish answer skill</button></div>
     </div>
     <form data-panel="create" id="lm-author-form" class="stack" hidden>
       <div class="two"><label>Name<input id="lm-name" maxlength="80" required></label>
       <label>Word<input id="lm-row" type="text" placeholder="Warning" maxlength="80" required></label></div>
       <label>What should it do differently?<textarea id="lm-instruction" maxlength="1000" rows="1"></textarea></label>
-      <div class="row"><button id="lm-author" type="submit">Teach and save</button><button id="lm-save" type="button">From file</button></div>
+      <div class="row"><button id="lm-author" type="submit">Train and save</button><button id="lm-save" type="button">From file</button></div>
       <input id="lm-artifact" type="file" accept=".json,application/json" hidden>
     </form>
   </section>
@@ -274,7 +292,14 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
 
 <dialog id="library-dialog">
   <div class="head"><h2>Model library</h2><button class="text" data-close>Close</button></div>
+  <div class="lib-tools">
+    <input id="lib-search" type="search" placeholder="Search models" aria-label="Search models">
+    <select id="lib-task" aria-label="Task"><option value="">Any task</option><option>early warning</option><option>explain</option><option>anomaly</option><option>custom</option></select>
+    <select id="lib-maker" aria-label="Maker"><option value="">Any maker</option><option>PYNQ team</option><option>Stefan Ilas</option><option>you</option><option>community</option></select>
+    <select id="lib-size" aria-label="Size"><option value="">Any size</option><option>tiny</option><option>small</option><option>large</option></select>
+  </div>
   <div id="library-list"></div>
+  <p class="quiet">Online sharing is coming soon.</p>
 </dialog>
 
 <dialog id="mcp-dialog">
@@ -313,7 +338,7 @@ const BEST_FOR = {
 };
 const GENERIC_PLAN = [
   {step:"Start from FLAN-T5-small", where:"runs on the board", ready:true},
-  {step:"Label examples from your data", where:"runs on this Mac", ready:true},
+  {step:"Label examples from your data", where:"runs on the board", ready:true},
   {step:"Write a skill with Astra and save it as INT8", where:"runs on the board", ready:true},
   {step:"Fine-tune on your labels", where:"coming soon", ready:false},
   {step:"Quantize the tuned model and load it on the FPGA", where:"coming soon", ready:false}
@@ -325,7 +350,7 @@ const demoProfile = {
   recommendation:{model_id:"queue-onset-logistic", reason:"Looks like connection-pool telemetry → Queue-onset INT8"},
   custom_plan:[
     {step:"Start from FLAN-T5-small", where:"runs on the board", ready:true},
-    {step:"Label examples from your 6,000 rows", where:"runs on this Mac", ready:true},
+    {step:"Label examples from your 6,000 rows", where:"runs on the board", ready:true},
     {step:"Write a skill for your data with Astra and save it as INT8", where:"runs on the board", ready:true},
     {step:"Fine-tune on your labels", where:"coming soon", ready:false},
     {step:"Quantize the tuned model and load it on the FPGA", where:"coming soon", ready:false}
@@ -341,6 +366,7 @@ const demoChats = [
 let status = null, address = "", busy = true, interaction = 0, pollPending = false, nextModelCheck = 0, autoUsb = true;
 let languageWeights = null, savedCaptures = [], olderCaptures = null, latestStream = null, answerCapture = null;
 let messages = [], chatId = null, chats = [], user = null, auth0 = false, demo = false, loginWatch = null, models = null, samples = [];
+let demoPublished = [];
 let dataset = null, datasetLabel = "", chosenModel = null, accepted = false, notes = "", notesTimer = null;
 let answerStyle = "short", lastLatency = null, activeTab = "notes", lastTimings = null;
 const query = new URLSearchParams(location.search || location.hash.slice(1));
@@ -368,8 +394,14 @@ function show(message, error=false) {
   el("notice").dataset.error = String(error);
   el("offline-notice").textContent = message;
 }
+function blinkLed() {
+  const led = document.querySelectorAll(".chip .led")[1];
+  if (!led) return;
+  led.classList.remove("flash"); void led.offsetWidth; led.classList.add("flash");
+}
 async function post(url, action, extra) {
   const response = await fetch(url, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({action,...extra})});
+  if (status && !demo && url === "/api/action") blinkLed();
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || "Something went wrong.");
   return data;
@@ -387,7 +419,6 @@ function pathReset() {
   path.ms = [null, null, null, null, null];
   path.state = ["idle", "idle", "idle", "idle", "idle"];
   for (const node of document.querySelectorAll(".node")) {node.dataset.state = "idle"; node.querySelector(".t").textContent = "";}
-  for (const dot of document.querySelectorAll(".pdot")) dot.dataset.state = "idle";
 }
 function peekPulse() {
   const peek = el("path");
@@ -395,10 +426,9 @@ function peekPulse() {
 }
 function pathMark(index, state, ms=null) {
   path.state[index] = state;
-  if (state === "active") peekPulse();
+  if (state === "active") {peekPulse(); if (demo) blinkLed();}
   const node = document.querySelector('.node[data-stage="' + index + '"]');
   node.dataset.state = state;
-  document.querySelector('.pdot[data-stage="' + index + '"]').dataset.state = state;
   if (ms !== null) {node.querySelector(".t").textContent = fmtMs(ms); path.ms[index] = ms;}
 }
 function pathBegin() {
@@ -430,14 +460,7 @@ async function pathPlay(timings, stages=[0, 1, 2, 3, 4]) {
   document.body.classList.remove("working");
 }
 function pathLabels() {
-  const nodes = document.querySelectorAll(".node");
-  const online = Boolean(status);
-  nodes[0].querySelector(".sub").textContent = dataset ? dataset.name : online ? "live stream" : "";
-  nodes[1].querySelector(".sub").textContent = dataset ? dataset.rows.toLocaleString() + " rows · " + dataset.columns.length + " cols" : "";
-  nodes[2].querySelector(".sub").textContent = chosenModel ? chosenModel.name : online ? "INT8 weights" : "";
-  document.querySelector(".fabric-name").textContent = online ? "PYNQ-Z2" : "This Mac";
-  nodes[3].querySelector(".sub").textContent = online ? "100 MHz" : "no board";
-  nodes[4].querySelector(".sub").textContent = "plain words";
+  document.querySelector(".fabric-name").textContent = status ? "PYNQ-Z2" : "This Mac";
 }
 
 function controls() {
@@ -446,6 +469,7 @@ function controls() {
   document.body.classList.toggle("offline", !online && !hasData);
   el("app").classList.toggle("nosidebar", !user);
   el("chip").classList.toggle("online", online);
+  el("chip").dataset.tip = online ? "Board clock: 100 MHz\nBoard temperature: " + (status.temp_c != null ? status.temp_c + " °C" : "not reported") + "\nLast answer latency: " + (lastLatency !== null ? lastLatency + " s" : "none yet") + "\nLEDs: link, activity, answering" : "No board connected";
   el("chip-text").textContent = online ? "100 MHz · " + (status.temp_c != null ? status.temp_c + " °C" : "-- °C") + (lastLatency !== null ? " · latency " + lastLatency + " s" : "") : "no board";
   el("connection").textContent = online ? (status.board_name || status.board || "PYNQ-Z2") + " connected" : "No board · this Mac";
   el("connection").classList.toggle("off", !online);
@@ -466,13 +490,13 @@ function controls() {
   el("import-more").disabled = busy;
   el("new-icon").hidden = Boolean(user);
   el("new-icon").disabled = busy;
-  el("export-btn").disabled = busy || !messages.some(message => !message.pending);
+  el("export-btn").disabled = !messages.some(message => message.role === "answer" && (!message.pending || readyStyles(message).length));
   el("login-note").hidden = Boolean(user);
   el("ask-live").disabled = busy || !(dataset || status?.stream_supported) || !el("live-question").value.trim();
   for (const button of document.querySelectorAll("#styles button")) button.setAttribute("aria-pressed", String(button.dataset.style === answerStyle));
   el("messages").hidden = !messages.length;
   el("empty").hidden = messages.length > 0;
-  el("greeting").textContent = user ? "Welcome back, " + user.name.trim().split(/\s+/)[0] : "Hey hacker!";
+  el("greeting").textContent = user ? "welcome back, " + user.name.trim().split(/\s+/)[0] : "hey hacker";
   el("empty-sub").textContent = dataset ? "Your data is loaded. Ask a question below and pick how you want the answer." : "Bring your data. Get a quantized model for it. Ask it anything.";
   el("import-big").hidden = Boolean(dataset);
   el("import-big").disabled = busy;
@@ -489,11 +513,11 @@ function controls() {
   for (const id of ["lm-name", "lm-row", "lm-instruction"]) el(id).disabled = !languageAvailable;
   el("lm-author").disabled = !languageAvailable || !versionNamed || !el("lm-instruction").value.trim();
   el("lm-save").disabled = !languageAvailable || !versionNamed;
+  el("publish-skill").disabled = busy || !skillToPublish();
   el("saved-incident").disabled = busy || !savedCaptures.length;
   el("replay-saved").disabled = busy || !status?.lm_supported || !el("saved-incident").value;
   el("more-incidents").disabled = busy;
   el("tab-incidents").hidden = !languageWeights?.capture_listing_supported && !demo;
-  el("lm-fingerprint").hidden = !languageWeights;
   el("notes-hint").textContent = user ? "" : "Log in to save notes";
   if (el("tab-incidents").hidden && activeTab === "incidents") selectTab("notes");
   renderModel();
@@ -511,15 +535,30 @@ function renderStrip() {
   if (lastLatency !== null) parts.push("latency " + lastLatency + " s");
   el("strip").textContent = parts.join(" · ");
 }
+const makerLabel = model => model.maker === "community" ? "community" : "by " + (model.maker || "PYNQ team");
+const sizeText = model => model.size_kb == null ? "" : model.size_kb >= 1000 ? Math.round(model.size_kb / 1000) + " MB" : model.size_kb + " KB";
+function rankInfo(model) {
+  const recommendation = dataset?.recommendation;
+  if (!recommendation) return null;
+  const order = [recommendation.model_id, ...(recommendation.alternatives || [])];
+  const index = order.indexOf(model.id);
+  if (index < 0) return null;
+  const what = dataset.signals?.includes("queue") ? (dataset.time_column ? "timestamped queue data" : "queue data") : (dataset.signals?.[0] ? dataset.signals[0] + " data" : "data");
+  return {rank:index + 1, tip:index === 0 ? "Recommended: matches your " + what : (index === 1 ? "Second choice" : "Third choice") + ": a close fit for your " + what};
+}
 function renderModel() {
   const recommendation = dataset?.recommendation;
   if (recommendation && !chosenModel && models) chosenModel = models.find(model => model.id === recommendation.model_id) || null;
   const shown = chosenModel || (status ? models?.find(model => model.id === "queue-onset-logistic") : null);
   el("model-name").textContent = shown ? shown.name : status ? friendlyVersion(status.version) : "No model yet";
+  el("model-meta").textContent = shown ? makerLabel(shown) + " \u00b7 Runs on the board" : "";
   el("model-use").textContent = shown ? bestFor(shown) : "Import data to get a recommendation.";
+  const info = shown ? rankInfo(shown) : null;
+  el("model-star").hidden = !(info && info.rank === 1);
+  el("model-star").dataset.tip = info ? info.tip : "";
   el("model-note").hidden = !(recommendation && shown?.id === recommendation.model_id);
   if (status) {
-    el("hash").textContent = status.weights_sha256 || "";
+    el("weight").title = status.weights_sha256 ? "Fingerprint " + status.weights_sha256 : "";
     el("weight").replaceChildren(...status.versions.map(version => new Option(version, version)));
     el("weight").value = status.version;
   }
@@ -529,7 +568,7 @@ function renderLanguageSelect() {
   const versions = languageWeights?.versions || [];
   selector.replaceChildren(...versions.map(version => new Option(version.name, version.name)));
   selector.value = languageWeights?.active?.name || "";
-  el("lm-hash").textContent = languageWeights?.active?.checkpoint_sha256 || "";
+  selector.title = languageWeights?.active?.checkpoint_sha256 ? "Fingerprint " + languageWeights.active.checkpoint_sha256 : "";
 }
 function setState(data) {
   if (data.host !== address || !data.status?.lm_supported) {
@@ -664,7 +703,8 @@ async function refreshChats() {
 async function openChat(id) {
   try {
     const chat = demo ? demoChats.find(item => item.id === id) : (await account("history_get", {chat_id:id})).chat;
-    messages = chat.messages.map(message => ({role:message.role, text:message.text, readings:message.readings || "", table:message.table, mono:message.mono, style:message.style}));
+    messages = chat.messages.map(message => ({role:message.role, text:message.text, readings:message.readings || "", table:message.table, mono:message.mono, style:message.style, variants:message.variants && Object.keys(message.variants).length ? message.variants : undefined, picked:true}));
+    for (const message of messages) {ensureVariants(message); if (message.role === "answer") message.view = message.variants[message.style] ? message.style : readyStyles(message)[0];}
     chatId = chat.id; notes = chat.notes || ""; el("notes").value = notes;
     dataset = null; datasetLabel = chat.dataset || "";
     chosenModel = models?.find(model => model.id === chat.model) || null; accepted = Boolean(chosenModel);
@@ -679,38 +719,87 @@ function newSession() {
   pathReset(); show(""); renderMessages(); controls();
   if (status) el("live-question").focus();
 }
+const STYLE_ORDER = ["short", "summary", "transcript", "table"];
+const STYLE_NAMES = {short:"Short", summary:"Summary", transcript:"Transcript", table:"Table"};
+function ensureVariants(message) {
+  if (message.role !== "answer" || message.variants) return;
+  const style = STYLE_ORDER.includes(message.style) ? message.style : "short";
+  message.variants = {[style]:{text:message.text || "", table:message.table, mono:message.mono}};
+  message.view = style;
+}
+function readyStyles(message) {
+  return STYLE_ORDER.filter(style => message.variants?.[style]);
+}
+function variantsPayload(message) {
+  return Object.fromEntries(readyStyles(message).map(style => {
+    const item = message.variants[style];
+    return [style, {text:item.text || "", table:item.table, mono:Boolean(item.mono)}];
+  }));
+}
+function tableElement(table) {
+  const grid = document.createElement("table");
+  const head = document.createElement("tr");
+  for (const column of table.columns) head.append(Object.assign(document.createElement("th"), {textContent:column}));
+  grid.append(head);
+  for (const row of table.rows) {
+    const line = document.createElement("tr");
+    for (const cell of row) line.append(Object.assign(document.createElement("td"), {textContent:cell}));
+    grid.append(line);
+  }
+  return grid;
+}
+function skeletonBars(count) {
+  const wrap = document.createElement("div"); wrap.className = "bars";
+  wrap.innerHTML = [[94,"#2b2f34","#3a4047"],[81,"#2f3338","#3d434a"],[88,"#292d31","#383e44"],[56,"#30353a","#3f454c"]].slice(0, count).map(bar => '<i style="width:' + bar[0] + '%;--c:' + bar[1] + ';--h:' + bar[2] + '"></i>').join("");
+  return wrap;
+}
 function renderMessages() {
   el("messages").hidden = !messages.length;
   el("empty").hidden = messages.length > 0;
   el("messages").replaceChildren(...messages.map((message, index) => {
     const bubble = document.createElement("div");
-    bubble.className = "msg " + message.role + (message.mono ? " mono" : "");
+    bubble.className = "msg " + message.role;
+    if (message.role === "user") {bubble.append(message.text); return bubble;}
+    ensureVariants(message);
+    const ready = readyStyles(message);
+    if (message.pending || ready.length > 1) {
+      const tabs = document.createElement("div"); tabs.className = "vtabs"; tabs.setAttribute("role", "tablist");
+      for (const style of STYLE_ORDER) {
+        const done = Boolean(message.variants[style]);
+        if (!done && !message.pending) continue;
+        const tab = document.createElement("button");
+        tab.type = "button"; tab.className = "vt"; tab.textContent = STYLE_NAMES[style];
+        tab.setAttribute("aria-pressed", String(message.view === style));
+        if (done) {
+          tab.onclick = () => {message.view = style; message.picked = true; renderMessages();};
+        } else {
+          tab.disabled = true; tab.append(document.createElement("i"));
+        }
+        tabs.append(tab);
+      }
+      bubble.append(tabs);
+    }
+    const variant = message.variants[message.view];
+    if (variant) {
+      const body = document.createElement("div");
+      body.className = "vbody" + (variant.mono ? " mono" : "");
+      body.append(variant.text || "");
+      if (variant.table) body.append(tableElement(variant.table));
+      bubble.append(body);
+    } else if (message.pending) {
+      bubble.append(skeletonBars(3));
+    }
     if (message.pending) {
-      if (message.partial) bubble.append(message.partial);
       const skeleton = document.createElement("div");
       skeleton.className = "skeleton"; skeleton.dataset.index = index;
       const names = ["Data", "Profile", "Model", status ? "PYNQ-Z2" : "This Mac", "Answer"];
       skeleton.innerHTML = '<div class="stg">' + names.map((name, stage) => '<span data-s="next" data-stage="' + stage + '">' + name + '</span>').join("") + '</div>' +
-        '<div class="thinking"><span class="phase"></span><span class="timer"></span></div>' +
-        '<div class="bars">' + [[94,"#2b2f34","#3a4047"],[81,"#2f3338","#3d434a"],[88,"#292d31","#383e44"],[56,"#30353a","#3f454c"]].map(bar => '<i style="width:' + bar[0] + '%;--c:' + bar[1] + ';--h:' + bar[2] + '"></i>').join("") + '</div>';
+        '<div class="thinking"><span class="phase"></span><span class="timer"></span></div>';
       bubble.append(skeleton);
       return bubble;
     }
-    bubble.append(message.text);
-    if (message.table) {
-      const grid = document.createElement("table");
-      const head = document.createElement("tr");
-      for (const column of message.table.columns) head.append(Object.assign(document.createElement("th"), {textContent:column}));
-      grid.append(head);
-      for (const row of message.table.rows) {
-        const line = document.createElement("tr");
-        for (const cell of row) line.append(Object.assign(document.createElement("td"), {textContent:cell}));
-        grid.append(line);
-      }
-      bubble.append(grid);
-    }
-    if (message.role === "answer" && message.genTiming) bubble.append(Object.assign(document.createElement("small"), {className:"gen-timing", textContent:message.genTiming}));
-    if (message.role === "answer" && message.readings) {
+    if (message.genTiming) bubble.append(Object.assign(document.createElement("small"), {className:"gen-timing", textContent:message.genTiming}));
+    if (message.readings) {
       const details = document.createElement("details");
       const summary = document.createElement("summary"); summary.textContent = "Readings behind this answer";
       const body = document.createElement("p"); body.textContent = message.readings;
@@ -737,6 +826,7 @@ function renderMessages() {
   }));
   updateThinking();
   el("messages").scrollTop = el("messages").scrollHeight;
+  requestAnimationFrame(() => {el("messages").scrollTop = el("messages").scrollHeight;});
 }
 function updateThinking() {
   for (const node of document.querySelectorAll(".skeleton")) {
@@ -754,7 +844,12 @@ function updateThinking() {
   }
 }
 function pendingEntry() {
-  return {role:"answer", text:"", pending:true, readings:"", start:Date.now(), stage:0, stageStart:Date.now(), order:STAGE_PHRASES.map(group => shuffled(group.map((_, index) => index)))};
+  return {role:"answer", pending:true, readings:"", variants:{}, view:"short", picked:false, defaultStyle:answerStyle, start:Date.now(), stage:0, stageStart:Date.now(), order:STAGE_PHRASES.map(group => shuffled(group.map((_, index) => index)))};
+}
+function setVariant(entry, style, variant) {
+  entry.variants[style] = variant;
+  if (!entry.picked && (style === entry.defaultStyle || !entry.variants[entry.view])) entry.view = style;
+  renderMessages();
 }
 function entryStage(entry, stage) {
   if (stage > (entry.stage || 0)) {entry.stage = stage; entry.stageStart = Date.now();}
@@ -839,6 +934,7 @@ function shapeLive(style, data) {
   rows.push(["Answer", text.split(/(?<=[.!?])\s/)[0]]);
   return {text:"", table:{columns:["Reading", "Value"], rows}};
 }
+const firstSentence = text => text.split(/(?<=[.!?])\s/)[0];
 function askLive(question, captured=null) {
   run(async () => {
     const entry = pendingEntry();
@@ -856,7 +952,9 @@ function askLive(question, captured=null) {
           entryStage(entry, data.partial_answer ? 4 : elapsed < 1500 ? 1 : elapsed < 3000 ? 2 : 3);
           if (data.partial_answer && data.partial_answer !== entry.partial) {
             if (entry.firstTextAt == null) entry.firstTextAt = Date.now();
-            entry.partial = data.partial_answer; renderMessages();
+            entry.partial = data.partial_answer;
+            const lead = firstSentence(data.partial_answer);
+            if (lead.length < data.partial_answer.length && !entry.variants.short) setVariant(entry, "short", {text:lead});
           }
           await refreshStream();
           await sleep(1500);
@@ -866,20 +964,19 @@ function askLive(question, captured=null) {
         data = {...data, snapshot, analyst_model:data.model, analyst_location:"PYNQ-Z2"};
         const seconds = at => ((at - entry.start) / 1000).toFixed(1) + " s";
         const doneAt = Date.now();
-        entry.genTiming = "First text " + seconds(entry.firstTextAt ?? doneAt) + " · Complete answer " + seconds(doneAt);
+        entry.genTiming = "First text " + seconds(entry.firstTextAt ?? doneAt) + " \u00b7 Complete answer " + seconds(doneAt);
       }
       const baseline = data.baseline || (captured ? captured.baseline : {answer:data.answer, version:data.active});
       const captureId = data.capture_id || captured?.id;
       answerCapture = typeof captureId === "string" ? {id:captureId, question, baseline} : null;
-      const shaped = shapeLive(answerStyle, data);
-      Object.assign(entry, shaped, {pending:false, partial:""});
-      if (!shaped.text) entry.text = "";
+      for (const style of STYLE_ORDER) setVariant(entry, style, shapeLive(style, data));
+      entry.pending = false; entry.partial = "";
       lastLatency = Math.round((Date.now() - entry.start) / 1000);
       entry.readings = readingsText(data, captured, captured ? baseline : null);
       entry.capture = answerCapture;
       entry.offTopic = !ON_TOPIC.test(question);
       pathFinish();
-      entry.style = answerStyle; entry.timings = lastTimings = timingsFromPath();
+      entry.style = entry.defaultStyle; entry.timings = lastTimings = timingsFromPath();
     } catch (err) {
       messages.splice(messages.indexOf(asked), 2); renderMessages();
       el("live-question").value = question;
@@ -890,7 +987,7 @@ function askLive(question, captured=null) {
     if (!entry.capture?.id) entry.capture = null;
     await refreshStream().catch(() => {});
     if (answerCapture && !captured && languageWeights?.capture_listing_supported) await refreshSavedCaptures();
-    if (!captured) await persistSession({question, answer:entry.text || entry.table?.rows.map(row => row.join(": ")).join("; ") || "", readings:entry.readings, table:entry.table, mono:entry.mono, style:entry.style});
+    if (!captured) await persistSession({question, answer:entry.variants.short?.text || "", readings:entry.readings, style:entry.style, variants:variantsPayload(entry)});
     show("");
   });
 }
@@ -902,25 +999,32 @@ function askData(question) {
     accepted = true;
     pathBegin();
     try {
-      const data = await request("data_ask", {question, style:answerStyle});
-      const times = data.timings;
-      times.data_ms = dataset.timings?.data_ms ?? 0; times.profile_ms = dataset.timings?.profile_ms ?? 0;
-      times.model_ms = Math.max(times.model_ms, 0.5);
-      const stages = [0, 1, 2, 3, 4];
-      const values = [times.data_ms, times.profile_ms, times.model_ms, times.fabric_ms, times.answer_ms];
+      let job = await request("data_ask_begin", {question, style:answerStyle});
+      const seen = new Set();
       document.body.classList.add("working");
-      for (const stage of stages) {
-        entryStage(entry, stage);
-        pathMark(stage, "active");
-        await sleep(Math.min(Math.max(values[stage], 450), 1000));
-        pathMark(stage, "done", values[stage]);
+      for (;;) {
+        const elapsed = Date.now() - entry.start;
+        for (const style of job.order) {
+          const result = job.ready[style];
+          if (!result || seen.has(style)) continue;
+          seen.add(style);
+          setVariant(entry, style, {text:result.answer, table:result.table, mono:style === "transcript"});
+          if (style === "short") entry.readings = result.readings + " Answered on " + job.where + ".";
+        }
+        if (job.state === "error") throw new Error(job.error);
+        entryStage(entry, seen.has("short") ? 4 : elapsed < 500 ? 2 : 3);
+        if (job.state !== "running" && elapsed > 1800) break;
+        await sleep(300);
+        if (job.state === "running") job = await request("data_ask_progress", {job_id:job.job_id});
       }
+      const times = job.timings;
+      const values = [dataset.timings?.data_ms ?? 0, dataset.timings?.profile_ms ?? 0, Math.max(times.model_ms, 0.5), times.fabric_ms, times.answer_ms];
+      values.forEach((value, stage) => pathMark(stage, "done", value));
       document.body.classList.remove("working");
-      lastLatency = Math.round(Object.values(times).reduce((total, value) => total + value, 0) / 100) / 10;
-      Object.assign(entry, {pending:false, text:data.answer, readings:data.readings + " Answered on " + data.where + ".", table:data.table, mono:data.style === "transcript"});
-      if (data.table) entry.text = data.answer;
+      lastLatency = Math.round(values.reduce((total, value) => total + value, 0) / 100) / 10;
+      entry.pending = false;
       entry.offTopic = !ON_TOPIC.test(question);
-      entry.style = answerStyle; entry.timings = lastTimings = timingsFromPath();
+      entry.style = entry.defaultStyle; entry.timings = lastTimings = timingsFromPath();
     } catch (err) {
       messages.splice(messages.indexOf(asked), 2); renderMessages();
       el("live-question").value = question;
@@ -928,7 +1032,7 @@ function askData(question) {
       throw err;
     }
     renderMessages();
-    await persistSession({question, answer:entry.text, readings:entry.readings, table:entry.table, mono:entry.mono, style:entry.style});
+    await persistSession({question, answer:entry.variants.short?.text || "", readings:entry.readings, style:entry.style, variants:variantsPayload(entry)});
   });
 }
 const DEMO_ANSWERS = {
@@ -937,29 +1041,29 @@ const DEMO_ANSWERS = {
   transcript:{mono:true, text:"00:00.0  START  waiting 0\n00:13.5  SPIKE  waiting jumps to 13\n00:14.5  PEAK   highest waiting, 19\n00:15.3  CALM   waiting eases to 12\n00:20.0  NOW    waiting 14, rising"},
   table:{text:"", table:{columns:["Time", "Event", "Waiting"], rows:[["0.0 s", "start", "0"], ["13.5 s", "spike", "13"], ["14.5 s", "peak", "19"], ["20.0 s", "now", "14"]]}}
 };
+const DEMO_SCHEDULE = {short:2000, summary:4000, transcript:6000, table:7000};
 function demoAnswer(question) {
   const entry = pendingEntry();
   messages.push({role:"user", text:question}, entry); renderMessages();
   accepted = true;
   pathBegin();
-  const finalTimes = [120, 210, 380, 3900, 1300];
-  const at = [0, 900, 1800, 2700, 4800];
-  at.forEach((delay, stage) => { if (stage) setTimeout(() => entryStage(entry, stage), delay); });
-  setTimeout(() => {
-    pathFinish();
-    finalTimes.forEach((ms, stage) => pathMark(stage, "done", ms));
-    lastLatency = 6;
-    Object.assign(entry, {pending:false, style:answerStyle});
-    entry.timings = lastTimings = timingsFromPath();
-    if (!ON_TOPIC.test(question)) {
-      entry.text = "I only read this board's system health, so I can't answer that one well.";
-      entry.offTopic = true;
-    } else {
-      Object.assign(entry, DEMO_ANSWERS[answerStyle]);
-      entry.readings = "t-30s waiting 3 · t-20s waiting 6 · t-10s waiting 10 · now waiting 14 · busy 20 of 20\nPredicted: queue onset in 2 s (p 0.91). Answered in 6 s · demo";
+  const offTopic = !ON_TOPIC.test(question);
+  const held = query.has("hold") ? (Number(query.get("hold")) || 1) : STYLE_ORDER.length;
+  [[1, 500], [2, 1000], [3, 1500], [4, 2000]].forEach(([stage, delay]) => setTimeout(() => entryStage(entry, stage), delay));
+  STYLE_ORDER.slice(0, offTopic ? 1 : held).forEach(style => setTimeout(() => {
+    const item = offTopic ? {text:"I only read this board's system health, so I can't answer that one well."} : DEMO_ANSWERS[style];
+    setVariant(entry, style, {...item});
+    if (offTopic) for (const other of STYLE_ORDER) entry.variants[other] = {...item};
+    entry.readings = "t-30s waiting 3 \u00b7 t-20s waiting 6 \u00b7 t-10s waiting 10 \u00b7 now waiting 14 \u00b7 busy 20 of 20\nPredicted: queue onset in 2 s (p 0.91). Answered in 7 s \u00b7 demo";
+    if (offTopic || style === "table") {
+      pathFinish();
+      [120, 210, 380, 3900, 1300].forEach((ms, index) => pathMark(index, "done", ms));
+      lastLatency = 7;
+      entry.pending = false; entry.style = entry.defaultStyle; entry.offTopic = offTopic;
+      entry.timings = lastTimings = timingsFromPath();
     }
     renderMessages(); controls();
-  }, query.has("hold") ? 3600000 : 6000);
+  }, offTopic ? 2000 : DEMO_SCHEDULE[style]));
 }
 async function changeQueueWeights(action, version) {
   const supportsStream = status.stream_supported, supportsLanguageModel = status.lm_supported;
@@ -993,22 +1097,51 @@ async function loadSamples() {
   }));
   controls();
 }
-async function openLibrary() {
-  el("library-dialog").showModal();
-  try {await loadModels();}
-  catch {el("library-list").textContent = "The model library is unavailable."; return;}
-  el("library-list").replaceChildren(...models.map(model => {
+async function reloadModels() {
+  models = (await (await fetch("/api/models")).json()).models;
+  if (demo) models = [...models, ...demoPublished];
+}
+function skillToPublish() {
+  const active = languageWeights?.active?.name;
+  if (active && active !== "original") return active;
+  return demo ? "tighter-warnings" : null;
+}
+function renderLibrary() {
+  const query = el("lib-search").value.trim().toLowerCase();
+  const filters = {task_tag:el("lib-task").value, maker:el("lib-maker").value, size:el("lib-size").value};
+  const shown = models.filter(model => (!query || (model.name + " " + model.task + " " + (model.maker || "")).toLowerCase().includes(query))
+    && Object.entries(filters).every(([key, value]) => !value || model[key] === value));
+  shown.sort((a, b) => (rankInfo(a)?.rank ?? 99) - (rankInfo(b)?.rank ?? 99) || a.rank - b.rank);
+  if (!shown.length) {el("library-list").textContent = "No models match."; return;}
+  el("library-list").replaceChildren(...shown.map(model => {
     const row = document.createElement("div"); row.className = "model-item";
     const text = document.createElement("div");
     const name = document.createElement("div"); name.className = "mono"; name.textContent = model.name;
+    const info = rankInfo(model);
+    if (info?.rank === 1) name.append(" ", Object.assign(document.createElement("span"), {className:"star", tabIndex:0, textContent:"\u2605"}));
+    if (info?.rank === 1) name.lastChild.dataset.tip = info.tip;
+    if (info && info.rank > 1) name.append(" ", Object.assign(document.createElement("span"), {className:"rank", textContent:info.rank === 2 ? "2nd choice" : "3rd choice", title:info.tip}));
+    const meta = document.createElement("div"); meta.className = "meta";
+    meta.textContent = [makerLabel(model), "Runs on the board", sizeText(model)].filter(Boolean).join(" \u00b7 ");
     const task = document.createElement("small"); task.textContent = bestFor(model);
-    text.append(name, task);
-    let action;
+    text.append(name, meta, task);
+    const acts = document.createElement("div"); acts.className = "acts";
     const activeId = chosenModel?.id || (status ? "queue-onset-logistic" : "");
+    if (model.published) {
+      const remove = document.createElement("button"); remove.className = "text"; remove.type = "button"; remove.textContent = "Unpublish";
+      remove.onclick = async () => {
+        try {
+          if (demo) demoPublished = demoPublished.filter(item => item.id !== model.id);
+          else await account("model_unpublish", {id:model.id});
+          await reloadModels(); renderLibrary();
+        } catch (err) {show(err.message, true);}
+      };
+      acts.append(remove);
+    }
     if (model.available && model.id === activeId) {
-      action = document.createElement("span"); action.className = "tag"; action.textContent = "Active";
+      acts.append(Object.assign(document.createElement("span"), {className:"tag", textContent:"Active"}));
     } else if (model.available) {
-      action = document.createElement("button"); action.textContent = "Switch"; action.dataset.model = model.id;
+      const action = document.createElement("button"); action.textContent = "Switch"; action.dataset.model = model.id;
       action.onclick = () => {
         el("library-dialog").close();
         chosenModel = model; accepted = true; peekPulse();
@@ -1017,12 +1150,19 @@ async function openLibrary() {
         if (status && model.kind === "queue") run(() => changeQueueWeights("rollback"));
         else if (status?.lm_supported && model.kind === "language") run(() => changeLanguageWeights("restore"));
       };
+      acts.append(action);
     } else {
-      action = document.createElement("span"); action.className = "tag"; action.textContent = "Coming soon";
+      acts.append(Object.assign(document.createElement("span"), {className:"tag", textContent:"Coming soon"}));
     }
-    row.append(text, action);
+    row.append(text, acts);
     return row;
   }));
+}
+async function openLibrary() {
+  el("library-dialog").showModal();
+  try {await reloadModels();}
+  catch {el("library-list").textContent = "The model library is unavailable."; return;}
+  renderLibrary();
   controls();
 }
 function openPlan() {
@@ -1037,9 +1177,13 @@ function openPlan() {
 }
 function sessionObject() {
   const title = messages.find(message => message.role === "user")?.text || dataset?.name || datasetLabel || "Session";
-  return {id:chatId, title:title.slice(0, 80), dataset:dataset?.name || datasetLabel, model:chosenModel?.id || "", notes,
-    timings:lastTimings || {},
-    messages:messages.filter(message => !message.pending).map(message => ({role:message.role, text:message.text, readings:message.readings || "", table:message.table, mono:message.mono, style:message.style, timings:message.timings}))};
+  return {id:chatId, title:title.slice(0, 80), dataset:dataset?.name || datasetLabel, model:chosenModel?.id || "", notes, timings:lastTimings || {},
+    messages:messages.filter(message => message.role === "user" || !message.pending || readyStyles(message).length).map(message => {
+      if (message.role === "user") return {role:"user", text:message.text};
+      ensureVariants(message);
+      const current = message.variants[message.view] || message.variants[readyStyles(message)[0]] || {text:""};
+      return {role:"answer", text:current.text || "", readings:message.readings || "", table:current.table, mono:current.mono, style:message.style || message.defaultStyle, timings:message.timings, variants:variantsPayload(message)};
+    })};
 }
 async function copyText(text) {
   try {await navigator.clipboard.writeText(text); return true;}
@@ -1108,6 +1252,12 @@ async function importSample(id) {
   await pathPlay(data.timings, [0, 1]);
   await persistSession();
 }
+const HELP = {
+  notes:"Jot down what you notice. Notes save with this session.",
+  incidents:"Replay an event the board saved and see how it answers now.",
+  weights:"Skills decide how the board warns you and explains. Switch or reset them here.",
+  create:"Train a new answer skill by telling the board what to do differently."
+};
 const helpPop = Object.assign(document.createElement("div"), {className:"pop", hidden:true});
 document.body.append(helpPop);
 function closeHelp() {
@@ -1118,10 +1268,11 @@ for (const button of document.querySelectorAll(".help")) {
   button.setAttribute("aria-label", "Help");
   button.onclick = event => {
     event.preventDefault(); event.stopPropagation();
-    const open = helpPop.hidden || helpPop.dataset.for !== button.dataset.help;
+    const text = button.dataset.help === "tab" ? HELP[activeTab] : button.dataset.help;
+    const open = helpPop.hidden || helpPop.dataset.for !== text;
     closeHelp();
     if (!open) return;
-    helpPop.textContent = button.dataset.help; helpPop.dataset.for = button.dataset.help;
+    helpPop.textContent = text; helpPop.dataset.for = text;
     helpPop.hidden = false;
     const box = button.getBoundingClientRect(), width = helpPop.offsetWidth;
     helpPop.style.left = Math.max(8, Math.min(box.right - width, window.innerWidth - width - 8)) + "px";
@@ -1190,6 +1341,20 @@ el("notes").oninput = () => {
   notesTimer = setTimeout(() => persistSession(), 900);
 };
 el("saved-incident").onchange = showSavedCaptureDetails;
+for (const id of ["lib-search", "lib-task", "lib-maker", "lib-size"]) el(id).addEventListener("input", () => {if (models) renderLibrary();});
+el("publish-skill").onclick = async () => {
+  const name = skillToPublish();
+  if (!name) return;
+  try {
+    if (demo) {
+      demoPublished = [...demoPublished.filter(item => item.name !== name), {id:"you-" + name, name, task:"Answer skill made by you", task_tag:"custom", kind:"language", available:true, maker:"you", size_kb:70, size:"tiny", published:true, rank:99, runs_on:"board"}];
+      await reloadModels();
+    } else {
+      models = (await account("model_publish", {name, task:"Answer skill made by you", task_tag:"custom", base:"flan-t5-small-int8"})).models;
+    }
+    show("Published " + name + " to your marketplace.");
+  } catch (err) {show(err.message, true);}
+};
 el("replay-saved").onclick = () => {
   const capture = savedCapture();
   if (demo) return demoNotice();
@@ -1303,6 +1468,7 @@ async function devStart() {
   if (query.get("menu") === "export") el("export-btn").click();
   if (query.has("help")) document.querySelector(".tabs .help").click();
   if (query.get("menu") === "late") setTimeout(() => {el("export-btn").click();}, 6600);
+  if (query.get("vt")) setTimeout(() => [...document.querySelectorAll(".vt")].find(button => button.textContent.startsWith(query.get("vt")))?.click(), 7600);
   if (query.has("ask")) {
     el("live-question").value = "What looks wrong with our system?";
     controls();
