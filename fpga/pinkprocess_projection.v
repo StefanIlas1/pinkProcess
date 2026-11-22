@@ -47,21 +47,58 @@ module pinkprocess_projection (
     reg start, completed, invalid, decode;
     reg [15:0] k, pos_tiles, out_tiles;
     reg [31:0] a_base, w_base, y_base;
-    wire busy, done, dma_error;
-    wire running = start || busy;
+    wire busy, done, dma_error, mac_feed;
+    reg [31:0] elapsed_cycles, feed_cycles, read_beats, write_beats;
+    // Descriptors are staged while idle; one doorbell runs up to eight in order.
+    // Keep the legacy configuration readable throughout execution.
+    reg [144:0] descriptors [0:7];
+    reg [3:0] queued, queue_index;
+    reg queue_active;
+    wire [144:0] config_words = {decode, k, pos_tiles, out_tiles, a_base, w_base, y_base};
+    wire [144:0] current_words = queue_active ? descriptors[queue_index[2:0]] : config_words;
+    wire engine_decode;
+    wire [15:0] engine_k, engine_positions, engine_outputs;
+    wire [31:0] engine_a, engine_w, engine_y;
+    assign {engine_decode, engine_k, engine_positions, engine_outputs,
+            engine_a, engine_w, engine_y} = current_words;
+    wire running = start || busy || queue_active;
     wire valid_config = k != 0 && pos_tiles != 0 && out_tiles != 0 &&
                         (!decode || pos_tiles == 1) &&
                         (a_base[2:0] | w_base[2:0] | y_base[2:0]) == 0;
+    // Counters span the whole batch and remain readable until the next launch.
+    wire first_launch = start && (!queue_active || queue_index == 0);
+    always @(posedge clk) begin
+        if (rst || first_launch) begin
+            elapsed_cycles <= 0; feed_cycles <= 0; read_beats <= 0; write_beats <= 0;
+        end else if (running) begin
+            elapsed_cycles <= elapsed_cycles + 1'b1;
+            if (mac_feed) feed_cycles <= feed_cycles + 1'b1;
+            if (m_axi_rvalid && m_axi_rready) read_beats <= read_beats + 1'b1;
+            if (m_axi_wvalid && m_axi_wready) write_beats <= write_beats + 1'b1;
+        end
+    end
     always @(posedge clk) begin
         if (rst) begin
             start <= 0; completed <= 0; invalid <= 0;
+            queued <= 0; queue_index <= 0; queue_active <= 0;
             aw_seen <= 0; w_seen <= 0;
             s_axi_bvalid <= 0; s_axi_rvalid <= 0;
             k <= 0; pos_tiles <= 0; out_tiles <= 0; decode <= 0;
             a_base <= 0; w_base <= 0; y_base <= 0;
         end else begin
             start <= 0;
-            if (done) completed <= 1;
+            if (done) begin
+                if (queue_active && !dma_error && queue_index + 1 < queued) begin
+                    queue_index <= queue_index + 1'b1;
+                    start <= 1;
+                end else begin
+                    completed <= 1;
+                    if (queue_active) begin
+                        queue_active <= 0;
+                        queued <= 0;
+                    end
+                end
+            end
             if (s_axi_awvalid && s_axi_awready) begin
                 aw_seen <= 1;
                 address <= s_axi_awaddr;
@@ -89,6 +126,21 @@ module pinkprocess_projection (
                     20: a_base <= value;
                     24: w_base <= value;
                     28: y_base <= value;
+                    36: case (value)
+                        0: queued <= 0;
+                        1: if (valid_config && queued < 8) begin
+                            descriptors[queued[2:0]] <= config_words;
+                            queued <= queued + 1'b1;
+                        end else s_axi_bresp <= 2;
+                        2: if (queued != 0) begin
+                            queue_index <= 0;
+                            queue_active <= 1;
+                            completed <= 0;
+                            invalid <= 0;
+                            start <= 1;
+                        end else s_axi_bresp <= 2;
+                        default: s_axi_bresp <= 2;
+                    endcase
                     default: s_axi_bresp <= 2;
                 endcase
             end
@@ -97,7 +149,7 @@ module pinkprocess_projection (
                 s_axi_rvalid <= 1;
                 s_axi_rresp <= 0;
                 case (s_axi_araddr)
-                    0: s_axi_rdata <= {29'b0,(invalid || dma_error),(completed || done),running};
+                    0: s_axi_rdata <= {29'b0,(invalid || dma_error),(completed || (done && !queue_active)),running};
                     4: s_axi_rdata <= decode;
                     8: s_axi_rdata <= k;
                     12: s_axi_rdata <= pos_tiles;
@@ -106,6 +158,12 @@ module pinkprocess_projection (
                     24: s_axi_rdata <= w_base;
                     28: s_axi_rdata <= y_base;
                     32: s_axi_rdata <= 32'h50504a31;
+                    36: s_axi_rdata <= {24'b0, queue_index, queued};
+                    40: s_axi_rdata <= 32'h51554538; // QUE8 capability
+                    44: s_axi_rdata <= elapsed_cycles;
+                    48: s_axi_rdata <= feed_cycles;
+                    52: s_axi_rdata <= read_beats;
+                    56: s_axi_rdata <= write_beats;
                     default: begin s_axi_rdata <= 0; s_axi_rresp <= 2; end
                 endcase
             end
@@ -119,9 +177,9 @@ module pinkprocess_projection (
     wire [63:0] rd_data, wr_data;
     projection_engine engine (
         .clk(clk), .rst(rst), .start(start),
-        .decode(decode), .k(k), .pos_tiles(pos_tiles),
-        .out_tiles(out_tiles), .a_base(a_base), .w_base(w_base),
-        .y_base(y_base), .busy(busy), .done(done),
+        .decode(engine_decode), .k(engine_k), .pos_tiles(engine_positions),
+        .out_tiles(engine_outputs), .a_base(engine_a), .w_base(engine_w),
+        .y_base(engine_y), .busy(busy), .mac_feed(mac_feed), .done(done),
         .rd_cmd_valid(rd_cmd_valid), .rd_cmd_ready(rd_cmd_ready), .rd_cmd_addr(rd_cmd_addr),
         .rd_cmd_beats(rd_cmd_beats), .rd_data_valid(rd_data_valid), .rd_data_ready(rd_data_ready),
         .rd_data(rd_data), .wr_cmd_valid(wr_cmd_valid), .wr_cmd_ready(wr_cmd_ready),

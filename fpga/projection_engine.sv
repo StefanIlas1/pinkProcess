@@ -11,6 +11,7 @@ module projection_engine (
     input  wire [31:0]  w_base,
     input  wire [31:0]  y_base,
     output wire         busy,
+    output wire         mac_feed,
     output reg          done,
 
     output wire         rd_cmd_valid,
@@ -54,6 +55,8 @@ module projection_engine (
     reg [3:0] flush_index;
     reg [4:0] write_index;
 
+    assign mac_feed = state == FEED;
+
     wire [8:0] a_beats = {3'b0, load_length};
     wire [8:0] w_beats = mode_decode ? {load_length, 3'b0} : a_beats;
     wire accept_data = rd_data_valid && rd_data_ready;
@@ -75,15 +78,30 @@ module projection_engine (
     wire [2:0] weight_lane = mode_decode ? read_index[2:0] : 3'd0;
 
     (* ram_style = "block" *) reg [63:0] activation_buffer [0:63];
-    reg [63:0] tile_activations;
+    // Cache one position tile across all output tiles. FLAN depths up to
+    // 1024 fit in 8 KiB; larger matrices retain the streaming path.
+    wire fits_cache = depth <= 16'd1024;
+    wire reuse_activations = fits_cache && outputs_left != output_tiles;
+    wire [9:0] cache_load_index = depth[9:0] - load_left[9:0] + {2'b0, read_index};
+    wire [9:0] cache_feed_index = depth[9:0] - feed_left[9:0] +
+                                  (state == FEED ? 10'd1 : 10'd0);
+    (* ram_style = "block" *) reg [63:0] activation_cache [0:1023];
+    reg [63:0] cached_activations, streamed_activations;
+    wire [63:0] tile_activations = fits_cache ? cached_activations : streamed_activations;
     wire [511:0] tile_weights;
     wire [2047:0] tile_sums;
 
     always @(posedge clk) begin
-        if (load_state == READ_A && accept_data)
-            activation_buffer[{load_bank, read_index[4:0]}] <= rd_data;
-        if (issue_read)
-            tile_activations <= activation_buffer[buffer_read_addr];
+        if (load_state == READ_A && accept_data) begin
+            if (fits_cache)
+                activation_cache[cache_load_index] <= rd_data;
+            else
+                activation_buffer[{load_bank, read_index[4:0]}] <= rd_data;
+        end
+        if (issue_read) begin
+            cached_activations <= activation_cache[cache_feed_index];
+            streamed_activations <= activation_buffer[buffer_read_addr];
+        end
     end
 
     for (genvar lane = 0; lane < 8; lane = lane + 1) begin : weight_buffer
@@ -150,7 +168,7 @@ module projection_engine (
                         (state == WAIT_CHUNK || state == FEED)) begin
                         load_length <= load_left > {10'b0, CHUNK_SIZE} ?
                                        CHUNK_SIZE : load_left[5:0];
-                        load_state <= READ_A_CMD;
+                        load_state <= reuse_activations ? READ_W_CMD : READ_A_CMD;
                     end
                 end
                 READ_A_CMD: begin

@@ -114,6 +114,8 @@ def parse_args(argv=None):
                         help="Enable the experimental FLAN DDR projection accelerator.")
     parser.add_argument("--projection-scope", choices=("query", "all"), default="query",
                         help="Offload the first self-attention queries (default) or all learned projections.")
+    parser.add_argument("--projection-queue", action="store_true",
+                        help="Use a projection overlay explicitly known to have the command queue.")
     args = parser.parse_args(argv)
     if bool(args.language_model) != bool(args.manifest_sha256):
         parser.error("Supply both the language model directory and its pinned manifest hash.")
@@ -121,6 +123,8 @@ def parse_args(argv=None):
         parser.error("Supply the language model when enabling the projection overlay.")
     if args.projection_scope == "all" and not args.projection_overlay:
         parser.error("--projection-scope all requires --projection-overlay.")
+    if args.projection_queue and (not args.projection_overlay or args.projection_scope != "all"):
+        parser.error("--projection-queue requires --projection-overlay --projection-scope all.")
     return args
 
 
@@ -155,7 +159,8 @@ def main():
                     if mmio is not None:
                         from pynq import allocate
 
-                        query_projection = OverlayProjection(mmio, allocate, scope=args.projection_scope)
+                        query_projection = OverlayProjection(mmio, allocate, scope=args.projection_scope,
+                                                            queue=args.projection_queue)
                         resources.callback(query_projection.close)
                 runtime = Flan(args.language_model, TiledMatvec(model.classifier, lock=server.model_lock),
                                query_projection=query_projection)

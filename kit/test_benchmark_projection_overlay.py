@@ -16,6 +16,11 @@ from lm_reference import projection_overlay as projection
 
 
 class Buffer(np.ndarray):
+    def __array_finalize__(self, source):
+        if hasattr(source, "device_address"):
+            self.device_address = source.device_address + self.ctypes.data - source.ctypes.data
+            self.events = source.events
+
     def flush(self):
         self.events.append(("flush", self.device_address))
 
@@ -24,17 +29,21 @@ class Buffer(np.ndarray):
 
 
 class FakeOverlay:
-    def __init__(self, *, stalled=False):
+    def __init__(self, *, stalled=False, queue=False):
         self.projection = SimpleNamespace(mmio=self)
         self.stalled = stalled
         self.registers = {projection.CORE_ID: projection.PROJECTION_ID, projection.CONTROL: 0}
+        if queue:
+            self.registers[projection.QUEUE_ID] = projection.PROJECTION_QUEUE_ID
+        self.queued = []
         self.buffers = {}
         self.events = []
         self.allocations = []
 
     @contextmanager
     def allocate(self, *, shape, dtype):
-        address = (len(self.buffers) + 1) * 16 * 1024 * 1024
+        step = 64 * 1024 * 1024
+        address = next(address for address in range(step, 64 * step, step) if address not in self.buffers)
         buffer = np.zeros(shape, dtype).view(Buffer)
         buffer.device_address = address
         buffer.events = self.events
@@ -47,19 +56,52 @@ class FakeOverlay:
             self.events.append(("free", address))
 
     def read(self, register):
+        if register == projection.QUEUE_CONTROL:
+            assert projection.QUEUE_ID in self.registers
+            return len(self.queued)
         return self.registers[register]
 
     def write(self, register, value):
         self.registers[register] = value
+        if register == projection.QUEUE_CONTROL:
+            assert projection.QUEUE_ID in self.registers
+            if value == projection.QUEUE_CLEAR:
+                self.queued.clear()
+            elif value == projection.QUEUE_PUSH:
+                self.queued.append(self.registers.copy())
+            elif value == projection.QUEUE_RUN:
+                self.events.append(("queue_run", len(self.queued)))
+                self.registers[projection.CONTROL] = projection.BUSY
+                if self.stalled:
+                    return
+                for command in self.queued:
+                    self.execute(command)
+                self.queued.clear()
+                self.registers[projection.CONTROL] = projection.DONE
+            return
         if register != projection.CONTROL:
             return
         self.events.append(("launch",))
         if self.stalled:
             return  # Control retains bit zero (busy) until reset.
-        a, w, y = (self.buffers[self.registers[r]] for r in (
-            projection.A_ADDRESS, projection.W_ADDRESS, projection.Y_ADDRESS))
-        y[:] = benchmark.simulate_projection(a, w, self.registers[projection.MODE])
+        self.execute(self.registers)
         self.registers[projection.CONTROL] = projection.DONE
+
+    def execute(self, command):
+        def region(address):
+            for base, buffer in self.buffers.items():
+                if base <= address < base + buffer.nbytes:
+                    return buffer.reshape(-1)[(address - base) // buffer.itemsize:]
+            raise AssertionError(f"Unallocated DDR address {address:#x}")
+
+        a, w, y = (region(command[r]) for r in (
+            projection.A_ADDRESS, projection.W_ADDRESS, projection.Y_ADDRESS))
+        positions, outputs, depth, decode = (command[r] for r in (
+            projection.POSITION_TILES, projection.OUTPUT_TILES, projection.DEPTH, projection.MODE))
+        lanes = 64 if decode else 8
+        a = a.reshape(-1)[:positions * depth * 8].reshape(positions, depth, 8)
+        w = w.reshape(-1)[:outputs * depth * lanes].reshape(outputs, depth, lanes)
+        y.reshape(-1)[:positions * outputs * 64] = benchmark.simulate_projection(a, w, decode).ravel()
 
     def download(self):
         self.events.append(("reset",))
@@ -140,6 +182,9 @@ class ProjectionOverlayTest(unittest.TestCase):
         np.testing.assert_array_equal(runner.project("lm_head", weights, activations), expected)
         self.assertEqual(overlay.events.count(("launch",)), 8)
         self.assertEqual(max(overlay.allocations), projection.MAX_SEGMENT_BUFFER_BYTES)
+        self.assertEqual(len(overlay.allocations), 3)
+        self.assertEqual(len(overlay.buffers), 3)
+        runner.close()
         self.assertFalse(overlay.buffers)
 
     def test_service_scope_selection(self):
@@ -153,8 +198,42 @@ class ProjectionOverlayTest(unittest.TestCase):
         with redirect_stderr(StringIO()) as stderr, self.assertRaises(SystemExit):
             parse_args(base + ["--projection-scope", "all"])
         self.assertIn("requires --projection-overlay", stderr.getvalue())
+        self.assertTrue(parse_args(base + ["--projection-overlay", "--projection-scope", "all",
+                                          "--projection-queue"]).projection_queue)
+        with redirect_stderr(StringIO()), self.assertRaises(SystemExit):
+            parse_args(base + ["--projection-overlay", "--projection-queue"])
 
-    def replay(self, snapshot, question, expected, *, edit=None):
+    def test_shared_input_legacy_and_queue(self):
+        matrices = [("q", self.w), ("k", self.w[:17]), ("v", self.w[::-1])]
+        for queued in (False, True):
+            for activations in (self.a, self.a[:1]):
+                with self.subTest(queued=queued, batch=len(activations)):
+                    overlay = FakeOverlay(queue=queued)
+                    runner = projection.OverlayProjection(overlay, overlay.allocate, scope="all", queue=queued)
+                    results = runner.project_many(matrices, activations)
+                    for y, (_, weights) in zip(results, matrices):
+                        np.testing.assert_array_equal(y, activations.astype(np.int32) @ weights.astype(np.int32).T)
+                    self.assertEqual(runner.profile()["commands"], 3)
+                    self.assertEqual(runner.profile()["shared_activation_uploads_saved"], 2)
+                    if queued:
+                        self.assertEqual(overlay.events.count(("queue_run", 3)), 1)
+                        self.assertEqual(runner.profile()["queue_runs"], 1)
+                    else:
+                        self.assertEqual(overlay.events.count(("launch",)), 3)
+                    runner.close()
+
+    def test_queue_timeout_retains_all_regions(self):
+        overlay = FakeOverlay(queue=True, stalled=True)
+        runner = projection.OverlayProjection(overlay, overlay.allocate, scope="all", queue=True, timeout=0)
+        with self.assertRaises(TimeoutError):
+            runner.project_many([("q", self.w), ("k", self.w)], self.a)
+        self.assertEqual(len(overlay.buffers), 3)
+        self.assertEqual(overlay.events.count(("queue_run", 2)), 1)
+        overlay.registers[projection.CONTROL] = projection.DONE
+        runner.close()
+        self.assertFalse(overlay.buffers)
+
+    def replay(self, snapshot, question, expected, *, edit=None, queue=False):
         from lm_reference.flan import Flan
         from lm_reference.flan_prompt import telemetry_prompt
         from lm_reference.model_assets import file_digest
@@ -176,8 +255,8 @@ class ProjectionOverlayTest(unittest.TestCase):
                 self.readback = payload
 
         with TemporaryDirectory() as temporary:
-            overlay = FakeOverlay()
-            runner = projection.OverlayProjection(overlay, overlay.allocate, scope="all")
+            overlay = FakeOverlay(queue=queue)
+            runner = projection.OverlayProjection(overlay, overlay.allocate, scope="all", queue=queue)
             runtime = Flan(model_path, LegacyFabric(), query_projection=runner)
             versions = WeightVersionStore.from_flan(Path(temporary) / "versions.sqlite", model_path,
                                                     manifest_sha256=manifest)
@@ -198,7 +277,10 @@ class ProjectionOverlayTest(unittest.TestCase):
                 self.assertEqual(actual["active"], result["active"])
                 self.assertEqual(actual["fabric_projections"], result["fabric_projections"])
                 self.assertEqual(actual["accelerated_projections"], result["fabric_projections"])
-                self.assertFalse(overlay.buffers)
+                self.assertEqual(len(overlay.buffers), 3)
+                self.assertGreaterEqual(actual["projection_phases"]["commands"], actual["accelerated_projections"])
+                if queue:
+                    self.assertGreater(actual["projection_phases"]["queue_runs"], 0)
                 return actual["capture_id"]
 
             capture_id = run(expected)
@@ -223,12 +305,13 @@ class ProjectionOverlayTest(unittest.TestCase):
                 self.assertEqual(runtime.fabric.readback, versions.classifier[row*width:(row+1)*width].tobytes())
                 run(expected, capture_id)
             runner.close()
+            self.assertFalse(overlay.buffers)
 
     def test_real_checkpoint_original_replay(self):
         path = Path(__file__).resolve().parent / "evidence/three-diagnosis-traces-physical.json"
         report = json.loads(path.read_bytes())
         case = next(case for case in report["cases"] if case["case"] == "ambiguous-cause")
-        self.replay(case["started"]["snapshot"], report["question"], case["result"])
+        self.replay(case["started"]["snapshot"], report["question"], case["result"], queue=True)
 
     def test_real_checkpoint_saved_edit_and_rollback(self):
         path = os.getenv("PINKPROCESS_FLAN_EDIT_REPORT")

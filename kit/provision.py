@@ -28,9 +28,9 @@ def make_bundle(destination, overlay, *, language_model=None, manifest_sha256=No
         for file in (ROOT / "pinkprocess").glob("*.py"):
             if not file.name.startswith("test_"):
                 shutil.copyfile(file, staging / "pinkprocess" / file.name)
-        for path in ("fpga/check_classifier.py", "fpga/mmio_words.c", *("lm_reference/" + name + ".py" for name in (
+        for path in ("fpga/check_classifier.py", "fpga/mmio_words.c", "fpga/projection_native.cpp", *("lm_reference/" + name + ".py" for name in (
             "fabric", "flan", "flan_prompt", "live_demo", "model_assets", "patch_operator", "quantize",
-            "reference", "weight_versions", "projection_overlay",
+            "reference", "weight_versions", "projection_overlay", "projection_native",
         ))):
             shutil.copyfile(ROOT / path, staging / path)
         (staging / "profiles").mkdir()

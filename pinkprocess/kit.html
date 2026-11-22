@@ -133,6 +133,7 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
 .model-item{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line)}.model-item:first-child{border-top:0}.model-item .mono{font-size:.88rem}
 .tag{font:.74rem var(--mono);color:var(--dim);border:1px solid var(--line);border-radius:4px;padding:2px 8px;white-space:nowrap}
 .google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;background:#2c3035}.google svg{display:block}
+.gen-timing{display:block;margin-top:6px;color:var(--dim);font-family:ui-monospace,Menlo,monospace;font-size:12px}
 </style>
 </head>
 <body data-boot>
@@ -711,6 +712,7 @@ function renderMessages() {
       }
       bubble.append(grid);
     }
+    if (message.role === "answer" && message.genTiming) bubble.append(Object.assign(document.createElement("small"), {className:"gen-timing", textContent:message.genTiming}));
     if (message.role === "answer" && message.readings) {
       const details = document.createElement("details");
       const summary = document.createElement("summary"); summary.textContent = "Readings behind this answer";
@@ -855,13 +857,19 @@ function askLive(question, captured=null) {
         while (data.state === "running") {
           const elapsed = Date.now() - entry.start;
           entryStage(entry, data.partial_answer ? 4 : elapsed < 1500 ? 1 : elapsed < 3000 ? 2 : 3);
-          if (data.partial_answer && data.partial_answer !== entry.partial) {entry.partial = data.partial_answer; renderMessages();}
+          if (data.partial_answer && data.partial_answer !== entry.partial) {
+            if (entry.firstTextAt == null) entry.firstTextAt = Date.now();
+            entry.partial = data.partial_answer; renderMessages();
+          }
           await refreshStream();
           await sleep(1500);
           data = await request("answer_progress", {job_id:data.job_id});
         }
         if (data.state !== "complete") throw new Error(data.error || "Board inference stopped.");
         data = {...data, snapshot, analyst_model:data.model, analyst_location:"PYNQ-Z2"};
+        const seconds = at => ((at - entry.start) / 1000).toFixed(1) + " s";
+        const doneAt = Date.now();
+        entry.genTiming = "First text " + seconds(entry.firstTextAt ?? doneAt) + " · Complete answer " + seconds(doneAt);
       }
       const baseline = data.baseline || (captured ? captured.baseline : {answer:data.answer, version:data.active});
       const captureId = data.capture_id || captured?.id;

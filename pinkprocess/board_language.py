@@ -108,6 +108,11 @@ class BoardLanguage:
             activation_max = getattr(self.runtime, "first_output_max", None)
             result = dict(state="complete", answer=answer, fabric_projections=self.runtime.fabric_projections,
                           accelerated_projections=getattr(self.runtime, "accelerated_projections", 0))
+            profile = getattr(self.runtime, "projection_profile", None)
+            if profile is not None:
+                phases = profile()
+                if phases:
+                    result["projection_phases"] = phases
             if initial:
                 with self.lock:
                     job = self.jobs[job_id]

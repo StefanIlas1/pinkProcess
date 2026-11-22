@@ -65,6 +65,13 @@ if [[ ! -d "$root/releases/$revision" ]]; then
             echo "Using scalar MMIO after the optional native helper failed to compile." >&2
         fi
     fi
+    if command -v c++ >/dev/null; then
+        if ! c++ -std=c++11 -O3 -Wall -Wextra -shared -fPIC \
+            "$temporary/fpga/projection_native.cpp" -o "$temporary/fpga/projection_native.so"; then
+            rm -f "$temporary/fpga/projection_native.so"
+            echo "Using Python projection after the optional native helper failed to compile." >&2
+        fi
+    fi
     if [[ -n $model_hash ]]; then
         printf 'PINKPROCESS_LANGUAGE_ARGS=--language-model %s/models/%s --manifest-sha256 %s\n' \
             "$root" "$model_hash" "$model_hash" > "$temporary/language.conf"
