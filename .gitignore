@@ -11,3 +11,5 @@ dist/
 paper/main.log
 paper/main.blg
 paper/__pycache__/
+website/downloads/
+website/paper/

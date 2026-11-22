@@ -9,7 +9,7 @@ sh website/sync-download.sh
 python3 -m http.server 5330 -d website
 ```
 
-`sync-download.sh` copies `build/mac-kit/pinkProcess-Mac-arm64.zip` into `website/downloads/`, which is what the Download button links to. The repo is private, so the zip has to ship with the site instead of linking to GitHub.
+`sync-download.sh` copies `build/mac-kit/pinkProcess-Mac-arm64.zip` into `website/downloads/`, which is what the Download button links to. It also copies `paper/main.pdf` to `website/paper/pynq-process-paper.pdf`, which the "Read the paper" links open in the browser. The repo is private, so the zip has to ship with the site instead of linking to GitHub.
 
 ## Deploy
 

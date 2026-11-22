@@ -27,6 +27,8 @@ import secrets
 
 PAGE = Path(__file__).with_name("kit.html")
 LOGO = Path(__file__).with_name("static") / "logo.png"
+PAPER = Path(__file__).resolve().parent.parent / "paper" / "main.pdf"
+PAPER_NAME = "PYNQ-Process-research-paper.pdf"
 SIGNED_IN_PAGE = b"<!doctype html><meta charset=utf-8><title>PYNQ Process</title><body style=\"font:16px -apple-system,Helvetica Neue,sans-serif;padding:48px\">You are logged in. Return to PYNQ Process.</body>"
 QUESTIONS = {
     "latest": "Will requests start waiting in the next ten seconds?",
@@ -517,6 +519,16 @@ class Kit:
             raise ValueError("Unknown kit action.")
 
 
+def save_paper(downloads=None):
+    if not PAPER.is_file():
+        raise RuntimeError("The research paper is not included in this build.")
+    folder = Path(downloads) if downloads else Path.home() / "Downloads"
+    folder.mkdir(parents=True, exist_ok=True)
+    target = folder / PAPER_NAME
+    target.write_bytes(PAPER.read_bytes())
+    return {"path": str(target), "filename": PAPER_NAME}
+
+
 class KitHandler(BaseHTTPRequestHandler):
     timeout = REQUEST_TIMEOUT_SECONDS
 
@@ -551,6 +563,10 @@ class KitHandler(BaseHTTPRequestHandler):
             if not LOGO.is_file():
                 return self.reply(404, {"error": "No logo."})
             return self.reply(200, LOGO.read_bytes(), "image/png")
+        if self.path == "/paper.pdf":
+            if not PAPER.is_file():
+                return self.reply(404, {"error": "The research paper is not included in this build."})
+            return self.reply(200, PAPER.read_bytes(), "application/pdf")
         if self.path == "/auth/login":
             referer = self.headers.get("Referer")
             fetch_site = self.headers.get("Sec-Fetch-Site")
@@ -596,6 +612,10 @@ class KitHandler(BaseHTTPRequestHandler):
                 raise ValueError("Expected a JSON object.")
             if self.path == "/api/account":
                 result = self.server.accounts.action(data)
+            elif data.get("action") == "paper_download":
+                result = save_paper()
+                if os.uname().sysname == "Darwin":
+                    os.spawnlp(os.P_NOWAIT, "open", "open", result["path"])
             elif data.get("action") == "export":
                 result = export_action(data, self.server.accounts)
             else:

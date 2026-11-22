@@ -407,3 +407,13 @@ class SignInPortTest(unittest.TestCase):
                 self.skipTest("Port taken.")
             with make_server(port=base, data_dir=data_dir) as server:
                 self.assertIn(server.server_port, range(base + 1, base + 5))
+
+
+class PaperDownloadTest(unittest.TestCase):
+    def test_paper_is_saved_byte_for_byte(self):
+        from .kit_app import PAPER, save_paper
+
+        with TemporaryDirectory() as folder:
+            saved = save_paper(folder)
+            self.assertEqual(Path(saved["path"]).read_bytes(), PAPER.read_bytes())
+            self.assertEqual(saved["filename"], "PYNQ-Process-research-paper.pdf")

@@ -22,6 +22,12 @@ Drop in a CSV, type *"What's wrong with my system?"*, and a small AI model runni
 
 <p align="center"><img src="docs/app-screenshot.png" alt="PYNQ Process answering a question about API latency" width="800"></p>
 
+## 📄 Research paper
+
+**[Read the paper](paper/main.pdf)** · [Download PDF](https://github.com/StefanIlas1/pinkProcess/raw/refs/heads/main/paper/main.pdf)
+
+*Reversible One-Row Weight Edits for a Language Model Served on a PYNQ-Z2 FPGA.* How we check the board's math against an integer reference, change a model's behavior with one reversible weight-row edit, and where the answer time goes. Every number traces to a file in `kit/evidence/` or `paper/experiments/`; `paper/README.md` rebuilds the figures and the PDF.
+
 ## 🏆 Sponsors and tracks
 
 | | How we use it |
