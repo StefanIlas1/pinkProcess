@@ -4,7 +4,7 @@ A telemetry producer sends pool capacity and timestamped busy/waiting counts dir
 
 ## Context tree
 
-- `README.md` describes the operator workflow and recorded physical-board results. `kit/forecast_acceptance.md` defines the separate forecast-quality study.
+- `README.md` describes the product, `docs/board-setup.md` the operator workflow and `docs/results.md` the recorded physical-board results. `kit/forecast_acceptance.md` defines the separate forecast-quality study.
 - `pinkprocess/kit_server.py` and `kit_transport.py` implement the board service and paired transport. `telemetry_device.py` owns hardware rows and profile updates.
 - `pinkprocess/kit_dataset.py` and `backlog.py` implement the existing feature and eligibility rules. Compare both empty-queue onset and nonempty-queue outlook paths against these rules.
 - The CSV workspace uploads a snapshot to the paired board. `pinkprocess/board_language.py` stores its rows and selected model separately from the rolling live feed. `pinkprocess/kit_app.py` coordinates model synthesis and polls the board for generated answers. `mac/SpeechInput.swift` transcribes dictation locally.
@@ -20,7 +20,7 @@ A telemetry producer sends pool capacity and timestamped busy/waiting counts dir
 
 1. Provide a documented, authenticated producer entry point with explicit stream identity, capacity, sample cadence and restart behavior. Reject invalid samples without corrupting the last completed window.
 2. Use the board processor to retain the rolling readings and prepare the existing quantized features. Invoke the resident FPGA rows as eligible data arrives. Tie each answer to its input time, model identity and scoring profile. Document warmup and freshness so an operator can tell when the last result was produced.
-3. Expose a native Mac question about the board feed. Preserve the existing imported-data and Mac-watched-file workflows. Run reads concurrently with ingestion and keep answers internally consistent across profile changes.
+3. Expose a native Mac question about the board feed. Preserve the imported-data workflow. Run reads concurrently with ingestion and keep answers internally consistent across profile changes.
 4. Exercise ingress while every query client is disconnected. Instrument the device boundary and verify a score occurs before any read. Read twice and verify the score count holds steady. Append another eligible window and verify the timestamp and answers advance. Compare both queue states to fixed-point reference outputs.
 5. Cover malformed cadence, capacity changes, partial batches, duplicate samples, profile changes, restart/warmup and authentication according to the declared contract. Distinguish software integration, native compilation and any physical FPGA observations in the final evidence.
 

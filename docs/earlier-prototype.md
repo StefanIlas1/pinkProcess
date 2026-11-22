@@ -1,15 +1,10 @@
-# pinkProcess spec
+# Earlier prototype: expert cartridges
 
-This is the design record for Mohsen’s expert-cartridge prototype and its
-historical results. The current pinkProcess Mac app and PYNQ-Z2 service use
-the live diagnostic backend described in the [project README](README.md).
-The board status and next steps below refer to the cartridge kernel.
-To reproduce the cartridge study from this checkout, run
-`python3 -m cartridge.check`; `python3 -m cartridge.server` serves its
-original interface on localhost.
+This page is the design record for an earlier prototype and its results. It is kept for reference and is not the current product. The current product is PYNQ Process, the Mac app described in the [README](../README.md), which queries a PYNQ-Z2 running a quantized language model.
 
+The prototype asked a different question: can one fixed FPGA circuit switch between fields of expertise by swapping 64 KB of weights, and can that be checked before it ships? Reproduce it from this checkout with `python3 -m cartridge.check`, or serve its original interface on localhost with `python3 -m cartridge.server`. Its code lives in `cartridge/`, `decks/`, `cartridges/`, `app/`, `hw/` and `scoping/`. A screenshot of its interface is in [app.png](app.png).
 
-This document records the prototype design, file map, measurements and open research questions. Track and demo notes for Hack Western are in [docs/hack-western.md](docs/hack-western.md).
+![The cartridge prototype interface](app.png)
 
 ## Run it
 
@@ -36,8 +31,8 @@ The answer has to be offline, bounded to one field, checked before it ships and 
 
 Those four requirements describe integer arithmetic on a fixed circuit.
 
-- **Identical every time.** The kernel is 16 accumulators and int8 multiplies. There is no floating point, scheduler or sampling. The C++ kernel reproduces the Python reference on every one of 3,264 scores (`hw/README.md`).
-- **Checked before it ships.** A cartridge is 64 KB of integers. `research.md` shows what weight readers can and can't verify from weights alone; a cartridge is small enough to audit in full.
+- **Identical every time.** The kernel is 16 accumulators and int8 multiplies. There is no floating point, scheduler or sampling. The C++ kernel reproduces the Python reference on every one of 3,264 scores (see "Kernel check and board build" below).
+- **Checked before it ships.** A cartridge is 64 KB of integers. [research.md](../research.md) shows what weight readers can and can't verify from weights alone; a cartridge is small enough to audit in full.
 - **Bounded.** Each cartridge has a refuse class trained on the other fields and on off-topic questions. A question outside the field loses to it.
 - **Switchable.** The circuit never changes. The expertise is the contents of one block RAM. Writing 64 KB into that RAM turns a first-aid expert into a money expert. A CPU can do the arithmetic too, but only the FPGA makes the claim physical: the logic you audited is the logic that runs, and the only thing that changes between experts is a memory image you can hash.
 
@@ -61,7 +56,7 @@ In `Auto` mode the device loads each cartridge in turn, runs the same question a
 
 ## Deleting weights and getting them back
 
-The first idea was to delete the weights a field never uses. Two measurements on GPT-2 (in `scoping/`, written up in `research.md` section 7) say:
+The first idea was to delete the weights a field never uses. Two measurements on GPT-2 (in `scoping/`, written up in [research.md](../research.md) section 7) say:
 
 1. There is almost nothing unused to delete: 0.21% of MLP neurons are dead on finance but used by code.
 2. Removing half the neurons and retraining on the field does give a smaller, field-only model, at a cost in quality.
@@ -69,7 +64,7 @@ The first idea was to delete the weights a field never uses. Two measurements on
 So nothing is deleted from the device. The base stays whole in storage, and a field is a small pack laid over it:
 
 - **Cartridges (shipping now):** the whole expert is the pack. Switching rewrites 64 KB.
-- **Scope packs (frontier, `scoping/scope_packs.py`):** for a language model, a pack is one bit per neuron saying keep or skip, plus a small low-rank correction trained on the field. The base weights are never written, so unloading a pack restores the base bit for bit (checked by sha256). On GPT-2 a pack is 2.95 MB, 0.6% of the base, and takes finance perplexity from 212.3 to 163.6 while skipping half the MLP neurons. A dense model fine-tuned the same way reaches 65.7, so the pack is not free. Full table in `research.md` section 7.6.
+- **Scope packs (frontier, `scoping/scope_packs.py`):** for a language model, a pack is one bit per neuron saying keep or skip, plus a small low-rank correction trained on the field. The base weights are never written, so unloading a pack restores the base bit for bit (checked by sha256). On GPT-2 a pack is 2.95 MB, 0.6% of the base, and takes finance perplexity from 212.3 to 163.6 while skipping half the MLP neurons. A dense model fine-tuned the same way reaches 65.7, so the pack is not free. Full table in [research.md](../research.md) section 7.6.
 
 Skipped neurons are the part that matters on the board: decoding is limited by memory bandwidth, and a skipped neuron is a row of weights never read.
 
@@ -115,7 +110,7 @@ Two ways to demo on the board:
 | mode | needs | what runs where |
 |---|---|---|
 | Board CPU | nothing new: copy the repo to the board, run `python3 -m cartridge.server --host 0.0.0.0` | same integer arithmetic on the board's ARM processor; the app shows "software replay" |
-| FPGA kernel | the bitstream built from `hw/` (steps in `hw/README.md`) | scores computed in the FPGA logic; the app shows "PYNQ-Z2 overlay" and stops if they differ from the reference |
+| FPGA kernel | the bitstream built from `hw/` (steps below) | scores computed in the FPGA logic; the app shows "PYNQ-Z2 overlay" and stops if they differ from the reference |
 
 Both give the same answers by construction. Say which one is running.
 
@@ -133,4 +128,37 @@ Both give the same answers by construction. Say which one is running.
 2. Build the bitstream on a machine with Vivado and pass `vectors.txt` on the board.
 3. Add 10 more questions per card and re-score on fresh held-out questions.
 4. Author one cartridge with the `author.py` flow and compare.
-5. Run a blind weight reader over a cartridge with one planted bad card, under the rules in `research.md` section 2.
+5. Run a blind weight reader over a cartridge with one planted bad card, under the rules in [research.md](../research.md) section 2.
+
+## Kernel check and board build
+
+`hw/cartridge_kernel.cpp` is the Vitis HLS source for the PYNQ-Z2 overlay. One call adds up to 64 weight rows into 16 accumulators and returns every score, the best card and its margin over the refuse class.
+
+Check it against the Python reference on any machine with a C++ compiler:
+
+```sh
+python3 -m cartridge.check
+clang++ -std=c++17 -O2 -Wno-unknown-pragmas hw/cartridge_kernel.cpp hw/testbench.cpp -o /tmp/kernel_tb
+/tmp/kernel_tb hw/vectors.txt
+```
+
+Expected last line: `3264 scores checked, 0 mismatches`.
+
+### Build for the board
+
+Needs Vitis HLS and Vivado 2020.2 to 2022.2 on x86 Linux. This has not been run yet.
+
+1. Vitis HLS: top function `cartridge_kernel`, part `xc7z020clg400-1`, clock 10 ns. Use `testbench.cpp` and `vectors.txt` for C simulation, then export RTL as IP.
+2. Vivado: Zynq PS plus the IP on `M_AXI_GP0`. Generate the bitstream.
+3. Copy `cartridge_kernel.bit` and `.hwh` to `hw/build/` on the board.
+4. Copy the register offsets from the generated `xcartridge_kernel_hw.h` into `hw/build/offsets.json` with the keys `weights`, `bias`, `feature_index`, `feature_count`, `active`, `refuse_slot`, `scores`, `best_slot`.
+5. On the board: `python3 -m cartridge.server --host 0.0.0.0`. The server uses the overlay when those files exist and refuses to answer if the overlay's scores differ from the integer reference.
+
+### Sizes
+
+| item | size |
+|---|---|
+| weight memory | 4096 rows × 16 int8 = 64 KB of the 630 KB block RAM |
+| accumulators | 16 × 18 bits needed, 32 used |
+| multipliers | 16 int8 × 4-bit products per row, within 220 DSP48 |
+
