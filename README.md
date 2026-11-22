@@ -65,6 +65,10 @@ alongside misses and false alarms.
 
 ## Query the pinkProcess kit
 
+On an Apple Silicon Mac, download and extract the
+[arm64 Mac app](https://github.com/StefanIlas1/pinkProcess/raw/refs/heads/main/build/mac-kit/pinkProcess-Mac-arm64.zip).
+The app connects to a provisioned PYNQ-Z2.
+
 1. Power the provisioned kit. Connect its **PROG/UART** USB port to the paired
    Mac if the USB appliance relay is enabled, or use a reachable Ethernet
    network. Open **pinkProcess.app**. Allow macOS local-network access when
