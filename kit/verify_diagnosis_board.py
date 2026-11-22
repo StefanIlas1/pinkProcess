@@ -4,7 +4,9 @@ import argparse
 from hashlib import sha256
 from http.client import HTTPException
 import json
+import os
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from time import monotonic, sleep
 from uuid import UUID, uuid4
 
@@ -87,7 +89,20 @@ def wait_for_producer(board, before, *, clock, wait):
     raise RuntimeError("SQLite demo did not resume after fixture release.")
 
 
-def verify(board, send, base, reference, report, *, timeout=7200, clock=monotonic, wait=sleep):
+def record_progress(path, report):
+    with NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as output:
+        temporary = Path(output.name)
+        try:
+            json.dump(report, output, indent=2)
+            output.write("\n")
+            output.flush()
+            os.replace(temporary, path)
+        finally:
+            temporary.unlink(missing_ok=True)
+
+
+def verify(board, send, base, reference, report, *, timeout=7200, clock=monotonic, wait=sleep,
+           progress=None):
     report["passed"] = False
     language = board.request("lm_versions")
     active = language["active"]
@@ -113,6 +128,7 @@ def verify(board, send, base, reference, report, *, timeout=7200, clock=monotoni
                        capacity=expected["snapshot"]["capacity"])
         run = dict(case=expected["case"], before=before, fixture=fixture, expected_answer=expected["answer"])
         report["cases"].append(run)
+        case_started = clock()
         try:
             sent = send(**fixture, fixture_after_session=before["session"], readings=expected["raw_samples"])
             run["accepted"] = sent
@@ -120,6 +136,7 @@ def verify(board, send, base, reference, report, *, timeout=7200, clock=monotoni
                     and sent["accepted"] == len(expected["raw_samples"]), "Board did not accept the frozen trace.")
             require(sent["fpga_submissions"] > before["fpga_submissions"],
                     "The board did not submit forecast work to the FPGA for this trace.")
+            asked = clock()
             job = board.request("lm_start", question=question)
             run["started"] = job
             check_capture(job, question, expected, fixture, active)
@@ -127,14 +144,21 @@ def verify(board, send, base, reference, report, *, timeout=7200, clock=monotoni
             run["released"] = release(send, fixture["session"], wait)
             run["producer_after_release"] = wait_for_producer(board, before, clock=clock, wait=wait)
 
+        if progress:
+            progress(f"{expected['case']} captured as {job['capture_id']}. Fixture released.")
         started = clock()
         result = poll_board(board, job, timeout, clock=clock, wait=wait)
-        run.update(result=result, wait_seconds=round(clock() - started, 3))
+        finished = clock()
+        run.update(result=result, wait_seconds=round(finished - started, 3),
+                   question_to_answer_seconds=round(finished - asked, 3),
+                   ingest_to_answer_seconds=round(finished - case_started, 3))
         projections = result.get("fabric_projections")
         require(result["job_id"] == job["job_id"] and result["capture_id"] == job["capture_id"]
                 and result["active"] == active and type(projections) is int and projections > 0,
                 "Board answer did not verify its evidence, weights and PL projection count.")
         run["matches_reference"] = result["answer"] == expected["answer"]
+        if progress:
+            progress(f"{expected['case']} completed in {run['question_to_answer_seconds']:.1f}s.")
 
     final = board.request("lm_versions")
     report["final_checkpoint"] = final
@@ -157,22 +181,27 @@ def main():
     reference = json.loads(args.reference.read_bytes())
     report = {"passed": False}
     board = BoardTransport()
-    with args.results.open("x") as output:
-        try:
-            status = board.connect(args.host)
-            host, pairing = board.host, board.kit
+    with args.results.open("x"):
+        pass
+    try:
+        record_progress(args.results, report)
+        status = board.connect(args.host)
+        host, pairing = board.host, board.kit
 
-            def send(**params):
-                return exchange(host, pairing, params, 10, path="/v1/telemetry")
+        def send(**params):
+            return exchange(host, pairing, params, 10, path="/v1/telemetry")
 
-            verify(board, send, status, reference, report, timeout=args.timeout_seconds)
-        except (OSError, HTTPException, ValueError, RuntimeError) as exc:
-            report["error"] = str(exc)
-            parser.exit(1, f"{exc}\n")
-        finally:
-            json.dump(report, output, indent=2)
-            output.write("\n")
-            board.close()
+        def progress(message):
+            record_progress(args.results, report)
+            print(message, flush=True)
+
+        verify(board, send, status, reference, report, timeout=args.timeout_seconds, progress=progress)
+    except (OSError, HTTPException, ValueError, RuntimeError) as exc:
+        report["error"] = str(exc)
+        parser.exit(1, f"{exc}\n")
+    finally:
+        board.close()
+        record_progress(args.results, report)
     print(f"Verified exact physical generation for {len(report['cases'])} synthetic traces.")
 
 
