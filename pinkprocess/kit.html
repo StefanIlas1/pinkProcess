@@ -221,7 +221,12 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
 .side{display:grid;grid-template-rows:var(--toolbar-h) minmax(0,1fr) var(--footer-h);gap:0;padding-block:0 var(--bottom)}
 #new-chat,#history-hint{align-self:center}
 .peek-chev{top:calc(var(--toolbar-h)/2 - 7px)}
-.top-right #model-toggle{padding-inline:0}
+.top-right #model-toggle{padding-inline:0;max-width:min(26vw,30ch);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.model-tab{position:absolute;z-index:6;right:0;top:calc(var(--topbar) + var(--toolbar-h)/2 - 18px);display:grid;place-items:center;width:26px;height:36px;padding:0;border:1px solid transparent;border-right:0;border-radius:9px 0 0 9px;color:#c9bfc7;background:transparent}
+.model-tab:is(:hover,:focus-visible){background:#382731;color:#ffdae8;border-color:#654857}
+.model-tab[aria-expanded=true] svg{transform:rotate(180deg)}
+.bar{background:color-mix(in srgb,var(--field) 55%,transparent)}
+#live-question::placeholder{color:rgba(220,207,218,.64);opacity:1}
 .rail{grid-area:auto;position:absolute;z-index:5;right:0;top:var(--topbar);bottom:0;width:min(max(var(--rail),320px),90vw);background:var(--panel);overflow:auto;visibility:hidden;transform:translateX(100%);transition:transform .2s ease,visibility .2s}
 .rail.open{visibility:visible;transform:none;box-shadow:-8px 4px 28px rgba(0,0,0,.24)}
 .rail .section.fill{flex:1 0 auto;overflow:visible}
@@ -250,7 +255,7 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
       <div id="board-tip" role="tooltip"></div>
       <div class="menu" id="conn-menu" hidden><div id="board-menu-details"></div><button id="disconnect" hidden>Disconnect</button></div>
     </div>
-    <button class="text" id="model-toggle" type="button" aria-expanded="false" aria-controls="model-drawer">Model</button>
+    <button class="text" id="model-toggle" type="button" aria-expanded="false" aria-controls="model-drawer">Checking model…</button>
     <button id="login" class="text">Log in</button>
     <div class="profile" id="profile" hidden>
       <button id="profile-button" class="avatar" aria-label="Profile"></button>
@@ -292,7 +297,7 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
 
     </div>
     <div class="bar">
-      <textarea id="live-question" rows="1" maxlength="500" placeholder="Ask about your data" aria-label="Your question" autocomplete="off"></textarea>
+      <textarea id="live-question" rows="1" maxlength="500" placeholder="Ask about your data..." aria-label="Your question" autocomplete="off"></textarea>
       <button class="mic" id="mic" type="button" aria-label="Dictate" title="Dictate" hidden><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="1.5" width="5" height="8" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5v2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
       <button class="send" id="ask-live" type="submit" aria-label="Send" title="Send" disabled><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M15 3v6a2 2 0 0 1-2 2H4M7 7.5L3.5 11 7 14.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
@@ -305,9 +310,10 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
       </div>
   </footer>
 </section>
+<button id="model-tab" class="model-tab" type="button" aria-label="Open model settings" aria-controls="model-drawer" aria-expanded="false"><svg width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><path d="M8 2L3 7l5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 <aside class="rail" id="model-drawer" aria-label="Model settings" inert>
   <section class="section">
-    <div class="drawer-heading"><h2>Model</h2><button type="button" class="text" id="model-close" aria-label="Close model settings">Close</button></div>
+    <div class="drawer-heading"><h2>Model</h2></div>
     <div class="mname"><span id="model-name" class="mono"></span><span id="model-star" class="rectag" tabindex="0" hidden>Recommended</span></div>
     <p id="model-meta" class="mono dim"></p>
     <p id="model-use" class="dim"></p>
@@ -624,6 +630,11 @@ function renderModel() {
   if (recommendation && !chosenModel && models) chosenModel = models.find(model => model.id === recommendation.model_id) || null;
   const shown = chosenModel || (status ? models?.find(model => model.id === "queue-onset-logistic") : null);
   el("model-name").textContent = shown ? shown.name : status ? friendlyVersion(status.version) : "No model yet";
+  const active = boardDataset?.selected_model || languageWeights?.active?.name;
+  const label = active === "original" ? (models?.find(model => model.id === "flan-t5-small-int8")?.name || "FLAN-T5-small INT8") : active;
+  const header = el("model-toggle");
+  header.textContent = label || (status?.lm_supported ? "Checking model…" : friendlyVersion(status?.version) || "No active model");
+  header.title = header.textContent;
   el("model-name").title = el("model-name").textContent;
   el("model-meta").textContent = shown ? makerLabel(shown) + " \u00b7 Runs on the board" : "";
   el("model-use").textContent = shown ? bestFor(shown) : "Import data to get a recommendation.";
@@ -1723,22 +1734,29 @@ el("login").onclick = startLogin;
 el("note-login").onclick = startLogin;
 el("google").onclick = continueWithGoogle;
 el("profile-button").onclick = () => {el("profile-menu").hidden = !el("profile-menu").hidden;};
+let modelDrawerTrigger;
 function setModelDrawer(open, returnFocus=false) {
   const drawer = el("model-drawer");
   drawer.inert = !open;
   drawer.classList.toggle("open", open);
   el("model-toggle").setAttribute("aria-expanded", String(open));
-  if (returnFocus) el("model-toggle").focus();
+  el("model-tab").setAttribute("aria-expanded", String(open));
+  el("model-tab").setAttribute("aria-label", open ? "Close model settings" : "Open model settings");
+  if (returnFocus) (modelDrawerTrigger || el("model-toggle")).focus();
 }
-el("model-toggle").onclick = () => setModelDrawer(el("model-drawer").inert);
-el("model-close").onclick = () => setModelDrawer(false, true);
+for (const trigger of [el("model-toggle"), el("model-tab")]) {
+  trigger.onclick = () => {
+    modelDrawerTrigger = trigger;
+    setModelDrawer(el("model-drawer").inert);
+  };
+}
 document.addEventListener("keydown", event => {
   if (event.key === "Escape" && !el("model-drawer").inert && !document.querySelector("dialog[open]")) setModelDrawer(false, true);
 });
 el("connection").onclick = () => toggleBoardMenu(el("conn-menu").hidden);
 el("connection").onkeydown = event => {if (event.key === "Escape") toggleBoardMenu(false);};
 document.addEventListener("click", event => {
-  if (!event.target.closest("#model-drawer,#model-toggle,dialog") && !document.querySelector("dialog[open]")) setModelDrawer(false);
+  if (!event.target.closest("#model-drawer,#model-toggle,#model-tab,dialog") && !document.querySelector("dialog[open]")) setModelDrawer(false);
   if (!event.target.closest(".conn")) toggleBoardMenu(false);
   if (!event.target.closest(".xport")) el("export-menu").hidden = true;
   if (!event.target.closest(".pop")) closeHelp();
