@@ -334,3 +334,17 @@ The initial software upgrade kept the 50 MHz bitstream and the diagnostic checkp
 Three new synthetic incidents with fresh, unscripted-by-the-runtime questions ran through the Mac backend. First text / completion times were 12.145 / 45.953 s (cleared), 13.617 / 48.625 s (active) and 12.081 / 59.393 s (uncertain cause). Each matched its reference answer and passed direct review against its question and captured measurements. The uncertain case explicitly said “The cause is unknown” and recommended checking arrivals and hold times. The original lexical matcher missed that phrasing. Forecast counters advanced during generation. The median completion was 48.625 s and the slowest was 59.393 s; zero of three met ten seconds. These are individual measurements on one board, using the native app’s backend and generated traffic. [Inputs, answers, phase counters and timings](https://github.com/StefanIlas1/pinkProcess/blob/fe750bc/kit/evidence/physical-projection-cache.json)
 
 The new RTL stages up to eight independent projections and reuses activation tiles of depth up to 1,024 in block RAM. The captured encoder projection took 1,044,306 simulated AXI clocks versus 1,935,342 previously. The captured decoder projection took 37,194 versus 40,950. Every signed score, including padding, matched. Simulation covered full queues, invalid writes, backpressure, bus errors, retry and the deeper streaming fallback. A separate vocabulary reducer preserves the model’s two FP32 rounding steps and the earliest index on ties; the first output step still exposes the full data used to calibrate weight edits. New MAC and DDR counters will help choose between further memory changes and more arithmetic lanes. These simulated cycle counts exclude host work.
+
+### Resident vocabulary weights and rollback
+
+The first cache removed repeated packing. The next revision also allowed a bounded 16 MiB of physically contiguous board memory for the vocabulary weights and reused the shared input to grouped projections. All eight output-head segments fit on the test kit (16,449,536 bytes). The warm saved replay reused those segments 400 times with zero uploads of that head. All learned projections still ran on the FPGA. Total weight uploads fell from about 1.95 GB to 1.14 GB for the same 50-step diagnosis.
+
+| Physical Mac USB run | First observed text | Complete answer |
+| --- | ---: | ---: |
+| Saved incident after startup | 16.003 s | 48.624 s |
+| Same saved incident, warm | 14.448 s | 47.345 s |
+| Previously saved Astra edit on its own captured incident | 12.753 s | 55.394 s |
+| Restore original on that same edit capture | 14.624 s | 49.376 s |
+| New synthetic incident with uncertain recovery | 13.249 s | 54.433 s |
+
+All five answers reproduced their references. Switching versions forced the selected head back into FPGA-readable memory. The historical edit also reproduced its known repetitive wording. The unfamiliar recovery case reported five requests waiting, a peak of twelve, the persistence forecast and uncertainty about cause. The original model and both named versions remained available. These measurements use the installed Mac app’s USB backend. [Physical report](https://github.com/StefanIlas1/pinkProcess/blob/ba2cac2/kit/evidence/physical-projection-resident-head.json)
