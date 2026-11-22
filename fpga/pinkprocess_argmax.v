@@ -54,7 +54,8 @@ module pinkprocess_argmax (
     wire command_ready, data_valid, dma_error;
     wire [63:0] data;
     wire accept_word = read_ready && data_valid;
-    wire [4:0] beats = remaining > 32 ? 5'd16 : 5'(({1'b0, remaining} + 17'd1) >> 1);
+    wire [16:0] rounded_remaining = {1'b0, remaining} + 17'd1;
+    wire [4:0] beats = remaining > 32 ? 5'd16 : rounded_remaining[5:1];
     reg [3:0] word_index;
     reg [4:0] row_in_chunk;
     reg [63:0] scores [0:15];
