@@ -1,7 +1,7 @@
 """Persist named INT8 output-row edits and verify their exact inference weights."""
 
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from hashlib import sha256
 import json
 import mmap
@@ -59,6 +59,8 @@ class WeightVersion:
     _base: bytes | memoryview = field(repr=False, compare=False)
     _layout: WeightLayout = field(repr=False, compare=False)
 
+    base_name: str = ORIGINAL
+
     @property
     def checkpoint(self):
         if self.patch is None:
@@ -73,6 +75,7 @@ class WeightVersion:
             "checkpoint_sha256": self.checkpoint_sha256,
             "classifier_sha256": self.classifier_sha256,
             "target_row": self.patch.row if self.patch is not None else None,
+            **({"base_name": self.base_name} if self.base_name != ORIGINAL else {}),
         }
 
 
@@ -104,6 +107,8 @@ class WeightVersionStore:
         return cls(database, mapped, layout=layout)
 
     def __init__(self, database, base_checkpoint, *, layout=TINYSTORIES):
+        self.checkpoints = {}
+        self.checkpoint_stores = {}
         self.database = Path(database)
         self.base = (base_checkpoint if isinstance(base_checkpoint, memoryview) and base_checkpoint.readonly
                      and isinstance(base_checkpoint.obj, mmap.mmap) else bytes(base_checkpoint))
@@ -153,7 +158,50 @@ class WeightVersionStore:
                 "INSERT OR IGNORE INTO model_state VALUES (1, ?, ?, ?, ?, ?, ?, ?)",
                 (*self.identity, ORIGINAL),
             )
+            connection.execute("""CREATE TABLE IF NOT EXISTS full_checkpoints (
+                name TEXT PRIMARY KEY, checkpoint_sha256 TEXT NOT NULL, manifest_sha256 TEXT NOT NULL
+            )""")
+            connection.execute("""CREATE TABLE IF NOT EXISTS version_roots (
+                name TEXT PRIMARY KEY REFERENCES versions(name), base_name TEXT NOT NULL REFERENCES full_checkpoints(name)
+            )""")
             self._selected(connection)
+
+    def register_checkpoint(self, name, source):
+        """Expose a verified model while pinning this public name across restarts."""
+        name = _name(name)
+        if name.casefold() == ORIGINAL:
+            raise ValueError("Expected a named, complete checkpoint.")
+        identity = (source.layout.checkpoint_sha256, source.layout.model_sha256)
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            self._selected(connection)
+            if connection.execute("SELECT 1 FROM versions WHERE name=?", (name,)).fetchone():
+                raise ValueError(f"A saved row edit already uses the name {name!r}.")
+            connection.execute("INSERT OR IGNORE INTO full_checkpoints VALUES(?,?,?)", (name, *identity))
+            if connection.execute("SELECT checkpoint_sha256,manifest_sha256 FROM full_checkpoints WHERE name=?",
+                                  (name,)).fetchone() != identity:
+                raise ValueError(f"A different checkpoint is pinned to {name!r}.")
+        self.checkpoints[name] = replace(source.original, name=name, base_name=name)
+        self.checkpoint_stores[name] = source
+
+    def checkpoint_store(self, base_name):
+        if base_name == ORIGINAL:
+            return self
+        if base_name not in self.checkpoint_stores:
+            raise ValueError(f"Checkpoint {base_name!r} is unavailable.")
+        return self.checkpoint_stores[base_name]
+
+    def base_for_version(self, name):
+        if name in self.checkpoints:
+            return name
+        if name == ORIGINAL:
+            return ORIGINAL
+        with self._connect() as connection:
+            row = connection.execute("""SELECT r.base_name FROM versions v
+                    LEFT JOIN version_roots r ON r.name=v.name WHERE v.name=?""", (name,)).fetchone()
+        if row is None:
+            raise ValueError(f"Unknown weight version {name!r}.")
+        return row[0] or ORIGINAL
 
     @contextmanager
     def _connect(self):
@@ -206,15 +254,18 @@ class WeightVersionStore:
     def _get(self, connection, name):
         if name == ORIGINAL:
             return self.original
+        if name in self.checkpoints:
+            return self.checkpoints[name]
         record = connection.execute(
-            """SELECT target_row, payload, payload_sha256, checkpoint_sha256, classifier_sha256
-                 FROM versions WHERE name = ?""", (name,),
+            """SELECT v.target_row,v.payload,v.payload_sha256,v.checkpoint_sha256,v.classifier_sha256,r.base_name
+                 FROM versions v LEFT JOIN version_roots r ON r.name=v.name WHERE v.name = ?""", (name,),
         ).fetchone()
         if record is None:
             raise ValueError(f"Unknown weight version {name!r}.")
-        row, payload, payload_sha256, checkpoint_sha256, classifier_sha256 = record
-        patch = self._patch(row, payload)
-        version = self._version(name, patch)
+        row, payload, payload_sha256, checkpoint_sha256, classifier_sha256, root = record
+        store = self.checkpoint_store(root or ORIGINAL)
+        patch = store._patch(row, payload)
+        version = replace(store._version(name, patch), base_name=root or ORIGINAL)
         if (payload_sha256, checkpoint_sha256, classifier_sha256) != (
             _digest(payload), version.checkpoint_sha256, version.classifier_sha256
         ):
@@ -237,22 +288,28 @@ class WeightVersionStore:
             connection.execute("BEGIN")
             self._selected(connection)
             records = connection.execute(
-                "SELECT name, checkpoint_sha256, classifier_sha256, target_row FROM versions ORDER BY name"
+                """SELECT v.name,v.checkpoint_sha256,v.classifier_sha256,v.target_row,r.base_name
+                   FROM versions v LEFT JOIN version_roots r ON r.name=v.name ORDER BY v.name"""
             ).fetchall()
         keys = ("name", "checkpoint_sha256", "classifier_sha256", "target_row")
-        return [self.original.metadata(), *(dict(zip(keys, row)) for row in records)]
+        return [self.original.metadata(), *(version.metadata() for version in self.checkpoints.values()),
+                *({**dict(zip(keys, row)), **({"base_name": row[4]} if row[4] else {})}
+                  for row in records if row[4] is None or row[4] in self.checkpoints)]
 
-    def save(self, name, patch):
+    def save(self, name, patch, *, base_name=ORIGINAL):
         """Save an immutable version. Repeating the same save is safe."""
         name = _name(name)
         if name.casefold() == ORIGINAL:
             raise ValueError("The original weight version is reserved.")
-        if patch != self._patch(patch.row, patch.payload):
+        store = self.checkpoint_store(base_name)
+        if patch != store._patch(patch.row, patch.payload):
             raise ValueError("Patch targets a different checkpoint, classifier or original row.")
-        version = self._version(name, patch)
+        version = replace(store._version(name, patch), base_name=base_name)
         with self._connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
             self._selected(connection)
+            if connection.execute("SELECT 1 FROM full_checkpoints WHERE name=?", (name,)).fetchone():
+                raise ValueError(f"The name {name!r} belongs to a full checkpoint.")
             existing = connection.execute("SELECT 1 FROM versions WHERE name = ?", (name,)).fetchone()
             if existing:
                 if self._get(connection, name) != version:
@@ -263,22 +320,25 @@ class WeightVersionStore:
                     (name, patch.row, patch.payload, _digest(patch.payload),
                      version.checkpoint_sha256, version.classifier_sha256),
                 )
+                if base_name != ORIGINAL:
+                    connection.execute("INSERT INTO version_roots VALUES(?,?)", (name, base_name))
         return version
 
-    def save_astra(self, name, target_row, response):
+    def save_astra(self, name, target_row, response, *, base_name=ORIGINAL):
+        store = self.checkpoint_store(base_name)
         weights = response.get("row") if isinstance(response, dict) else None
-        if (not isinstance(weights, list) or len(weights) != self.layout.width
+        if (not isinstance(weights, list) or len(weights) != store.layout.width
                 or any(type(value) is not int or not -127 <= value <= 127 for value in weights)):
             raise ValueError(
-                f"Astra response must contain {self.layout.width} signed INT8 values under the row key."
+                f"Astra response must contain {store.layout.width} signed INT8 values under the row key."
             )
         if "target_row" in response and (
             type(response["target_row"]) is not int or response["target_row"] != target_row
         ):
             raise ValueError("Astra response targets a different output row.")
-        if response.get("base_sha256", self.layout.checkpoint_sha256) != self.layout.checkpoint_sha256:
+        if response.get("base_sha256", store.layout.checkpoint_sha256) != store.layout.checkpoint_sha256:
             raise ValueError("Astra response targets a different base checkpoint.")
-        return self.save(name, self._patch(target_row, bytes(value & 255 for value in weights)))
+        return self.save(name, store._patch(target_row, bytes(value & 255 for value in weights)), base_name=base_name)
 
     def select(self, name):
         """Record the verified version to reload on the next start."""

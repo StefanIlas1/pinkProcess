@@ -165,8 +165,12 @@ class Flan:
         return (x / np.sqrt((x * x).mean(axis=-1, keepdims=True) + np.float32(1e-6))
                 * self.t[name + ".weight"])
 
-    def bias(self, side, length, step):
-        positions = np.arange(length)[None, :] - (np.arange(length)[:, None] if step is None else step)
+    def bias(self, side, length, step, queries=1):
+        if step is None:
+            query_positions = np.arange(length)[:, None]
+        else:
+            query_positions = np.arange(step, step + queries)[:, None]
+        positions = np.arange(length)[None, :] - query_positions
         n = 32 if side == "decoder" else 16
         offset = 0 if side == "decoder" else (positions > 0) * n
         dist = np.abs(positions) if side == "encoder" else np.maximum(-positions, 0)
@@ -174,7 +178,11 @@ class Flan:
         large = half + (np.log(np.maximum(dist, half) / half) / np.log(128 / half)
                         * (n - half)).astype(int)
         bucket = offset + np.where(dist < half, dist, np.minimum(large, n - 1))
-        return self.t[side + ".block.0.layer.0.SelfAttention.relative_attention_bias.weight"][bucket].transpose(2, 0, 1)
+        bias = self.t[side + ".block.0.layer.0.SelfAttention.relative_attention_bias.weight"][bucket].transpose(2, 0, 1)
+        if step is not None and queries > 1:
+            # Speculative positions can see accepted history and earlier guesses only.
+            bias = np.where(positions[None] > 0, np.float32(-np.inf), bias)
+        return bias
 
     def attention(self, name, x, source, bias, cache, incremental):
         def heads(values):
@@ -194,14 +202,28 @@ class Flan:
         else:
             q = heads(self.linear(name + ".q", x))
             k, v = key
+        if cache.get("_verifying") and q.shape[1] > 1:
+            # Preserve the scalar path's FP32 reductions (including their exact
+            # lengths); masked padding can change near-tie token decisions.
+            output = []
+            for pos in range(q.shape[1]):
+                end = k.shape[1] - q.shape[1] + pos + 1 if incremental else k.shape[1]
+                prefix_bias = bias[:, pos:pos + 1, :end] if incremental else bias
+                output.append(self._attend(q[:, pos:pos + 1], k[:, :end], v[:, :end], prefix_bias))
+            attended = np.concatenate(output, axis=0)
+        else:
+            attended = self._attend(q, k, v, bias)
+        return self.linear(name + ".o", attended.reshape(-1, 384))
+
+    @staticmethod
+    def _attend(q, k, v, bias):
         scores = q @ k.transpose(0, 2, 1) + bias
         p = np.exp(scores - scores.max(axis=2, keepdims=True))
-        attended = ((p / p.sum(axis=2, keepdims=True)) @ v).transpose(1, 0, 2)
-        return self.linear(name + ".o", attended.reshape(-1, 384))
+        return ((p / p.sum(axis=2, keepdims=True)) @ v).transpose(1, 0, 2)
 
     def stack(self, side, ids, cache, encoder=None, step=None):
         x = self.t["shared.weight"][ids].astype("float32") * self.t["shared.weight.scale"][ids, None]
-        bias = self.bias(side, len(ids) if step is None else step + 1, step)
+        bias = self.bias(side, len(ids) if step is None else step + len(ids), step, len(ids))
         for i in range(8):
             base = f"{side}.block.{i}.layer."
             n = self.norm(base + "0.layer_norm", x)
@@ -238,28 +260,60 @@ class Flan:
         cache = {}
         tokens = []
         previous = 0
-        for step in range(max_tokens):
+        draft = getattr(self, "token_draft", None)
+        if draft is not None:
+            self.generation_timing.update(verification_blocks=0, proposed_tokens=0, accepted_proposals=0)
+        consecutive_misses = 0
+        retry_at = 1
+        while len(tokens) < max_tokens:
+            step = len(tokens)
+            remaining = min(7, max_tokens - step - 1)
+            # Always run the first position alone to preserve row-edit calibration.
+            guesses = draft.propose(tokens, remaining) if draft is not None and step >= retry_at else []
+            if draft is not None:
+                cache["_verifying"] = bool(guesses)
             start = perf_counter_ns()
-            hidden = self.stack("decoder", [previous], cache, encoder, step)
+            hidden = self.stack("decoder", [previous, *guesses], cache, encoder, step)
             self.generation_timing["decoder_stacks_ns"] += perf_counter_ns() - start
             start = perf_counter_ns()
-            # Named row edits use the first raw-score maximum and quantized input.
-            if step and getattr(self.query_projection, "argmax_mmio", None) is not None:
+            if step and not guesses and getattr(self.query_projection, "argmax_mmio", None) is not None:
                 q, scale = self._quantize_activations(hidden)
-                previous = self.query_projection.head_argmax(
+                winners = [self.query_projection.head_argmax(
                     self.t["lm_head.weight"], q, scale[0, 0], self.t["lm_head.weight.scale"],
-                )
+                )]
                 self.fabric_projections += 1
                 self.accelerated_projections += 1
             else:
-                previous = int(np.argmax(self.linear("lm_head", hidden)))
+                winners = self.linear("lm_head", hidden).argmax(axis=1).tolist()
             self.generation_timing["vocabulary_ns"] += perf_counter_ns() - start
-            if previous == 1:
-                break
-            tokens.append(previous)
+            accepted = 0
+            for index, previous in enumerate(winners):
+                if previous == 1:
+                    break
+                tokens.append(previous)
+                if index < len(guesses):
+                    if previous != guesses[index]:
+                        # The mismatching input and all later guesses must be replayed.
+                        keep = step + index + 1
+                        for name in cache:
+                            if name.endswith(".SelfAttention"):
+                                keys, values = cache[name]
+                                cache[name] = (keys[:, :keep], values[:, :keep])
+                        break
+                    accepted += 1
+            if draft is not None:
+                self.generation_timing["verification_blocks"] += 1
+                self.generation_timing["proposed_tokens"] += len(guesses)
+                self.generation_timing["accepted_proposals"] += accepted
+                if guesses:
+                    consecutive_misses = 0 if accepted else consecutive_misses + 1
+                    if consecutive_misses >= 2:
+                        retry_at = len(tokens) + 4
             start = perf_counter_ns()
             self.partial_answer = self.tokenizer.decode(tokens)
             self.generation_timing["decode_text_ns"] += perf_counter_ns() - start
+            if previous == 1:
+                break
         start = perf_counter_ns()
         answer = self.tokenizer.decode(tokens)
         self.generation_timing["decode_text_ns"] += perf_counter_ns() - start

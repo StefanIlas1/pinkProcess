@@ -1,0 +1,350 @@
+{
+  "runtime_source": {
+    "sha": "217fb05",
+    "source_file_hashes": {
+      "lm_reference/projection_overlay.py": "f2eb732495cbd1f4f28558d8f90584287fee794756c98b27052cdf8cc6aea2d7",
+      "lm_reference/flan.py": "b9e7d4ee609e45a255021efa8cb0c690318058bb8b9aacf8220f8a2e601e1452",
+      "lm_reference/flan_draft.py": "8717e499b6ad273682238af35e9e8c0b6dabc359e4e06db845b1a76bb28f7698",
+      "lm_reference/telemetry-token-draft.tsv.gz": "f6ea2818914cbfcdc11928344007a2d1d07e6ce42c0dbdab77a14fe7a7f1d0e2",
+      "lm_reference/flan_prompt.py": "63988135dd9710020ae8f5b56d8438c1bf41cd29a0e29ac883603da35b19cdfc",
+      "lm_reference/weight_versions.py": "37850569b4b344572a301446b61450fe5763900253bea737ed025c1a838860f1",
+      "pinkprocess/board_language.py": "1cb03622838346ed330b21f94a1878f50211c92420cdc3c2a8cc9a8d8b46060c",
+      "pinkprocess/kit_server.py": "c4a29d3b58dba2a3d9fc660e969b4016e267e25689e6393f6841502f68a41726"
+    },
+    "parent_release": "fc407b0e34956433f21f"
+  },
+  "installed_release": "/opt/pinkprocess-kit/releases/02cd59d6651995c99171",
+  "bitstream_sha256": "fa8d970e5c909fab4d2090afec1b619b481e7e7abd96fb7ec731993afbe48177",
+  "hwh_sha256": "47d91d209274aebc87426ca419eb125af9a9da0bfb18d554401288d9f67ca264",
+  "board_boot_id": "60d4e64d-214c-493f-b29c-eb7e4d7e9a2f",
+  "model_manifest_sha256": "d8d97a3327aae96859b3ea5c165ccc860f06d55fe38a79d03c50da9203b22aeb",
+  "checkpoint_files": [
+    "d8d97a3327aae96859b3ea5c165ccc860f06d55fe38a79d03c50da9203b22aeb  model.json",
+    "4ab0bbf9e8c249bf20d08fbe1a1d03321d0819164c5571c13f6ac42df2289f9d  weights.bin",
+    "f9a7146f8f1a6c28cd74c8c4da8efdf7b37b343434e45995149252a8ff946d13  tokenizer.json"
+  ],
+  "model_name": "Queue history v2",
+  "global_model_during_dataset_test": {
+    "name": "original",
+    "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+    "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+    "target_row": null
+  },
+  "qualified_model_entry": {
+    "name": "Queue history v2",
+    "checkpoint_sha256": "4ab0bbf9e8c249bf20d08fbe1a1d03321d0819164c5571c13f6ac42df2289f9d",
+    "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+    "target_row": null
+  },
+  "reference_inputs": "kit/evidence/open-question-three-physical.json",
+  "protocol": "Chrome drove the installed c29f81d Mac UI through its paired USB backend. The global default stayed original for these trials. Each separate dataset selected Queue history v2, and each submission switched to its actual full W8A8 weights, then switched back. Wall time starts at Ask and ends at rendered completion. First partial is observed by polling. Live FPGA stream counter was sampled before, during, and after. These are physical integration measurements on the three development traces. Independent software quality tests have separate evidence.",
+  "independent_software_quality": "kit/evidence/grounded-history-independent-review.json",
+  "cases": {
+    "recovery": {
+      "csv_sha256": "60c2b619930cc8040230e91737bf4c1612c89fd1f7e7d5bfbcbe986ca4a66d08",
+      "qa": "Correctly reports recovery and the peak of 12, identifies the onset warning as a forecast, acknowledges an unknown cause and suggests measurements. Recovery implies zero waiting without explicitly citing the final count.",
+      "run": {
+        "live_before": {
+          "session": "705a949e-ba07-49bb-8c55-db33f722f823",
+          "fresh": true,
+          "latest": {
+            "time_ms": 17300,
+            "busy": 4,
+            "waiting": 16
+          },
+          "fpga_submissions": 125,
+          "sample_count": 174
+        },
+        "live_at_5_seconds": {
+          "session": "705a949e-ba07-49bb-8c55-db33f722f823",
+          "fresh": true,
+          "latest": {
+            "time_ms": 22800,
+            "busy": 4,
+            "waiting": 0
+          },
+          "fpga_submissions": 180,
+          "sample_count": 229
+        },
+        "live_after": {
+          "session": "705a949e-ba07-49bb-8c55-db33f722f823",
+          "fresh": true,
+          "latest": {
+            "time_ms": 48200,
+            "busy": 4,
+            "waiting": 64
+          },
+          "fpga_submissions": 434,
+          "sample_count": 483
+        },
+        "question": "What's wrong with my system?",
+        "elapsed_wall_seconds": 30.4,
+        "first_partial_poll_seconds": 11.17,
+        "board_job": {
+          "fabric_projections": 1313,
+          "accelerated_projections": 1313,
+          "state": "complete",
+          "dataset_id": "e667f84b54034e36bbae722c47c36c7b",
+          "stage": "final",
+          "projection_phases": {
+            "native_commands": 824,
+            "allocations": 14,
+            "allocate_ns": 164415974,
+            "weight_cache_hits": 439,
+            "weight_cache_misses": 682,
+            "pack_weights_ns": 4711368499,
+            "pack_activations_ns": 236103904,
+            "upload_activations_ns": 208752861,
+            "activation_bytes": 6893568,
+            "shared_activation_uploads_saved": 440,
+            "upload_weights_ns": 1766124028,
+            "weight_bytes": 560857088,
+            "device_roundtrip_ns": 9934409953,
+            "queue_runs": 168,
+            "commands": 1240,
+            "download_ns": 284571992,
+            "score_bytes": 45113344,
+            "unpack_ns": 885630773,
+            "fused_decoder_groups": 128,
+            "fused_decoder_commands_saved": 192,
+            "resident_weight_uploads": 8,
+            "resident_weight_hits": 56,
+            "packed_weight_bytes": 66453504,
+            "workspace_bytes": 4456448,
+            "resident_weight_bytes": 16449536,
+            "tokenize_ns": 30817344,
+            "encoder_stack_ns": 6505504658,
+            "decoder_stacks_ns": 15608521664,
+            "vocabulary_ns": 5610223431,
+            "decode_text_ns": 2839702,
+            "verification_blocks": 17,
+            "proposed_tokens": 62,
+            "accepted_proposals": 24
+          },
+          "active": {
+            "name": "Queue history v2",
+            "checkpoint_sha256": "4ab0bbf9e8c249bf20d08fbe1a1d03321d0819164c5571c13f6ac42df2289f9d",
+            "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+            "target_row": null
+          }
+        },
+        "views": {
+          "transcript": "What's wrong with my system?",
+          "generalization": "60 readings from 0 to 5900 ms.\nLast reading: 2 of 4 connections busy; 0 waiting.\nPeak queue: 12 waiting at 2200 ms.\nThese measurements do not identify a cause or request-level latency.",
+          "short_answer": "The queue cleared by the final sample.",
+          "summary": "The queue cleared by the final sample.\nMeasure arrivals and connection hold times.",
+          "final": "The queue cleared by the final sample. The peak was 12. The FPGA warns that requests may start waiting within the next ten seconds. Cause unknown. Measure arrivals and connection hold times."
+        },
+        "fpga_ask_requests": [
+          "final"
+        ],
+        "model": "Queue history v2",
+        "kit": "PYNQ-Z2 connected"
+      }
+    },
+    "growing": {
+      "csv_sha256": "18401febd0f128f7148f6976594e97c453bfe57ae328910f5ba0eea0d3506ba5",
+      "qa": "Correctly reports active backlog, rise from 0 to 19, peak of 19 and predicted persistence. It acknowledges an unknown cause and suggests measurements. The FPGA also predicted growth by the horizon, which the answer omitted.",
+      "run": {
+        "live_before": {
+          "session": "705a949e-ba07-49bb-8c55-db33f722f823",
+          "fresh": true,
+          "latest": {
+            "time_ms": 55800,
+            "busy": 4,
+            "waiting": 80
+          },
+          "fpga_submissions": 510,
+          "sample_count": 559
+        },
+        "live_at_5_seconds": {
+          "session": "705a949e-ba07-49bb-8c55-db33f722f823",
+          "fresh": true,
+          "latest": {
+            "time_ms": 61200,
+            "busy": 2,
+            "waiting": 0
+          },
+          "fpga_submissions": 564,
+          "sample_count": 600
+        },
+        "live_after": {
+          "session": "705a949e-ba07-49bb-8c55-db33f722f823",
+          "fresh": true,
+          "latest": {
+            "time_ms": 89600,
+            "busy": 4,
+            "waiting": 34
+          },
+          "fpga_submissions": 848,
+          "sample_count": 600
+        },
+        "question": "What's wrong with my system?",
+        "elapsed_wall_seconds": 33.42,
+        "first_partial_poll_seconds": 12.74,
+        "board_job": {
+          "fabric_projections": 1605,
+          "accelerated_projections": 1605,
+          "state": "complete",
+          "dataset_id": "43187b9e40534bcdb028f2b3bfa2fb9f",
+          "stage": "final",
+          "projection_phases": {
+            "native_commands": 1048,
+            "allocations": 8,
+            "allocate_ns": 108107117,
+            "weight_cache_hits": 757,
+            "weight_cache_misses": 560,
+            "pack_weights_ns": 3866391741,
+            "pack_activations_ns": 284719344,
+            "upload_activations_ns": 251561334,
+            "activation_bytes": 8138752,
+            "shared_activation_uploads_saved": 536,
+            "upload_weights_ns": 2118717036,
+            "weight_bytes": 648937472,
+            "device_roundtrip_ns": 11794637375,
+            "queue_runs": 168,
+            "commands": 1464,
+            "download_ns": 328928996,
+            "score_bytes": 48838656,
+            "unpack_ns": 955124930,
+            "fused_decoder_groups": 192,
+            "fused_decoder_commands_saved": 288,
+            "resident_weight_uploads": 8,
+            "resident_weight_hits": 88,
+            "packed_weight_bytes": 66453504,
+            "workspace_bytes": 4456448,
+            "resident_weight_bytes": 16449536,
+            "tokenize_ns": 20630159,
+            "encoder_stack_ns": 7513524836,
+            "decoder_stacks_ns": 17047458847,
+            "vocabulary_ns": 5710805862,
+            "decode_text_ns": 3807800,
+            "verification_blocks": 21,
+            "proposed_tokens": 62,
+            "accepted_proposals": 25
+          },
+          "active": {
+            "name": "Queue history v2",
+            "checkpoint_sha256": "4ab0bbf9e8c249bf20d08fbe1a1d03321d0819164c5571c13f6ac42df2289f9d",
+            "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+            "target_row": null
+          }
+        },
+        "views": {
+          "transcript": "What's wrong with my system?",
+          "generalization": "60 readings from 0 to 5900 ms.\nLast reading: 4 of 4 connections busy; 19 waiting.\nPeak queue: 19 waiting at 5900 ms.\nThese measurements do not identify a cause or request-level latency.",
+          "short_answer": "Active queue.",
+          "summary": "Active queue.\nMeasure arrivals and connection hold times.",
+          "final": "Active queue. Waiting rose from 0 to 19. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. Cause unknown. Measure arrivals and connection hold times."
+        },
+        "fpga_ask_requests": [
+          "final"
+        ],
+        "model": "Queue history v2",
+        "kit": "PYNQ-Z2 connected"
+      }
+    },
+    "healthy": {
+      "csv_sha256": "9312a4ece3de5baecc9083f68213f637701e0461cb278917f0518f82fbf79cff",
+      "qa": "Correctly reports that zero requests waited throughout, identifies the onset warning as a forecast and proposes a measurement. The sample ends before the forecast outcome.",
+      "run": {
+        "live_before": {
+          "session": "705a949e-ba07-49bb-8c55-db33f722f823",
+          "fresh": true,
+          "latest": {
+            "time_ms": 97200,
+            "busy": 4,
+            "waiting": 4
+          },
+          "fpga_submissions": 924,
+          "sample_count": 600
+        },
+        "live_at_5_seconds": {
+          "session": "705a949e-ba07-49bb-8c55-db33f722f823",
+          "fresh": true,
+          "latest": {
+            "time_ms": 102600,
+            "busy": 1,
+            "waiting": 0
+          },
+          "fpga_submissions": 978,
+          "sample_count": 600
+        },
+        "live_after": {
+          "session": "705a949e-ba07-49bb-8c55-db33f722f823",
+          "fresh": true,
+          "latest": {
+            "time_ms": 123000,
+            "busy": 4,
+            "waiting": 16
+          },
+          "fpga_submissions": 1182,
+          "sample_count": 600
+        },
+        "question": "What's wrong with my system?",
+        "elapsed_wall_seconds": 25.36,
+        "first_partial_poll_seconds": 11.12,
+        "board_job": {
+          "fabric_projections": 1021,
+          "accelerated_projections": 1021,
+          "state": "complete",
+          "dataset_id": "dbe33111b745496a82582a41e053e1e7",
+          "stage": "final",
+          "projection_phases": {
+            "native_commands": 600,
+            "allocations": 8,
+            "allocate_ns": 65167621,
+            "weight_cache_hits": 487,
+            "weight_cache_misses": 438,
+            "pack_weights_ns": 2799364692,
+            "pack_activations_ns": 208990550,
+            "upload_activations_ns": 162625767,
+            "activation_bytes": 6025216,
+            "shared_activation_uploads_saved": 344,
+            "upload_weights_ns": 1530298595,
+            "weight_bytes": 472776704,
+            "device_roundtrip_ns": 8500489417,
+            "queue_runs": 168,
+            "commands": 1016,
+            "download_ns": 228274311,
+            "score_bytes": 43943936,
+            "unpack_ns": 755836868,
+            "fused_decoder_groups": 64,
+            "fused_decoder_commands_saved": 96,
+            "resident_weight_uploads": 8,
+            "resident_weight_hits": 24,
+            "packed_weight_bytes": 66453504,
+            "workspace_bytes": 4456448,
+            "resident_weight_bytes": 16449536,
+            "tokenize_ns": 17407586,
+            "encoder_stack_ns": 6326643630,
+            "decoder_stacks_ns": 12134604253,
+            "vocabulary_ns": 3929165676,
+            "decode_text_ns": 2456595,
+            "verification_blocks": 13,
+            "proposed_tokens": 57,
+            "accepted_proposals": 36
+          },
+          "active": {
+            "name": "Queue history v2",
+            "checkpoint_sha256": "4ab0bbf9e8c249bf20d08fbe1a1d03321d0819164c5571c13f6ac42df2289f9d",
+            "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+            "target_row": null
+          }
+        },
+        "views": {
+          "transcript": "What's wrong with my system?",
+          "generalization": "60 readings from 0 to 5900 ms.\nLast reading: 2 of 4 connections busy; 0 waiting.\nPeak queue: 0 waiting at 0 ms.\nThese measurements do not identify a cause or request-level latency.",
+          "short_answer": "No backlog was observed; 0 requests are waiting now.",
+          "summary": "No backlog was observed; 0 requests are waiting now.\nMeasure request arrivals and connection hold times.",
+          "final": "No backlog was observed; 0 requests are waiting now. The peak was 0. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times."
+        },
+        "fpga_ask_requests": [
+          "final"
+        ],
+        "model": "Queue history v2",
+        "kit": "PYNQ-Z2 connected"
+      }
+    }
+  }
+}

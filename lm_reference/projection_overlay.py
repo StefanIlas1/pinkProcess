@@ -203,10 +203,10 @@ class OverlayProjection:
 
     def invalidate_weights(self, name):
         with self.lock:
-            for decode in (False, True):
-                old = self.packed_weights.pop((name, decode), None)
-                if old is not None:
-                    self.packed_bytes -= old.nbytes
+            for key in list(self.packed_weights):
+                names, _ = key
+                if names == name or (isinstance(names, tuple) and name in names):
+                    self.packed_bytes -= self.packed_weights.pop(key).nbytes
             if name == "lm_head" and not self.pending:
                 self._release_resident()
                 self.resident_blocked = False
@@ -313,6 +313,14 @@ class OverlayProjection:
                 raise RuntimeError("Projection accelerator is already busy.")
             a = self._upload_activations(activations, positions, depth)
             self.phases["shared_activation_uploads_saved"] += len(matrices) - 1
+            # Decoder tiles carry 64 output rows. Concatenating complete tiles
+            # makes one ordinary hardware projection with exactly the same dots.
+            # Keep padded tails and unbound (possibly mutable) inputs on the
+            # independent descriptor path.
+            if (queued and decode and sum(weight_sizes) <= MAX_PACKED_WEIGHT_BYTES
+                    and all(len(w) % lanes == 0 for _, w in matrices)
+                    and all(self.model_weights.get(name + ".weight") is w for name, w in matrices)):
+                return self._project_fused_decoder(matrices, tiles, depth, a)
             if queued:
                 w_space = self._buffer("w", (sum(weight_spans),), np.int8)
                 y_space = self._buffer("y", (sum(score_sizes),), np.dtype("<i4"))
@@ -357,6 +365,33 @@ class OverlayProjection:
                 for y, result in commands:
                     self._consume_scores(y, result)
             return [result for _, result in commands]
+
+    def _project_fused_decoder(self, matrices, tiles, depth, a):
+        names = tuple(name for name, _ in matrices)
+        key = names, True
+        shape = (sum(tiles), depth, 64)
+        packed = self.packed_weights.get(key)
+        if packed is None:
+            self.phases["weight_cache_misses"] += 1
+            packed = np.empty(shape, dtype=np.int8)
+            offset = 0
+            for (_, weights), count in zip(matrices, tiles):
+                self._pack_weight_data(packed[offset:offset + count], weights, True)
+                offset += count
+            self._remember_weights(key, packed)
+        else:
+            self.packed_weights.move_to_end(key)
+            self.phases["weight_cache_hits"] += 1
+        result = np.empty((1, sum(len(w) for _, w in matrices)), dtype=np.int32)
+        self._project_segment(a, packed, True, shape, result, True, timeout=self.timeout * len(matrices))
+        self.phases["fused_decoder_groups"] += 1
+        self.phases["fused_decoder_commands_saved"] += len(matrices) - 1
+        offset = 0
+        outputs = []
+        for _, w in matrices:
+            outputs.append(result[:, offset:offset + len(w)])
+            offset += len(w)
+        return outputs
 
     def _upload_activations(self, activations, positions, depth):
         a = self._buffer("a", (positions, depth, 8), np.int8)
@@ -421,14 +456,17 @@ class OverlayProjection:
         self.phases["weight_cache_misses"] += 1
         if length > MAX_PACKED_WEIGHT_BYTES:
             return None
-        while length + self.packed_bytes > MAX_PACKED_WEIGHT_BYTES:
-            _, old = self.packed_weights.popitem(last=False)
-            self.packed_bytes -= old.nbytes
         packed = np.empty(shape, dtype=np.int8)
         self._pack_weight_data(packed, weights, decode)
+        self._remember_weights(key, packed)
+        return packed
+
+    def _remember_weights(self, key, packed):
+        while self.packed_bytes + packed.nbytes > MAX_PACKED_WEIGHT_BYTES:
+            _, old = self.packed_weights.popitem(last=False)
+            self.packed_bytes -= old.nbytes
         self.packed_weights[key] = packed
         self.packed_bytes += packed.nbytes
-        return packed
 
     def _resident_weight(self, key, segment, packed, shape):
         key = key, shape
@@ -456,7 +494,7 @@ class OverlayProjection:
         self.phases["resident_weight_uploads"] += 1
         return buffer
 
-    def _project_segment(self, a, segment, packed, shape, destination, decode, *, resident_key=None):
+    def _project_segment(self, a, segment, packed, shape, destination, decode, *, resident_key=None, timeout=None):
         # Reserve the fallback buffers before a resident can compete for CMA.
         scratch = self._buffer("w", shape, np.int8)
         y = self._buffer("y", (len(a), shape[0], 64), np.dtype("<i4"))
@@ -465,15 +503,17 @@ class OverlayProjection:
             w = scratch
             self._upload_weights(w, segment, packed, decode)
 
+        if timeout is None:
+            timeout = self.timeout
         addresses = [int(buffer.device_address) for buffer in (a, w, y)]
         start = perf_counter_ns()
         if self.native is None:
             _configure(self.mmio, addresses, decode, a.shape[1], len(a), len(w))
         try:
             if self.native is None:
-                status = _launch(self.mmio, self.timeout)
+                status = _launch(self.mmio, timeout)
             else:
-                status = self.native.dispatch(addresses, decode, a.shape[1], len(a), len(w), self.timeout)
+                status = self.native.dispatch(addresses, decode, a.shape[1], len(a), len(w), timeout)
                 self.phases["native_commands"] += 1
         except BaseException:
             self._retain()

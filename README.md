@@ -11,7 +11,7 @@ PYNQ Process is an Apple Silicon Mac app for asking questions about live data. Y
 Real:
 
 - Answers about a queue CSV or the live feed are generated on the PYNQ-Z2. The kit keeps its own rolling history and scores eligible windows as they arrive, with the Mac closed.
-- Named language-model versions (edits to one INT8 output row) are stored, verified, switched, rolled back and replayed on the board.
+- The original and Queue history v2 are selectable language-model checkpoints. Named edits to either checkpoint change one INT8 output row. The board stores, verifies, switches and replays versions.
 - Board uploads, staged answers (Short, Summary, Final), follow-up questions and model synthesis run through the board. Dictation uses on-device speech recognition on the Mac.
 - History, notes, export, the model library and the Claude connector run locally on the Mac.
 
@@ -21,7 +21,7 @@ Not the same as it looks:
 - A file you import is always profiled on this Mac, and the Transcript and Table answers come from plain statistics computed here. Only queue CSVs can be sent to the board for the model answers.
 - The model recommendation is a rule-based guess from column names and types.
 - The marketplace is local. Online sharing does not exist.
-- Measured speed is slow: about 46 to 60 seconds for a complete answer on the physical kit. See [results](docs/results.md).
+- With Queue history v2 active, the first generated text took 9.34–9.78 seconds and the full diagnosis took 17.57–18.16 seconds on three recorded incidents. Live data continued arriving on the board. [Measured results](docs/results.md).
 
 ## Quick start
 

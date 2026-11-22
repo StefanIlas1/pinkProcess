@@ -329,6 +329,34 @@ software token selection on the new image; all learned matrix operations
 ran on the FPGA. The named edit, rollback, and a new incident each reproduced
 their reference answer. [Physical comparison](../kit/evidence/physical-projection-queue-comparison.json)
 
+### Verified token proposals
+
+A fresh board service uses ordinary greedy decoding. Both the factory archive
+and the update archive include the optional verifier and its 15 KiB token
+proposal table. To benchmark it on the all-projection overlay, append
+`--verified-draft` to the existing `PINKPROCESS_PROJECTION_ARGS` in
+`/etc/pinkprocess-kit/projection.conf` and restart `pinkprocess-kit.service`.
+Remove that flag and restart to return to ordinary decoding.
+
+The draft suggests up to seven token IDs from the previous five IDs. The
+active quantized model checks every proposal with a causal decoder block on
+the FPGA and decides every output token. At the first mismatch the kit emits
+the model's winner, discards the speculative attention history past that
+position, and continues. Repeated misses switch temporarily to single steps.
+The first decoder position always runs alone to preserve weight-edit
+calibration. Under `projection_phases`, a completed job reports
+`verification_blocks`, `proposed_tokens` and `accepted_proposals`.
+Compare the complete answers, first-position calibration, wall times and
+live telemetry on identical captures with and without the flag.
+
+The table is reproducible from 500 seeded examples from the development
+training generator. To rebuild it with the diagnostic checkpoint's tokenizer:
+
+```sh
+python3 -m lm_reference.flan_draft build/flan/diagnostic-install/tokenizer.json /tmp/telemetry-token-draft.tsv.gz
+cmp /tmp/telemetry-token-draft.tsv.gz lm_reference/telemetry-token-draft.tsv.gz
+```
+
 ### Remote Vivado build on Western GAUL
 
 On 2026-11-20, the Mac reached Western University's SSH service at
@@ -626,3 +654,11 @@ The browser API passed preview, generation, patch application, full
 readback, and rollback against the physical board. The transcript is
 `build/pynq/fixed-browser-api.json`.
 
+
+### Replay the three open-ended diagnosis inputs
+
+With the Mac app connected over USB, replay the recorded CSVs and question. Use an interpreter with NumPy and the app's loopback HTTP port. The verifier checks the input hashes, selected version, projection counts, and live telemetry. It measures API wall time and writes the actual answers for review.
+
+```sh
+python -m kit.replay_open_questions --port PORT --model original --output original-replay.json
+```

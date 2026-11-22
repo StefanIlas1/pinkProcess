@@ -25,6 +25,36 @@ Follow the [projection configuration](engineering.md#benchmark-the-flan-projecti
 
 Transfer the kit's pairing JSON privately. In the app choose **PYNQ Process, then Import Kit Pairing…**. The file grants access to query the kit and change its active profile, so treat it like a password.
 
+### Install the optional Queue history v2 checkpoint
+
+On a provisioned kit with the all-projection overlay, retain the installed
+original FLAN model and reconstruct the [queue-history checkpoint](../profiles/flan-queue-history-v2/README.md).
+Copy that export to the board. From the installed service directory on the
+board, use its Python environment to verify and install the export:
+
+```sh
+cd /opt/pinkprocess-kit/current
+hash=d8d97a3327aae96859b3ea5c165ccc860f06d55fe38a79d03c50da9203b22aeb
+sudo /usr/local/share/pynq-venv/bin/python3 -m lm_reference.model_assets /path/to/queue-history-v2 "$hash" /opt/pinkprocess-kit/models
+```
+
+Append `--history-model /opt/pinkprocess-kit/models/d8d97a3327aae96859b3ea5c165ccc860f06d55fe38a79d03c50da9203b22aeb --history-manifest-sha256 d8d97a3327aae96859b3ea5c165ccc860f06d55fe38a79d03c50da9203b22aeb` to the
+existing `PINKPROCESS_PROJECTION_ARGS` in `/etc/pinkprocess-kit/projection.conf`.
+Preserve the existing all-projection arguments and restart `pinkprocess-kit.service`.
+The board verifies the files before offering **Queue history v2** in the model selector.
+
+For a live question its selection persists across service restarts. For an
+uploaded dataset it applies only to that dataset. Fresh questions on this
+checkpoint receive the measured queue-history description. Replaying an older
+capture preserves its frozen question and evidence prompt. Select **original**
+to return to the original checkpoint. Its previously saved row edits remain
+selectable. Training with **Queue history v2** selected calibrates against
+that checkpoint and saves the new INT8 output-row bytes under a unique name.
+Every saved edit is anchored to one full checkpoint. Starting from an edited
+version uses its underlying full checkpoint for the new row calculation.
+Loading a v2 edit reports its base name and the edited checkpoint and classifier
+fingerprints. An imported v2 row artifact needs the matching `base_sha256`.
+
 ## Connect
 
 - **Ethernet.** Put the Mac and the board on a reachable network. In the app press **Find boards**. One kit connects on its own. Otherwise use **Connect by address**. If the Mac is on Wi-Fi and the board is on wall Ethernet you need a network route between them.
@@ -52,7 +82,7 @@ The board stores the upload separately from its live feed and answers from one g
 
 Open the **Skills** tab for the board's versions and the **Train** tab to make a new one.
 
-- **Create a version.** In **Train**, name the version, give one output token such as `Now` (or a token ID) and describe the intended first-token behavior. **Train and save** asks the signed-in Mac Codex CLI to design a row edit. **From file** saves an Astra response you already have. The board stores the exact edited bytes against the original checkpoint.
+- **Create a version.** In **Train**, name the version, give one output token such as `Now` (or a token ID) and describe the intended first-token behavior. **Train and save** asks the signed-in Mac Codex CLI to design a row edit. **From file** saves an Astra response you already have. The board stores the exact edited bytes against the selected full checkpoint.
 - **Switch.** Pick a version under **Answer skill**. Each load verifies the classifier digest and probes an output row through FPGA scores. **Reset** returns to the original and keeps your named versions.
 - **Synthesize for a dataset.** With a file uploaded to the board, **Synthesize model** picks a starting point, a name and a plain-language request. The board calibrates on the upload if needed, Astra proposes the INT8 row and the board saves it under your name for that dataset.
 - **Replay.** The **Replay** tab lists saved incidents. **Replay** runs a new generation on the same captured evidence so you can compare answers before and after a change.

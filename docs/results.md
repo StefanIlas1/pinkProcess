@@ -2,6 +2,36 @@
 
 Every number on this page comes from a recorded run. The raw records are under `kit/evidence/` and `build/`. The broader research log, including the weight-reading studies, is in [research.md](../research.md). How to reproduce the hardware work is in [engineering.md](engineering.md).
 
+## Open-ended pool diagnosis
+
+The physical kit received the same question, “What's wrong with my system?”, for three 60-reading uploads. All runs below used the original model weights. Times run from submission to the rendered final answer.
+
+| Recorded queue | Previous decoder | Decoder verifying token proposals | Original model's answer |
+| --- | ---: | ---: | --- |
+| Cleared after peaking at 12 | 40.39 s | 19.71 s | Correct recovery and peak |
+| Increased to 19 waiting | 43.41 s | 23.33 s | Correct active backlog and count, omitted the increase |
+| Zero waiting throughout | 42.44 s | 19.65 s | Correct count, incorrectly implied a past queue |
+
+The faster path generated the exact same text in each case. A separate unfamiliar question took 24.70 s versus 42.43 s, and the first-step calibration values also matched. The app shows the measured first, peak and final queue state alongside the generated interpretation. [Board timings](../kit/evidence/open-question-verified-physical.json) · [Fresh wording and saved weights](../kit/evidence/verified-decoder-weight-controls-physical.json)
+
+A separate W8A8 checkpoint, **Queue history v2**, was trained to use the captured queue history. A software evaluation on frozen incidents found it classified 15 of 15 histories correctly, reported the change in all nine active queues correctly, and answered three targeted questions. It also preserved the current state, historical peak and primary forecast on 12 archived cases. Five of those answers described recovery without explicitly giving the current count of zero. [Paired evaluation](../kit/evidence/grounded-history-independent-review.json)
+
+The installed Mac app also submitted the healthy CSV to the physical kit with Queue history v2 selected. Its answer correctly reported a zero peak, described the warning as a forecast and recommended measuring arrivals and connection hold times. First text appeared at 11.76 s and the final answer at 25.42 s with the shared proposal table. All 1,021 projections ran on the FPGA. [Installed app recording](../kit/evidence/installed-queue-history-v2.json)
+
+### Queue history v2 on the paired PYNQ-Z2
+
+With v2 already active and its checkpoint-specific proposal table installed, the app submitted the same open-ended question once for each recording. The board generated the same complete answers as the earlier v2 run. Across these three questions, first text met the ten-second target and the full diagnosis took about eighteen seconds.
+
+| Recorded queue | First generated text | Complete answer | Live FPGA submissions during answer |
+| --- | ---: | ---: | ---: |
+| Cleared after peaking at 12 | 9.78 s | 17.57 s | 181 |
+| Increased from 0 to 19 | 9.34 s | 18.16 s | 186 |
+| Zero waiting throughout | 9.38 s | 18.13 s | 186 |
+
+The previous v2 runs used the shared proposal table and selected v2 per dataset while the global selection was original. The comparison includes both configuration changes. Encoder time was 6.29–7.24 s and decoder-stack time was 7.69–8.08 s on the new runs. [Full answers and counters](../kit/evidence/physical-history-verifier-tuned.json)
+
+Astra also authored a named edit to the v2 output row for “Now”. On the same healthy recording and question, selecting the edit produced “Now” as the first word and repeated it later. The edit demonstrated control over output and degraded the wording. Restore original succeeded, and selecting the unmodified v2 checkpoint then reproduced its entire earlier answer byte for byte. All seven library entries remained available. The board stayed powered. [Named edit and rollback](../kit/evidence/physical-history-named-edit-rollback.json)
+
 ## Current status
 
 The FPGA scores live telemetry. A provisioned language-model

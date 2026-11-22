@@ -1,7 +1,25 @@
 """Compact one telemetry snapshot into input for the resident encoder."""
 
 
-def telemetry_prompt(question, evidence):
+def measured_history(evidence):
+    """Describe the observed endpoints and peak for the history-trained checkpoint."""
+    observations = evidence.get("observations") or {}
+    first = (observations.get("first") or {}).get("waiting")
+    peak = (observations.get("peak_waiting") or {}).get("waiting")
+    last = (evidence.get("latest") or {}).get("waiting")
+    if any(type(n) is not int or n < 0 for n in (first, peak, last)) or peak < max(first, last):
+        return ""
+    if peak == 0:
+        return "No backlog was observed in this window."
+    if last == 0:
+        return "The queue cleared by the final sample."
+    if first == last:
+        return f"Active queue. First and final waiting counts were both {last}."
+    direction = "rose" if last > first else "fell"
+    return f"Active queue. Waiting {direction} from {first} to {last}."
+
+
+def telemetry_prompt(question, evidence, *, history=False):
     if not isinstance(question, str) or not 0 < len(question.strip()) <= 500:
         raise ValueError("Enter a question of up to 500 characters.")
     latest = evidence["latest"]
@@ -28,4 +46,8 @@ def telemetry_prompt(question, evidence):
         sentences.append(f"Mean occupancy: {busy['mean']:.4g} connections.")
     sentences.extend([evidence.get("forecast_interpretation") or "Forecast unavailable.",
                       "Endpoint, root cause and request latency: unknown."])
+    if history:
+        measured = measured_history(evidence)
+        if measured:
+            sentences.append("Measured queue history: " + measured)
     return "Answer the question using the measurements. " + " ".join(sentences) + "\nQuestion: " + question.strip() + "\nAnswer:"
