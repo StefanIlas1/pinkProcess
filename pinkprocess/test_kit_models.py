@@ -2,11 +2,15 @@ import csv
 import io
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from threading import Thread
 import time
 import unittest
+from unittest.mock import patch
+from urllib.error import HTTPError
+from urllib.request import Request, build_opener, HTTPRedirectHandler, urlopen
 
 from .kit_accounts import Accounts
-from .kit_app import Kit
+from .kit_app import DEFAULT_PORT, Kit, make_server
 from .kit_data import SAMPLES
 from .kit_export import export_session
 from .kit_models import BUILT_IN, ModelStore
@@ -82,6 +86,45 @@ class ProgressiveAnswerTest(unittest.TestCase):
             self.assertIn(heading, markdown)
         rows = list(csv.reader(io.StringIO(export_session(session, "csv")["content"])))
         self.assertEqual(len(rows), 5)
+
+
+class NoFollow(HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None
+
+
+class ServerTest(unittest.TestCase):
+    def test_port_falls_back_when_the_default_is_taken(self):
+        import pinkprocess.kit_app as kit_app
+        real = kit_app.KitServer
+        attempts = []
+
+        def refuse_default(address, handler):
+            attempts.append(address[1])
+            if address[1] == DEFAULT_PORT:
+                raise OSError("Address already in use")
+            return real(address, handler)
+
+        with patch.object(kit_app, "KitServer", side_effect=refuse_default):
+            with make_server() as server:
+                self.assertEqual(attempts[0], DEFAULT_PORT)
+                self.assertNotEqual(server.server_port, DEFAULT_PORT)
+
+    def test_sign_in_start_rejects_foreign_referers(self):
+        with patch.dict("os.environ", {"PYNQ_AUTH0_DOMAIN": "tenant.auth0.com", "PYNQ_AUTH0_CLIENT_ID": "abc"}):
+            server = make_server(port=0)
+        with server:
+            Thread(target=server.serve_forever, daemon=True).start()
+            base = f"http://127.0.0.1:{server.server_port}/auth/login"
+            opener = build_opener(NoFollow)
+            with self.assertRaises(HTTPError) as foreign:
+                opener.open(Request(base, headers={"Referer": "http://evil.example/"}))
+            self.assertEqual(foreign.exception.code, 403)
+            with self.assertRaises(HTTPError) as ok:
+                opener.open(Request(base, headers={"Referer": f"http://127.0.0.1:{server.server_port}/"}))
+            self.assertEqual(ok.exception.code, 302)
+            self.assertIn("nonce=", ok.exception.headers["Location"])
+            server.shutdown()
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 """Run a FIFO connection pool in event time and sample it on a fixed clock."""
 
+from __future__ import annotations
+
 from collections import deque
 from dataclasses import dataclass
 from heapq import heappop, heappush

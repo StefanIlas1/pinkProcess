@@ -50,6 +50,15 @@ class AccountsTest(unittest.TestCase):
             accounts.action({"action": "logout"})
             self.assertIsNone(accounts.session()["user"])
 
+    def test_token_needs_matching_audience_and_nonce(self):
+        accounts = Accounts(environ=CONFIGURED)
+        for claims in ({"sub": "1"}, {"sub": "1", "aud": "abc"}, {"sub": "1", "aud": "abc", "nonce": "other"}):
+            state = self.state_of(accounts)
+            with patch.object(kit_accounts, "urlopen", return_value=FakeResponse({"id_token": fake_token(claims)})):
+                with self.assertRaises(RuntimeError):
+                    accounts.finish_login("code", state)
+        self.assertIsNone(accounts.session()["user"])
+
     def test_sessions_keep_dataset_model_and_notes(self):
         with TemporaryDirectory() as directory:
             accounts = Accounts(Path(directory), environ={})
@@ -89,14 +98,15 @@ class AccountsTest(unittest.TestCase):
 
     def test_login_state_is_single_use_and_expires(self):
         accounts = Accounts(environ=CONFIGURED)
-        reply = FakeResponse({"id_token": fake_token({"sub": "google|1", "name": "Ana", "aud": "abc"})})
         state = self.state_of(accounts)
+        reply = FakeResponse({"id_token": fake_token({"sub": "google|1", "name": "Ana", "aud": "abc", "nonce": accounts.pending[state][3]})})
         with patch.object(kit_accounts, "urlopen", return_value=reply) as call:
             accounts.finish_login("code", state)
             self.assertEqual(accounts.session()["user"]["name"], "Ana")
             self.assertIn(b"code_verifier=", call.call_args.args[0].data)
             with self.assertRaises(ValueError):
                 accounts.finish_login("code", state)
+        self.assertIn("nonce=", accounts.login_url("http://127.0.0.1:1"))
         stale = self.state_of(accounts)
         with patch.object(kit_accounts, "time", return_value=kit_accounts.time() + kit_accounts.LOGIN_TTL_SECONDS + 1):
             with self.assertRaisesRegex(ValueError, "expired"):

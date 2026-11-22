@@ -67,6 +67,8 @@ class ExportTest(unittest.TestCase):
             result = export_action({"action": "export", "session_id": saved["chat_id"], "format": "csv"}, accounts)
             self.assertIn("Why?,summary,Busy.", result["content"])
             posted = export_action({"action": "export", "session_id": None, "session": SESSION, "format": "md"}, accounts)
+            both = export_action({"action": "export", "session_id": saved["chat_id"], "session": SESSION, "format": "md"}, accounts)
+            self.assertEqual(both["content"], posted["content"])
             self.assertIn("pool.csv", posted["content"])
             for bad in ({"session_id": "missing"}, {"session_id": 4}, {"session_id": None}, {"session_id": None, "session": []},
                         {"session_id": None, "session": SESSION, "extra": 1}):

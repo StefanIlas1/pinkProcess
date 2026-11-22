@@ -154,15 +154,16 @@ class Accounts:
             raise ValueError("Sign-in is not configured.")
         verifier, challenge = pkce_pair()
         state = secrets.token_urlsafe(24)
+        nonce = secrets.token_urlsafe(24)
         now = time()
         with self.lock:
             live = {key: entry for key, entry in self.pending.items() if now - entry[2] < LOGIN_TTL_SECONDS}
             newest = sorted(live.items(), key=lambda item: item[1][2])[-(MAX_PENDING_LOGINS - 1):]
             self.pending = dict(newest)
-            self.pending[state] = (verifier, origin + CALLBACK_PATH, now)
+            self.pending[state] = (verifier, origin + CALLBACK_PATH, now, nonce)
         query = urlencode({
             "response_type": "code", "client_id": self.client_id, "redirect_uri": origin + CALLBACK_PATH,
-            "scope": "openid profile", "connection": "google-oauth2", "state": state, "code_challenge": challenge, "code_challenge_method": "S256",
+            "scope": "openid profile", "connection": "google-oauth2", "state": state, "nonce": nonce, "code_challenge": challenge, "code_challenge_method": "S256",
         })
         return f"https://{self.domain}/authorize?{query}"
 
@@ -175,7 +176,7 @@ class Accounts:
             raise ValueError("Sign-in was cancelled. You can try again from the app.")
         if not code:
             raise ValueError("The sign-in did not return a code. Try logging in again.")
-        verifier, redirect_uri, _ = entry
+        verifier, redirect_uri, _, nonce = entry
         body = urlencode({
             "grant_type": "authorization_code", "client_id": self.client_id, "code": code,
             "code_verifier": verifier, "redirect_uri": redirect_uri,
@@ -192,7 +193,9 @@ class Accounts:
         except (URLError, OSError, KeyError, IndexError, ValueError, TypeError, AttributeError):
             raise RuntimeError("Sign-in could not be completed. Try again.") from None
         audience = claims.get("aud")
-        if audience not in (self.client_id, None) and not (isinstance(audience, list) and self.client_id in audience):
+        if audience != self.client_id and not (isinstance(audience, list) and self.client_id in audience):
+            raise RuntimeError("Sign-in could not be completed. Try again.")
+        if claims.get("nonce") != nonce:
             raise RuntimeError("Sign-in could not be completed. Try again.")
         name = claims.get("name") or claims.get("nickname") or claims.get("email") or "You"
         with self.lock:

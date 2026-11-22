@@ -57,9 +57,12 @@ still use everything but nothing is saved. Sessions are stored on this Mac in
 
 **Logging in.** The app uses Auth0 Universal Login with Google. Set
 `PYNQ_AUTH0_DOMAIN` and `PYNQ_AUTH0_CLIENT_ID` before launching and allow
-`http://127.0.0.1:<port>/auth/callback` as a callback URL in the Auth0 application.
-Without them, **Continue with Google** creates a local stand-in profile so you
-can try the flow.
+`http://127.0.0.1:53530/auth/callback` as a callback URL in the Auth0 application.
+The app listens on port 53530 so the callback stays stable, and falls back to a
+random port only if 53530 is taken (then sign-in needs that port allowed too).
+The ID token must name your client as its audience and carry the nonce the app
+sent. Without the two variables, the sign-in sheet shows **Continue as guest**,
+which creates a local stand-in profile so you can try the flow.
 
 **Logo.** Drop a file at `pinkprocess/static/logo.png` to replace the built-in logo.
 

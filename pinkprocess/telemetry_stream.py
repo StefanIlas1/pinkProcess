@@ -1,5 +1,7 @@
 """Bounded, board-resident history and forecasts for one active telemetry source."""
 
+from __future__ import annotations
+
 from collections import deque
 from dataclasses import asdict, dataclass, field
 from itertools import islice

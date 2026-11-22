@@ -548,6 +548,10 @@ class KitHandler(BaseHTTPRequestHandler):
                 return self.reply(404, {"error": "No logo."})
             return self.reply(200, LOGO.read_bytes(), "image/png")
         if self.path == "/auth/login":
+            referer = self.headers.get("Referer")
+            fetch_site = self.headers.get("Sec-Fetch-Site")
+            if (referer and not referer.startswith(f"http://{self.headers.get('Host')}/")) or fetch_site in ("cross-site", "same-site"):
+                return self.reply(403, {"error": "Start sign-in from the PYNQ Process app."})
             try:
                 url = self.server.accounts.login_url(f"http://{self.headers.get('Host')}")
             except ValueError as exc:
@@ -609,11 +613,19 @@ class KitServer(ThreadingHTTPServer):
                 self.kit.disconnect()
 
 
-def make_server(host="127.0.0.1", port=0, data_dir=DATA_DIR):
+DEFAULT_PORT = 53530
+
+
+def make_server(host="127.0.0.1", port=DEFAULT_PORT, data_dir=DATA_DIR):
     if host != "127.0.0.1":
         raise ValueError("The Mac app must use the local loopback address.")
     transport = BoardTransport()
-    server = KitServer((host, port), KitHandler)
+    try:
+        server = KitServer((host, port), KitHandler)
+    except OSError:
+        if not port:
+            raise
+        server = KitServer((host, 0), KitHandler)
     server.kit = Kit(transport, store=DatasetStore(data_dir))
     server.accounts = Accounts()
     server.allowed_hosts = {f"127.0.0.1:{server.server_port}", f"localhost:{server.server_port}"}
@@ -622,7 +634,7 @@ def make_server(host="127.0.0.1", port=0, data_dir=DATA_DIR):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--port", type=int, default=8770)
+    parser.add_argument("--port", type=int, default=DEFAULT_PORT)
     parser.add_argument("--open", action="store_true", help="Open the app in the default browser")
     args = parser.parse_args()
     with make_server(port=args.port) as server:

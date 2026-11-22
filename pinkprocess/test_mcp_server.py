@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 from .kit_accounts import Accounts
 from .kit_data import DatasetStore
-from .mcp_server import Connector, mcp_config, serve
+from .mcp_server import Connector, interpreter_ok, mcp_config, pick_python, serve
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -116,6 +116,26 @@ class McpTest(unittest.TestCase):
         replies = [json.loads(line) for line in done.stdout.splitlines()]
         self.assertEqual([reply["id"] for reply in replies], [1, 2])
         self.assertEqual(payload(replies[1])["imported"], ["mine.csv"])
+
+    def test_initialize_runs_under_the_interpreter_the_config_picks(self):
+        python = mcp_config({})["command"]
+        if not interpreter_ok(python):
+            self.skipTest("No Python 3.10 or newer interpreter is available.")
+        environment = {**os.environ, "PYTHONPATH": str(ROOT), "PYNQ_HISTORY_DIR": str(self.history), "PYNQ_DATA_DIR": str(self.data)}
+        done = subprocess.run([python, "-m", "pinkprocess.mcp_server"], input=rpc(1, "initialize", {"protocolVersion": "2024-11-05"}) + "\n",
+                              capture_output=True, text=True, timeout=30, env=environment, cwd=self.directory.name)
+        self.assertEqual(json.loads(done.stdout.splitlines()[0])["id"], 1)
+
+    def test_old_interpreters_can_import_the_server(self):
+        old = "/usr/bin/python3"
+        if not Path(old).is_file() or interpreter_ok(old):
+            self.skipTest("No older system interpreter to check.")
+        done = subprocess.run([old, "-c", "import pinkprocess.mcp_server"], capture_output=True, text=True, timeout=30,
+                              env={**os.environ, "PYTHONPATH": str(ROOT)})
+        self.assertEqual(done.returncode, 0, done.stderr)
+
+    def test_picked_python_is_modern(self):
+        self.assertTrue(Path(pick_python()).is_absolute())
 
     def test_config_points_at_this_checkout(self):
         config = mcp_config({})

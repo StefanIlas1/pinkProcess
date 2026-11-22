@@ -1,5 +1,7 @@
 """Build observable histories and event-derived targets."""
 
+from __future__ import annotations
+
 from bisect import bisect_right
 from dataclasses import dataclass
 

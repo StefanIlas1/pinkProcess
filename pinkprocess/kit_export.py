@@ -142,13 +142,12 @@ def export_session(session, fmt):
 def export_action(data, accounts):
     if set(data) - {"action", "session_id", "session", "format"}:
         raise ValueError("Exporting takes a session, a session id and a format.")
+    posted = data.get("session")
+    if isinstance(posted, dict):
+        return export_session(posted, data.get("format"))
     session_id = data.get("session_id")
     if session_id is not None:
         if not isinstance(session_id, str):
             raise ValueError("That session is no longer available.")
-        session = accounts.get_chat(session_id)
-    else:
-        session = data.get("session")
-        if not isinstance(session, dict):
-            raise ValueError("Choose a saved session to export, or send the session itself.")
-    return export_session(session, data.get("format"))
+        return export_session(accounts.get_chat(session_id), data.get("format"))
+    raise ValueError("Choose a saved session to export, or send the session itself.")

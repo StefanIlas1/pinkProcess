@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 
 from .kit_accounts import HISTORY_DIR, Accounts, read_chat_file, user_key
@@ -50,11 +51,30 @@ def repo_root():
     return None
 
 
+def interpreter_ok(path):
+    try:
+        done = subprocess.run([path, "-c", "import sys; print(int(sys.version_info >= (3, 10)))"],
+                              capture_output=True, text=True, timeout=5)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return done.returncode == 0 and done.stdout.strip() == "1"
+
+
+def pick_python():
+    candidates = ["/opt/homebrew/bin/python3", "/usr/local/bin/python3", shutil.which("python3")]
+    if not frozen_app():
+        candidates.append(sys.executable)
+    for candidate in candidates:
+        if candidate and Path(candidate).is_file() and interpreter_ok(candidate):
+            return str(Path(candidate).resolve())
+    fallback = shutil.which("python3") if frozen_app() else sys.executable
+    return str(Path(fallback).resolve()) if fallback else "/usr/bin/python3"
+
+
 def mcp_config(environ=None):
     environ = os.environ if environ is None else environ
     root = repo_root()
-    python = shutil.which("python3") if frozen_app() else sys.executable
-    python = str(Path(python).resolve()) if python else "/usr/bin/python3"
+    python = pick_python()
     env = {"PYTHONPATH": str(root)} if root else {}
     if environ.get("PYNQ_USER"):
         env["PYNQ_USER"] = environ["PYNQ_USER"]

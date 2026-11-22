@@ -303,6 +303,12 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
   <div id="library-list"></div>
 </dialog>
 
+<dialog id="export-dialog">
+  <div class="head"><h2 id="export-title">Export</h2><button class="text" data-close>Close</button></div>
+  <textarea id="export-text" readonly rows="10" style="width:100%;resize:none;font:.78rem/1.5 var(--mono)" aria-label="Exported content"></textarea>
+  <div class="row" style="margin-top:12px"><button id="export-copy" class="solid" type="button">Copy</button></div>
+</dialog>
+
 <dialog id="mcp-dialog">
   <div class="head"><h2>Connect to Claude</h2><button class="text" data-close>Close</button></div>
   <pre id="mcp-config" class="mono"></pre>
@@ -369,8 +375,12 @@ const demoChats = [
 let status = null, address = "", busy = true, interaction = 0, pollPending = false, nextModelCheck = 0, autoUsb = true;
 let languageWeights = null, savedCaptures = [], olderCaptures = null, latestStream = null, answerCapture = null;
 let messages = [], chatId = null, chats = [], user = null, auth0 = false, demo = false, loginWatch = null, models = null, samples = [];
-let demoPublished = [];
-let boardDataset = null, boardHost = "", boardCalibrated = false, lastCsvText = "", voiceState = "idle", voiceBefore = "";
+let demoPublished = [], demoTimers = [];
+function clearDemoTimers() {
+  for (const id of demoTimers) clearTimeout(id);
+  demoTimers = [];
+}
+let boardDataset = null, boardHost = "", boardCalibrated = false, lastCsvText = "", voiceState = "idle", voiceBefore = "", voiceIgnore = false;
 const speechInput = window.webkit?.messageHandlers?.speechInput;
 let dataset = null, datasetLabel = "", chosenModel = null, accepted = false, notes = "", notesTimer = null;
 let answerStyle = "short", lastLatency = null, activeTab = "notes", lastTimings = null;
@@ -532,7 +542,7 @@ function controls() {
   for (const id of ["synth-name", "synth-instruction"]) el(id).disabled = !synthReady;
   el("synth-run").disabled = !synthReady || !el("synth-name").value.trim();
   if (!el("synth-status").dataset.live) el("synth-status").textContent = synthReady ? "" : "Connect a board and import a queue CSV to build a model for your data.";
-  el("mic").disabled = busy || ["requesting", "stopping"].includes(voiceState);
+  el("mic").disabled = ["requesting", "stopping"].includes(voiceState) || (busy && voiceState !== "listening");
   el("live-question").readOnly = ["requesting", "listening", "stopping"].includes(voiceState);
   el("saved-incident").disabled = busy || !savedCaptures.length;
   el("replay-saved").disabled = busy || !status?.lm_supported || !el("saved-incident").value;
@@ -685,7 +695,7 @@ async function run(task) {
   try { await task(); }
   catch (err) {
     show(err.message, true);
-    if (status) {
+    if (status && !demo) {
       try { setState(await request("status")); }
       catch { setState({status:null}); }
     }
@@ -734,7 +744,7 @@ async function openChat(id) {
     messages = chat.messages.map(message => ({role:message.role, text:message.text, readings:message.readings || "", table:message.table, mono:message.mono, style:message.style, variants:message.variants && Object.keys(message.variants).length ? message.variants : undefined, picked:true}));
     for (const message of messages) {ensureVariants(message); if (message.role === "answer") message.view = message.variants[message.style] ? message.style : readyStyles(message)[0];}
     chatId = chat.id; notes = chat.notes || ""; el("notes").value = notes;
-    dataset = null; datasetLabel = chat.dataset || "";
+    dataset = null; datasetLabel = chat.dataset || ""; lastCsvText = ""; boardDataset = null; boardCalibrated = false;
     chosenModel = models?.find(model => model.id === chat.model) || null; accepted = Boolean(chosenModel);
     pathReset(); show(""); renderMessages(); controls();
   } catch (err) {show(err.message, true);}
@@ -743,7 +753,7 @@ function newSession() {
   if (busy) return;
   messages = []; chatId = null; dataset = null; datasetLabel = ""; chosenModel = null; accepted = false; notes = "";
   boardDataset = null; boardCalibrated = false; lastCsvText = "";
-  answerCapture = null; lastLatency = null; lastTimings = null; clearTimeout(notesTimer);
+  answerCapture = null; lastLatency = null; lastTimings = null; clearTimeout(notesTimer); clearDemoTimers();
   el("notes").value = ""; el("live-question").value = "";
   pathReset(); show(""); renderMessages(); controls();
   if (status) el("live-question").focus();
@@ -895,10 +905,15 @@ function applySession(data) {
     if (chatId) chatId = null;
   }
   controls();
-  if (user && !demo) refreshChats().catch(err => show(err.message, true));
+  if (user) refreshChats().catch(err => show(err.message, true));
 }
 function startLogin() {
+  renderLoginButton();
   el("login-dialog").showModal();
+}
+const googleLabel = el("google").innerHTML;
+function renderLoginButton() {
+  el("google").innerHTML = auth0 ? googleLabel : "Continue as guest";
 }
 async function continueWithGoogle() {
   if (!auth0) {
@@ -974,10 +989,12 @@ function askLive(question, captured=null) {
     try {
       const fields = captured ? {question, capture_id:captured.id} : {question};
       let data = await request(status?.lm_supported ? "ask_begin" : "ask_live", fields);
+      const deadline = Date.now() + 120000;
       entryStage(entry, 1);
       if (data.job_id) {
         const snapshot = data.snapshot;
         while (data.state === "running") {
+          if (Date.now() > deadline) throw new Error("The board took too long to answer. Try again.");
           const elapsed = Date.now() - entry.start;
           entryStage(entry, data.partial_answer ? 4 : elapsed < 1500 ? 1 : elapsed < 3000 ? 2 : 3);
           if (data.partial_answer && data.partial_answer !== entry.partial) {
@@ -1071,8 +1088,9 @@ function askCapacity() {
 async function prepareBoardDataset() {
   if (!boardEligible()) return false;
   if (boardDataset && boardHost === address) return true;
+  if (dataset.boardSkipped) return false;
   const capacity = await askCapacity();
-  if (!capacity) return false;
+  if (!capacity) {dataset.boardSkipped = true; return false;}
   try {
     show("Uploading to the board\u2026");
     boardDataset = await request("dataset_upload", {csv:lastCsvText, capacity, name:dataset.name});
@@ -1090,8 +1108,9 @@ el("capacity-form").onsubmit = event => {
 };
 async function localAnswer(entry, question, only) {
   let job = await request("data_ask_begin", {question, style:answerStyle});
-  const seen = new Set();
+  const seen = new Set(), deadline = Date.now() + 120000;
   for (;;) {
+    if (Date.now() > deadline) throw new Error("The analysis took too long. Try again.");
     const elapsed = Date.now() - entry.start;
     for (const style of job.order) {
       const result = job.ready[style];
@@ -1115,7 +1134,9 @@ async function boardAnswer(entry, question) {
   const jobId = job.job_id;
   if (job.state === "running" && !jobId) throw new Error("The board did not provide a job ID.");
   entryStage(entry, 2);
+  const deadline = Date.now() + 120000;
   while (job.state === "running") {
+    if (Date.now() > deadline) throw new Error("The board took too long to answer. Try again.");
     const elapsed = Date.now() - entry.start;
     entryStage(entry, job.partial_answer ? 4 : elapsed < 1500 ? 2 : 3);
     if (job.partial_answer && job.partial_answer !== entry.partial) {
@@ -1184,8 +1205,8 @@ function demoAnswer(question) {
   pathBegin();
   const offTopic = !ON_TOPIC.test(question);
   const held = query.has("hold") ? (Number(query.get("hold")) || 1) : LOCAL_STYLES.length;
-  [[1, 500], [2, 1000], [3, 1500], [4, 2000]].forEach(([stage, delay]) => setTimeout(() => entryStage(entry, stage), delay));
-  LOCAL_STYLES.slice(0, offTopic ? 1 : held).forEach(style => setTimeout(() => {
+  [[1, 500], [2, 1000], [3, 1500], [4, 2000]].forEach(([stage, delay]) => demoTimers.push(setTimeout(() => entryStage(entry, stage), delay)));
+  LOCAL_STYLES.slice(0, offTopic ? 1 : held).forEach(style => demoTimers.push(setTimeout(() => {
     const item = offTopic ? {text:"I only read this board's system health, so I can't answer that one well."} : DEMO_ANSWERS[style];
     setVariant(entry, style, {...item});
     if (offTopic) for (const other of LOCAL_STYLES) entry.variants[other] = {...item};
@@ -1198,7 +1219,7 @@ function demoAnswer(question) {
       entry.timings = lastTimings = timingsFromPath();
     }
     renderMessages(); controls();
-  }, offTopic ? 2000 : DEMO_SCHEDULE[style]));
+  }, offTopic ? 2000 : DEMO_SCHEDULE[style])));
 }
 async function changeQueueWeights(action, version) {
   const supportsStream = status.stream_supported, supportsLanguageModel = status.lm_supported;
@@ -1237,7 +1258,7 @@ async function reloadModels() {
   if (demo) models = [...models, ...demoPublished];
 }
 function skillToPublish() {
-  const active = languageWeights?.active?.name;
+  const active = boardDataset?.selected_model || languageWeights?.active?.name;
   if (active && active !== "original") return active;
   return demo ? "tighter-warnings" : null;
 }
@@ -1282,7 +1303,11 @@ function renderLibrary() {
         if (demo) {controls(); return demoNotice();}
         controls();
         if (status && model.kind === "queue") run(() => changeQueueWeights("rollback"));
-        else if (status?.lm_supported && model.kind === "language") run(() => changeLanguageWeights("restore"));
+        else if (status?.lm_supported && model.kind === "language") {
+          if (model.id === "flan-t5-small-int8") run(() => changeLanguageWeights("restore"));
+          else if (languageWeights?.versions?.some(version => version.name === model.name)) run(() => changeLanguageWeights("select", model.name));
+          else show("That skill is not on this board.", true);
+        }
       };
       acts.append(action);
     }
@@ -1361,7 +1386,7 @@ async function exportSession(format) {
   el("export-menu").hidden = true;
   try {
     const saved = Boolean(user && !demo && chatId);
-    const file = await request("export", saved ? {session_id:chatId, format} : {session_id:null, session:sessionObject(), format});
+    const file = await request("export", {session_id:saved ? chatId : null, session:sessionObject(), format});
     const inApp = /AppleWebKit/.test(navigator.userAgent) && !/Safari\//.test(navigator.userAgent);
     if (!inApp) {
       const link = Object.assign(document.createElement("a"), {href:URL.createObjectURL(new Blob([file.content], {type:file.mime})), download:file.filename});
@@ -1369,7 +1394,10 @@ async function exportSession(format) {
       setTimeout(() => URL.revokeObjectURL(link.href), 4000);
       show("Exported " + file.filename + ".");
     } else {
-      show(await copyText(file.content) ? "Copied " + file.filename + " to the clipboard." : "Could not export here.", false);
+      el("export-title").textContent = file.filename;
+      el("export-text").value = file.content;
+      el("export-dialog").showModal();
+      el("export-text").select();
     }
   } catch (err) {show(err.message, true);}
 }
@@ -1393,7 +1421,7 @@ function selectTab(name) {
 }
 function applyProfile(data) {
   dataset = {...data.profile, timings:data.timings};
-  datasetLabel = ""; boardDataset = null; boardCalibrated = false;
+  datasetLabel = ""; boardDataset = null; boardCalibrated = false; lastCsvText = "";
   chosenModel = models?.find(model => model.id === dataset.recommendation.model_id) || null;
   accepted = true; messages = []; chatId = null; notes = ""; el("notes").value = "";
   renderMessages(); pathReset(); peekPulse();
@@ -1473,9 +1501,10 @@ el("connect").onclick = () => {
 };
 el("disconnect").onclick = () => {
   if (demo) {
-    demo = false; address = ""; el("host").value = ""; lastLatency = null; show("");
+    demo = false; clearDemoTimers(); address = ""; el("host").value = ""; lastLatency = null; show("");
     displayWeightVersions(null); displaySavedCaptures(); setState({status:null});
     newSession();
+    if (user) refreshChats().catch(err => show(err.message, true));
     return;
   }
   run(async () => {autoUsb = false; setState(await request("disconnect")); show("Board disconnected.");});
@@ -1485,6 +1514,8 @@ el("ask-form").onsubmit = event => {
   event.preventDefault();
   const question = el("live-question").value.trim();
   if (el("ask-live").disabled || !question) return;
+  if (["requesting", "listening"].includes(voiceState)) speechInput?.postMessage("stop");
+  voiceIgnore = true;
   el("live-question").value = ""; controls();
   if (demo) return demoAnswer(question);
   if (dataset) return askData(question);
@@ -1494,6 +1525,16 @@ el("new-chat").onclick = newSession;
 el("export-btn").onclick = () => {el("export-menu").hidden = !el("export-menu").hidden;};
 for (const button of document.querySelectorAll("[data-export]")) button.onclick = () => exportSession(button.dataset.export);
 el("mcp-open").onclick = openMcp;
+el("export-copy").onclick = () => {
+  const box = el("export-text");
+  box.focus(); box.select();
+  let done = false;
+  try {done = document.execCommand("copy");} catch {}
+  if (!done && navigator.clipboard) navigator.clipboard.writeText(box.value).then(() => show("Copied to the clipboard."), () => show("Press Command-C to copy.", true));
+  else show(done ? "Copied to the clipboard." : "Press Command-C to copy.", !done);
+  el("export-copy").textContent = done ? "Copied" : "Copy";
+  setTimeout(() => {el("export-copy").textContent = "Copy";}, 1500);
+};
 el("mcp-copy").onclick = async () => {
   const done = await copyText(el("mcp-config").textContent);
   el("mcp-copy").textContent = done ? "Copied" : "Copy";
@@ -1536,7 +1577,9 @@ el("synth-form").onsubmit = event => {
       let job = await request("dataset_synthesize", {dataset_id:boardDataset.dataset_id, name, target_row, instruction});
       const id = job.synthesis_id;
       if (job.state === "running" && !id) throw new Error("The server did not provide a synthesis ID.");
+      const deadline = Date.now() + 600000;
       while (job.state === "running") {
+        if (Date.now() > deadline) throw new Error("Model synthesis took too long. Try again.");
         if (job.stage === "calibrating") {pathMark(3, "active"); note.textContent = "Calibrating on the FPGA with this data\u2026";}
         else if (job.stage === "authoring") {pathMark(3, "done"); pathMark(2, "active"); note.textContent = "Astra is proposing the INT8 row\u2026";}
         else if (job.stage === "saving") {pathMark(2, "done"); pathMark(4, "active"); note.textContent = "Saving the named model\u2026";}
@@ -1561,7 +1604,7 @@ window.pinkprocessSpeechInput = event => {
   el("mic").classList.toggle("on", event.state === "listening");
   const message = event.message || ({requesting:"Requesting microphone access\u2026", listening:"Listening\u2026", stopping:"Transcribing\u2026"})[event.state] || "";
   if (message || event.state === "idle") show(message);
-  if (typeof event.transcript === "string" && event.transcript.trim()) {
+  if (typeof event.transcript === "string" && event.transcript.trim() && !voiceIgnore) {
     const input = el("live-question");
     input.value = [voiceBefore, event.transcript.trim()].filter(Boolean).join(" ").slice(0, input.maxLength);
     if (event.final) input.focus();
@@ -1571,7 +1614,7 @@ window.pinkprocessSpeechInput = event => {
 if (speechInput) {
   el("mic").onclick = () => {
     if (voiceState === "listening") speechInput.postMessage("stop");
-    else {voiceBefore = el("live-question").value.trim(); speechInput.postMessage("start");}
+    else {voiceIgnore = false; voiceBefore = el("live-question").value.trim(); speechInput.postMessage("start");}
   };
   speechInput.postMessage("ready");
 }
@@ -1589,6 +1632,7 @@ const weightDraft = () => ({name:el("lm-name").value.trim(), target_row:/^\d+$/.
 el("lm-author-form").onsubmit = event => {
   event.preventDefault();
   if (el("lm-author").disabled) return;
+  if (demo) return demoNotice();
   run(async () => {
     const draft = weightDraft();
     show("Asking Astra to propose an INT8 row…");
@@ -1596,8 +1640,8 @@ el("lm-author-form").onsubmit = event => {
     show("Saved weight version " + draft.name + ".");
   });
 };
-el("lm-save").onclick = () => el("lm-artifact").click();
-el("lm-artifact").onchange = () => run(async () => {
+el("lm-save").onclick = () => {if (demo) return demoNotice(); el("lm-artifact").click();};
+el("lm-artifact").onchange = () => demo ? demoNotice() : run(async () => {
   const file = el("lm-artifact").files[0], draft = weightDraft();
   if (!file) return;
   if (file.size > 128 * 1024) throw new Error("Choose an Astra response JSON smaller than 128 KiB.");
