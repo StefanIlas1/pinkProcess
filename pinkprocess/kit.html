@@ -1586,7 +1586,11 @@ el("live-question").addEventListener("keydown", event => {
 });
 el("ask-form").onsubmit = event => {
   event.preventDefault();
-  const question = el("live-question").value.trim();
+  const pasted = el("live-question").value.trim();
+  // Strip list and quotation formatting that can come with a copied question.
+  const question = pasted.replace(/^[-*•][ \t]+/, "")
+    .replace(/^(?:"([^\n]+\?)"|“([^\n]+\?)”)$/, (_, straight, curly) => straight || curly)
+    .trim();
   if (el("ask-live").disabled || !question) return;
   if (["requesting", "listening"].includes(voiceState)) speechInput?.postMessage("stop");
   voiceIgnore = true;
