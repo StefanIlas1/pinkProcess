@@ -657,8 +657,20 @@ readback, and rollback against the physical board. The transcript is
 
 ### Replay the three open-ended diagnosis inputs
 
-With the Mac app connected over USB, replay the recorded CSVs and question. Use an interpreter with NumPy and the app's loopback HTTP port. The verifier checks the input hashes, selected version, projection counts, and live telemetry. It measures API wall time and writes the actual answers for review.
+With the Mac app connected over USB, replay the recorded CSVs and question. Use Python and the installed app's loopback HTTP port. The replay client uses the standard library. The verifier checks the input hashes, selected version, projection counts, and live telemetry. It measures API wall time and writes the actual answers for review.
 
 ```sh
 python -m kit.replay_open_questions --port PORT --model original --output original-replay.json
 ```
+
+### Qualify a decoder change against the released model
+
+The optional `--prompt-draft-positions 16` server argument requires `--verified-draft` and the all-projection overlay. It allows a decoder pass to verify up to sixteen positions using candidates from the current prompt and development table. The selected model still computes the winner at each position. The first token is evaluated alone to preserve the activation and maximum used for authoring weight edits. Omitting the positions argument retains the eight-position development-table decoder.
+
+For a software comparison, point `PINKPROCESS_HISTORY_MODEL` at the reconstructed v2 directory and `PINKPROCESS_HISTORY_TOKEN_DRAFT` at the released proposal table. The regression compares generated IDs, complete text, calibration activations and the calibration maximum on each of eighteen independent cases.
+
+```sh
+python -m unittest lm_reference.test_flan_draft.DraftTests.test_frozen_prompt_copy_counts_and_calibration
+```
+
+For physical measurements, use the same CSV, question, weight version and bitstream in each arm. Record the complete answer, first-text and completion times, forecast, projection counts and live-stream progress. Repeat the first request after service startup before interpreting warm timings. [Frozen reference results](../kit/evidence/history-prompt-copy-parity.json)
