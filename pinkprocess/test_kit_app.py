@@ -1,5 +1,6 @@
 import json
 from threading import Thread
+from time import monotonic, sleep
 import unittest
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
@@ -74,6 +75,37 @@ class KitTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Invalid language-model version request"):
                 self.kit.action({"action": "lm_select", "name": "Astra", "weights": ...})
             self.assertEqual(send.call_count, 4)
+
+    def test_dataset_synthesis_automatically_calibrates_then_saves(self):
+        self.kit.host = "pynq.local"
+        context = dict(ok=True, ready=True, selected_model="original", target_row=3, base_sha256="checkpoint")
+        replies = {
+            "lm_dataset_calibration": iter(({"ok": True, "ready": False}, context)),
+            "lm_dataset_calibrate": iter(({"ok": True, "job_id": "real-calibration"},)),
+            "lm_result": iter(({"ok": True, "state": "complete"},)),
+            "lm_dataset_save": iter(({"ok": True, "selected_model": "CSV model"},)),
+        }
+
+        def send(op, **fields):
+            return next(replies[op])
+
+        with (patch.object(self.transport, "request", side_effect=send) as request,
+              patch("pinkprocess.kit_app.propose", return_value={"row": [2, 3]}) as propose):
+            job = self.kit.action(dict(action="dataset_synthesize", dataset_id="dataset",
+                                       target_row="Now", name="CSV model", instruction="Change the first token"))
+            self.assertEqual(job["stage"], "calibrating")
+            deadline = monotonic() + 2
+            while monotonic() < deadline:
+                result = self.kit.action(dict(action="dataset_synthesis_progress", synthesis_id=job["synthesis_id"]))
+                if result["state"] != "running":
+                    break
+                sleep(.005)
+            self.assertEqual(result["state"], "complete")
+            self.assertEqual(result["dataset"]["selected_model"], "CSV model")
+            propose.assert_called_once_with("Change the first token", context)
+            request.assert_called_with("lm_dataset_save", dataset_id="dataset", name="CSV model",
+                                       selected_model="original", target_row=3, response={"row": [2, 3]},
+                                       base_sha256="checkpoint")
 
     def test_saved_capture_pages_are_forwarded(self):
         self.kit.action({"action": "connect", "host": "pynq.local"})
