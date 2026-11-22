@@ -3,21 +3,41 @@
 \newcommand{\alphaMax}{2}
 \newcommand{\alphaStep}{0.1}
 \newcommand{\armCores}{2}
+\newcommand{\astraBrokeConstraints}{3}
 \newcommand{\astraChangedValues}{13}
 \newcommand{\astraConstraintsMet}{56}
+\newcommand{\astraFirstHitAlpha}{0.2}
 \newcommand{\astraFirstLeakAlpha}{0.2}
 \newcommand{\astraHalfHitAlpha}{1.1}
 \newcommand{\astraHitCI}{[0.24, 0.61]}
 \newcommand{\astraHits}{10}
+\newcommand{\astraHitsAtEight}{1}
+\newcommand{\astraHitsAtElevenTenths}{19}
+\newcommand{\astraHitsAtTwelveTenths}{21}
 \newcommand{\astraLeakCI}{[0.62, 0.98]}
+\newcommand{\astraLeakCleanCI}{[0.60, 0.98]}
 \newcommand{\astraLeaks}{10}
+\newcommand{\astraLeaksAtEight}{9}
+\newcommand{\astraLeaksClean}{9}
 \newcommand{\astraMaxHits}{23}
 \newcommand{\astraMaxLeaks}{11}
 \newcommand{\astraMaxOther}{2}
 \newcommand{\astraOther}{0}
 \newcommand{\astraTopTwo}{22}
 \newcommand{\astraTopTwoLm}{6}
+\newcommand{\balancedFreeRight}{3}
+\newcommand{\balancedFreeTotal}{3}
+\newcommand{\balancedRecovered}{1}
+\newcommand{\balancedRecoveredTotal}{3}
 \newcommand{\bundleBytes}{701}
+\newcommand{\capacityFalse}{1}
+\newcommand{\capacityFoneScore}{0.52}
+\newcommand{\capacityWarned}{35}
+\newcommand{\captureBatch}{186}
+\newcommand{\captureGroups}{24}
+\newcommand{\captureReadMB}{4.82}
+\newcommand{\captureWeightKB}{197}
+\newcommand{\captureWeightReadMB}{4.72}
 \newcommand{\checkpointBytes}{425{,}708}
 \newcommand{\classifierBram}{8}
 \newcommand{\classifierDsp}{0}
@@ -29,26 +49,35 @@
 \newcommand{\classifierSlackNs}{2.071}
 \newcommand{\coldSuiteSeconds}{119.8}
 \newcommand{\constraintsPerNegative}{20}
+\newcommand{\contaminatedIndex}{10}
 \newcommand{\contrHitCI}{[0.64, 0.93]}
 \newcommand{\contrLeakCI}{[0.02, 0.38]}
+\newcommand{\contrLeakCleanCI}{[0.02, 0.40]}
 \newcommand{\contrLmCI}{[0.44, 0.97]}
 \newcommand{\contrastiveConstraints}{224}
 \newcommand{\contrastiveHits}{20}
 \newcommand{\contrastiveLeaks}{1}
+\newcommand{\contrastiveLeaksClean}{1}
 \newcommand{\contrastiveLmControls}{6}
 \newcommand{\contrastiveLmHits}{5}
 \newcommand{\contrastiveLone}{763}
 \newcommand{\contrastiveMovedToken}{405}
 \newcommand{\contrastiveOther}{0}
+\newcommand{\contrastiveWrittenTime}{04:33:28}
 \newcommand{\convHitCI}{[0.69, 0.96]}
+\newcommand{\convHitsAtEight}{1}
 \newcommand{\convLeakCI}{[0.28, 0.79]}
+\newcommand{\convLeakCleanCI}{[0.31, 0.83]}
+\newcommand{\convLeaksAtEight}{6}
 \newcommand{\convVsAstraB}{11}
 \newcommand{\convVsAstraC}{0}
 \newcommand{\convVsAstraP}{0.001}
+\newcommand{\conventionalFirstHitAlpha}{0.3}
 \newcommand{\conventionalFirstLeakAlpha}{0.4}
 \newcommand{\conventionalHalfHitAlpha}{0.9}
 \newcommand{\conventionalHits}{21}
 \newcommand{\conventionalLeaks}{6}
+\newcommand{\conventionalLeaksClean}{6}
 \newcommand{\conventionalMaxHits}{24}
 \newcommand{\conventionalMaxLeaks}{10}
 \newcommand{\conventionalMaxOther}{1}
@@ -58,15 +87,26 @@
 \newcommand{\criterionHits}{18}
 \newcommand{\criterionLeaks}{2}
 \newcommand{\criterionOther}{0}
+\newcommand{\currentAccepted}{164}
+\newcommand{\currentProposed}{188}
+\newcommand{\currentUploadFloorMax}{0.60}
+\newcommand{\currentUploadFloorMin}{0.41}
+\newcommand{\currentWeightMBMax}{236}
+\newcommand{\currentWeightMBMin}{159}
 \newcommand{\ddrBeatDec}{29.9}
 \newcommand{\ddrBeatEnc}{27.3}
+\newcommand{\decCycleMs}{1.68}
+\newcommand{\decHostMs}{7.85}
 \newcommand{\decoderSteps}{50}
 \newcommand{\deviceBram}{140}
 \newcommand{\deviceDsp}{220}
 \newcommand{\deviceLuts}{53{,}200}
+\newcommand{\encCycleMs}{44.1}
+\newcommand{\encHostMs}{59.3}
 \newcommand{\extAlphas}{21}
 \newcommand{\extControls}{24}
 \newcommand{\extNaming}{11}
+\newcommand{\extNamingClean}{10}
 \newcommand{\extNewTokens}{20}
 \newcommand{\extOriginalHits}{0}
 \newcommand{\extOther}{13}
@@ -80,6 +120,7 @@
 \newcommand{\finalLutShare}{30}
 \newcommand{\finalLuts}{15{,}959}
 \newcommand{\firstFlanPass}{0}
+\newcommand{\firstTextGrowing}{10.34}
 \newcommand{\firstTextMax}{10.45}
 \newcommand{\firstTextMin}{8.40}
 \newcommand{\firstTextNew}{10.45}
@@ -94,9 +135,16 @@
 \newcommand{\flanEditBytes}{380}
 \newcommand{\flanEditRow}{852}
 \newcommand{\flanRowBytes}{512}
+\newcommand{\flanShapeCases}{5}
+\newcommand{\flanShapePasses}{2}
+\newcommand{\flanShapeScoresPerPass}{421{,}376}
 \newcommand{\floorDdr}{6.19}
 \newcommand{\floorMac}{1.92}
 \newcommand{\floorSubmissions}{276{,}082}
+\newcommand{\freezeTime}{04:31:14}
+\newcommand{\fusionStepLarge}{2.56}
+\newcommand{\fusionStepSmallMax}{1.17}
+\newcommand{\fusionStepSmallMin}{0.06}
 \newcommand{\historyActive}{9}
 \newcommand{\historyArchived}{12}
 \newcommand{\historyCases}{15}
@@ -105,6 +153,11 @@
 \newcommand{\historyOmittedZero}{5}
 \newcommand{\historySteps}{360}
 \newcommand{\historyTargeted}{3}
+\newcommand{\hitB}{2}
+\newcommand{\hitC}{1}
+\newcommand{\hitP}{1.0}
+\newcommand{\installedSampleProjections}{802}
+\newcommand{\installedSampleReadings}{600}
 \newcommand{\latAllMax}{17.3}
 \newcommand{\latAllMin}{13.5}
 \newcommand{\latAllRuns}{6}
@@ -120,7 +173,7 @@
 \newcommand{\latCacheWarm}{51.1}
 \newcommand{\latInstalledHealthy}{16.94}
 \newcommand{\latInstalledSample}{20.06}
-\newcommand{\latLadderSpeedup}{16}
+\newcommand{\latLadderSpeedup}{16.5}
 \newcommand{\latNewFinal}{15.46}
 \newcommand{\latNewRestart}{17.26}
 \newcommand{\latQueue}{49.9}
@@ -133,6 +186,7 @@
 \newcommand{\latRestartDelta}{1.8}
 \newcommand{\latScalarMax}{43.41}
 \newcommand{\latScalarMin}{40.39}
+\newcommand{\latSoftwareSpeedup}{2.7}
 \newcommand{\latTwoQuery}{830.2}
 \newcommand{\latVerifyMax}{24.70}
 \newcommand{\latVerifyMin}{19.65}
@@ -143,6 +197,12 @@
 \newcommand{\lilyToken}{317}
 \newcommand{\liveMax}{166}
 \newcommand{\liveMin}{147}
+\newcommand{\liveQueryAccepted}{39}
+\newcommand{\liveQueryBlocks}{11}
+\newcommand{\liveQueryComplete}{22.8}
+\newcommand{\liveQueryFirst}{11.9}
+\newcommand{\liveQueryProjections}{875}
+\newcommand{\liveQueryProposed}{74}
 \newcommand{\liveSelectivePrompts}{6}
 \newcommand{\liveSelectiveScores}{294{,}912}
 \newcommand{\lmAstraCI}{[0.19, 0.81]}
@@ -178,8 +238,11 @@
 \newcommand{\namingAlreadyTim}{1}
 \newcommand{\namingCanRename}{10}
 \newcommand{\nativeQuantValues}{4{,}854}
+\newcommand{\nativeStepMax}{1.12}
+\newcommand{\nativeStepMin}{0.22}
 \newcommand{\negativeAuthoring}{8}
 \newcommand{\operatorScores}{49{,}152}
+\newcommand{\originalConstraintsMet}{59}
 \newcommand{\originalStatesRight}{12}
 \newcommand{\originalStatesTotal}{15}
 \newcommand{\phaseCommands}{264}
@@ -190,24 +253,34 @@
 \newcommand{\phaseVocabulary}{2.23}
 \newcommand{\pollSecondsExact}{0.5}
 \newcommand{\pollSecondsQueue}{1}
+\newcommand{\poolEarly}{11}
 \newcommand{\poolEpisodes}{99}
 \newcommand{\poolFalseAlerts}{11}
+\newcommand{\poolFoneScore}{0.55}
+\newcommand{\poolLeadMs}{377}
+\newcommand{\poolMissShare}{58}
 \newcommand{\poolMissed}{57}
 \newcommand{\poolWarned}{42}
 \newcommand{\positiveAuthoring}{3}
 \newcommand{\projDecAfter}{12.1}
 \newcommand{\projDecAfterRange}{12.1 to 14.8}
+\newcommand{\projDecAllocate}{4.8}
 \newcommand{\projDecBefore}{43.1}
 \newcommand{\projDecBeforeRange}{42.9 to 43.5}
+\newcommand{\projDecPack}{2.6}
+\newcommand{\projDecRoundtrip}{1.6}
+\newcommand{\projDecUpload}{1.4}
 \newcommand{\projEncAfter}{81.5}
 \newcommand{\projEncAfterRange}{79.4 to 85.9}
 \newcommand{\projEncBefore}{2{,}100}
 \newcommand{\projEncBeforeRange}{2{,}093 to 2{,}121}
+\newcommand{\projEncRoundtrip}{60.1}
 \newcommand{\projRuns}{5}
 \newcommand{\projectionArrayScores}{842{,}752}
 \newcommand{\projectionsCurrentMax}{510}
 \newcommand{\projectionsCurrentMin}{364}
 \newcommand{\projectionsFloorCase}{3{,}722}
+\newcommand{\promptOnlyPrefix}{The girl in this story is named Tim.}
 \newcommand{\promptTokens}{186}
 \newcommand{\queueHoldNs}{0.028}
 \newcommand{\queueScores}{1{,}160}
@@ -217,11 +290,27 @@
 \newcommand{\recordingReadings}{60}
 \newcommand{\reducerMissNs}{9.748}
 \newcommand{\reducerRandomTests}{10{,}000}
+\newcommand{\referenceAnswers}{12}
+\newcommand{\referenceSecondsMax}{0.67}
+\newcommand{\referenceSecondsMedian}{0.65}
+\newcommand{\referenceSecondsMin}{0.61}
+\newcommand{\referenceSlowdownMax}{26}
+\newcommand{\referenceSlowdownMin}{21}
+\newcommand{\renameB}{6}
+\newcommand{\renameC}{1}
+\newcommand{\renameP}{0.125}
 \newcommand{\replacementDirectPass}{12}
 \newcommand{\replacementLexicalPass}{9}
 \newcommand{\replayActivations}{32}
 \newcommand{\residentMiB}{16}
+\newcommand{\resultTime}{04:34:57}
 \newcommand{\rowBytes}{64}
+\newcommand{\ruleTime}{04:33:24}
+\newcommand{\secondPoolEarly}{5}
+\newcommand{\secondPoolFalse}{1}
+\newcommand{\secondPoolFoneScore}{0.57}
+\newcommand{\secondPoolLeadMs}{65}
+\newcommand{\secondPoolWarned}{40}
 \newcommand{\shapeChecks}{2}
 \newcommand{\singleTokenNames}{3}
 \newcommand{\storiesHidden}{64}
@@ -234,15 +323,20 @@
 \newcommand{\sweepBaseLone}{502}
 \newcommand{\sweepBestHits}{20}
 \newcommand{\sweepBestLeaks}{1}
+\newcommand{\sweepBestLone}{763}
 \newcommand{\sweepDistinctPassing}{1}
 \newcommand{\sweepFits}{12}
+\newcommand{\sweepNegFewHits}{18}
 \newcommand{\sweepNegOnlyHits}{13}
 \newcommand{\sweepNegOnlyLeaks}{2}
+\newcommand{\sweepNegOnlyLeaksMax}{3}
+\newcommand{\sweepNegOnlyLeaksMin}{2}
 \newcommand{\sweepPassing}{3}
 \newcommand{\sweepPosOnlyHits}{21}
 \newcommand{\sweepPosOnlyLeaks}{9}
 \newcommand{\targetSeconds}{10}
 \newcommand{\telemetryEpisodes}{772}
+\newcommand{\telemetryFalsePerHour}{79.5}
 \newcommand{\telemetryFixedFalse}{53}
 \newcommand{\telemetryFixedMissed}{322}
 \newcommand{\telemetryFixedWarned}{450}
@@ -250,11 +344,19 @@
 \newcommand{\telemetryFloatFalse}{52}
 \newcommand{\telemetryFloatMissed}{321}
 \newcommand{\telemetryFloatWarned}{451}
+\newcommand{\telemetryLeadSeconds}{0.41}
 \newcommand{\telemetryMissShare}{42}
 \newcommand{\telemetryWindows}{14{,}291}
 \newcommand{\tieWinner}{4{,}095}
 \newcommand{\timToken}{326}
 \newcommand{\timmyToken}{405}
+\newcommand{\totalStepMax}{6.3}
+\newcommand{\totalStepMin}{2.1}
+\newcommand{\tunedDeltaMax}{1.06}
+\newcommand{\tunedDeltaMin}{0.16}
+\newcommand{\tunedGrowing}{18.16}
+\newcommand{\tunedHealthy}{18.13}
+\newcommand{\tunedRecovery}{17.57}
 \newcommand{\verifierBaselinePasses}{138}
 \newcommand{\verifierPasses}{82}
 \newcommand{\verifierQuestions}{18}
@@ -277,3 +379,6 @@
 \newcommand{\weightGB}{2.45}
 \newcommand{\weightUploadAfterGB}{1.14}
 \newcommand{\weightUploadBeforeGB}{1.95}
+\newcommand{\zeroFinalSeconds}{16.16}
+\newcommand{\zeroProofDelta}{0.02}
+\newcommand{\zeroProofSeconds}{16.18}

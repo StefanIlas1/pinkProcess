@@ -1,11 +1,12 @@
 \documentclass[conference,10pt,letterpaper]{IEEEtran}
 \IEEEoverridecommandlockouts
-\usepackage[T1]{fontenc}
 \usepackage{newtxtext,newtxmath}
-\setmonofont{texgyrecursor-regular.otf}[Scale=0.88,Ligatures=NoCommon]
+\setmonofont{Inconsolatazi4-Regular.otf}[Scale=MatchLowercase]
 \usepackage[protrusion=true,expansion=false]{microtype}
 \usepackage{graphicx}
 \usepackage{booktabs}
+\usepackage{array}
+\usepackage{threeparttable}
 \usepackage{siunitx}
 \usepackage{amsmath}
 \usepackage[caption=false,font=footnotesize]{subfig}
@@ -13,17 +14,22 @@
 \usepackage[hidelinks]{hyperref}
 \hypersetup{pdftitle={Reversible One-Row Weight Edits for a Language Model Served on a PYNQ-Z2 FPGA},pdfauthor={Stefan Ilas, Mohsen Sarrafan Chaharsoughi}}
 \usepackage{url}
+\usepackage{flushend}
 \renewcommand{\UrlBreaks}{\do\/\do\-\do\_\do\.}
 \linespread{1.06}
-\setlength{\textfloatsep}{16pt plus 4pt minus 2pt}
-\setlength{\floatsep}{14pt plus 4pt minus 2pt}
-\setlength{\intextsep}{14pt plus 4pt minus 2pt}
-\setlength{\dbltextfloatsep}{16pt plus 4pt minus 2pt}
+\setlength{\textheight}{673.44pt}
+\setlength{\textfloatsep}{16pt plus 8pt minus 2pt}
+\setlength{\floatsep}{14pt plus 6pt minus 2pt}
+\setlength{\intextsep}{14pt plus 6pt minus 2pt}
+\setlength{\dbltextfloatsep}{16pt plus 8pt minus 2pt}
 \setlength{\abovecaptionskip}{6pt}
 \setlength{\belowcaptionskip}{0pt}
 \renewcommand{\arraystretch}{1.2}
 \setcounter{topnumber}{1}
-\setcounter{dbltopnumber}{1}
+\setcounter{dbltopnumber}{2}
+\renewcommand{\dbltopfraction}{0.95}
+\renewcommand{\dblfloatpagefraction}{0.8}
+\renewcommand{\textfraction}{0.1}
 \renewcommand{\topfraction}{0.7}
 \renewcommand{\floatpagefraction}{0.8}
 \makeatletter
@@ -32,13 +38,28 @@
 \setlength{\@dblfptop}{0pt}
 \setlength{\@dblfpbot}{0pt plus 1fil}
 \makeatother
-\sisetup{group-separator={,}}
+\raggedbottom
+\widowpenalty=10000
+\clubpenalty=10000
+\displaywidowpenalty=10000
+\emergencystretch=1em
+\sisetup{group-separator={,},parse-numbers=false,mode=text,reset-text-series=false,range-phrase={ to },range-units=single,per-mode=symbol}
+\DeclareSIUnit{\byte}{B}
 \input{numbers}
 \makeatletter
 \newcommand{\tablerows}[1]{\@@input #1 }
 \makeatother
 \renewcommand{\labelitemi}{$\bullet$}
 \newcommand{\head}[1]{\begin{tabular}[b]{@{}c@{}}#1\end{tabular}}
+\newcommand{\tablenote}[1]{\begin{tablenotes}[flushleft]\footnotesize\item[] #1\end{tablenotes}}
+\newcommand{\seconds}[1]{\SI{#1}{\second}}
+\newcommand{\secrange}[2]{\SIrange{#1}{#2}{\second}}
+\newcommand{\ms}[1]{\SI{#1}{\milli\second}}
+\newcommand{\pct}[1]{#1\%}
+\newcommand{\pynq}{\mbox{PYNQ-Z2}}
+\newcommand{\flan}{\mbox{FLAN-T5-small}}
+\newcommand{\stories}{\mbox{stories260K}}
+\newcommand{\eightbit}{\mbox{8-bit}}
 
 \begin{document}
 
@@ -48,143 +69,150 @@
 
 \maketitle
 
-\begin{abstract}
-A small FPGA board can run a language model whose weights are all visible and can be changed while it serves. Such boards are slow: one memory port feeds all of the arithmetic. It is unclear whether a board this small can serve a model exactly and change its behavior in a way we can measure and undo. We built PYNQ Process, a Mac app paired with a PYNQ-Z2 kit that serves 8-bit models and swaps single weight rows while they run. We check FPGA scores against an integer software reference and test edits on held-out prompts. On the board at \SI{50}{\mega\hertz}, all \lmBoardScores{} scores of a \lmRuns-run held-out edit study matched the reference. In the integer reference, a \rowBytes-byte edit made a story model pick the target name on \conventionalHits/\extTargets{} held-out prompts, but it also renamed \conventionalLeaks/\extNaming{} unrelated naming prompts. An edit fit with counter-examples renamed \contrastiveLeaks/\extNaming{} and kept \contrastiveHits/\extTargets{} hits. A complete answer from a larger diagnostic model took \latAllMin{} to \latAllMax~s over \latAllRuns{} single runs, down from \latBaseline~s in an early build.
+\begin{abstract}\sisetup{parse-numbers=true}
+We ask whether a low-cost FPGA board can serve a language model bit-exactly and let a user change one weight row, measure the effect and undo it. We built PYNQ Process, a Mac app paired with a \pynq{} board that serves two \eightbit{} models: a \storiesLayers-layer story model for edit studies, and \flan{} fine-tuned to answer questions about database connection-pool readings. On the board at \SI{50}{\mega\hertz}, all \lmBoardScores{} output scores in a \lmRuns-run held-out edit study matched an integer software reference. An edit overwrites one output-layer row between requests. In the reference, a \SI{\rowBytes}{\byte} edit made the story model name a girl \emph{Tim} on \conventionalHits/\extTargets{} held-out prompts and also changed the name on \conventionalLeaks/\extNaming{} prompts about other characters. A row fit with counter-examples after we saw those results changed \contrastiveLeaks/\extNaming{} and kept \contrastiveHits/\extTargets{} hits; with \extNaming{} prompts the difference is not significant ({\boldmath$p=\renameP$}). Writing the original bytes back restored the original output in every case we tested. For \flan, a multiplier array and C++ weight packing with a cache on the ARM cores cut one test question from \seconds{\latBaseline} to \seconds{\latQueueSoft}. With a decoder that checks several proposed tokens per pass and a later checkpoint, complete answers took \secrange{\latAllMin}{\latAllMax} on three development recordings and \seconds{\liveQueryComplete} on a live-stream question, above our \seconds{\targetSeconds} target.
 \end{abstract}
 
 \begin{IEEEkeywords}
-FPGA, LLM inference, PYNQ-Z2, weight editing
+FPGA, LLM inference, PYNQ-Z2, quantization, weight editing
 \end{IEEEkeywords}
 
 \section{Introduction}
 
-Give a small story model the prompt ``Once upon a time, there was a little girl named''. Running on our board, it answers \emph{Lily}. We overwrite \rowBytes{} bytes in one weight row and ask again. Now it answers \emph{Tim}. We write the old bytes back, and it answers \emph{Lily} again. In each of the three phases, all \walkPhaseScores{} scores computed on the FPGA match a software reference exactly (Fig.~\ref{fig:walkthrough}).
+Give a small story model (\stories) the prompt ``Once upon a time, there was a little girl named''. Running on our board, it answers \emph{Lily}. We overwrite \SI{\rowBytes}{\byte} in one weight row and ask again. Now it answers \emph{Tim}. We write the old bytes back, and it answers \emph{Lily} again. In each of the three phases, all \walkPhaseScores{} scores computed on the FPGA match a software reference exactly (Fig.~\ref{fig:walkthrough}).
 
-We wanted a language model that a user can inspect and change on hardware they can hold, then put back exactly as it was. The board we used is a PYNQ-Z2. Its programmable logic runs at \SI{50}{\mega\hertz} and reads memory through one 64-bit port, so it can read at most \readBandwidthMB~MB/s of weights. One \decoderSteps-step answer from our diagnostic model reads \weightGB~GB of weights. Our early build took \latBaseline~s, about \latBaselineMinutes{} minutes, to write that answer.
+We wanted a language model that a user can inspect and change on hardware they can hold, then put back exactly as it was. The story model is small enough to study edits in detail. The second model is \flan, fine-tuned to answer questions about readings from a database connection pool, such as ``What's wrong with my system?''. We call it the diagnostic model, and we use it to measure latency. The board is a \pynq. Our design runs its programmable logic at \SI{50}{\mega\hertz} and reads memory through one 64-bit port at that clock, so it can read at most \SI{\readBandwidthMB}{\mega\byte\per\second}. Our first build needed \seconds{\latBaseline}, about \latBaselineMinutes{} minutes, to answer one question with the diagnostic model. The answer is \decoderSteps{} tokens long. Our target was \seconds{\targetSeconds}.
 
-Prior FPGA work makes large models fast on large boards. Prior editing work changes model facts on GPUs. We found no paper that measures exact, reversible weight edits on a small board while it serves. We also found none that reports the latency of serving that way.
+Earlier FPGA designs run large models fast on large boards~\cite{zeng2024flightllm,hong2022dfx,xu2024llamaf}. Prior editing work changes facts in models on GPUs~\cite{meng2022rome,meng2023memit}. None of the FPGA or model-editing papers we cite measures exact, reversible weight edits on a board this small, or reports how long such a board takes to answer. We did not run a systematic literature search, so we do not claim to be first.
 
-Our claim is that a small FPGA board can serve a quantized language model with every checked score matching a software reference, and that a one-row edit changes its behavior in a way we can measure and undo. Each edit carries hashes of the weights it expects, and the board rejects it if they do not match.
+We find three things. The board serves both models with every checked score equal to an integer software reference. A one-row edit changes the story model's output, and writing the old bytes back undoes it. We did not reach the latency target.
 
 Our contributions are:
 \begin{itemize}
-\item We build PYNQ Process (repository name: pinkProcess~\cite{repo}), a Mac app and PYNQ-Z2 kit. The FPGA runs every learned matrix of an 8-bit FLAN-T5-small model and keeps scoring live telemetry while it answers.
-\item We show that the FPGA matched the software reference on every score we compared: \lmBoardScores{} scores across \lmRuns{} edit runs, and \projectionArrayScores{} scores across the FLAN-T5-small matrices.
-\item We measure how far a one-row edit spreads on \extTargets{} held-out targets and \extControls{} held-out controls. An edit fit with counter-examples, under a pass rule committed before its run, cut renames from \conventionalLeaks/\extNaming{} to \contrastiveLeaks/\extNaming.
-\item We measure one saved question falling from \latBaseline{} to \latQueueSoft~s as work moved to the FPGA, and a current answer time of \latAllMin{} to \latAllMax~s on new uploads.
+\item We built PYNQ Process~\cite{repo}, a Mac app together with the board software and FPGA designs for a \pynq, which we call the kit. The FPGA runs every learned matrix of an \eightbit{} \flan{} model and keeps scoring incoming telemetry readings while the model answers. Each edit carries hashes of the weights it expects, and the board rejects it if they do not match.
+\item We showed that the FPGA matched the integer reference on every score we compared: \lmBoardScores{} scores across \lmRuns{} edit runs, and \projectionArrayScores{} scores on three \flan{} matrix shapes and the output layer.
+\item We measured how far a one-row edit spreads. On \extTargets{} held-out prompts about a girl, a solver-written row produced \emph{Tim} on \conventionalHits. It also changed the name on \conventionalLeaks{} of \extNaming{} held-out prompts that name other characters. A row refit with counter-examples changed \contrastiveLeaks{} of \extNaming. We chose its counter-examples after seeing the first result, and with \extNaming{} prompts the difference is not significant ($p=\renameP$).
+\item We measured latency. One test question took \seconds{\latBaseline} on our first build and \seconds{\latQueueSoft} after we added a multiplier array and moved weight packing on the ARM cores to C++ with a weight cache. With a decoder that checks several proposed tokens per pass, and a later checkpoint, complete answers took \secrange{\latAllMin}{\latAllMax} on three development recordings and \seconds{\liveQueryComplete} on a live-stream question, short of our \seconds{\targetSeconds} target.
 \end{itemize}
 
-The paper has three parts: inputs (Section~\ref{sec:system}), process (Section~\ref{sec:method}) and outputs (Section~\ref{sec:evaluation}). One script, \texttt{paper/analysis.py}, regenerates every figure and every number that has a machine-readable evidence file. The rest are transcribed from the project notebook and listed in the script (Appendix~\ref{app:repro}).
+One script (\path{paper/analysis.py}) regenerates every figure and every number that has a machine-readable evidence file. The rest are transcribed from the project notebook and listed in the script (Appendix~\ref{app:repro}).
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/walkthrough.pdf}
-\caption{A one-row edit changes the next name and rolls back exactly. Greedy stories260K output on the physical PYNQ-Z2 at \SI{50}{\mega\hertz}, one run per phase; the edit replaces the \rowBytes{} weights of output row \timToken{} (\emph{Tim}), and every phase matched all \walkPhaseScores{} scores to the C reference. This early run used the floating-point transformer on the ARM cores and a \walkFitConstraints-constraint row that differs from the LM001 Conventional row in \walkRowDiff{} of \rowBytes{} bytes.}
+\caption{A one-row edit changes the next name and rolls back exactly. Greedy \stories{} output on the physical \pynq{} at \SI{50}{\mega\hertz}, one run per phase. The edit replaces the \rowBytes{} weights of output row \timToken{} (\emph{Tim}), and in every phase all \walkPhaseScores{} scores matched the integer reference. The hatched bar marks the phase with the edited row active.}
 \label{fig:walkthrough}
 \end{figure}
 
-\section{Background and Motivation}
+\section{Background}
 \label{sec:background}
 
-\subsection{The board}
-An FPGA (field-programmable gate array) is a chip whose logic is wired up after manufacture. The PYNQ-Z2~\cite{pynqz2} carries a Xilinx Zynq-7020~\cite{zynq7000}. That chip pairs \armCores{} ARM Cortex-A9 cores with programmable logic holding \deviceLuts{} lookup tables (LUTs), \deviceBram{} block RAMs and \deviceDsp{} DSP slices. The ARM cores run Linux and share DDR memory with the logic. The logic reads that memory through one 64-bit port. In our builds, the logic runs at \SI{50}{\mega\hertz} and the ARM cores at \SI{\cpuMhz}{\mega\hertz}.
+\subsection{The Board}
+An FPGA (field-programmable gate array) is a chip whose logic is wired up after manufacture. The \pynq~\cite{pynqz2} carries a Xilinx Zynq-7020~\cite{zynq7000}. That chip pairs \armCores{} ARM Cortex-A9 cores with programmable logic holding \deviceLuts{} lookup tables (LUTs), \deviceBram{} block RAMs and \deviceDsp{} DSP slices. The ARM cores run Linux and share DDR memory with the logic. The chip offers the logic four 64-bit high-performance ports into that memory~\cite{ug585}, and our design reads through one of them. In our builds, the logic runs at \SI{50}{\mega\hertz} and the ARM cores at \SI{\cpuMhz}{\mega\hertz}.
 
-\subsection{8-bit models}
-Quantizing a model means storing its numbers as small integers. Here each weight is a signed 8-bit integer between $-127$ and $127$, plus one scale factor per matrix or row~\cite{jacob2018quantization}. W8A8 means both weights and activations use 8 bits. The hardware multiplies integers and adds the products in 32-bit accumulators. A software reference that does the same integer arithmetic must produce the same sums, which is what makes exact checking possible. The reference is the quantized model. It is not the floating-point model the weights came from.
-
-We use two models. stories260K is a \storiesLayers-layer TinyStories model~\cite{eldan2023tinystories,llama2c} with hidden size \storiesHidden{} and a \storiesVocab-token vocabulary. We export it as a \checkpointBytes-byte integer checkpoint. The second is FLAN-T5-small~\cite{raffel2020t5,chung2024flan}, quantized to W8A8 and fine-tuned to answer questions about connection-pool telemetry.
+\subsection{8-Bit Models}
+Quantizing a model means storing its numbers as small integers. Here each weight is a signed \eightbit{} integer between $-127$ and $127$, plus one scale factor per matrix or row. The scheme is symmetric with no zero point, unlike the affine scheme of Jacob et al.~\cite{jacob2018quantization}. W8A8 means both weights and activations use 8 bits. The hardware multiplies integers and adds the products in 32-bit accumulators. A software reference that does the same integer arithmetic must produce the same sums, which is what makes exact checking possible. We call this software the \emph{integer reference}: a C program for \stories{} and a NumPy program for \flan. It is the quantized model, not the floating-point model the weights came from.
 
 \subsection{Terms}
-We use these terms with one meaning each.
 \begin{itemize}
 \item A \emph{score} is the signed integer the output layer gives one vocabulary token. The model picks the token with the highest score.
 \item A \emph{projection} is one multiply by a learned matrix.
 \item An \emph{overlay} is one FPGA configuration loaded onto the board.
-\item A \emph{parity check} runs the same input on the FPGA and on an independent integer reference. It passes only if every compared score matches.
-\item A \emph{one-row edit} replaces the weights of one row of the output layer. That row scores one vocabulary token. For stories260K it holds \rowBytes{} bytes.
+\item The \emph{row scorer} is a small FPGA circuit that holds 512 rows of 64 weights and returns all their scores for one 64-value input. It computes the \stories{} output layer and, on three reserved rows, the telemetry forecaster. In our first build it also ran every \flan{} matrix, one tile of rows at a time.
+\item A \emph{parity check} runs the same input on the FPGA and on the integer reference. It passes only if every compared score matches.
+\item A \emph{one-row edit} replaces the weights of one row of the output layer. That row scores one vocabulary token. For \stories{} it holds \SI{\rowBytes}{\byte}.
 \item The \emph{naming slot} is the position right after a phrase such as ``a girl named'', where a story introduces a name.
-\item \emph{Held-out} prompts are prompts that no edit author saw.
-\item A \emph{hit} is a target prompt whose next generated token becomes \emph{Tim}. A \emph{rename} is a naming control whose generated output changes.
-\item The \emph{pass rule} is the hit and rename threshold an edit must meet. \emph{Committed in advance} means we committed it to git before the run.
-\item A \emph{contrastive fit} computes a one-row edit from two kinds of extra constraints. Positives are prompts where the edit should win. Negatives are prompts where it should not.
-\item \emph{Verified decoding} proposes several next tokens at once and checks them all in one pass of the unchanged model. It keeps only the tokens the model would have picked anyway, so the output equals plain greedy decoding~\cite{leviathan2023speculative}.
+\item A \emph{target} prompt ends at a naming slot for a girl, where we want the edit to produce \emph{Tim}. A \emph{control} prompt is one the edit should leave alone. A \emph{naming control} is a control that ends at a naming slot for some other character.
+\item A \emph{hit} is a target prompt on which the next generated token is \emph{Tim} after the edit. A \emph{rename} is a naming control whose \extNewTokens{} generated tokens differ from the original model's.
+\item The \emph{frozen rows} are the Conventional and Astra rows of Section~\ref{sec:authors}, whose bytes we hashed before running any held-out prompt.
+\item \emph{Held-out} prompts are prompts not used to fit any edit, with the one exception noted in Section~\ref{sec:protocols}.
 \end{itemize}
 
 \subsection{Motivation}
-Our early build ran every FLAN-T5-small projection through the single-row telemetry classifier on the FPGA. It wrote one weight row and made one score round trip at a time, \floorSubmissions{} classifier submissions for one answer. One saved question took \latBaseline~s to answer, too slow to use while a problem is happening. On that path, one encoder projection took a median of \projEncBefore~ms (range \projEncBeforeRange, $n=\projRuns$). On an $8{\times}8$ multiplier array in the programmable logic it took \projEncAfter~ms. The decoder projection fell from \projDecBefore{} to \projDecAfter~ms. Moving only two query layers to the array did not help end to end (\latTwoQuery~s against \latBaseline~s). The gain came when every learned matrix moved (\latArray~s). We have no measurement of the same model running only on the ARM cores.
+Our first build ran \flan{} through the row scorer alone, \floorSubmissions{} FPGA requests for one answer by our replay count, which is where the \seconds{\latBaseline} in the introduction comes from. The rest of the paper asks how much of that time a board this small can remove while every score still matches the reference.
 
 \section{System}
 \label{sec:system}
 
-\subsection{Hardware and overlays}
-Fig.~\ref{fig:system} shows the system. A Mac app talks to the board over USB. On the board, the ARM cores handle tokenization, attention, decoding and 8-bit packing. The programmable logic holds an $8{\times}8$ signed 8-bit multiplier array with 32-bit accumulation, a command queue and the telemetry scorer. It also holds a vocabulary reducer that we built and verified but leave off by default, because picking the top token in software was as fast and simpler.
+\subsection{Hardware and Overlays}
+Fig.~\ref{fig:system} shows the system. A Mac app talks to the board over USB. On the board, the ARM cores handle tokenization, attention, decoding and \eightbit{} packing. The programmable logic holds an array of \macLanes{} signed \eightbit{} multipliers, arranged 8 by 8, with 32-bit accumulators. We call it the multiplier array. The logic also holds a command queue and the row scorer, and a vocabulary reducer that picks the top-scoring token on the FPGA. We built and verified the reducer but leave it off by default, because picking the top token in software was as fast in our runs (Section~\ref{sec:latency}) and simpler.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/system.pdf}
-\caption{The Mac app sends questions and edits over USB, and the board does all inference. Every learned matrix of FLAN-T5-small runs on the $8{\times}8$ array (hatched box), with weights read from DDR memory; stories260K uses the classifier overlay, which holds only its output layer.}
+\caption{The Mac app sends questions and edits over USB, and the board does all inference. Every learned matrix of \flan{} runs on the multiplier array (hatched box), with weights read from DDR memory; \stories{} uses the row-scorer overlay, which holds only its output layer.}
 \label{fig:system}
 \end{figure}
 
-A design meets timing when every signal settles before the next clock edge. Slack is the time to spare. We built three overlays with Vivado 2025.2 (Table~\ref{tab:overlays}). At \SI{100}{\mega\hertz} the classifier overlay's slowest path was \missedTimingNs~ns too long, so we rebuilt it at \SI{50}{\mega\hertz}. An intermediate projection overlay added the array. The final one adds the command queue and the reducer. The reducer's floating-point path was \reducerMissNs~ns too long at \SI{50}{\mega\hertz}. We split it across several clock cycles, and the final overlay met timing. It uses \finalLutShare\% of the LUTs, \finalBramShare\% of the block RAMs and \finalDspShare\% of the DSP slices.
+We built three overlays with Vivado 2025.2 (Table~\ref{tab:overlays}): a row-scorer overlay, an intermediate projection overlay that adds the multiplier array, and a final overlay that adds the command queue and the reducer. A design meets timing when every signal settles before the next clock edge, and slack is the time to spare. At \SI{100}{\mega\hertz} the row-scorer overlay's slowest path was \SI{\missedTimingNs}{\nano\second} too long, so we build everything at \SI{50}{\mega\hertz}. The reducer's floating-point path was still \SI{\reducerMissNs}{\nano\second} too long at that clock until we split it across several cycles. The final overlay uses \pct{\finalLutShare} of the LUTs, \pct{\finalBramShare} of the block RAMs and \pct{\finalDspShare} of the DSP slices.
 
 \begin{table}[t]
 \centering
-\caption{FPGA overlays at \SI{50}{\mega\hertz} on the Zynq-7020. The classifier overlay serves the stories260K output layer. The two projection overlays serve every FLAN-T5-small matrix.}
+\caption{FPGA Overlays at \SI{50}{\mega\hertz} on the Zynq-7020}
 \label{tab:overlays}
 \footnotesize
+\begin{threeparttable}
 \begin{tabular}{@{}lccc@{}}
 \toprule
- & Classifier & \head{Projection\\(intermediate)} & \head{Projection\\(final)} \\
+ & \head{Row\\scorer} & \head{Projection\\(intermediate)} & \head{Projection\\(final)} \\
 \midrule
 LUTs (of \deviceLuts) & \classifierLuts & \middleLuts & \finalLuts \\
 Block RAM tiles (of \deviceBram) & \classifierBram & \middleBram & \finalBram \\
 DSP slices (of \deviceDsp) & \classifierDsp & \middleDsp & \finalDsp \\
-Setup slack [ns] $\uparrow$ & \classifierSlackNs & \middleSlackNs & \queueSlackNs \\
-Hold slack [ns] $\uparrow$ & \classifierHoldNs & \middleHoldNs & \queueHoldNs \\
+Setup slack (ns) & \classifierSlackNs & \middleSlackNs & \queueSlackNs \\
+Hold slack (ns) & \classifierHoldNs & \middleHoldNs & \queueHoldNs \\
 \bottomrule
 \end{tabular}
+\tablenote{The row-scorer overlay serves the \stories{} output layer. The two projection overlays serve every \flan{} matrix. Positive slack means the design met timing.}
+\end{threeparttable}
 \end{table}
 
-\subsection{Models and workload}
-For stories260K, the ARM cores run the \storiesLayers{} transformer layers in fixed point. The FPGA computes the \storiesVocab{} output scores, and the ARM cores pick the top token. We use this model for the edit studies, because its vocabulary is small and its outputs are easy to judge. The fixed-point runtime is not identical to the floating-point model: on \fixedPointPrompts{} prompts compared on the Mac, \fixedPointDiverged{} generated sequences diverged.
+\subsection{Models and Workload}
+\label{sec:models}
+\stories{} is a \storiesLayers-layer TinyStories model~\cite{eldan2023tinystories,llama2c} with hidden size \storiesHidden{} and a \storiesVocab-token vocabulary, exported as a \SI{\checkpointBytes}{\byte} integer checkpoint. The ARM cores run its transformer layers in fixed point. The FPGA computes the \storiesVocab{} output scores, and the ARM cores pick the top token. We use this model for the edit studies because its vocabulary is small and a changed name is easy to see. The fixed-point runtime is not identical to the floating-point model: on \fixedPointPrompts{} prompts compared on the Mac, \fixedPointDiverged{} generated sequences diverged. All edit results are relative to the fixed-point runtime.
 
-FLAN-T5-small is the diagnostic model. A user uploads a CSV of connection-pool readings or watches a live stream, then asks a question such as ``What's wrong with my system?''. A \emph{recording} is a saved upload of \recordingReadings{} readings. A \emph{question} is the text the user asks about it, and an \emph{answer} is the model's full reply. We use three FLAN checkpoints. The \emph{first candidate} failed our quality checks and was never served. The \emph{original checkpoint} replaced it and is what the kit ships as \texttt{original}. \emph{Queue history v2} is a later \historySteps-step fine-tune that adds a short cue built from the first, peak and latest queue depth.
+\flan~\cite{raffel2020t5,chung2024flan} is the diagnostic model, quantized to W8A8. Its input is telemetry from a database connection pool: a series of readings, each giving the number of busy connections and the number of requests waiting for one. A user uploads a CSV of readings or watches a live stream, then asks a question such as ``What's wrong with my system?''. The model should say whether a queue is building, has cleared or never formed, cite the counts, and suggest what to measure next. A \emph{recording} is a saved upload of readings. The \emph{test question} is one stored question and input that we replay unchanged on every build; it has \promptTokens{} prompt tokens and its answer is \decoderSteps{} tokens long.
 
-All telemetry is synthetic and comes from two sources. The recordings and saved questions use generated connection-pool traces. The live stream and the forecaster study use a local SQLite database behind a pool of connections with controlled arrival rates and hold times. The latency tests use three recordings: one that recovered after a peak, one with a growing backlog, and one with zero requests waiting. While the model answers, the board keeps scoring live readings with a small fixed-point forecaster.
+We trained four checkpoints. The first failed our quality checks and was never served (Section~\ref{sec:quality}); we call it the \emph{rejected checkpoint}. Its replacement, \emph{v1}, is the first one we served (the kit names it \texttt{original}). A later candidate, which the review file names \texttt{balanced\_160}, failed the frozen-history review and was never served. \emph{v2} (the kit's Queue history v2) is a \historySteps-step fine-tune of the same task whose prompt adds a short cue built from the first, peak and latest queue depth.
 
-\subsection{Weight authors}
-Two authors write edits. Both get the same authoring packet: the original row, its scale factor, and example prompts with the scores the edit should produce. The \emph{Conventional} author is a numerical solver. It adjusts the row step by step until it satisfies \fitConstraints{} integer score constraints from the packet. \emph{Astra} is a language model (GPT-6). We gave it the packet once, and it wrote out \rowBytes{} signed integers. It got one attempt and no solver. Astra changed \astraChangedValues{} of the \rowBytes{} values and met \astraConstraintsMet{} of the \fitConstraints{} constraints. The single target constraint was among the four it missed. We hashed and froze both rows before running any held-out prompt.
+All telemetry is synthetic and comes from two sources. The recordings and the test question use generated connection-pool traces. The live stream and the forecaster study use a local SQLite database behind a pool of connections with controlled arrival rates and hold times. The latency tests use three recordings of \recordingReadings{} readings each: one that recovered after a peak, one with a growing backlog, and one with zero requests waiting (the \emph{zero-waiting recording}). They are development inputs that we used while building the system, not held-out data. While the model answers, the board keeps scoring live readings with the telemetry forecaster, a small fixed-point model.
+
+\subsection{Weight Authors}
+\label{sec:authors}
+We compare two ways of writing an edit. Both start from the same authoring packet: the original row and \fitConstraints{} examples, each an \eightbit{} activation vector, the best competing score and whether \emph{Tim} should win, plus four authoring prompt strings. The \emph{Conventional} author is a numerical solver that adjusts the row step by step until it satisfies the packet's \fitConstraints{} integer score constraints. The second author, \emph{Astra}, is a hosted general-purpose language model from the GPT-6 family; it is not one of the two models the board serves. We gave Astra the packet once, with no solver and no second attempt, and it wrote out \rowBytes{} signed integers. Its row did worse on the packet than no edit: it met \astraConstraintsMet{} of the \fitConstraints{} constraints, and the unedited row meets \originalConstraintsMet. It changed \astraChangedValues{} of the \rowBytes{} values, missed the single target constraint and broke \astraBrokeConstraints{} constraints that the original row satisfied. We hashed and froze both rows before running any held-out prompt.
 
 \section{Method}
 \label{sec:method}
 
 \subsection{Verification}
-Every run pins SHA-256 hashes for the model, tokenizer, bitstream and edit. Every stories260K score is checked against the integer reference. For FLAN-T5-small we check the array on captured shapes (\projectionArrayScores{} scores) and require each served answer to match the reference text byte for byte. We report numerators with denominators, and we keep failed runs and regressions in the record. Table~\ref{tab:parity} lists the parity checks.
+Every run pins SHA-256 hashes for the model, tokenizer, bitstream and edit. Every \stories{} score is checked against the integer reference. For \flan{} we checked the array on three matrix shapes and the output layer with synthetic \eightbit{} activations (\projectionArrayScores{} scores, on the intermediate overlay), and the command queue on \queueScores{} scores on the final overlay. For v1, the test question's answer matched the reference text byte for byte on every build, as did three saved traces. For v2 we checked only that each board answer equals the first board answer for the same input. Table~\ref{tab:parity} lists the parity checks. We report every count with its denominator and keep failed runs in the results.
 
 \begin{table*}[t]
 \centering
-\caption{Physical parity checks on the PYNQ-Z2 at \SI{50}{\mega\hertz}. A check passes only if every compared signed integer score matches the reference.}
+\caption{Physical Parity Checks on the \pynq{} at \SI{50}{\mega\hertz}}
 \label{tab:parity}
 \footnotesize
-\begin{tabular}{@{}llrl@{}}
+\begin{threeparttable}
+\begin{tabular}{@{}llr>{\raggedright\arraybackslash}p{0.34\textwidth}@{}}
 \toprule
 Model & Check & Scores matched / compared & Scope \\
 \midrule
-stories260K & Output layer, recorded inputs & \classifierReplayScores/\classifierReplayScores & \replayActivations{} activations, row replace and restore \\
- & Lily to Tim edit, live & \liveSelectiveScores/\liveSelectiveScores & \liveSelectivePrompts{} prompts $\times$ \walkPhases{} phases \\
- & Edit tool, bad bundles & \operatorScores/\operatorScores & bad bundles rejected, readback intact \\
- & LM001 development prompts & \fixtureScores/\fixtureScores & \fixturePrompts{} prompts, \fixtureConditions{} conditions \\
- & LM001 held-out study & \lmBoardScores/\lmBoardScores & \lmRuns{} runs, tokens equal software \\
+\stories{} & Output layer, recorded inputs & \classifierReplayScores/\classifierReplayScores & \replayActivations{} activations, row replaced and restored \\
+ & \emph{Lily} to \emph{Tim} edit, live & \liveSelectiveScores/\liveSelectiveScores & \liveSelectivePrompts{} prompts $\times$ \walkPhases{} phases \\
+ & Edit tool, malformed edits & \operatorScores/\operatorScores & malformed edits rejected; weights unchanged on readback \\
+ & Dry run of the LM001 harness & \fixtureScores/\fixtureScores & \fixturePrompts{} development prompts $\times$ \fixtureConditions{} conditions; the Astra condition used the unedited row \\
+ & Held-out study (LM001, Section~\ref{sec:protocols}) & \lmBoardScores/\lmBoardScores & \lmRuns{} runs, tokens equal to the integer reference \\
 \midrule
-FLAN-T5-small & All matrices & \projectionArrayScores/\projectionArrayScores & all layers, \shapeChecks{} shape and weight checks \\
- & Command queue & \queueScores/\queueScores & winner and tie order also matched \\
+\flan{} & Three matrix shapes and output layer & \projectionArrayScores/\projectionArrayScores & intermediate overlay; synthetic \eightbit{} activations, \flanShapePasses{} passes of \flanShapeScoresPerPass{} with different edited output rows \\
+ & Command queue & \queueScores/\queueScores & final overlay; winner and tie order also matched \\
 \bottomrule
 \end{tabular}
+\tablenote{A check passes only if every compared signed integer score matches the integer reference. Every v2 answer in this paper ran on the final overlay.}
+\end{threeparttable}
 \end{table*}
 
-\subsection{The edit operation}
-An edit is a versioned JSON bundle. It names the target row and carries hashes of the base model, the quantized output layer and the original row, plus the replacement bytes. For stories260K the payload is \rowBytes{} bytes inside a \bundleBytes-byte bundle. The board applies an edit between requests, never in the middle of one, in five steps:
+\subsection{The Edit Operation}
+An edit is a versioned JSON bundle. It names the target row and carries hashes of the base model, the quantized output layer and the original row, plus the replacement bytes. For \stories{} the payload is \SI{\rowBytes}{\byte} inside a \SI{\bundleBytes}{\byte} bundle. The board applies an edit between requests, never in the middle of one. An edit's life has five steps:
 \begin{enumerate}
 \item Check every hash in the bundle against the loaded model, and reject the bundle on any mismatch.
 \item Wait until no request is in flight.
@@ -192,273 +220,343 @@ An edit is a versioned JSON bundle. It names the target row and carries hashes o
 \item Serve requests with the edited row.
 \item To roll back, write the original row and check the hash of the full output layer.
 \end{enumerate}
-If the edit tool exits with an edit active, it restores the original row first. On FLAN-T5-small the same mechanism writes output rows of up to \flanRowBytes{} bytes, and named versions persist across service restarts.
+If the edit tool exits with an edit active, it restores the original row first. On \flan{} an edit is stored as a named version of one output row (up to \SI{\flanRowBytes}{\byte}), and named versions persist across service restarts. Selecting an edit or the original repacks the \SI{\residentMiB}{\mebi\byte} output layer and leaves the other matrices in place; we did not time this.
 
-\subsection{Edit evaluation protocols}
-\emph{LM001} is the original held-out study. It has four conditions: the original model, a prompt-only instruction, the Conventional row and the Astra row. It uses \lmTargets{} target prompts that end in ``girl named'' and \lmControls{} controls. Decoding is greedy for \lmMaxTokens{} tokens. A control is \emph{unchanged} when all \lmMaxTokens{} generated tokens match the original model. We fixed the pass rule before the run: at least \lmMinHits{} hits and \lmMinControls{} unchanged controls.
+\subsection{Edit Evaluation Protocols}
+\label{sec:protocols}
+\emph{LM001} is the first held-out study. It has four conditions: the original model, a prompt-only instruction, the Conventional row and the Astra row. The prompt-only condition prepends ``\promptOnlyPrefix'' to each prompt and changes no weights. LM001 uses \lmTargets{} target prompts that end in ``girl named'' and \lmControls{} controls. Decoding is greedy for \lmMaxTokens{} tokens. A control is \emph{unchanged} when all \lmMaxTokens{} generated tokens match the original model. Before the run we fixed a \emph{pass rule}, the counts an edit must reach to pass: at least \lmMinHits{} hits and at least \lmMinControls{} unchanged controls.
 
-For this paper we froze a larger held-out set in git before running anything (commit \texttt{d9b261d}). It holds \extTargets{} target prompts and \extControls{} controls. Of the controls, \extNaming{} are naming prompts such as ``a big dog named''. The other \extOther{} are ordinary story text. We then varied the strength of each edit. Strength $\alpha=0$ is the original row, $\alpha=1$ is the frozen edit, and $\alpha=2$ doubles the change:
+For this paper we wrote a larger held-out set and committed it to git before running any edited row on it (commit \texttt{d9b261d}). We call it the \emph{extended set}. It holds \extTargets{} target prompts and \extControls{} controls. Of the controls, \extNaming{} are naming controls such as ``a big dog named''. The other \extOther{} are ordinary story text. One naming control, ``Once upon a time, there was a little boy named'', is also an authoring prompt of the LM001 packet. The Conventional and contrastive fits therefore carried constraints to keep it unchanged, and Astra saw it in the packet, so it is not held out. We report renames on the \extNamingClean{} clean naming controls next to the full \extNaming.
+
+To test whether a weaker edit keeps the hits and drops the renames, we then varied the strength of each edit. Strength $\alpha=0$ is the original row, $\alpha=1$ is the frozen edit, and $\alpha=2$ doubles the change:
 \begin{equation}
 r_\alpha = \mathrm{clip}\bigl(\mathrm{round}(r_0 + \alpha\,(r_1 - r_0))\bigr).
 \end{equation}
 Here $r_0$ is the original row, $r_1$ is the frozen edit, and clip keeps each value between $-127$ and $127$. We ran $\alpha$ from 0 to \alphaMax{} in steps of \alphaStep.
 
-The contrastive fit reuses the Conventional solver on a base set of \sweepBaseConstraints{} constraints. It adds \positiveAuthoring{} authoring-only ``girl named'' positives and \negativeAuthoring{} ``animal or adult named'' negatives. Each negative prompt adds \constraintsPerNegative{} constraints, one per generated position, for \contrastiveConstraints{} constraints in total. None of these prompts appears in either held-out set. We committed the contrastive pass rule before running the contrastive row (commit \texttt{0891cf9}): at least \criterionHits/\extTargets{} hits, at most \criterionLeaks/\extNaming{} renames and \criterionOther/\extOther{} changed ordinary controls. That commit came after we had seen the frozen rows' results on the same prompts, and we chose the negatives to mirror the renames we had observed. A later exploratory sweep varied the number of positives and negatives.
+A \emph{contrastive fit} is a Conventional fit with two kinds of extra constraints. Positives are prompts where \emph{Tim} should win, and negatives are prompts where it should not. Ours starts from a base set of \sweepBaseConstraints{} constraints (one more than the frozen fit's \fitConstraints; Appendix~\ref{app:sweep}). It adds \positiveAuthoring{} ``girl named'' positives and \negativeAuthoring{} negatives that name an animal, an adult or a toy. Each negative adds \constraintsPerNegative{} constraints, one per generated position, for \contrastiveConstraints{} in total. None of these prompts appears in either held-out set.
 
-These edit studies ran on the integer software reference. It matched the board token for token in all \lmRuns{} LM001 runs. The extended and contrastive studies were not rerun on the board. Intervals are Wilson 95\%~\cite{wilson1927}. Paired comparisons between rows use the exact McNemar test~\cite{mcnemar1947}.
+The contrastive row is not a clean held-out test. We had already seen the frozen rows' results on the extended set, and we chose the negatives to mirror the renames we saw. We did commit a pass rule before running the contrastive row (commit \texttt{0891cf9}): at least \criterionHits/\extTargets{} hits, at most \criterionLeaks/\extNaming{} renames and \criterionOther/\extOther{} changed ordinary controls. We chose these thresholds after we knew the frozen Conventional row scored \conventionalHits/\extTargets{} and \conventionalLeaks/\extNaming. The only record of the order is three local commits on one day, none pushed in between: the extended set at \freezeTime, the pass rule and the frozen rows' results at \ruleTime, and the contrastive results at \resultTime. The contrastive result file was written at \contrastiveWrittenTime, four seconds after the rule commit. A rerun of the fit gives a byte-identical result file. A later exploratory sweep varied the number of positives and negatives.
 
-\subsection{Latency protocol}
-We time a complete answer from question submission to the final token. For recordings, the clock starts when the question is submitted after the CSV upload, and it stops before the interface renders the answer. Most times come from the Mac app backend, which polls the board every \pollSecondsExact~s or \pollSecondsQueue~s, so each reading can be late by up to one polling interval. Two early runs were timed by a process on the board. The first run was started from the Mac and finished by a board process that took over the job. Each run checks that the active checkpoint is the expected one, that every learned projection ran on the FPGA, and that live telemetry kept advancing during the answer.
+LM001 ran both on the board and on the integer reference, and the two produced the same tokens in all \lmRuns{} runs. The extended set, the strength sweep and the contrastive fit ran on the integer reference only. Intervals are Wilson 95\%~\cite{wilson1927}. Paired comparisons between rows use the exact McNemar test~\cite{mcnemar1947}. The prompts are our own paraphrases of a few templates and are not independent samples, so the intervals and $p$-values describe this prompt set only.
 
-\section{Evaluation}
-\label{sec:evaluation}
-
-All results come from one PYNQ-Z2 with programmable logic at \SI{50}{\mega\hertz} and ARM cores at \SI{\cpuMhz}{\mega\hertz}. Batch size is one question at a time. Weights and activations are 8-bit with 32-bit accumulation. Latency is wall time with polling, as described in Section~\ref{sec:method}. Each latency cell is a single run unless we say otherwise. Edit studies use \extTargets{} target and \extControls{} control prompts, plus the \lmTargets{} and \lmControls{} prompts of LM001. We answer three questions, then report answer quality:
+\subsection{Latency Protocol}
+Before the latency work we set a target of \seconds{\targetSeconds} for a complete answer to a question worded unlike the training set, with live readings still arriving. We time a complete answer from question submission to the final token, and \emph{first text} to the moment the first part of the answer reaches the Mac. The runs use four timers, and we name the timer with every result:
 \begin{enumerate}
-\item Do one-row edits change behavior and revert exactly?
-\item How far does an edit spread?
-\item What does a complete answer cost in latency, and what bounds it?
+\item \emph{Mac backend.} The Mac app's backend polls the board and stops its clock before the interface renders the answer. The final build polls every \seconds{\pollSecondsExact}; earlier builds polled every \seconds{\pollSecondsQueue}, so a time can be up to one interval too long. Most runs use this timer.
+\item \emph{Board process.} The two multiplier-array runs of the test question were timed on the board with one-second polling.
+\item \emph{Board process, earlier protocol.} The row-scorer run was started and timed by a board-local process over local HTTPS, with a polling protocol different from the two array runs.
+\item \emph{Installed app.} The scalar and verified-decoder runs on v1 (Section~\ref{sec:latency}) were timed in the installed app from clicking Ask to the rendered answer.
 \end{enumerate}
-
-\subsection{One-row edits change outputs and roll back exactly}
-Every parity check in Table~\ref{tab:parity} passed. On the board, the edit changed the first generated name from \emph{Lily} (token \lilyToken) to \emph{Tim} (token \timToken). It won by a small margin. \emph{Tim} scored \walkTimScoreBefore{} before the edit and \walkTimScore{} after, against \walkLilySum{} for \emph{Lily}. The next \walkPreserved{} tokens matched what the unedited model writes when the prompt already contains \emph{Tim}. The row write took \walkApplyMs~ms to apply and \walkRestoreMs~ms to restore, in one run. Rollback restored \emph{Lily} and the full output-layer hash. We rebooted the board and ran the whole sequence again from a cold start. It passed in \coldSuiteSeconds~s.
-
-Table~\ref{tab:lm001} gives the LM001 comparison. The board and the software reference produced the same tokens in all \lmRuns{} runs. The prompt-only instruction never produced \emph{Tim} and changed every control. The Conventional row met the pass rule. The Astra row ranked \emph{Tim} in its top two on all \astraTopTwoLm{} target prompts and selected it on \lmAstraHits. Both rows changed the same control, where a small dog named \emph{Max} became \emph{Tim}. With \lmTargets{} prompts per group the intervals are wide, so LM001 alone cannot separate the two rows.
+Table~\ref{tab:ladder} gives the timer for each run of the test question. Each run checks that the active checkpoint is the expected one, that every learned projection ran on the FPGA, and that live telemetry kept advancing during the answer.
 
 \begin{table}[t]
 \centering
-\caption{LM001 held-out comparison on stories260K. Board and software tokens were identical in all \lmRuns{} runs. Brackets: Wilson 95\% interval.}
-\label{tab:lm001}
-\footnotesize
-\begin{tabular}{@{}lcc@{}}
-\toprule
-Condition & Hits $\uparrow$ & Controls unchanged $\uparrow$ \\
-\midrule
-Original model & \lmOrigHits/\lmTargets & \lmOrigControls/\lmControls \\
-Prompt-only instruction & \lmPromptHits/\lmTargets & \lmPromptControls/\lmControls \\
-Conventional row & \lmConvHits/\lmTargets{} \lmConvCI & \lmConvControls/\lmControls \\
-Astra row & \lmAstraHits/\lmTargets{} \lmAstraCI & \lmAstraControls/\lmControls \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The same mechanism works on the diagnostic model. Astra wrote a \flanEditBytes-byte change to output row \flanEditRow{} of FLAN-T5-small, on the original checkpoint, so that a saved answer would begin with ``Now''. It did, and it still did after we power-cycled the board. The model also repeated ``Now'' later in the answer, which made the answer read worse. Restoring the original row reproduced the original answer byte for byte on the same capture. A second, \flanRowBytes-byte edit targeted a wrong ``no backlog'' answer. It fixed the one case it was written for, then failed on reworded questions or on recordings where the pool had recovered. We did not ship it.
-
-\textit{Takeaway: a hash-guarded write of \rowBytes{} to \flanRowBytes{} bytes changed what the model said, and rollback restored the original output exactly in every case we tested.}
-
-\subsection{Edits spread to other naming prompts}
-Table~\ref{tab:spread} and Fig.~\ref{fig:edits} show the larger held-out set. The original model never chose \emph{Tim} on these targets. The frozen Conventional row hit \conventionalHits{} of \extTargets{} targets. Astra's hit \astraHits. On \convVsAstraB{} prompts only the Conventional row hit, and on \convVsAstraC{} only Astra's did ($p=\convVsAstraP$, exact McNemar).
-
-\begin{table}[t]
-\centering
-\caption{One-row edits on \extTargets{} held-out targets and \extControls{} held-out controls (stories260K, integer reference, $\alpha=1$). Brackets: Wilson 95\% interval. $^\dagger$Pass rule committed before the contrastive run, after the frozen rows' results on these prompts were known.}
-\label{tab:spread}
-\footnotesize
-\begin{tabular}{@{}lccc@{}}
-\toprule
-Row & Hits $\uparrow$ & Renames $\downarrow$ & Other changed $\downarrow$ \\
-\midrule
-Conventional & \conventionalHits/\extTargets{} \convHitCI & \conventionalLeaks/\extNaming{} \convLeakCI & \conventionalOther/\extOther \\
-Astra & \astraHits/\extTargets{} \astraHitCI & \astraLeaks/\extNaming{} \astraLeakCI & \astraOther/\extOther \\
-Contrastive$^\dagger$ & \contrastiveHits/\extTargets{} \contrHitCI & \contrastiveLeaks/\extNaming{} \contrLeakCI & \contrastiveOther/\extOther \\
-\midrule
-Pass rule$^\dagger$ & $\ge$\criterionHits/\extTargets & $\le$\criterionLeaks/\extNaming & \criterionOther/\extOther \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Every control that changed was a naming prompt. The Conventional row renamed \conventionalLeaks{} of \extNaming{} naming controls, and Astra's renamed \astraLeaks. Under the Conventional row a cat, a bird, a truck, a fish, a mom and an old man all became \emph{Tim}. None of the \extOther{} ordinary controls changed at $\alpha=1$. The edit attaches to the slot a token fills. The concept around that slot, a girl, is untouched. One naming control, ``One day, a boy named'', already gives \emph{Tim} in the original model, so only \namingCanRename{} of the \extNaming{} can be renamed to \emph{Tim}.
-
-Turning the edit down does not separate hits from renames. In Fig.~\ref{fig:edits}(a), the Conventional row first renames a naming control at $\alpha=\conventionalFirstLeakAlpha$. It does not reach half its peak hits until $\alpha=\conventionalHalfHitAlpha$. Astra's row renames from $\alpha=\astraFirstLeakAlpha$ and reaches half its peak hits at $\alpha=\astraHalfHitAlpha$. In both rows, renames start before hits do.
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{figures/edits.pdf}
-\caption{One-row edits reach other naming prompts, and counter-examples narrow the spread. stories260K, integer reference, greedy decoding, \extTargets{} held-out targets and \extNaming{} naming controls. (a)~Each frozen row at edit strength $\alpha$; solid lines are hits and dashed lines are renames. (b)~Hits against renames for the frozen rows and the exploratory sweep, labelled positives$+$, negatives$-$; error bars are Wilson 95\% intervals and the shaded box is the pass rule.}
-\label{fig:edits}
-\end{figure*}
-
-The contrastive row passed its rule. It hit \contrastiveHits{} of \extTargets{} targets, renamed \contrastiveLeaks{} of \extNaming{} naming controls and changed \contrastiveOther{} of \extOther{} ordinary ones. The one remaining rename went the other way. A boy whom the original model names \emph{Tim} became \emph{Timmy} (token \contrastiveMovedToken), so the negatives also suppress \emph{Tim} where it belonged. On the LM001 set it hit \contrastiveLmHits{} of \lmTargets{} targets and left all \contrastiveLmControls{} controls unchanged. The dog named \emph{Max} keeps its name.
-
-The exploratory sweep in Fig.~\ref{fig:edits}(b) shows what each part does. With negatives only, renames stay low and hits fall to \sweepNegOnlyHits{} of \extTargets. With positives only, renames rise to \sweepPosOnlyLeaks{} of \extNaming. Three positives with four or more negatives reach \sweepBestHits{} hits and \sweepBestLeaks{} rename. Of the \sweepFits{} sweep fits, \sweepPassing{} meet the rule, but they have identical row changes and outcomes, so they are probably \sweepDistinctPassing{} row (Table~\ref{tab:sweep}).
-
-\textit{Takeaway: with \positiveAuthoring{} positives and \negativeAuthoring{} negatives, renames fell from \conventionalLeaks{} to \contrastiveLeaks{} of \extNaming{} while hits fell from \conventionalHits{} to \contrastiveHits{} of \extTargets.}
-
-\subsection{Answers take about \latBestRounded~s on the board}
-Fig.~\ref{fig:latency}(a) fixes one saved question and changes only the execution path. The question has \promptTokens{} prompt tokens and \decoderSteps{} decoder steps, decoded one token per model pass on the original checkpoint. The row-at-a-time classifier build took \latBaseline~s. Moving two query layers to the array took \latTwoQuery~s, slightly slower. Moving every learned matrix to the array cut the time to \latArray~s. Packing weights in C++ and caching them gave \latCache~s. Keeping the output-layer weights in \residentMiB~MiB of memory the FPGA reads directly gave \latResident~s. A command queue lets the FPGA run several multiplies per request from the ARM cores. With the FPGA reducer it took \latQueue~s cold and \latQueueWarm~s warm. With the top token picked in software, the shipped setting, it took \latQueueSoft~s cold and \latQueueSoftWarm~s warm. That is about a \latLadderSpeedup$\times$ reduction, measured across three timing methods with up to \pollSecondsQueue~s of polling. Every answer matched byte for byte. The two array runs used the intermediate overlay and the queue runs the final one.
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{figures/latency.pdf}
-\caption{Moving every matrix to the FPGA cut one saved answer about \latLadderSpeedup$\times$, and current answers take \latBestMin{} to \latBestMax~s, above the \targetSeconds~s target. Physical PYNQ-Z2 at \SI{50}{\mega\hertz}, single runs. (a)~One saved question (\decoderSteps{} decoder steps, original checkpoint) as the execution path changes; the dashed and dotted lines are the memory-read and arithmetic-only floors for this workload, assuming perfect use of the port and the multipliers. (b)~Three recordings and one reworded question as the decoder changes; open markers use the original checkpoint and filled markers Queue history v2, so the two segments are not comparable, and points are offset sideways for legibility.}
-\label{fig:latency}
-\end{figure*}
-
-For this \decoderSteps-step workload, weight and activation reads alone need at least \floorDdr~s, and the arithmetic alone needs at least \floorMac~s~\cite{williams2009roofline}. One answer reads \weightGB~GB of weights. Dividing by the port's \readBandwidthMB~MB/s, plus the activation reads, gives the memory floor. Keeping activations in block RAM already cut their traffic from \activationNoReuseMB~MB to \activationReuseMB~MB. Both floors assume perfect use of the hardware and leave out score writes, ARM work and transport. Memory and arithmetic can also overlap, so the two floors do not add.
-
-Fig.~\ref{fig:latency}(b) tracks three recordings and one question phrased differently from the training set. Scalar decoding generates one token per model pass. Verified decoding, with proposals from a small table trained on development examples and \verifyWidthOld{} positions per pass, cut the original checkpoint from \latScalarMin{} to \latScalarMax~s to \latVerifyMin{} to \latVerifyMax~s, with identical text. On Queue history v2 we then made three changes to how the ARM cores prepare work for the FPGA. Batched fusion sends matrices that share an input in one request. NEON packing uses the ARM vector unit to pack 8-bit inputs. Native quantization converts activations to 8 bits in C. The NEON step also added prompt-copy proposals and widened verification to \verifyWidth{} positions~\cite{saxena2023prompt}, and we did not measure the two separately. Together these brought complete answers from \latVtwoMin{} to \latVtwoMax~s down to \latBestMin{} to \latBestMax~s (Table~\ref{tab:latency}). In the software reference, the prompt-copy proposals and wider verifier cut verifier passes from \verifierBaselinePasses{} to \verifierPasses{} across \verifierQuestions{} frozen questions, with every token unchanged. The board kept scoring \liveMin{} to \liveMax{} live telemetry windows during each of the four current answers.
-
-\begin{table}[t]
-\centering
-\caption{Complete-answer time [s] $\downarrow$ per recording, physical PYNQ-Z2, single runs at the Mac backend with polling. $^\ast$Original checkpoint; other columns use Queue history v2. New wording reuses the growing recording.}
-\label{tab:latency}
-\footnotesize
-\begin{tabular}{@{}lccccc@{}}
-\toprule
-Recording & Scalar$^\ast$ & Verified$^\ast$ & \head{v2\\start} & \head{v2\\now} & \head{First text\\(v2 now)} \\
-\midrule
-\tablerows{tables/latencyRows.tex}
-\bottomrule
-\end{tabular}
-\end{table}
-
-These are single runs, so we checked how much a repeat moves. The recovered recording took \latRecoveryFinal~s on the first request after startup and \latWarmRepeat~s warm. The reworded question took \latNewFinal~s, and \latNewRestart~s after a later service restart that changed only a memory-allocation fallback. The two pairs differ by \latWarmDelta~s and \latRestartDelta~s. We treat any difference under \latRestartDelta~s as noise. Over all \latAllRuns{} runs of this backend, answers took \latAllMin{} to \latAllMax~s. In the installed app, with interface rendering included, the zero-waiting recording showed \latInstalledHealthy~s and a sample recording \latInstalledSample~s. No run met the \targetSeconds~s target for a complete answer. On the reworded question, first text took \firstTextNew~s and \firstTextNewRestart~s, also above \targetSeconds~s.
-
-We did not recompute the memory floor for these answers. They use \projectionsCurrentMin{} to \projectionsCurrentMax{} projections each, against \projectionsFloorCase{} for the saved question. In the recovered answer, the encoder took \phaseEncoder~s, the decoder \phaseDecoder~s and the output layer \phaseVocabulary~s. Waiting on \phaseCommands{} FPGA commands took \phaseRoundtrip~s and packing weights \phasePackWeights~s. These phases overlap, so they do not sum to the total. In two isolated captures on the original checkpoint, the multipliers had data in \macFeedEnc\% and \macFeedDec\% of cycles (Fig.~\ref{fig:utilization}). Memory delivered a 64-bit word in only \ddrBeatEnc\% and \ddrBeatDec\% of cycles, so the port itself sat idle most of the time. This points at how reads are scheduled before more arithmetic.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{figures/utilization.pdf}
-\caption{In two captured projections, the array is idle most cycles and the memory port is used under a third of the time. Share of elapsed cycles with data at the multipliers (hatched bars) and with a 64-bit word delivered from DDR memory (dotted bars); labels give batch $\times$ input depth $\rightarrow$ output rows. One hardware-counter capture each, original checkpoint, PYNQ-Z2 at \SI{50}{\mega\hertz}.}
-\label{fig:utilization}
-\end{figure}
-
-\textit{Takeaway: complete answers took \latAllMin{} to \latAllMax~s, above the \targetSeconds~s target, and the array waited on memory in the cycles we captured.}
-
-\subsection{The board repeats the model's mistakes}
-Table~\ref{tab:quality} summarizes answer quality for the three FLAN checkpoints in the W8A8 software reference. Each answer must meet five requirements: the current state, the current count and peak, a labeled forecast, uncertainty about the cause, and a concrete next measurement. The first candidate met all five on \firstFlanPass{} of \flanCases{} synthetic incidents. On \flanCases{} fresh incidents and wordings, a frozen keyword scorer passed \replacementLexicalPass{} of \flanCases{} original-checkpoint answers. The scorer did not recognize the word ``warns'' in three answers. A single direct review of the same answers, with no second rater, accepted all \replacementDirectPass.
-
-\begin{table}[t]
-\centering
-\caption{Answer quality of the FLAN-T5-small checkpoints on synthetic incidents, W8A8 software reference. Counts are cases meeting the stated check.}
-\label{tab:quality}
-\footnotesize
-\begin{tabular}{@{}lll@{}}
-\toprule
-Checkpoint & Check & Result $\uparrow$ \\
-\midrule
-First candidate & all five requirements & \firstFlanPass/\flanCases \\
-Original & all five, keyword scorer & \replacementLexicalPass/\flanCases \\
- & all five, direct review & \replacementDirectPass/\flanCases \\
- & current state, frozen histories & \originalStatesRight/\originalStatesTotal \\
-Queue history v2 & current state, frozen histories & \historyCases/\historyCases \\
- & active-queue trends & \historyActive/\historyActive \\
- & numeric current count cited & \the\numexpr\historyCases-\historyCountMissing\relax/\historyCases \\
- & archived cases citing current count & \the\numexpr\historyArchived-\historyOmittedZero\relax/\historyArchived \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The board repeats the model's wrong answers exactly. The original checkpoint called a recording with no queue ``cleared''. In a separate live question it reported \missWaiting{} requests waiting and a peak of \missPeak, then said the queue had cleared. The software reference produced the same wrong text. Queue history v2 fixed the queue-free case on the board.
-
-We tested Queue history v2 on \historyCases{} frozen histories, \historyActive{} of them with an active queue, and on \historyTargeted{} targeted questions. It got the current state right on all \historyCases{} and every active-queue trend, and it answered all \historyTargeted{} questions. In \historyCountMissing{} of the \historyCases{} answers the model left out the numeric current count. Broad answers left out the forecast's end-of-horizon size. We also reran \historyArchived{} archived cases. In \historyOmittedZero{} recovery answers the model implied a count of zero without stating it. The original checkpoint got the current state right on \originalStatesRight{} of \originalStatesTotal{} histories.
-
-The telemetry forecaster is a small fixed-point model. In a Mac replay of \telemetryWindows{} held-out windows, its decisions differed from floating point on \telemetryFlips. It warned on \telemetryFixedWarned{} of \telemetryEpisodes{} queue episodes, against \telemetryFloatWarned{} in floating point, and missed \telemetryFixedMissed{} with \telemetryFixedFalse{} false alerts. In a board study it warned on \poolWarned{} of \poolEpisodes{} episodes. A candidate that added the incoming request rate gave \rateCandidateEarlyWarnings{} early warning and failed our promotion criteria.
-
-\textit{Takeaway: the board reproduces the model's wrong answers exactly, so fixing them means changing the weights.}
-
-\section{Limitations}
-\label{sec:limits}
-
-\begin{itemize}
-\item All telemetry is synthetic. We have not measured accuracy on production traffic.
-\item Every result comes from one PYNQ-Z2 and two small models.
-\item Latency cells are single runs. The two repeats we have moved by \latWarmDelta~s and \latRestartDelta~s.
-\item The two segments of Fig.~\ref{fig:latency}(b) use different checkpoints and cannot be compared directly.
-\item Latency runs used three timing methods, and Mac timings include polling of up to \pollSecondsQueue~s.
-\item The memory floor covers only the \decoderSteps-step saved question. We did not recompute it for the current backend.
-\item The edit studies cover one checkpoint, one task, one target name and one Astra proposal. The vocabulary holds \singleTokenNames{} whole-word name tokens (\emph{Lily}, \emph{Tim}, \emph{Timmy}), so we tested one target.
-\item Astra came from a nondeterministic external model, so its row cannot be regenerated, and one proposal cannot separate its quality from chance.
-\item A one-row edit attaches to the slot a token fills. We showed containment for one slot with one constraint set.
-\item We chose the contrastive negatives after seeing the frozen rows' renames on the same prompts. A fresh third prompt set would test the fit cleanly.
-\item The extended and contrastive studies ran on the integer reference, which matched the board on LM001 and was not rerun on the board.
-\item Parity is to the quantized reference. The stories260K fixed-point runtime diverged from floating point on \fixedPointDiverged{} of \fixedPointPrompts{} prompts, and we have no float against W8A8 quality comparison for FLAN-T5-small.
-\item Answer quality comes from the software reference, with a single reviewer for the direct review.
-\item The forecaster misses \telemetryMissShare\% of queue episodes in the Mac replay (\telemetryFixedMissed{} of \telemetryEpisodes).
-\item The proposal table was trained on development examples, so latency on unfamiliar wording may differ.
-\item Edits apply only between requests.
-\item We measured no power or energy, and we have no ARM-only, CPU or GPU baseline for the FLAN workload.
-\item A second developer has not reproduced the hardware runs, and a power-cycle test of Queue history v2 is still open.
-\end{itemize}
-
-\section{Related Work}
-\label{sec:related}
-
-\emph{FPGA inference for language models.} FlightLLM~\cite{zeng2024flightllm} and DFX~\cite{hong2022dfx} map large models onto data-center FPGAs with high-bandwidth memory. LlamaF~\cite{xu2024llamaf} accelerates TinyLlama 1.1B on a Zynq UltraScale+ ZCU102, a much larger device than the Zynq-7020. We use the smaller chip and add exact parity checks and reversible edits while the model serves.
-
-\emph{Knowledge editing.} ROME~\cite{meng2022rome} and MEMIT~\cite{meng2023memit} change facts by editing feed-forward weights, and Knowledge Neurons~\cite{dai2022neurons} locate neurons tied to facts. These methods target factual recall in larger models on GPUs. We edit one output row and measure how far it spreads to other naming prompts.
-
-\emph{Efficient inference.} Speculative decoding~\cite{leviathan2023speculative} and prompt lookup~\cite{saxena2023prompt} verify proposed tokens with the target model. FlashAttention~\cite{dao2022flashattention} and vLLM~\cite{kwon2023vllm} cut memory traffic and memory waste on GPUs. LLM.int8()~\cite{dettmers2022int8} and AWQ~\cite{lin2024awq} quantize weights to 8 or 4 bits. We use verified decoding and 8-bit quantization on a board with one 64-bit memory port.
-
-\section{Conclusion}
-\label{sec:conclusion}
-
-A PYNQ-Z2 served a quantized language model with every compared score matching the reference, including \lmBoardScores{} scores in the held-out edit study. A one-row edit works, and it spreads to other prompts where that token fills the same slot. Adding \positiveAuthoring{} positive and \negativeAuthoring{} negative prompts cut renames from \conventionalLeaks{} of \extNaming{} to \contrastiveLeaks{} of \extNaming{} in the integer reference. A complete answer takes \latAllMin{} to \latAllMax~s, and in the cycles we captured the memory port sat idle most of the time, so our next step is to schedule longer memory reads per request.
-
-\bibliographystyle{IEEEtran}
-\bibliography{refs}
-\suppressfloats[t]
-
-\appendices
-
-\section{Latency readings}
-\label{app:latency}
-Table~\ref{tab:ladder} lists the readings behind Fig.~\ref{fig:latency}(a). Cold means the first request after the service started. Warm means a repeat with caches filled. Table~\ref{tab:stages} lists every reading behind Fig.~\ref{fig:latency}(b). All are single runs.
-
-\begin{table}[t]
-\centering
-\caption{Complete-answer time [s] $\downarrow$ for one saved question, single runs on the physical PYNQ-Z2 at \SI{50}{\mega\hertz}. Cold: first request after startup. Warm: repeat with caches filled. A dash means no warm run was recorded.}
+\caption{Complete-Answer Time for the Test Question}
 \label{tab:ladder}
 \footnotesize
-\begin{tabular}{@{}lccp{0.3\columnwidth}@{}}
+\begin{threeparttable}
+\begin{tabular}{@{}lcc>{\raggedright\arraybackslash}p{0.26\columnwidth}@{}}
 \toprule
-Execution path & Cold & Warm & Timed at \\
+Execution path & Cold (s) & Warm (s) & Timed at \\
 \midrule
 \tablerows{tables/ladderRows.tex}
 \bottomrule
 \end{tabular}
-
-\bigskip
-\caption{Complete-answer time [s] $\downarrow$ at each decoder stage, single runs on the physical PYNQ-Z2. $^\ast$Original checkpoint; other columns use Queue history v2. The NEON stage also added prompt-copy proposals.}
-\label{tab:stages}
-\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}lcccccc@{}}
-\toprule
-Recording & \head{Scalar$^\ast$} & \head{Verified$^\ast$} & \head{v2\\start} & \head{Batched\\fusion} & \head{NEON +\\prompt\\copy} & \head{Native\\quantize} \\
-\midrule
-\tablerows{tables/stageRows.tex}
-\bottomrule
-\end{tabular}
+\tablenote{Single runs on the physical \pynq{} at \SI{50}{\mega\hertz}, v1. Cold: first request after startup. Warm: repeat with caches filled. A dash means no warm run was recorded.}
+\end{threeparttable}
 \end{table}
 
-\section{Contrastive sweep detail}
+\section{Evaluation}
+\label{sec:evaluation}
+
+All board results come from one \pynq, which answers one question at a time. The extended edit set, the sweeps, the answer-quality checks and the forecaster replay ran in the integer reference or in other software on a Mac, not on the board. Each latency value is a single run unless we say otherwise, timed as in Section~\ref{sec:method}. We ask four questions:
+\begin{enumerate}
+\item Do one-row edits change behavior and revert exactly?
+\item How far does an edit spread?
+\item How long does a complete answer take, and what limits it?
+\item Are the answers right?
+\end{enumerate}
+
+\subsection{One-Row Edits Change Outputs and Roll Back Exactly}
+Every parity check in Table~\ref{tab:parity} passed. The walkthrough of Fig.~\ref{fig:walkthrough} predates the edit studies. Its row was fit to \walkFitConstraints{} constraints and differs in \walkRowDiff{} of \rowBytes{} bytes from the Conventional row evaluated below, and the transformer layers ran in floating point on the ARM cores. In the walkthrough, the edit changed the first generated name from \emph{Lily} (token \lilyToken) to \emph{Tim} (token \timToken). \emph{Tim} won by a small margin: it scored \walkTimScoreBefore{} before the edit and \walkTimScore{} after, against \walkLilySum{} for \emph{Lily}. The story then continued as the unedited model continues it when we type \emph{Tim} into the prompt ourselves: the next \walkPreserved{} tokens were the same. The row write took \ms{\walkApplyMs} to apply and \ms{\walkRestoreMs} to restore, in one run. Rollback restored \emph{Lily} and the full output-layer hash. We rebooted the board and ran the whole sequence again from a cold start. It passed in \seconds{\coldSuiteSeconds}.
+
+Table~\ref{tab:lm001} gives the LM001 comparison. The board and the integer reference produced the same tokens in all \lmRuns{} runs. The prompt-only instruction never produced \emph{Tim}. \stories{} was not trained to follow instructions, so this is a weak baseline. Its prefix is also prepended to control prompts, so its \lmPromptControls/\lmControls{} unchanged controls is expected and says nothing about spread. The Conventional row met the pass rule with \lmConvHits{} hits and \lmConvControls{} unchanged controls. The Astra row did not: it ranked \emph{Tim} in its top two on all \astraTopTwoLm{} target prompts but selected it on only \lmAstraHits, one short of the rule. Both rows changed the same control, where a small dog named \emph{Max} became \emph{Tim}. With \lmTargets{} prompts per group the intervals are wide, so LM001 alone cannot separate the two rows.
+
+\begin{table}[t]
+\centering
+\caption{LM001 Held-Out Comparison on \stories}
+\label{tab:lm001}
+\footnotesize
+\begin{threeparttable}
+\begin{tabular}{@{}lr@{\ }lc@{}}
+\toprule
+Condition & \multicolumn{2}{c}{Hits} & Controls unchanged \\
+\midrule
+Original model & \lmOrigHits/\lmTargets & & \lmOrigControls/\lmControls \\
+Prompt-only instruction & \lmPromptHits/\lmTargets & & \lmPromptControls/\lmControls \\
+Conventional row & \lmConvHits/\lmTargets & \lmConvCI & \lmConvControls/\lmControls \\
+Astra row & \lmAstraHits/\lmTargets & \lmAstraCI & \lmAstraControls/\lmControls \\
+\bottomrule
+\end{tabular}
+\tablenote{Board and integer-reference tokens were identical in all \lmRuns{} runs. Brackets: Wilson 95\% interval.}
+\end{threeparttable}
+\end{table}
+
+The same mechanism works on the diagnostic model. Astra wrote a \SI{\flanEditBytes}{\byte} change to output row \flanEditRow{} of \flan, on v1, so that the answer to a captured question would begin with ``Now''. The edited answer began with ``Now'', and still did after we power-cycled the board. The model also repeated ``Now'' later in the answer, which made the answer read worse. Restoring the original row reproduced the original answer byte for byte on the same input. A second, \SI{\flanRowBytes}{\byte} edit targeted a wrong ``no backlog'' answer. It fixed the one case it was written for but failed on reworded questions and on recordings where the pool had recovered, so we did not ship it.
+
+\textit{Takeaway: a hash-guarded write of one row (\SI{\rowBytes}{\byte} on \stories, up to \SI{\flanRowBytes}{\byte} on \flan) changed what the model said, and rollback restored the original output exactly in every case we tested.}
+
+\subsection{Edits Spread to Other Naming Prompts}
+Table~\ref{tab:spread} and Fig.~\ref{fig:edits} show the extended set. The original model never chose \emph{Tim} on these targets. The frozen Conventional row hit \conventionalHits{} of \extTargets{} targets and the Astra row \astraHits. On \convVsAstraB{} prompts only the Conventional row hit, and on \convVsAstraC{} only the Astra row did ($p=\convVsAstraP$, exact McNemar). A slightly stronger Astra row closes the gap: it reaches \astraHitsAtElevenTenths{} hits at $\alpha=1.1$ and \astraHitsAtTwelveTenths{} at $\alpha=1.2$. At $\alpha=1$, \emph{Tim} is in its top two on \astraTopTwo{} of \extTargets{} targets.
+
+\begin{table}[t]
+\centering
+\caption{One-Row Edits on the Extended Set}
+\label{tab:spread}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{threeparttable}
+\begin{tabular}{@{}lr@{\ }lr@{\ }lc@{}}
+\toprule
+Row & \multicolumn{2}{c}{Hits} & \multicolumn{2}{c}{Renames} & Other changed \\
+\midrule
+Conventional & \conventionalHits/\extTargets & \convHitCI & \conventionalLeaks/\extNaming & \convLeakCI & \conventionalOther/\extOther \\
+Astra & \astraHits/\extTargets & \astraHitCI & \astraLeaks/\extNaming & \astraLeakCI & \astraOther/\extOther \\
+Contrastive$^\dagger$ & \contrastiveHits/\extTargets & \contrHitCI & \contrastiveLeaks/\extNaming & \contrLeakCI & \contrastiveOther/\extOther \\
+\midrule
+\multicolumn{6}{@{}l}{\textit{Renames on the \extNamingClean{} clean naming controls$^\ddagger$}} \\
+Conventional & & & \conventionalLeaksClean/\extNamingClean & \convLeakCleanCI & \\
+Astra & & & \astraLeaksClean/\extNamingClean & \astraLeakCleanCI & \\
+Contrastive$^\dagger$ & & & \contrastiveLeaksClean/\extNamingClean & \contrLeakCleanCI & \\
+\midrule
+Pass rule$^\dagger$ & $\ge$\criterionHits/\extTargets & & $\le$\criterionLeaks/\extNaming & & \criterionOther/\extOther \\
+\bottomrule
+\end{tabular}
+\tablenote{\stories, integer reference, $\alpha=1$, \extTargets{} targets and \extControls{} controls. Brackets: Wilson 95\% interval. $^\dagger$Pass rule committed before the contrastive run, after the frozen rows' results on these prompts were known. $^\ddagger$Leaves out naming control \contaminatedIndex, which is also an authoring prompt.}
+\end{threeparttable}
+\end{table}
+
+The change needs the naming slot. Every control that changed was a naming control: the Conventional row renamed \conventionalLeaks{} of \extNaming{} and the Astra row \astraLeaks, and none of the \extOther{} ordinary controls changed at $\alpha=1$, including the two that mention \emph{Lily}. Under the Conventional row a cat, a bird, a truck, a fish, a mom and an old man all became \emph{Tim}. Within naming prompts the Conventional row still favors the girl context (\conventionalHits/\extTargets{} targets against \conventionalLeaks/\extNaming{} other names), and the Astra row does not (\astraHits/\extTargets{} against \astraLeaks/\extNaming). Two caveats apply to the denominator. One naming control, ``One day, a boy named'', already gives \emph{Tim} in the original model, so only \namingCanRename{} of the \extNaming{} can be renamed to \emph{Tim}. Another appears in the authoring packet; without it the counts are \conventionalLeaksClean{} and \astraLeaksClean{} of \extNamingClean.
+
+Turning the edit down does not separate hits from renames. In Fig.~\ref{fig:edits}(a), the Conventional row gets its first hit at $\alpha=\conventionalFirstHitAlpha$ and its first rename at $\alpha=\conventionalFirstLeakAlpha$, and it does not reach half its peak hits until $\alpha=\conventionalHalfHitAlpha$. The Astra row gets its first hit and first rename at $\alpha=\astraFirstLeakAlpha$ and reaches half its peak hits at $\alpha=\astraHalfHitAlpha$. In both rows, most renames arrive before most hits. At $\alpha=0.8$ the Conventional row has renamed \convLeaksAtEight{} controls and hit \convHitsAtEight{} target, and the Astra row has renamed \astraLeaksAtEight{} and hit \astraHitsAtEight.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/edits.pdf}
+\caption{One-row edits reach other naming prompts; a refit with counter-examples renamed \contrastiveLeaks{} of \extNaming{} against \conventionalLeaks{} on this prompt set ($p=\renameP$). \stories, integer reference, greedy decoding, \extTargets{} held-out targets and \extNaming{} naming controls. (a)~Each frozen row at edit strength $\alpha$; solid lines are hits and dashed or dotted lines are renames. A rename counts any change in the \extNewTokens{} generated tokens, so at $\alpha\ge1.8$ the Astra count includes the control whose first name stays \emph{Tim}. (b)~Hits against renames for the frozen rows and the exploratory sweep; each sweep point is labeled with its number of positives ($+$) and negatives ($-$). Error bars are Wilson 95\% intervals and the shaded box is the pass rule. Fits with identical outcomes share a marker; the fit with no extra constraints coincides with the Conventional point.}
+\label{fig:edits}
+\end{figure*}
+
+The contrastive row passed its rule. It hit \contrastiveHits{} of \extTargets{} targets, renamed \contrastiveLeaks{} of \extNaming{} naming controls and changed \contrastiveOther{} of \extOther{} ordinary ones. The one remaining rename was a loss of \emph{Tim}: a boy whom the original model names \emph{Tim} became \emph{Timmy} (token \contrastiveMovedToken), so the negatives also suppress \emph{Tim} where it belonged. On the LM001 set it hit \contrastiveLmHits{} of \lmTargets{} targets and left all \contrastiveLmControls{} controls unchanged, and the dog named \emph{Max} keeps its name. The reduction is not significant at 0.05: the Conventional row alone renamed \renameB{} controls and the contrastive row alone renamed \renameC{} ($p=\renameP$, exact McNemar). The hits are not the same set either: the contrastive row lost \hitB{} of the Conventional row's hits and gained \hitC{} ($p=\hitP$). The test is also narrow. Ten of the eleven naming controls share the template of the eight negatives (``Once upon a time, there was a \dots{} named''), and five of the eight negatives are near-synonyms of naming controls (puppy and dog, kitten and cat, grandpa and old man, dad and mom, toy car and truck). The result shows only that the fit holds on paraphrases of its negatives. The one naming control with a different template is the one that changed.
+
+The exploratory sweep in Fig.~\ref{fig:edits}(b) shows what each part does. With negatives only, renames fall to \sweepNegOnlyLeaksMin{} or \sweepNegOnlyLeaksMax{} of \extNaming, and hits fall to \sweepNegFewHits{} of \extTargets{} with one or two negatives and \sweepNegOnlyHits{} with four or more. With positives only, renames rise to \sweepPosOnlyLeaks{} of \extNaming. Three positives with four or more negatives reach \sweepBestHits{} hits and \sweepBestLeaks{} rename. Of the \sweepFits{} sweep fits, \sweepPassing{} meet the rule. All \sweepPassing{} have the same $L_1$ change and the same outcomes, so they are probably the same row found \sweepPassing{} times (Appendix~\ref{app:sweep}).
+
+\textit{Takeaway: both frozen rows changed names on other naming prompts (\conventionalLeaks{} and \astraLeaks{} of \extNaming) and on no ordinary prompt, and a weaker edit lost hits before it lost renames. Refitting with \positiveAuthoring{} positives and \negativeAuthoring{} negatives cut renames to \contrastiveLeaks{} of \extNaming{} and kept \contrastiveHits{} of \extTargets{} hits. That difference is not significant on this prompt set ($p=\renameP$).}
+
+\subsection{Latency of Complete Answers}
+\label{sec:latency}
+Complete answers took \secrange{\latAllMin}{\latAllMax} on three \recordingReadings-reading development recordings and \seconds{\liveQueryComplete} on a live-stream question.
+
+Fig.~\ref{fig:latency}(a) fixes the test question and changes only where the work runs. The largest gain came from the multiplier array. The question has \promptTokens{} prompt tokens and \decoderSteps{} decoder steps on v1, decoded one token per model pass (Table~\ref{tab:ladder}). The first build took \seconds{\latBaseline}. Every projection already ran on the FPGA, through the row scorer, one 64-value input slice per request. Moving only two query matrices in the first block to the array did not help (\seconds{\latTwoQuery}). Moving every learned matrix cut the time to \seconds{\latArray}, \latArraySpeedup$\times$ faster. One encoder projection fell from a median of \ms{\projEncBefore} (range \projEncBeforeRange, $n=\projRuns$) to \ms{\projEncAfter}, and one decoder projection from \ms{\projDecBefore} to \ms{\projDecAfter}.
+
+The remaining steps changed software on the ARM cores, except the command queue, which also needed the final overlay. Packing weights in C++ and caching them gave \seconds{\latCache}. Three later steps changed little: keeping the output layer in \SI{\residentMiB}{\mebi\byte} of memory the FPGA reads directly (\seconds{\latResident}), a command queue that runs several multiplies per request (\seconds{\latQueue} with the top token picked on the FPGA), and the shipped setting with the top token picked in software (\seconds{\latQueueSoft}). These are first requests after a service start; repeats were \seconds{\latQueueWarm} and \seconds{\latQueueSoftWarm}. From the all-matrices array to the shipped setting the time fell from \seconds{\latArray} to \seconds{\latQueueSoft} (\latSoftwareSpeedup$\times$, across two timing methods and two overlays).
+
+From first build to last the time fell \latLadderSpeedup$\times$. Three caveats apply. The runs used three timing methods with up to \seconds{\pollSecondsQueue} of polling error. Both ends of the comparison run on the FPGA, and we did not time ARM-only inference on the board. The two array runs used the intermediate overlay and the queue runs the final one. Every build produced the same answer text, byte for byte. For scale, the NumPy integer reference generated the \referenceAnswers{} quality-check answers of Section~\ref{sec:quality} in \secrange{\referenceSecondsMin}{\referenceSecondsMax} each (v1, different prompts; the evidence file does not record the machine). Our final complete answers took \referenceSlowdownMin{} to \referenceSlowdownMax{} times that median.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/latency.pdf}
+\caption{One test question as the execution path changes (a), and three recordings and one reworded question as the decoder changes (b). Physical \pynq{} at \SI{50}{\mega\hertz}, single runs. (a)~v1, \decoderSteps{} decoder steps, timed with three methods; no ARM-only baseline. The dashed and dotted lines are the memory-read and arithmetic lower bounds for this question on our design, assuming perfect use of the port and the multipliers. (b)~Open markers on the left use v1 and are timed from clicking Ask to the rendered answer; markers on the right use v2 and stop at the Mac backend. The two segments differ in checkpoint and timer and are not comparable.}
+\label{fig:latency}
+\end{figure*}
+
+We next ask how fast the test question could go on this design. Following the roofline method~\cite{williams2009roofline}, we compute two lower bounds. The question ran \projectionsFloorCase{} projections. By our replay of the tiling, the array reads \SI{\weightGB}{\giga\byte} of weights for them. The design keeps activations in block RAM and reuses them, which by our calculation cuts activation traffic from \SI{\activationNoReuseMB}{\mega\byte} to \SI{\activationReuseMB}{\mega\byte}. At the \SI{\readBandwidthMB}{\mega\byte\per\second} of one port, weight and activation reads take at least \seconds{\floorDdr}, assuming that reuse. The arithmetic takes at least \seconds{\floorMac}. Reads and arithmetic can overlap, so the bounds do not add. Both assume perfect use of the hardware and leave out score writes, ARM work and transport. The measured \seconds{\latQueueSoft} is well above both, so most of the time goes elsewhere. The read bound applies to one port; the chip has four.
+
+Fig.~\ref{fig:latency}(b) tracks three recordings and one question worded differently from the training set. We first changed the decoder. Scalar decoding generates one token per model pass. Verified decoding proposes several next tokens at once, checks them in one pass of the unchanged model, and keeps only those the model would have picked, so the text equals greedy decoding~\cite{leviathan2023speculative}. Proposals come from a small lookup table built from development examples, and each pass checks up to \verifyWidthOld{} positions. On v1, scalar decoding took \secrange{\latScalarMin}{\latScalarMax} and verified decoding \secrange{\latVerifyMin}{\latVerifyMax}, with identical text.
+
+We then switched to v2, which answers with different text, so times before and after the switch are not comparable. The first v2 build took \secrange{\latVtwoMin}{\latVtwoMax}. We then made three changes to how the ARM cores prepare work. Batched fusion sends matrices that share an input in one request. NEON packing uses the ARM vector unit to pack \eightbit{} inputs. Native quantization converts activations to 8 bits in C. The NEON build also began proposing tokens copied from the prompt~\cite{saxena2023prompt} and widened verification to \verifyWidth{} positions, and we did not measure these separately. After all three, answers took \secrange{\latBestMin}{\latBestMax} (Table~\ref{tab:latency}). On these development recordings the decoder accepted \currentAccepted{} of \currentProposed{} proposed tokens. In the integer reference, the prompt-copy proposals and wider verifier cut verifier passes from \verifierBaselinePasses{} to \verifierPasses{} across \verifierQuestions{} frozen questions, with every token unchanged. The board kept scoring \liveMin{} to \liveMax{} live telemetry windows during each of the four final answers. Including the two repeats described below, the \latAllRuns{} runs on the final build span \secrange{\latAllMin}{\latAllMax}.
+
+\begin{table*}[t]
+\centering
+\caption{Complete-Answer Time per Recording at Each Decoder Stage}
+\label{tab:latency}
+\footnotesize
+\begin{threeparttable}
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+Recording & Scalar$^\ast$ & Verified$^\ast$ & \head{v2\\start} & \head{Batched\\fusion} & \head{NEON +\\prompt copy} & \head{Native quantize\\(final)} & \head{First text\\(final)} \\
+\midrule
+\tablerows{tables/latencyRows.tex}
+\bottomrule
+\end{tabular}
+\tablenote{All times in seconds. Physical \pynq, single runs. $^\ast$v1, timed from clicking Ask to the rendered answer. Other columns use v2 and stop at the Mac backend. First text is the time until the first part of the answer reaches the Mac. Rows are the three development recordings of Section~\ref{sec:models}; New wording asks a reworded question about the growing recording.}
+\end{threeparttable}
+\end{table*}
+
+Each cell is a single run, and we have no identical repeats. Three near-repeats give a sense of the noise. The recovered recording took \seconds{\latRecoveryFinal} on the first request after startup and \seconds{\latWarmRepeat} when asked again, \seconds{\latWarmDelta} apart. The reworded question took \seconds{\latNewFinal}, then \seconds{\latNewRestart} after a service restart that also added a fallback for a failed memory allocation, \seconds{\latRestartDelta} apart. After that restart, an edit check ran the zero-waiting recording again in \seconds{\zeroProofSeconds}, against \seconds{\zeroFinalSeconds} before; the check stores its own elapsed time, and we did not confirm that it uses the same timer. The largest of these differences, \seconds{\latRestartDelta}, is our rough noise estimate from three pairs. Three earlier runs on the v2-start build agree with it: they took \seconds{\tunedRecovery}, \seconds{\tunedGrowing} and \seconds{\tunedHealthy}, within \secrange{\tunedDeltaMin}{\tunedDeltaMax} of that column, although their evidence file notes that a model-selection setting may have differed. By this estimate, several single stage-to-stage steps are within noise (Appendix~\ref{app:latency}).
+
+No run met the \seconds{\targetSeconds} target for a complete answer, and first text met it only on some runs. First text took \secrange{\firstTextMin}{\firstTextMax} in Table~\ref{tab:latency}; it exceeded \seconds{\targetSeconds} on the growing recording (\seconds{\firstTextGrowing}) and on the reworded question (\seconds{\firstTextNew}, and \seconds{\firstTextNewRestart} after the restart). Other conditions on the same final release were slower. Timed in the installed app, with interface rendering included, the zero-waiting recording took \seconds{\latInstalledHealthy}, and a bundled sample with \installedSampleReadings{} readings took \seconds{\latInstalledSample} (\installedSampleProjections{} projections). A live-stream question took \seconds{\liveQueryComplete} to complete and \seconds{\liveQueryFirst} to first text. The decoder accepted only \liveQueryAccepted{} of its \liveQueryProposed{} proposed tokens there, against \currentAccepted{} of \currentProposed{} on the development recordings, and it needed \liveQueryProjections{} projections in \liveQueryBlocks{} verification passes. Only the reworded question and the live question test the target's condition of unfamiliar wording.
+
+In the recovered answer, the encoder took \seconds{\phaseEncoder}, the decoder \seconds{\phaseDecoder} and the output layer \seconds{\phaseVocabulary}. Waiting on \phaseCommands{} FPGA commands took \seconds{\phaseRoundtrip} and packing weights \seconds{\phasePackWeights}. These phases overlap, so they do not sum to the total. The final answers use \projectionsCurrentMin{} to \projectionsCurrentMax{} projections each, against \projectionsFloorCase{} for the test question.
+
+We do not know how much of the final answers' time is memory reads. The ARM cores uploaded \SIrange{\currentWeightMBMin}{\currentWeightMBMax}{\mega\byte} of weights per answer, one copy of each matrix. That upload alone takes \secrange{\currentUploadFloorMin}{\currentUploadFloorMax} at full port speed, a lower bound on the reads. The FPGA reads more than it is sent, because the array rereads a matrix once for every 8 positions of a batched projection. In our encoder capture, a $384\times512$ matrix (\SI{\captureWeightKB}{\kilo\byte}) with \captureBatch{} positions was read \captureGroups{} times, \SI{\captureWeightReadMB}{\mega\byte} of the \SI{\captureReadMB}{\mega\byte} the port delivered. We did not compute the read traffic of the final answers: that needs a replay with the v2 checkpoint, which is not in our evidence. If the port delivers data in \pct{\ddrBeatEnc} of cycles, as in that capture, every \SI{100}{\mega\byte} read takes about \seconds{0.9}. We therefore cannot rule out the memory path as a limit.
+
+In the same two isolated captures, on v1, the multipliers had data in \pct{\macFeedEnc} and \pct{\macFeedDec} of cycles (Fig.~\ref{fig:utilization}), and memory delivered a 64-bit word in \pct{\ddrBeatEnc} and \pct{\ddrBeatDec}. A \emph{request round trip} is the time the ARM-side driver spends on one FPGA request, from submitting it to reading the result. The decoder projection ran for \ms{\decCycleMs} of clock cycles inside a \ms{\decHostMs} round trip. The encoder projection ran for \ms{\encCycleMs} of \ms{\encHostMs}, so for batched projections the FPGA is most of the request. In earlier isolated samples, the time spent waiting on the FPGA was \ms{\projDecRoundtrip} of a \ms{\projDecAfter} decoder projection, next to \ms{\projDecPack} of packing, \ms{\projDecAllocate} of buffer allocation and \ms{\projDecUpload} of upload, and \ms{\projEncRoundtrip} of an \ms{\projEncAfter} encoder projection. The final build reuses its buffers, and we did not capture counters on it.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/utilization.pdf}
+\caption{In two captured projections, the array is idle most cycles and the memory port is used under a third of the time. Share of elapsed cycles with data at the multipliers (hatched bars) and with a 64-bit word delivered from DDR memory (dotted bars); labels give batch $\times$ input depth $\rightarrow$ output rows. One hardware-counter capture each, v1, \pynq{} at \SI{50}{\mega\hertz}.}
+\label{fig:utilization}
+\end{figure}
+
+\textit{Takeaway: complete answers took \secrange{\latAllMin}{\latAllMax} on three development recordings and \seconds{\liveQueryComplete} on a live-stream question, above the \seconds{\targetSeconds} target. We have not separated DDR read time from ARM-side work and FPGA command round trips.}
+
+\subsection{Answer Quality, and What Parity Does Not Fix}
+\label{sec:quality}
+Table~\ref{tab:quality} gives the answer quality of each checkpoint in the W8A8 integer reference. Each answer must meet five requirements: the current state, the current count and peak, a labeled forecast, uncertainty about the cause, and a concrete next measurement. The rejected checkpoint met all five on none of \flanCases{} synthetic incidents, so we never served it. For v1 we wrote \flanCases{} new incidents and wordings. A keyword scorer fixed before the run passed \replacementLexicalPass{} of the \flanCases{} answers. It failed three because it did not recognize the word ``warns''. A single direct review of the same \flanCases{} answers accepted all of them. The review file does not record the reviewer, and there was no second rater.
+
+\begin{table}[t]
+\centering
+\caption{Answer Quality of the \flan{} Checkpoints}
+\label{tab:quality}
+\footnotesize
+\begin{threeparttable}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Checkpoint & Check & Result \\
+\midrule
+Rejected & all five requirements & \firstFlanPass/\flanCases \\
+v1 & all five, frozen keyword scorer & \replacementLexicalPass/\flanCases \\
+ & all five, single direct review & \replacementDirectPass/\flanCases \\
+ & current state, frozen histories & \originalStatesRight/\originalStatesTotal \\
+\texttt{balanced\_160} & queue-free histories right & \balancedFreeRight/\balancedFreeTotal \\
+ & recovered histories recognized & \balancedRecovered/\balancedRecoveredTotal \\
+v2 & current state, frozen histories & \historyCases/\historyCases \\
+ & active-queue trends & \historyActive/\historyActive \\
+ & numeric current count cited & \the\numexpr\historyCases-\historyCountMissing\relax/\historyCases \\
+ & earlier incidents citing current count & \the\numexpr\historyArchived-\historyOmittedZero\relax/\historyArchived \\
+\bottomrule
+\end{tabular}
+\tablenote{Synthetic incidents, W8A8 integer reference. Counts are cases meeting the stated check. The review files do not record who did the direct and frozen-history reviews.}
+\end{threeparttable}
+\end{table}
+
+The board repeats the model's wrong answers exactly. v1 called the zero-waiting recording ``cleared''. In a separate live question it reported \missWaiting{} requests waiting and a peak of \missPeak, then said the queue had cleared. The integer reference produced the same wrong text. v2 fixed the zero-waiting case on the board.
+
+We tested the later checkpoints on \historyCases{} frozen histories, \historyActive{} of them with an active queue, and on \historyTargeted{} targeted questions. A \emph{history} is a sequence of queue depths written before the run and not used in training. The \texttt{balanced\_160} candidate got all \balancedFreeTotal{} queue-free histories right but recognized \balancedRecovered{} of \balancedRecoveredTotal{} recovered ones and described falling queues as rising, so we rejected it. v2 got the current state right on all \historyCases{} and every active-queue trend, and it answered all \historyTargeted{} targeted questions. In \historyCountMissing{} of the \historyCases{} answers it left out the numeric current count. Answers to open questions such as ``What's wrong?'' left out the forecast's end-of-horizon size. We also reran the \historyArchived{} incidents from the earlier checks. In \historyOmittedZero{} recovery answers the model implied a count of zero without stating it. v1 got the current state right on \originalStatesRight{} of \originalStatesTotal{} histories.
+
+\emph{Forecaster.} The telemetry forecaster warns when a queue is about to form. It misses many queues and warns late. A \emph{window} is one short run of readings that it scores, an \emph{episode} is one period with requests waiting, and \emph{lead} is how long before an episode the warning comes. In a Mac replay of \telemetryWindows{} held-out windows, the fixed-point forecaster warned on \telemetryFixedWarned{} of \telemetryEpisodes{} episodes and missed \telemetryFixedMissed, with \telemetryFixedFalse{} false alerts (\telemetryFalsePerHour{} per hour). Its fixed-point decisions differed from floating point on \telemetryFlips{} windows. Its median lead was \seconds{\telemetryLeadSeconds}, although generated answers speak of ``the next ten seconds''. On the board it warned on \poolWarned{} of \poolEpisodes{} episodes with \poolFalseAlerts{} false alerts and a median lead of \ms{\poolLeadMs}; \poolEarly{} warnings came at least \seconds{1} early. A second profile warned on \secondPoolWarned{} with \secondPoolFalse{} false alert (F1 over episodes \secondPoolFoneScore, median lead \ms{\secondPoolLeadMs}, \secondPoolEarly{} warnings at least \seconds{1} early). A plain rule that warns when the pool is full warned on \capacityWarned{} with \capacityFalse{} false alert (F1 \capacityFoneScore). The shipped profile has the lowest F1 of the three (\poolFoneScore) and the most false alerts; we kept it because it gives the most warnings at least \seconds{1} early.
+
+\textit{Takeaway: parity guarantees the board says what the quantized model says, including when the model is wrong. Fixing wrong answers needs better weights, and our one attempt to do that with a one-row edit did not generalize.}
+
+\section{Limitations}
+\label{sec:limits}
+
+\emph{Scope.} Every board result comes from one \pynq, and every result from two small models. All telemetry is synthetic, and we have not measured accuracy on production traffic. A second developer has not reproduced the hardware runs, and a power-cycle test of v2 is still open.
+
+\emph{Baselines not measured.} We did not time ARM-only inference on the board, and we have no GPU baseline, so the \latLadderSpeedup$\times$ figure compares two FPGA paths. The only software timing is the integer reference's \secrange{\referenceSecondsMin}{\referenceSecondsMax} per answer on other prompts. We measured no power or energy. We have no full-reload time to compare with the \ms{\walkApplyMs} row write. For the edit study we did not compare against a constant bias on the \emph{Tim} score, a prompt-only condition on the extended set, or published editing methods. We tried one prompt-only wording, and we did not test a random row change of the same $L_1$ size. We did not try more memory ports or a faster port clock.
+
+\emph{Edit study: coverage.} The edit studies cover one checkpoint, one task, one target name and one Astra proposal. The vocabulary holds \singleTokenNames{} whole-word name tokens (\emph{Lily}, \emph{Tim}, \emph{Timmy}), so we tested one target. Astra came from a nondeterministic external model, so its row cannot be regenerated, and one proposal cannot separate its quality from chance. Astra's response file for the story-model edit records no model identifier or access date; the file for its \flan{} edit records \texttt{gpt-6.2-astra}. We tested one naming slot and one set of constraints, so we cannot say whether the spread we saw holds for other slots, and we did not probe hidden states to explain it. The extended and contrastive studies ran on the integer reference, which matched the board on LM001, and were not rerun on the board. Edits apply only between requests, and we did not test changing a row in the middle of an answer.
+
+\emph{Edit study: statistics.} The prompts are our own paraphrases of a few templates, so intervals and $p$-values describe this prompt set only. The Astra row's low hit count at $\alpha=1$ disappears at $\alpha=1.2$. One naming control of the extended set was an authoring prompt. We chose the contrastive negatives after seeing the frozen rows' renames on the same prompts. Ten of the eleven naming controls share their template, and five of the eight negatives are near-synonyms of naming controls. The pass rule was committed seconds before the run (rule commit \ruleTime, result file written \contrastiveWrittenTime, results committed \resultTime), by local commit only, and its thresholds were chosen after we knew the frozen rows' scores. The reduction from \conventionalLeaks{} to \contrastiveLeaks{} renames is not significant with \extNaming{} controls; a fresh third prompt set would test the fit cleanly.
+
+\emph{Latency.} Latency cells are single runs, and our three near-repeat pairs moved by up to \seconds{\latRestartDelta}. Runs used four timing methods, and Mac timings include polling of up to \seconds{\pollSecondsQueue}. The two segments of Fig.~\ref{fig:latency}(b) use different checkpoints and timers and cannot be compared directly. The \seconds{\floorDdr} lower bound covers only the test question and assumes activations stay in block RAM. We did not compute the read traffic of the final answers, so we cannot say whether the memory port bounds them. We captured cycle counters only on v1. The recordings are development inputs, and the proposal table was trained on development examples, so latency on unfamiliar wording may be higher, as the live-stream question suggests.
+
+\emph{Quality.} Parity means the board matches the quantized reference, not the floating-point model. The \stories{} fixed-point runtime diverged from floating point on \fixedPointDiverged{} of \fixedPointPrompts{} prompts, and we did not compare the answer quality of the floating-point and \eightbit{} \flan. For \flan{} we did not compare per-layer scores on real activations. For v1, exactness there rests on byte-equal answer text. For v2 we did not compare any board answer with the integer reference; we checked only that repeated board answers agree. The \projectionArrayScores{} shape-check scores ran on the intermediate overlay, and on the final overlay, which served every v2 answer, we compared \queueScores{} queue scores. Answer quality comes from the integer reference. Both the direct review and the frozen-history review were done once, the files do not record the reviewer, there was no second rater, and no blinding protocol was recorded. v2 was trained on the same synthetic generator after we saw v1's errors. The forecaster misses \pct{\telemetryMissShare} of episodes in the Mac replay and \pct{\poolMissShare} on the board (\poolMissed{} of \poolEpisodes), and its median lead is under half a second.
+
+\section{Related Work}
+\label{sec:related}
+
+\emph{FPGA inference for language models.} FlightLLM~\cite{zeng2024flightllm} and DFX~\cite{hong2022dfx} map large models onto data-center FPGAs with high-bandwidth memory. LlamaF~\cite{xu2024llamaf} accelerates TinyLlama 1.1B on a Zynq UltraScale+ ZCU102, a much larger device than the Zynq-7020. We use the smaller chip, check every compared score against an integer reference, and edit weights between requests.
+
+\emph{Knowledge editing.} ROME~\cite{meng2022rome} and MEMIT~\cite{meng2023memit} change facts by editing feed-forward weights, and Knowledge Neurons~\cite{dai2022neurons} locate neurons tied to facts. These methods target factual recall in larger models on GPUs. Editing benchmarks also test how an edit propagates to related facts and whether it leaves unrelated ones alone~\cite{cohen2024ripple}. Our spread measurement is a small test of the second kind for one output row. Feed-forward updates can be read in the vocabulary space that the output layer defines~\cite{geva2022ffn}, which is the space our edits change directly.
+
+\emph{Weight perturbation.} Bit-flip attacks show that changing a few bits of a quantized network's weights can change its outputs~\cite{rakin2019bitflip}. Our edits are deliberate changes of the same kind. The board checks hashes before each write and can undo it, and we measure the effect on held-out prompts.
+
+\emph{Efficient inference.} Our decoder follows speculative decoding~\cite{leviathan2023speculative} and prompt lookup~\cite{saxena2023prompt}: cheap proposals, checked by the unchanged model. Our \eightbit{} format is integer-only quantization in the sense of Jacob et al.~\cite{jacob2018quantization}, without a zero point. LLM.int8()~\cite{dettmers2022int8} and AWQ~\cite{lin2024awq} quantize larger models and keep part of the computation in floating point. FlashAttention~\cite{dao2022flashattention} reduces memory traffic on GPUs, and vLLM~\cite{kwon2023vllm} reduces KV-cache memory waste.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+A \pynq{} served two quantized language models with every compared score equal to the integer reference, including \lmBoardScores{} scores in the held-out edit study. Overwriting one \SI{\rowBytes}{\byte} output row changed the name the story model picks, and writing the old bytes back restored it. The change needs the naming slot: the two frozen rows also changed the name in prompts about other characters, wherever a name was due, and in no ordinary prompt. A row refit with \positiveAuthoring{} positive and \negativeAuthoring{} negative prompts renamed \contrastiveLeaks{} of \extNaming{} naming controls, against \conventionalLeaks{} for the Conventional row. That difference is not significant on this prompt set ($p=\renameP$), and we have not rerun the row on the board. For the diagnostic model, a multiplier array and ARM-side software took the test question from \seconds{\latBaseline} to \seconds{\latQueueSoft}. On the final build a complete answer took \secrange{\latAllMin}{\latAllMax} on three development recordings and \seconds{\liveQueryComplete} on a live-stream question, above our \seconds{\targetSeconds} target. Next we will separate DDR read pacing from ARM-side work with counters on the final build.
+
+\appendices
+
+\section{Latency Measurements}
+\label{app:latency}
+Table~\ref{tab:ladder} lists the times behind Fig.~\ref{fig:latency}(a). Cold means the first request after the service started. Warm means a repeat with caches filled. Table~\ref{tab:latency} lists every time behind Fig.~\ref{fig:latency}(b). All are single runs. Single steps smaller than \seconds{\latRestartDelta}, the largest near-repeat difference we observed, may be noise. That covers batched fusion on three recordings (\secrange{\fusionStepSmallMin}{\fusionStepSmallMax}), native quantization on all four (\secrange{\nativeStepMin}{\nativeStepMax}) and the NEON step on the zero-waiting recording, which was slightly slower. Only the cumulative change from v2 start to the final stage exceeds \seconds{\latRestartDelta} on every recording (\secrange{\totalStepMin}{\totalStepMax}).
+
+\section{Contrastive Sweep Detail}
 \label{app:sweep}
 Table~\ref{tab:sweep} lists every fit in the exploratory sweep. We ran the sweep after seeing the contrastive result. Its pass rule was the same, but its settings were chosen afterwards, so we report it as exploratory. $L_1$ is the total absolute change to the row, in 8-bit steps. Every fit starts from a base set of \sweepBaseConstraints{} constraints, one more than the \fitConstraints{} of the frozen Conventional fit. The fit with no extra constraints ($L_1=\sweepBaseLone$) reproduces the Conventional row's counts (\sweepBaseHits/\extTargets{} hits, \sweepBaseLeaks/\extNaming{} renames) but is a different row. The sweep did not store row hashes. Fits with identical $L_1$ and outcomes are probably the same row, because the extra negatives were inactive.
 
 \begin{table*}[t]
 \centering
-\caption{Exploratory contrastive sweep on stories260K (integer reference, $\alpha=1$). Pass rule: at least \criterionHits/\extTargets{} hits, at most \criterionLeaks/\extNaming{} renames and \criterionOther/\extOther{} other changes. The committed contrastive fit is the row with 3 positives and 8 negatives.}
+\caption{Exploratory Contrastive Sweep on \stories}
 \label{tab:sweep}
 \footnotesize
+\begin{threeparttable}
 \begin{tabular}{@{}cccccccccc@{}}
 \toprule
-Positives & Negatives & Constraints & \head{Row $L_1$\\change} & \head{Hits\\$\uparrow$} & \head{Renames\\$\downarrow$} & \head{Other\\changed $\downarrow$} & \head{LM001\\hits $\uparrow$} & \head{LM001\\controls $\uparrow$} & \head{Meets\\rule} \\
+Positives & Negatives & Constraints & \head{Row $L_1$\\change} & Hits & Renames & \head{Other\\changed} & \head{LM001\\hits} & \head{LM001\\controls} & \head{Meets\\rule} \\
 \midrule
 \tablerows{tables/sweepRows.tex}
 \bottomrule
 \end{tabular}
+\tablenote{Integer reference, $\alpha=1$. Pass rule: at least \criterionHits/\extTargets{} hits, at most \criterionLeaks/\extNaming{} renames and \criterionOther/\extOther{} other changes. The committed contrastive fit is the row with 3 positives and 8 negatives; the fits with 4 and 6 negatives give the same $L_1$ change (\sweepBestLone) and outcomes.}
+\end{threeparttable}
 \end{table*}
 
-\section{Frozen prompt sets}
-\label{app:prompts}
-Table~\ref{tab:prompts} lists the held-out prompts. Rows 1 to \extTargets{} form the extended set frozen in commit \texttt{d9b261d}. Rows L1 to L\lmTargets{} form LM001. A target is a hit when the next generated token is \emph{Tim}.
+\section{Reproduction}
+\label{app:repro}
+The repository is named pinkProcess~\cite{repo}. From its root, these commands rebuild the edit results, the numbers and the PDF.
+{\raggedright
+\begin{enumerate}
+\item Rerun the edit studies on a laptop. They need the pinned \path{run.c}, \mbox{\path{tok512.bin}} and \mbox{\path{stories260K.ppq}}.\\
+\texttt{python3 -m paper.experiments.lm001\_extended}\\
+\texttt{python3 -m paper.experiments.contrastive\_fit}
+\item Rebuild the numbers, tables and figures (\mbox{\path{paper/numbers.tex}}, \path{paper/tables/}).\\
+\texttt{python3 paper/analysis.py}
+\item Build the paper.\\
+\texttt{tectonic -X compile paper/main.tex}
+\end{enumerate}
+}
+Table~\ref{tab:evidence} lists the files the script reads. Values without a file are hand-entered in the \texttt{RECORDED} table of \path{analysis.py}, each under the source it was transcribed from: the project notebook, \path{docs/results.md} or the device datasheet. Commit times come from \texttt{git log}.
 
 \begin{table*}[t]
 \centering
-\caption{Held-out prompts for the edit studies. $^\dagger$Naming control. Rows L1 to L\lmTargets{} are the LM001 prompts.}
+\caption{Evidence Files Read by the Analysis Script}
+\label{tab:evidence}
+\footnotesize
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{0.78\textwidth}@{}}
+\toprule
+Group & Files \\
+\midrule
+Edit studies & \path{paper/experiments/}: \path{lm001-extended.json}, \path{contrastive-fit.json}, \path{contrastive-sweep.json}. \path{build/lm001/}: \path{protocol.json}, \path{authoring.json}, \path{astra-response.json}, \path{conventional.patch.json}, \path{lm001-software.json}, \path{lm001-pynq.json} \\
+Tokenizer & \path{build/lm-inputs/tok512.bin} \\
+Walkthrough and parity & \path{build/pynq/}: \path{live-pynq-selective.json}, \path{lm001-board-fixture.json} \\
+Overlays & \path{build/projection-queue-qualified/utilization.rpt}. \path{kit/evidence/}: \path{physical-systolic-projection.json}, \path{physical-projection-queue-comparison.json} \\
+Latency & \path{kit/evidence/}: \path{physical-systolic-diagnosis.json}, \path{physical-projection-cache.json}, \path{physical-projection-resident-head.json}, \path{open-question-three-physical.json}, \path{open-question-verified-physical.json}, \path{verified-decoder-weight-controls-physical.json}, \path{physical-exact-backend-latency.json}, \path{installed-exact-backend-latency.json}, \path{physical-history-verifier-tuned.json}, \path{diagnosis-latency-floor.json} \\
+Quality & \path{kit/evidence/}: \path{blind-diagnosis-w8a8.json}, \path{blind-diagnosis-replacement-w8a8.json}, \path{grounded-history-independent-review.json}, \path{native-window-projection-quality-miss.json}, \path{history-prompt-copy-parity.json}, \path{physical-diagnosis-edit.json} \\
+Forecaster & \path{build/pool-study/observed/report.json}; \path{pinkprocess/fixed_point.py} (run as a module) \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{Frozen Prompt Sets}
+\label{app:prompts}
+Table~\ref{tab:prompts} lists the held-out prompts. Rows 1 to \extTargets{} form the extended set frozen in commit \texttt{d9b261d}. Rows L1 to L\lmTargets{} form LM001.
+
+\begin{table*}[t]
+\centering
+\caption{Held-Out Prompts for the Edit Studies}
 \label{tab:prompts}
 \footnotesize
+\renewcommand{\arraystretch}{1.05}
+\begin{threeparttable}
 \begin{tabular}{@{}rll@{}}
 \toprule
  & Target prompt & Control prompt \\
@@ -466,70 +564,15 @@ Table~\ref{tab:prompts} lists the held-out prompts. Rows 1 to \extTargets{} form
 \tablerows{tables/promptRows.tex}
 \bottomrule
 \end{tabular}
+\tablenote{$^\dagger$Naming control. $^\ddagger$Also an authoring prompt of the LM001 packet, so the Conventional and contrastive fits carried constraints to keep it unchanged; it is not held out. Rows L1 to L\lmTargets{} are the LM001 prompts.}
+\end{threeparttable}
 \end{table*}
 
-\section{Reproduction}
-\label{app:repro}
-From the repository root~\cite{repo}, these commands rebuild the edit results, the numbers and the PDF.
-\begin{enumerate}
-\item Rerun the edit studies on a laptop with \texttt{python3 -m} and these two modules. They need the pinned \texttt{run.c}, \texttt{tok512.bin} and \texttt{stories260K.ppq}.\\
-\texttt{paper.experiments.lm001\_extended}\\
-\texttt{paper.experiments.contrastive\_fit}
-\item Rebuild \texttt{paper/numbers.tex}, the tables under \texttt{paper/tables/} and every figure.\\
-\texttt{python3 paper/analysis.py}
-\item Build the paper.\\
-\texttt{tectonic -X compile paper/main.tex}
-\end{enumerate}
-Table~\ref{tab:evidence} lists the files the script reads. Values without a file are hand-entered in the \texttt{RECORDED} table of \texttt{analysis.py}, each under the source it was transcribed from: the project notebook, \texttt{docs/results.md} or the device datasheet.
-
-\begin{table*}[t]
-\centering
-\caption{Evidence files read by \texttt{paper/analysis.py}, grouped by result.}
-\label{tab:evidence}
-\footnotesize
-\begin{tabular}{@{}lll@{}}
-\toprule
-Result & Directory & File \\
-\midrule
-Edit studies & \texttt{paper/experiments/} & \texttt{lm001-extended.json} \\
- &  & \texttt{contrastive-fit.json} \\
- &  & \texttt{contrastive-sweep.json} \\
- & \texttt{build/lm001/} & \texttt{protocol.json} \\
- &  & \texttt{authoring.json} \\
- &  & \texttt{astra-response.json} \\
- &  & \texttt{conventional.patch.json} \\
- &  & \texttt{lm001-software.json} \\
- &  & \texttt{lm001-pynq.json} \\
- & \texttt{build/lm-inputs/} & \texttt{tok512.bin} \\
-\midrule
-Walkthrough, parity & \texttt{build/pynq/} & \texttt{live-pynq-selective.json} \\
- &  & \texttt{lm001-board-fixture.json} \\
-\midrule
-Overlays & \texttt{build/projection-queue-qualified/} & \texttt{utilization.rpt} \\
- & \texttt{kit/evidence/} & \texttt{physical-systolic-projection.json} \\
- &  & \texttt{physical-projection-queue-comparison.json} \\
-\midrule
-Latency & \texttt{kit/evidence/} & \texttt{physical-systolic-diagnosis.json} \\
- &  & \texttt{physical-projection-cache.json} \\
- &  & \texttt{physical-projection-resident-head.json} \\
- &  & \texttt{open-question-three-physical.json} \\
- &  & \texttt{open-question-verified-physical.json} \\
- &  & \texttt{verified-decoder-weight-controls-physical.json} \\
- &  & \texttt{physical-exact-backend-latency.json} \\
- &  & \texttt{installed-exact-backend-latency.json} \\
- &  & \texttt{diagnosis-latency-floor.json} \\
-\midrule
-Answer quality & \texttt{kit/evidence/} & \texttt{blind-diagnosis-w8a8.json} \\
- &  & \texttt{blind-diagnosis-replacement-w8a8.json} \\
- &  & \texttt{grounded-history-independent-review.json} \\
- &  & \texttt{native-window-projection-quality-miss.json} \\
- &  & \texttt{history-prompt-copy-parity.json} \\
- &  & \texttt{physical-diagnosis-edit.json} \\
-\midrule
-Forecaster & \texttt{build/pool-study/observed/} & \texttt{report.json} \\
- & \texttt{pinkprocess/} & \texttt{fixed\_point.py (run as a module)} \\
-\bottomrule
-\end{tabular}
-\end{table*}
+\bibliographystyle{IEEEtran}
+\makeatletter
+\let\paperthebibliography\thebibliography
+\renewcommand{\thebibliography}[1]{\paperthebibliography{#1}\interlinepenalty=10000\relax}
+\makeatother
+\bibliography{refs}
 
 \end{document}
