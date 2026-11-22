@@ -614,7 +614,7 @@ On boards with sufficient contiguous memory, add
 FPGA-readable buffers. The driver uses the existing streaming workspace if an
 allocation fails, and the active version determines what the FPGA reads.
 
-The next overlay adds an eight-entry queue and stores each activation tile of
+The [timing-qualified overlay](build/projection-queue-qualified) adds an eight-entry queue and stores each activation tile of
 depth up to 1,024 in block RAM for reuse across output tiles. The block-level
 simulation covers AXI stalls, queue bounds, interrupted batches, retry, and
 the streaming fallback above that depth. To build the optional vocabulary
@@ -626,6 +626,13 @@ first output step preserves the full calibration data for edits. Earlier
 images continue to support the all-matrix configuration above. For isolated
 qualification, add `--hardware-counters` to `kit.benchmark_projection_overlay`
 on a queue-capable image to record useful MAC cycles and 64-bit DDR beats.
+
+The installed kit uses the queue, the shared activation cache, and a 16 MiB
+vocabulary weight budget. FPGA vocabulary reduction remains opt-in. The
+same saved incident completed in 48.289 s cold and 46.944 s warm with
+software token selection on the new image; all learned matrix operations
+ran on the FPGA. The named edit, rollback, and a new incident each reproduced
+their reference answer. [Physical comparison](kit/evidence/physical-projection-queue-comparison.json)
 
 ### Remote Vivado build on Western GAUL
 
