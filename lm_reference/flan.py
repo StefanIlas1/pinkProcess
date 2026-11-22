@@ -114,9 +114,19 @@ class Flan:
         scale = np.maximum(abs(x).max(axis=1, keepdims=True) / np.float32(127), np.float32(1e-30))
         return np.rint(x / scale).clip(-127, 127).astype("int8"), scale
 
+    def _quantize_activations(self, x):
+        native = getattr(self.query_projection, "native", None)
+        # The low-overhead path targets single decoder activations. NumPy
+        # processes the batched encoder rows with vectorized array kernels.
+        if native is not None and x.ndim == 2 and x.shape[0] == 1:
+            result = native.quantize_activations(x)
+            if result is not None:
+                return result
+        return self.quantize_activations(x)
+
     def linear(self, name, x):
         w = self.t[name + ".weight"]
-        q, scale = self.quantize_activations(x)
+        q, scale = self._quantize_activations(x)
         if name == "lm_head" and self.first_output_activation is None:
             self.first_output_activation = q[0].tolist()
         if self.fabric is None:
@@ -140,7 +150,7 @@ class Flan:
         runner = self.query_projection
         if runner is None or runner.scope != "all":
             return [self.linear(name, x) for name in names]
-        q, scale = self.quantize_activations(x)
+        q, scale = self._quantize_activations(x)
         dots = runner.project_many([(name, self.t[name + ".weight"]) for name in names], q)
         results = [d.astype("float32") * scale * self.t[name + ".weight.scale"]
                    for name, d in zip(names, dots)]
@@ -235,7 +245,7 @@ class Flan:
             start = perf_counter_ns()
             # Named row edits use the first raw-score maximum and quantized input.
             if step and getattr(self.query_projection, "argmax_mmio", None) is not None:
-                q, scale = self.quantize_activations(hidden)
+                q, scale = self._quantize_activations(hidden)
                 previous = self.query_projection.head_argmax(
                     self.t["lm_head.weight"], q, scale[0, 0], self.t["lm_head.weight.scale"],
                 )

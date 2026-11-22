@@ -53,6 +53,21 @@ class FlanProjectionTests(unittest.TestCase):
         digest = hashlib.sha256(memoryview(self.weights)).hexdigest()
         self.assertEqual(self.model.install_weight_version(SimpleNamespace(patch=None, classifier_sha256=digest)), digest)
 
+    def test_decoder_quantization_uses_native_when_available_and_falls_back(self):
+        model = self.model
+        calls = []
+
+        def native_quantize(x):
+            calls.append(x.shape)
+            return None
+
+        model.query_projection = SimpleNamespace(native=SimpleNamespace(quantize_activations=native_quantize))
+        x = np.array([[0.5, -0.25, 1.0], [-2.0, 1.4, 2.0]], dtype=np.float32)
+        for sample in (x[:1], x):
+            for actual, expected in zip(model._quantize_activations(sample), model.quantize_activations(sample)):
+                np.testing.assert_array_equal(actual, expected)
+        self.assertEqual(calls, [(1, 3)])
+
     def test_argmax_preserves_first_step_calibration_and_times_generation(self):
         model = self.model
         model.stack = lambda *_: np.array([[-1., 0.25, -0.5, 1.]], dtype=np.float32)

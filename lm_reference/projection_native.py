@@ -30,6 +30,10 @@ def _load_library(path=None):
         lib.pp_projection_dispatch.restype = C.c_int
     except (OSError, AttributeError):
         return None
+    quantize = getattr(lib, "pp_projection_quantize", None)
+    if quantize is not None:
+        quantize.argtypes = [_POINTER, _POINTER, _POINTER, _SIZE, _SIZE]
+        quantize.restype = C.c_int
     return lib
 
 
@@ -61,6 +65,18 @@ class NativeProjection:
 
     def pack_activations(self, destination, source):
         self._pack(destination, source, 8)
+
+    def quantize_activations(self, source):
+        quantize = getattr(self.library, "pp_projection_quantize", None)
+        if (quantize is None or not isinstance(source, np.ndarray) or source.ndim != 2
+                or source.dtype != np.float32 or not source.flags.c_contiguous
+                or not source.flags.aligned or not source.shape[1]):
+            return None
+        output = np.empty(source.shape, dtype=np.int8)
+        scales = np.empty((source.shape[0], 1), dtype=np.float32)
+        if quantize(output.ctypes.data, scales.ctypes.data, source.ctypes.data, *source.shape):
+            return None
+        return output, scales
 
     def pack_weights(self, destination, source, decode):
         self._pack(destination, source, 64 if decode else 8)
