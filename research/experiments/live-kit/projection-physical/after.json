@@ -1,0 +1,16 @@
+{
+  "board_boot_id": "60d4e64d-214c-493f-b29c-eb7e4d7e9a2f",
+  "release": "/opt/pinkprocess-kit/releases/fee6d816ad553df995ac",
+  "overlay_bit_sha256": "ac260b425bbf0e5acc5c5883070f7b03ef6457d8f0d5f716cd041e6e55c1ba93",
+  "overlay_hwh_sha256": "6e34e76e9afee7bcc8ab788c863b8984faf84758d857da0915fbe67923297763",
+  "named_weights_db_sha256": "7de94d7d759b8fca1d1dd7aaacaa73b6152fbd4814c2a594e8af634cee5d8206",
+  "active_weight_version": {
+    "name": "original",
+    "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+    "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+    "target_row": null
+  },
+  "named_versions_visible": 3,
+  "lm_supported": true,
+  "live_evidence_supported": true
+}

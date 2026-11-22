@@ -1,0 +1,12 @@
+{
+  "backend": "physical_pynq_z2",
+  "scope": "isolated candidate overlay with genuine TelemetryDevice stream ingest and reserved-row classifier",
+  "bitstream_sha256": "e3de4482fbec66a7c4a5bfcd187df8d3edada230b8b9cab67034034a64c62376",
+  "elapsed_seconds": 1.9570095059998494,
+  "encoder_projection_calls": 18,
+  "telemetry_fpga_submissions": 20,
+  "telemetry_fpga_submissions_overlapping_projection_calls": 16,
+  "telemetry_submissions_observing_projection_busy_at_start": 13,
+  "same_forecasts_as_sequential": true,
+  "projection_coincides_with_integer_reference": true
+}

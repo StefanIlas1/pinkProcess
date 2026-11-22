@@ -1218,8 +1218,8 @@ async function prepareBoardDataset() {
     renderLanguageSelect(); controls(); show("Uploaded to the board."); peekPulse();
     return true;
   } catch (err) {
-    boardDataset = null; show(err.message, true);
-    return false;
+    boardDataset = null;
+    throw err;
   }
 }
 el("capacity-form").onsubmit = event => {
@@ -1227,7 +1227,7 @@ el("capacity-form").onsubmit = event => {
   el("capacity-dialog").close("ok");
 };
 async function localAnswer(entry, question, only) {
-  let job = await request("data_ask_begin", {question, style:answerStyle});
+  let job = await request("data_ask_begin", {question, style:answerStyle, local_only:true});
   const seen = new Set(), deadline = Date.now() + 120000;
   for (;;) {
     if (Date.now() > deadline) throw new Error("The analysis took too long. Try again.");

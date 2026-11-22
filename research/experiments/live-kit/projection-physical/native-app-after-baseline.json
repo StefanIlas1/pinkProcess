@@ -1,0 +1,11 @@
+{
+  "board_connected": true,
+  "lm_supported": true,
+  "fresh_stream": true,
+  "stream_state": "ready",
+  "stream_origin": "demo",
+  "stream_source": "Board SQLite demo (generated traffic)",
+  "stream_fpga_submissions": 1635,
+  "active_language_weight": "original",
+  "board_boot_id": "60d4e64d-214c-493f-b29c-eb7e4d7e9a2f"
+}

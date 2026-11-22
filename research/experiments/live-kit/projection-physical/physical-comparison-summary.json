@@ -1,0 +1,91 @@
+{
+  "scope": "one PYNQ-Z2, separate isolated maintenance runs, five samples per physical backend",
+  "projections": {
+    "encoder": {
+      "shape": {
+        "rows": 384,
+        "columns": 512,
+        "batch": 186
+      },
+      "legacy_median_ms": 2100.186854,
+      "candidate_median_ms": 81.480176,
+      "candidate_device_roundtrip_median_ms": 60.064098,
+      "arm_host_reference_median_ms": 109.992954,
+      "legacy_over_candidate": 25.77543345021739,
+      "legacy_phases_median_ns": {
+        "host_global_ns": 109992954,
+        "projection_ns": 2100186854,
+        "tile_gather_ns": 10220642,
+        "weight_write_ns": 18396520,
+        "score_roundtrip_ns": 1788148587,
+        "other_projection_ns": 282998436,
+        "tiles_gathered": 8,
+        "weight_writes": 8,
+        "score_roundtrips": 1488
+      },
+      "candidate_phases_median_ns": {
+        "projection_ns": 81480176,
+        "pack_ns": 7029626,
+        "allocate_ns": 7705508,
+        "upload_ns": 1725148,
+        "device_roundtrip_ns": 60064098,
+        "download_ns": 1473696,
+        "unpack_ns": 1936539
+      },
+      "integer_reference_matched": true
+    },
+    "decoder": {
+      "shape": {
+        "rows": 384,
+        "columns": 512,
+        "batch": 1
+      },
+      "legacy_median_ms": 43.139277,
+      "candidate_median_ms": 12.131218,
+      "candidate_device_roundtrip_median_ms": 1.63593,
+      "arm_host_reference_median_ms": 4.272591,
+      "legacy_over_candidate": 3.5560548825352902,
+      "legacy_phases_median_ns": {
+        "host_global_ns": 4272591,
+        "projection_ns": 43139277,
+        "tile_gather_ns": 10091368,
+        "weight_write_ns": 18108872,
+        "score_roundtrip_ns": 10186057,
+        "other_projection_ns": 4803893,
+        "tiles_gathered": 8,
+        "weight_writes": 8,
+        "score_roundtrips": 8
+      },
+      "candidate_phases_median_ns": {
+        "projection_ns": 12131218,
+        "pack_ns": 2591406,
+        "allocate_ns": 4835513,
+        "upload_ns": 1373475,
+        "device_roundtrip_ns": 1635930,
+        "download_ns": 247717,
+        "unpack_ns": 64025
+      },
+      "integer_reference_matched": true
+    }
+  },
+  "telemetry": {
+    "backend": "physical_pynq_z2",
+    "scope": "isolated candidate overlay with genuine TelemetryDevice stream ingest and reserved-row classifier",
+    "bitstream_sha256": "e3de4482fbec66a7c4a5bfcd187df8d3edada230b8b9cab67034034a64c62376",
+    "elapsed_seconds": 1.9570095059998494,
+    "encoder_projection_calls": 18,
+    "telemetry_fpga_submissions": 20,
+    "telemetry_fpga_submissions_overlapping_projection_calls": 16,
+    "telemetry_submissions_observing_projection_busy_at_start": 13,
+    "same_forecasts_as_sequential": true,
+    "projection_coincides_with_integer_reference": true
+  },
+  "isolated_service_restoration_verified": true,
+  "subsequent_deployment": {
+    "release": "088ea522f62445a69516",
+    "different_overlay_digest": true,
+    "unchanged_named_weight_database": true,
+    "unchanged_selected_weight_metadata": true,
+    "named_versions_visible": 3
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "question": "Which symptom should the on-call engineer investigate first, and what should they check to distinguish pool saturation from a short-lived backlog?",
+  "capture_id": "0ae2e2c1a5c6e1d601cd7dc3752cfb79be67bfe416d435b18cd13ae484a10597",
+  "evidence": "kit/evidence/physical-native-ask.json",
+  "complete": true
+}

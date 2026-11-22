@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>pinkProcess · Motor simulator</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f8f4f5;color:#30252e;font:16px system-ui,sans-serif}main{max-width:830px;margin:6vh auto;padding:24px}header,.controls,.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}header strong{font-size:23px;color:#9a305b}header span,small{color:#665961}.panel{margin:25px 0 14px;background:#241f29;color:#fbf5f7;border-radius:18px;padding:25px}.panel small{color:#deb6ca}canvas{width:100%;height:170px;display:block;margin-top:14px}button,select{font:inherit;border-radius:8px;padding:9px 13px;border:1px solid #cfbdc6;background:white;color:#34272e}button{cursor:pointer}button.primary{background:#882c53;color:white;border-color:#882c53}button:disabled{opacity:.5}label{display:inline-flex;align-items:center;gap:8px}h1{font-size:clamp(24px,5vw,36px);margin:10px 0}p{line-height:1.5}.result{background:white;border:1px solid #ddd0d6;border-radius:12px;padding:16px 20px;margin-top:18px}.result p{margin:8px 0}details{margin-top:16px}summary{cursor:pointer}
+</style>
+<main><header><strong>pinkProcess</strong><span>Simulated motor · Mac prototype</span></header>
+<section class="panel"><small id="status">Ready</small><h1>Motor vibration</h1><canvas aria-label="Recent simulated acceleration samples plotted over time"></canvas><small id="time">0.00 s elapsed</small></section>
+<div class="controls"><button class="primary" id="start">Start simulated motor</button><label>Active profile <select id="profile"><option value="A">Motor A</option><option value="B">Motor B</option></select></label></div>
+<section class="result"><div class="row"><strong>Did it start normally?</strong><button id="query" disabled>Query now</button></div><p id="answer" aria-live="polite">Start the motor, then query its startup.</p></section>
+<details><summary>How the profiles work</summary><p>Each profile contains two numerical weights defining an expected range for startup duration. The model multiplies the measured duration by the first weight, adds the second, and checks whether the result falls between −1 and +1. Motor A expects 1.0–1.4 seconds. Motor B expects 0.3–0.6 seconds. Switching profiles rescores the current startup.</p><p>The simulator generates 200 readings per simulated second. The detector measures vibration strength over 0.1-second windows and waits for two consecutive quiet windows before declaring the startup settled. The graph shows up to four seconds. Switching tabs can pause the simulation clock.</p></details></main>
+<script>
+'use strict';
+const el=id=>document.getElementById(id);
+const hz=200, windowSize=20;
+const profiles={A:{weight:5,bias:-6},B:{weight:1/0.15,bias:-3}};
+function newDetector(){return {samples:0,sumSquares:0,loud:false,quietWindows:0,settled:null};}
+function observe(d,value){
+  d.samples++; d.sumSquares+=value*value;
+  if(d.samples%windowSize!==0)return;
+  const rms=Math.sqrt(d.sumSquares/windowSize);
+  d.sumSquares=0;
+  if(d.settled!==null)return;
+  if(rms>=0.2){d.loud=true;d.quietWindows=0;return;}
+  if(d.loud && ++d.quietWindows===2)d.settled=(d.samples-2*windowSize)/hz;
+}
+function classify(seconds,profile){
+  if(seconds===null)return 'Still observing the startup.';
+  const {weight,bias}=profiles[profile];
+  const score=seconds*weight+bias;
+  const conclusion=score>1+1e-9?'Longer than expected':score< -1-1e-9?'Shorter than expected':'Within the expected startup range';
+  return conclusion+' for Motor '+profile+'. Settled in '+seconds.toFixed(2)+' s.';
+}
+function makeSource(seed){
+  let state=seed;
+  function random(){state=(Math.imul(state,1664525)+1013904223)>>>0;return state/4294967296;}
+  const duration=1.1+random()*0.18;
+  return t=>(t<duration?0.67:0.08)*Math.sin(2*Math.PI*18*t)+(random()-0.5)*0.09;
+}
+let detector=newDetector(), source, trace=[], lastFrame=null, fraction=0,run=0;
+const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d');
+function draw(){
+  const w=canvas.clientWidth,h=canvas.clientHeight,scale=devicePixelRatio||1;
+  if(canvas.width!==Math.round(w*scale)||canvas.height!==Math.round(h*scale)){canvas.width=Math.round(w*scale);canvas.height=Math.round(h*scale);}
+  ctx.setTransform(scale,0,0,scale,0,0);ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle='#4d424d';ctx.beginPath();ctx.moveTo(0,h/2);ctx.lineTo(w,h/2);ctx.stroke();
+  ctx.strokeStyle='#f49ec1';ctx.lineWidth=1.6;ctx.beginPath();
+  trace.forEach((v,i)=>{const x=i*w/(4*hz-1),y=h*(0.5-0.6*v);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();
+}
+function frame(now){
+  if(lastFrame!==null)fraction+=Math.min(now-lastFrame,100)*hz/1000;
+  lastFrame=now;
+  while(fraction>=1){const sample=source(detector.samples/hz);observe(detector,sample);trace.push(sample);fraction--;}
+  if(trace.length>4*hz)trace.splice(0,trace.length-4*hz);
+  draw();el('time').textContent=(detector.samples/hz).toFixed(2)+' s elapsed';
+  requestAnimationFrame(frame);
+}
+function query(){el('answer').textContent=classify(detector.settled,el('profile').value);}
+el('start').onclick=()=>{
+  detector=newDetector();source=makeSource(73129+run*5309);trace=[];fraction=0;lastFrame=null;
+  if(run===0)requestAnimationFrame(frame);
+  run++;el('status').textContent='Live · Simulated run '+run;el('query').disabled=false;
+  el('start').textContent='Start another run';el('answer').textContent='Collecting readings. Select Query now for the latest answer.';
+};
+el('query').onclick=query;el('profile').onchange=()=>{if(run)query();};
+draw();
+</script></html>

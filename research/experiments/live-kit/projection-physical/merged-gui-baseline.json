@@ -1,0 +1,15 @@
+{
+  "id": "18a05499e83497816e65a5f70c4ca37cba1ef2606197b747c8662d9bcac6e129",
+  "question": "Before I page the database team, what does this pool snapshot actually show now, what was the peak, and what evidence would help explain it?",
+  "captured_at_ms": 1795329756042,
+  "reading_time_ms": 338600,
+  "baseline": {
+    "answer": "The queue has cleared; 27 requests are waiting now. The peak was 92. The FPGA predicts the queue will drain at least once over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+    "version": {
+      "name": "original",
+      "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+      "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+      "target_row": null
+    }
+  }
+}

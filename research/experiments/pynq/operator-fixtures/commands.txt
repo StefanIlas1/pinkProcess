@@ -1,0 +1,19 @@
+status 326
+generate
+apply fixtures/wrong-model.json
+status 326
+apply fixtures/truncated.json
+status 326
+verify
+apply fixtures/tim.patch.json
+verify
+generate
+apply fixtures/truncated.json
+verify
+apply fixtures/tim.patch.json
+rollback
+status 326
+verify
+generate
+apply fixtures/tim.patch.json
+quit

@@ -1,0 +1,1 @@
+New seeds 9601–9606. Freeze v2 with four-second constant slope for persistence and strictly positive four-second change for growth. Require balanced accuracy at least as high as v1 for both targets on new runs. Compare quantization to exact integer trend. The UI uses only the passing version.

@@ -1,0 +1,138 @@
+{
+  "before_boot": "c4785ced-dfb0-4406-9580-b38c8ef3922a",
+  "before_active": {
+    "name": "original",
+    "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+    "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+    "target_row": null
+  },
+  "versions_before_native_save": [
+    {
+      "name": "original",
+      "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+      "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+      "target_row": null
+    },
+    {
+      "name": "Astra Now 0f137b5e",
+      "checkpoint_sha256": "f999e7e8702926b53fac296b01db4bdcf0f5d7e5213015e159c04b7de67a2b3b",
+      "classifier_sha256": "e8a86ac9e3caa3cd0a1fbe21070f2b480a6470e02ec0ba70f657b4eca1ceeebf",
+      "target_row": 852
+    }
+  ],
+  "source": "Board SQLite demo (generated traffic)",
+  "last_trace_capture_id": "7dfc0370bb5392b79015aa3d065052e74e2daa0b4b5266f612252569ea3ae702",
+  "native_authored": {
+    "name": "Astra reduce Now",
+    "checkpoint_sha256": "5e7e7fb46365c5dd5d1da46e846eab6048f47fe28b1af0f4eabe4216775d3fa1",
+    "classifier_sha256": "bd792f8b76f79721c6510cc5bf4d257477198cdf1dc1a745fa6ee9da05d7da69",
+    "target_row": 852
+  },
+  "saved_versions": [
+    {
+      "name": "original",
+      "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+      "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+      "target_row": null
+    },
+    {
+      "name": "Astra Now 0f137b5e",
+      "checkpoint_sha256": "f999e7e8702926b53fac296b01db4bdcf0f5d7e5213015e159c04b7de67a2b3b",
+      "classifier_sha256": "e8a86ac9e3caa3cd0a1fbe21070f2b480a6470e02ec0ba70f657b4eca1ceeebf",
+      "target_row": 852
+    },
+    {
+      "name": "Astra reduce Now",
+      "checkpoint_sha256": "5e7e7fb46365c5dd5d1da46e846eab6048f47fe28b1af0f4eabe4216775d3fa1",
+      "classifier_sha256": "bd792f8b76f79721c6510cc5bf4d257477198cdf1dc1a745fa6ee9da05d7da69",
+      "target_row": 852
+    }
+  ],
+  "native_authored_load": {
+    "name": "Astra reduce Now",
+    "checkpoint_sha256": "5e7e7fb46365c5dd5d1da46e846eab6048f47fe28b1af0f4eabe4216775d3fa1",
+    "classifier_sha256": "bd792f8b76f79721c6510cc5bf4d257477198cdf1dc1a745fa6ee9da05d7da69",
+    "target_row": 852
+  },
+  "selected_active": {
+    "name": "Astra Now 0f137b5e",
+    "checkpoint_sha256": "f999e7e8702926b53fac296b01db4bdcf0f5d7e5213015e159c04b7de67a2b3b",
+    "classifier_sha256": "e8a86ac9e3caa3cd0a1fbe21070f2b480a6470e02ec0ba70f657b4eca1ceeebf",
+    "target_row": 852
+  },
+  "selected_versions": [
+    {
+      "name": "original",
+      "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+      "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+      "target_row": null
+    },
+    {
+      "name": "Astra Now 0f137b5e",
+      "checkpoint_sha256": "f999e7e8702926b53fac296b01db4bdcf0f5d7e5213015e159c04b7de67a2b3b",
+      "classifier_sha256": "e8a86ac9e3caa3cd0a1fbe21070f2b480a6470e02ec0ba70f657b4eca1ceeebf",
+      "target_row": 852
+    },
+    {
+      "name": "Astra reduce Now",
+      "checkpoint_sha256": "5e7e7fb46365c5dd5d1da46e846eab6048f47fe28b1af0f4eabe4216775d3fa1",
+      "classifier_sha256": "bd792f8b76f79721c6510cc5bf4d257477198cdf1dc1a745fa6ee9da05d7da69",
+      "target_row": 852
+    }
+  ],
+  "after_boot": "4c71d325-b6ff-4d2e-9fbb-1c7e36ac3aa1",
+  "after_active": {
+    "name": "Astra Now 0f137b5e",
+    "checkpoint_sha256": "f999e7e8702926b53fac296b01db4bdcf0f5d7e5213015e159c04b7de67a2b3b",
+    "classifier_sha256": "e8a86ac9e3caa3cd0a1fbe21070f2b480a6470e02ec0ba70f657b4eca1ceeebf",
+    "target_row": 852
+  },
+  "after_versions": [
+    {
+      "name": "original",
+      "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+      "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+      "target_row": null
+    },
+    {
+      "name": "Astra Now 0f137b5e",
+      "checkpoint_sha256": "f999e7e8702926b53fac296b01db4bdcf0f5d7e5213015e159c04b7de67a2b3b",
+      "classifier_sha256": "e8a86ac9e3caa3cd0a1fbe21070f2b480a6470e02ec0ba70f657b4eca1ceeebf",
+      "target_row": 852
+    },
+    {
+      "name": "Astra reduce Now",
+      "checkpoint_sha256": "5e7e7fb46365c5dd5d1da46e846eab6048f47fe28b1af0f4eabe4216775d3fa1",
+      "classifier_sha256": "bd792f8b76f79721c6510cc5bf4d257477198cdf1dc1a745fa6ee9da05d7da69",
+      "target_row": 852
+    }
+  ],
+  "after_source": "Board SQLite demo (generated traffic)",
+  "final_active": {
+    "name": "original",
+    "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+    "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+    "target_row": null
+  },
+  "final_versions": [
+    {
+      "name": "original",
+      "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+      "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+      "target_row": null
+    },
+    {
+      "name": "Astra Now 0f137b5e",
+      "checkpoint_sha256": "f999e7e8702926b53fac296b01db4bdcf0f5d7e5213015e159c04b7de67a2b3b",
+      "classifier_sha256": "e8a86ac9e3caa3cd0a1fbe21070f2b480a6470e02ec0ba70f657b4eca1ceeebf",
+      "target_row": 852
+    },
+    {
+      "name": "Astra reduce Now",
+      "checkpoint_sha256": "5e7e7fb46365c5dd5d1da46e846eab6048f47fe28b1af0f4eabe4216775d3fa1",
+      "classifier_sha256": "bd792f8b76f79721c6510cc5bf4d257477198cdf1dc1a745fa6ee9da05d7da69",
+      "target_row": 852
+    }
+  ],
+  "source_restored": "Board SQLite demo (generated traffic)"
+}

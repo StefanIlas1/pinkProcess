@@ -1,0 +1,726 @@
+{
+  "backend": "pynq_projection",
+  "activation_source": "deterministic signed INT8 samples",
+  "model_dir": "/opt/pinkprocess-kit/models/14d7912c66a78edf407bbb272f7aa04b953af920827a9a035275194ec4f2f2f2",
+  "initial_memory_kib": {
+    "MemTotal": 503464,
+    "MemAvailable": 332536,
+    "CmaTotal": 131072,
+    "CmaFree": 23028
+  },
+  "encoder_memory_at_input_limit": {
+    "attention_q": {
+      "batch": 512,
+      "dma_buffer_bytes": {
+        "activation": 262144,
+        "weights": 196608,
+        "scores": 786432
+      },
+      "dma_total_bytes": 1245184,
+      "dma_largest_buffer_bytes": 786432,
+      "cma_free_minus_dma_bytes": 22335488
+    },
+    "ffn_up": {
+      "batch": 512,
+      "dma_buffer_bytes": {
+        "activation": 262144,
+        "weights": 524288,
+        "scores": 2097152
+      },
+      "dma_total_bytes": 2883584,
+      "dma_largest_buffer_bytes": 2097152,
+      "cma_free_minus_dma_bytes": 20697088
+    },
+    "ffn_down": {
+      "batch": 512,
+      "dma_buffer_bytes": {
+        "activation": 524288,
+        "weights": 524288,
+        "scores": 1048576
+      },
+      "dma_total_bytes": 2097152,
+      "dma_largest_buffer_bytes": 1048576,
+      "cma_free_minus_dma_bytes": 21483520
+    }
+  },
+  "cases": [
+    {
+      "case": "attention_q",
+      "tensor": "encoder.block.0.layer.0.SelfAttention.q.weight",
+      "shape": {
+        "rows": 384,
+        "depth": 512,
+        "batch": 186
+      },
+      "integer_reference_matched": true,
+      "scores_checked": 71424,
+      "timing_ns": {
+        "reference": 481152070,
+        "pack": 6472151,
+        "allocate_ns": 10189209,
+        "upload_ns": 1691521,
+        "device_roundtrip_ns": 60050210,
+        "download_ns": 1487318,
+        "unpack": 2612533
+      },
+      "memory_kib": {
+        "before_reference": {
+          "MemTotal": 503464,
+          "MemAvailable": 332536,
+          "CmaTotal": 131072,
+          "CmaFree": 23028
+        },
+        "packed": {
+          "MemTotal": 503464,
+          "MemAvailable": 331916,
+          "CmaTotal": 131072,
+          "CmaFree": 22716
+        },
+        "after_dma_allocation_0": {
+          "MemTotal": 503464,
+          "MemAvailable": 332192,
+          "CmaTotal": 131072,
+          "CmaFree": 22828
+        },
+        "after_dma_allocation_1": {
+          "MemTotal": 503464,
+          "MemAvailable": 331872,
+          "CmaTotal": 131072,
+          "CmaFree": 22636
+        },
+        "after_dma_allocation_2": {
+          "MemTotal": 503464,
+          "MemAvailable": 331824,
+          "CmaTotal": 131072,
+          "CmaFree": 22348
+        },
+        "after_compare": {
+          "MemTotal": 503464,
+          "MemAvailable": 331700,
+          "CmaTotal": 131072,
+          "CmaFree": 22348
+        }
+      },
+      "dma": {
+        "batch": 186,
+        "dma_buffer_bytes": {
+          "activation": 98304,
+          "weights": 196608,
+          "scores": 294912
+        },
+        "dma_total_bytes": 589824,
+        "dma_largest_buffer_bytes": 294912,
+        "cma_free_minus_dma_bytes": 22671360
+      },
+      "head_edit": null
+    },
+    {
+      "case": "ffn_up",
+      "tensor": "encoder.block.0.layer.1.DenseReluDense.wi_0.weight",
+      "shape": {
+        "rows": 1024,
+        "depth": 512,
+        "batch": 186
+      },
+      "integer_reference_matched": true,
+      "scores_checked": 190464,
+      "timing_ns": {
+        "reference": 1289370979,
+        "pack": 15180798,
+        "allocate_ns": 15864046,
+        "upload_ns": 2541955,
+        "device_roundtrip_ns": 159710804,
+        "download_ns": 5557213,
+        "unpack": 7441212
+      },
+      "memory_kib": {
+        "before_reference": {
+          "MemTotal": 503464,
+          "MemAvailable": 331700,
+          "CmaTotal": 131072,
+          "CmaFree": 22348
+        },
+        "packed": {
+          "MemTotal": 503464,
+          "MemAvailable": 331204,
+          "CmaTotal": 131072,
+          "CmaFree": 22348
+        },
+        "after_dma_allocation_0": {
+          "MemTotal": 503464,
+          "MemAvailable": 331296,
+          "CmaTotal": 131072,
+          "CmaFree": 22348
+        },
+        "after_dma_allocation_1": {
+          "MemTotal": 503464,
+          "MemAvailable": 330632,
+          "CmaTotal": 131072,
+          "CmaFree": 22028
+        },
+        "after_dma_allocation_2": {
+          "MemTotal": 503464,
+          "MemAvailable": 329956,
+          "CmaTotal": 131072,
+          "CmaFree": 21548
+        },
+        "after_compare": {
+          "MemTotal": 503464,
+          "MemAvailable": 329212,
+          "CmaTotal": 131072,
+          "CmaFree": 21392
+        }
+      },
+      "dma": {
+        "batch": 186,
+        "dma_buffer_bytes": {
+          "activation": 98304,
+          "weights": 524288,
+          "scores": 786432
+        },
+        "dma_total_bytes": 1409024,
+        "dma_largest_buffer_bytes": 786432,
+        "cma_free_minus_dma_bytes": 21475328
+      },
+      "head_edit": null
+    },
+    {
+      "case": "ffn_down",
+      "tensor": "encoder.block.0.layer.1.DenseReluDense.wo.weight",
+      "shape": {
+        "rows": 512,
+        "depth": 1024,
+        "batch": 186
+      },
+      "integer_reference_matched": true,
+      "scores_checked": 95232,
+      "timing_ns": {
+        "reference": 1404228191,
+        "pack": 19183548,
+        "allocate_ns": 10870413,
+        "upload_ns": 2976174,
+        "device_roundtrip_ns": 156181709,
+        "download_ns": 2409887,
+        "unpack": 3822368
+      },
+      "memory_kib": {
+        "before_reference": {
+          "MemTotal": 503464,
+          "MemAvailable": 330908,
+          "CmaTotal": 131072,
+          "CmaFree": 22172
+        },
+        "packed": {
+          "MemTotal": 503464,
+          "MemAvailable": 330816,
+          "CmaTotal": 131072,
+          "CmaFree": 22016
+        },
+        "after_dma_allocation_0": {
+          "MemTotal": 503464,
+          "MemAvailable": 331632,
+          "CmaTotal": 131072,
+          "CmaFree": 22556
+        },
+        "after_dma_allocation_1": {
+          "MemTotal": 503464,
+          "MemAvailable": 331120,
+          "CmaTotal": 131072,
+          "CmaFree": 22044
+        },
+        "after_dma_allocation_2": {
+          "MemTotal": 503464,
+          "MemAvailable": 330616,
+          "CmaTotal": 131072,
+          "CmaFree": 21664
+        },
+        "after_compare": {
+          "MemTotal": 503464,
+          "MemAvailable": 330496,
+          "CmaTotal": 131072,
+          "CmaFree": 21664
+        }
+      },
+      "dma": {
+        "batch": 186,
+        "dma_buffer_bytes": {
+          "activation": 196608,
+          "weights": 524288,
+          "scores": 393216
+        },
+        "dma_total_bytes": 1114112,
+        "dma_largest_buffer_bytes": 524288,
+        "cma_free_minus_dma_bytes": 21430272
+      },
+      "head_edit": null
+    },
+    {
+      "case": "head_original",
+      "tensor": "lm_head.weight",
+      "shape": {
+        "rows": 32128,
+        "depth": 512,
+        "batch": 1
+      },
+      "integer_reference_matched": true,
+      "scores_checked": 32128,
+      "timing_ns": {
+        "reference": 616247751,
+        "segmented_projection": 585181013
+      },
+      "memory_kib": {
+        "before_reference": {
+          "MemTotal": 503464,
+          "MemAvailable": 331248,
+          "CmaTotal": 131072,
+          "CmaFree": 22436
+        },
+        "before_projection": {
+          "MemTotal": 503464,
+          "MemAvailable": 331248,
+          "CmaTotal": 131072,
+          "CmaFree": 22436
+        },
+        "after_dma_allocation_0": {
+          "MemTotal": 503464,
+          "MemAvailable": 330880,
+          "CmaTotal": 131072,
+          "CmaFree": 22104
+        },
+        "after_dma_allocation_1": {
+          "MemTotal": 503464,
+          "MemAvailable": 328708,
+          "CmaTotal": 131072,
+          "CmaFree": 20056
+        },
+        "after_dma_allocation_2": {
+          "MemTotal": 503464,
+          "MemAvailable": 328812,
+          "CmaTotal": 131072,
+          "CmaFree": 20040
+        },
+        "after_dma_allocation_3": {
+          "MemTotal": 503464,
+          "MemAvailable": 330760,
+          "CmaTotal": 131072,
+          "CmaFree": 22124
+        },
+        "after_dma_allocation_4": {
+          "MemTotal": 503464,
+          "MemAvailable": 328828,
+          "CmaTotal": 131072,
+          "CmaFree": 20076
+        },
+        "after_dma_allocation_5": {
+          "MemTotal": 503464,
+          "MemAvailable": 328812,
+          "CmaTotal": 131072,
+          "CmaFree": 20060
+        },
+        "after_dma_allocation_6": {
+          "MemTotal": 503464,
+          "MemAvailable": 330760,
+          "CmaTotal": 131072,
+          "CmaFree": 22084
+        },
+        "after_dma_allocation_7": {
+          "MemTotal": 503464,
+          "MemAvailable": 328828,
+          "CmaTotal": 131072,
+          "CmaFree": 20036
+        },
+        "after_dma_allocation_8": {
+          "MemTotal": 503464,
+          "MemAvailable": 328812,
+          "CmaTotal": 131072,
+          "CmaFree": 20020
+        },
+        "after_dma_allocation_9": {
+          "MemTotal": 503464,
+          "MemAvailable": 330760,
+          "CmaTotal": 131072,
+          "CmaFree": 22124
+        },
+        "after_dma_allocation_10": {
+          "MemTotal": 503464,
+          "MemAvailable": 328828,
+          "CmaTotal": 131072,
+          "CmaFree": 20076
+        },
+        "after_dma_allocation_11": {
+          "MemTotal": 503464,
+          "MemAvailable": 328812,
+          "CmaTotal": 131072,
+          "CmaFree": 20060
+        },
+        "after_dma_allocation_12": {
+          "MemTotal": 503464,
+          "MemAvailable": 330760,
+          "CmaTotal": 131072,
+          "CmaFree": 22084
+        },
+        "after_dma_allocation_13": {
+          "MemTotal": 503464,
+          "MemAvailable": 328828,
+          "CmaTotal": 131072,
+          "CmaFree": 20036
+        },
+        "after_dma_allocation_14": {
+          "MemTotal": 503464,
+          "MemAvailable": 328812,
+          "CmaTotal": 131072,
+          "CmaFree": 20020
+        },
+        "after_dma_allocation_15": {
+          "MemTotal": 503464,
+          "MemAvailable": 330760,
+          "CmaTotal": 131072,
+          "CmaFree": 22124
+        },
+        "after_dma_allocation_16": {
+          "MemTotal": 503464,
+          "MemAvailable": 328824,
+          "CmaTotal": 131072,
+          "CmaFree": 20076
+        },
+        "after_dma_allocation_17": {
+          "MemTotal": 503464,
+          "MemAvailable": 328808,
+          "CmaTotal": 131072,
+          "CmaFree": 20060
+        },
+        "after_dma_allocation_18": {
+          "MemTotal": 503464,
+          "MemAvailable": 330756,
+          "CmaTotal": 131072,
+          "CmaFree": 22084
+        },
+        "after_dma_allocation_19": {
+          "MemTotal": 503464,
+          "MemAvailable": 328824,
+          "CmaTotal": 131072,
+          "CmaFree": 20036
+        },
+        "after_dma_allocation_20": {
+          "MemTotal": 503464,
+          "MemAvailable": 328808,
+          "CmaTotal": 131072,
+          "CmaFree": 20020
+        },
+        "after_dma_allocation_21": {
+          "MemTotal": 503464,
+          "MemAvailable": 331076,
+          "CmaTotal": 131072,
+          "CmaFree": 22236
+        },
+        "after_dma_allocation_22": {
+          "MemTotal": 503464,
+          "MemAvailable": 329464,
+          "CmaTotal": 131072,
+          "CmaFree": 20508
+        },
+        "after_dma_allocation_23": {
+          "MemTotal": 503464,
+          "MemAvailable": 329448,
+          "CmaTotal": 131072,
+          "CmaFree": 20492
+        },
+        "after_compare": {
+          "MemTotal": 503464,
+          "MemAvailable": 331144,
+          "CmaTotal": 131072,
+          "CmaFree": 22260
+        }
+      },
+      "max_segment_dma": {
+        "batch": 1,
+        "dma_buffer_bytes": {
+          "activation": 4096,
+          "weights": 2097152,
+          "scores": 16384
+        },
+        "dma_total_bytes": 2117632,
+        "dma_largest_buffer_bytes": 2097152,
+        "cma_free_minus_dma_bytes": 20856832
+      },
+      "segments": [
+        {
+          "rows": 4096,
+          "wall_ns": 74128829
+        },
+        {
+          "rows": 4096,
+          "wall_ns": 73598104
+        },
+        {
+          "rows": 4096,
+          "wall_ns": 73931161
+        },
+        {
+          "rows": 4096,
+          "wall_ns": 74109937
+        },
+        {
+          "rows": 4096,
+          "wall_ns": 73769488
+        },
+        {
+          "rows": 4096,
+          "wall_ns": 74145204
+        },
+        {
+          "rows": 4096,
+          "wall_ns": 74961687
+        },
+        {
+          "rows": 3456,
+          "wall_ns": 64609574
+        }
+      ],
+      "head_edit": null
+    },
+    {
+      "case": "head_patched",
+      "tensor": "lm_head.weight",
+      "shape": {
+        "rows": 32128,
+        "depth": 512,
+        "batch": 1
+      },
+      "integer_reference_matched": true,
+      "scores_checked": 32128,
+      "timing_ns": {
+        "reference": 624344226,
+        "segmented_projection": 590915878
+      },
+      "memory_kib": {
+        "before_reference": {
+          "MemTotal": 503464,
+          "MemAvailable": 331144,
+          "CmaTotal": 131072,
+          "CmaFree": 22260
+        },
+        "before_projection": {
+          "MemTotal": 503464,
+          "MemAvailable": 331184,
+          "CmaTotal": 131072,
+          "CmaFree": 22284
+        },
+        "after_dma_allocation_0": {
+          "MemTotal": 503464,
+          "MemAvailable": 330832,
+          "CmaTotal": 131072,
+          "CmaFree": 22068
+        },
+        "after_dma_allocation_1": {
+          "MemTotal": 503464,
+          "MemAvailable": 328784,
+          "CmaTotal": 131072,
+          "CmaFree": 20020
+        },
+        "after_dma_allocation_2": {
+          "MemTotal": 503464,
+          "MemAvailable": 328768,
+          "CmaTotal": 131072,
+          "CmaFree": 20004
+        },
+        "after_dma_allocation_3": {
+          "MemTotal": 503464,
+          "MemAvailable": 330716,
+          "CmaTotal": 131072,
+          "CmaFree": 22116
+        },
+        "after_dma_allocation_4": {
+          "MemTotal": 503464,
+          "MemAvailable": 328784,
+          "CmaTotal": 131072,
+          "CmaFree": 20068
+        },
+        "after_dma_allocation_5": {
+          "MemTotal": 503464,
+          "MemAvailable": 328768,
+          "CmaTotal": 131072,
+          "CmaFree": 20052
+        },
+        "after_dma_allocation_6": {
+          "MemTotal": 503464,
+          "MemAvailable": 330716,
+          "CmaTotal": 131072,
+          "CmaFree": 22116
+        },
+        "after_dma_allocation_7": {
+          "MemTotal": 503464,
+          "MemAvailable": 328784,
+          "CmaTotal": 131072,
+          "CmaFree": 20068
+        },
+        "after_dma_allocation_8": {
+          "MemTotal": 503464,
+          "MemAvailable": 328768,
+          "CmaTotal": 131072,
+          "CmaFree": 20052
+        },
+        "after_dma_allocation_9": {
+          "MemTotal": 503464,
+          "MemAvailable": 330716,
+          "CmaTotal": 131072,
+          "CmaFree": 22116
+        },
+        "after_dma_allocation_10": {
+          "MemTotal": 503464,
+          "MemAvailable": 328784,
+          "CmaTotal": 131072,
+          "CmaFree": 20068
+        },
+        "after_dma_allocation_11": {
+          "MemTotal": 503464,
+          "MemAvailable": 328768,
+          "CmaTotal": 131072,
+          "CmaFree": 20052
+        },
+        "after_dma_allocation_12": {
+          "MemTotal": 503464,
+          "MemAvailable": 330716,
+          "CmaTotal": 131072,
+          "CmaFree": 22116
+        },
+        "after_dma_allocation_13": {
+          "MemTotal": 503464,
+          "MemAvailable": 328784,
+          "CmaTotal": 131072,
+          "CmaFree": 20068
+        },
+        "after_dma_allocation_14": {
+          "MemTotal": 503464,
+          "MemAvailable": 328768,
+          "CmaTotal": 131072,
+          "CmaFree": 20052
+        },
+        "after_dma_allocation_15": {
+          "MemTotal": 503464,
+          "MemAvailable": 330716,
+          "CmaTotal": 131072,
+          "CmaFree": 22116
+        },
+        "after_dma_allocation_16": {
+          "MemTotal": 503464,
+          "MemAvailable": 328784,
+          "CmaTotal": 131072,
+          "CmaFree": 20068
+        },
+        "after_dma_allocation_17": {
+          "MemTotal": 503464,
+          "MemAvailable": 328768,
+          "CmaTotal": 131072,
+          "CmaFree": 20052
+        },
+        "after_dma_allocation_18": {
+          "MemTotal": 503464,
+          "MemAvailable": 330716,
+          "CmaTotal": 131072,
+          "CmaFree": 22116
+        },
+        "after_dma_allocation_19": {
+          "MemTotal": 503464,
+          "MemAvailable": 328784,
+          "CmaTotal": 131072,
+          "CmaFree": 20068
+        },
+        "after_dma_allocation_20": {
+          "MemTotal": 503464,
+          "MemAvailable": 328768,
+          "CmaTotal": 131072,
+          "CmaFree": 20052
+        },
+        "after_dma_allocation_21": {
+          "MemTotal": 503464,
+          "MemAvailable": 331036,
+          "CmaTotal": 131072,
+          "CmaFree": 22228
+        },
+        "after_dma_allocation_22": {
+          "MemTotal": 503464,
+          "MemAvailable": 329424,
+          "CmaTotal": 131072,
+          "CmaFree": 20500
+        },
+        "after_dma_allocation_23": {
+          "MemTotal": 503464,
+          "MemAvailable": 329408,
+          "CmaTotal": 131072,
+          "CmaFree": 20484
+        },
+        "after_compare": {
+          "MemTotal": 503464,
+          "MemAvailable": 331104,
+          "CmaTotal": 131072,
+          "CmaFree": 22252
+        }
+      },
+      "max_segment_dma": {
+        "batch": 1,
+        "dma_buffer_bytes": {
+          "activation": 4096,
+          "weights": 2097152,
+          "scores": 16384
+        },
+        "dma_total_bytes": 2117632,
+        "dma_largest_buffer_bytes": 2097152,
+        "cma_free_minus_dma_bytes": 20701184
+      },
+      "segments": [
+        {
+          "rows": 4096,
+          "wall_ns": 73979826
+        },
+        {
+          "rows": 4096,
+          "wall_ns": 75052893
+        },
+        {
+          "rows": 4096,
+          "wall_ns": 74517216
+        },
+        {
+          "rows": 4096,
+          "wall_ns": 74620945
+        },
+        {
+          "rows": 4096,
+          "wall_ns": 76263117
+        },
+        {
+          "rows": 4096,
+          "wall_ns": 75150247
+        },
+        {
+          "rows": 4096,
+          "wall_ns": 74716501
+        },
+        {
+          "rows": 3456,
+          "wall_ns": 64678960
+        }
+      ],
+      "head_edit": {
+        "name": "Astra reduce Now",
+        "row": 852,
+        "payload_sha256": "0f3c85ed45705ec5f96994bb50e3f11e617303f925c6317c2ef4a1d5aaef260f",
+        "classifier_sha256": "bd792f8b76f79721c6510cc5bf4d257477198cdf1dc1a745fa6ee9da05d7da69",
+        "original_score": -33997,
+        "score": -33455
+      }
+    }
+  ],
+  "hypothetical_encoder_head_memory": {
+    "batch": 512,
+    "dma_buffer_bytes": {
+      "activation": 262144,
+      "weights": 16449536,
+      "scores": 65798144
+    },
+    "dma_total_bytes": 82509824,
+    "dma_largest_buffer_bytes": 65798144,
+    "cma_free_minus_dma_bytes": -58929152
+  }
+}

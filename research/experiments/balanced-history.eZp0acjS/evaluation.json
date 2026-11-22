@@ -1,0 +1,218 @@
+[
+  {
+    "case": "recovery",
+    "answer": "No backlog was observed; 0 requests are waiting now. The peak was 12. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times."
+  },
+  {
+    "case": "growing",
+    "answer": "The backlog is active. Waiting rose from 0 to 19. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times."
+  },
+  {
+    "case": "healthy",
+    "answer": "No backlog was observed; 0 requests are waiting now. The peak was 0. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times."
+  },
+  {
+    "case": "4972f038c496",
+    "expected": {
+      "now": "cleared",
+      "current_waiting": 0,
+      "peak_waiting": 27,
+      "forecast": "onset_warning"
+    },
+    "answer": "The queue has cleared; 0 requests are waiting now. The peak was 27. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+    "checks": {
+      "current_state": true,
+      "cites_current_and_peak": true,
+      "forecast_separated_and_correct": false,
+      "uncertainty_about_cause": true,
+      "concrete_next_measurement": true
+    }
+  },
+  {
+    "case": "4fbed0a3beaf",
+    "expected": {
+      "now": "cleared",
+      "current_waiting": 0,
+      "peak_waiting": 46,
+      "forecast": "onset_warning"
+    },
+    "answer": "The queue has cleared; 0 requests are waiting now. The peak was 46. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+    "checks": {
+      "current_state": true,
+      "cites_current_and_peak": true,
+      "forecast_separated_and_correct": false,
+      "uncertainty_about_cause": true,
+      "concrete_next_measurement": true
+    }
+  },
+  {
+    "case": "35eae659bdca",
+    "expected": {
+      "now": "cleared",
+      "current_waiting": 0,
+      "peak_waiting": 46,
+      "forecast": "no_onset_warning"
+    },
+    "answer": "The queue has cleared; 0 requests are waiting now. The peak was 46. The FPGA issued no queue-onset warning for the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+    "checks": {
+      "current_state": true,
+      "cites_current_and_peak": true,
+      "forecast_separated_and_correct": true,
+      "uncertainty_about_cause": true,
+      "concrete_next_measurement": true
+    }
+  },
+  {
+    "case": "31c613bd409d",
+    "expected": {
+      "now": "backlog persists",
+      "current_waiting": 7,
+      "peak_waiting": 51,
+      "forecast": "persist"
+    },
+    "answer": "The backlog is active. Waiting rose from 2 to 7. The peak was 51. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+    "checks": {
+      "current_state": false,
+      "cites_current_and_peak": false,
+      "forecast_separated_and_correct": true,
+      "uncertainty_about_cause": true,
+      "concrete_next_measurement": true
+    }
+  },
+  {
+    "case": "47514ec8f5fc",
+    "expected": {
+      "now": "backlog persists",
+      "current_waiting": 9,
+      "peak_waiting": 46,
+      "forecast": "persist"
+    },
+    "answer": "The backlog is active. Waiting rose from 1 to 9. The peak was 46. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+    "checks": {
+      "current_state": false,
+      "cites_current_and_peak": false,
+      "forecast_separated_and_correct": true,
+      "uncertainty_about_cause": true,
+      "concrete_next_measurement": true
+    }
+  },
+  {
+    "case": "362e6344da45",
+    "expected": {
+      "now": "cleared",
+      "current_waiting": 0,
+      "peak_waiting": 17,
+      "forecast": "no_onset_warning"
+    },
+    "answer": "The queue has cleared; 0 requests are waiting now. The peak was 17. The FPGA issued no queue-onset warning for the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+    "checks": {
+      "current_state": true,
+      "cites_current_and_peak": true,
+      "forecast_separated_and_correct": true,
+      "uncertainty_about_cause": true,
+      "concrete_next_measurement": true
+    }
+  },
+  {
+    "case": "0620e3d22fb1",
+    "expected": {
+      "now": "backlog persists",
+      "current_waiting": 3,
+      "peak_waiting": 19,
+      "forecast": "persist"
+    },
+    "answer": "The backlog is active. Waiting rose from 1 to 3. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+    "checks": {
+      "current_state": false,
+      "cites_current_and_peak": false,
+      "forecast_separated_and_correct": true,
+      "uncertainty_about_cause": true,
+      "concrete_next_measurement": true
+    }
+  },
+  {
+    "case": "1b13edf6f6c1",
+    "expected": {
+      "now": "cleared",
+      "current_waiting": 0,
+      "peak_waiting": 36,
+      "forecast": "no_onset_warning"
+    },
+    "answer": "The queue has cleared; 0 requests are waiting now. The peak was 36. The FPGA issued no queue-onset warning for the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+    "checks": {
+      "current_state": true,
+      "cites_current_and_peak": true,
+      "forecast_separated_and_correct": true,
+      "uncertainty_about_cause": true,
+      "concrete_next_measurement": true
+    }
+  },
+  {
+    "case": "33a95b6a5c56",
+    "expected": {
+      "now": "backlog persists",
+      "current_waiting": 3,
+      "peak_waiting": 35,
+      "forecast": "persist"
+    },
+    "answer": "The backlog is active. Waiting rose from 1 to 3. The peak was 35. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+    "checks": {
+      "current_state": false,
+      "cites_current_and_peak": false,
+      "forecast_separated_and_correct": true,
+      "uncertainty_about_cause": true,
+      "concrete_next_measurement": true
+    }
+  },
+  {
+    "case": "04d31459c69e",
+    "expected": {
+      "now": "backlog persists",
+      "current_waiting": 5,
+      "peak_waiting": 42,
+      "forecast": "drain"
+    },
+    "answer": "The backlog is active. Waiting rose from 4 to 5. The peak was 42. The FPGA predicts the queue will drain at least once over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+    "checks": {
+      "current_state": false,
+      "cites_current_and_peak": false,
+      "forecast_separated_and_correct": true,
+      "uncertainty_about_cause": true,
+      "concrete_next_measurement": true
+    }
+  },
+  {
+    "case": "65519071eb1e",
+    "expected": {
+      "now": "backlog persists",
+      "current_waiting": 6,
+      "peak_waiting": 55,
+      "forecast": "drain"
+    },
+    "answer": "The backlog is active. Waiting rose from 1 to 6. The peak was 55. The FPGA predicts the queue will drain at least once over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+    "checks": {
+      "current_state": false,
+      "cites_current_and_peak": false,
+      "forecast_separated_and_correct": true,
+      "uncertainty_about_cause": true,
+      "concrete_next_measurement": true
+    }
+  },
+  {
+    "case": "ec87586efe9d",
+    "expected": {
+      "now": "cleared",
+      "current_waiting": 0,
+      "peak_waiting": 47,
+      "forecast": "onset_warning"
+    },
+    "answer": "The queue has cleared; 0 requests are waiting now. The peak was 47. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+    "checks": {
+      "current_state": true,
+      "cites_current_and_peak": true,
+      "forecast_separated_and_correct": false,
+      "uncertainty_about_cause": true,
+      "concrete_next_measurement": true
+    }
+  }
+]

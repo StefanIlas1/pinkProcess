@@ -1,0 +1,74 @@
+{
+  "shape": {
+    "rows": 384,
+    "columns": 512,
+    "batch": 186
+  },
+  "mode": "encode",
+  "position_tiles": 24,
+  "output_tiles": 48,
+  "buffer_bytes": {
+    "activations": 98304,
+    "weights": 196608,
+    "scores": 294912
+  },
+  "integer_reference_matched": true,
+  "median": {
+    "projection_ns": 81480176,
+    "pack_ns": 7029626,
+    "allocate_ns": 7705508,
+    "upload_ns": 1725148,
+    "device_roundtrip_ns": 60064098,
+    "download_ns": 1473696,
+    "unpack_ns": 1936539
+  },
+  "samples": [
+    {
+      "projection_ns": 85286207,
+      "pack_ns": 7029626,
+      "allocate_ns": 9923584,
+      "upload_ns": 1658847,
+      "device_roundtrip_ns": 60064098,
+      "download_ns": 1759240,
+      "unpack_ns": 2730581
+    },
+    {
+      "projection_ns": 85877517,
+      "pack_ns": 8182640,
+      "allocate_ns": 10796021,
+      "upload_ns": 1725148,
+      "device_roundtrip_ns": 60138751,
+      "download_ns": 1493191,
+      "unpack_ns": 2017726
+    },
+    {
+      "projection_ns": 81480176,
+      "pack_ns": 7125454,
+      "allocate_ns": 7705508,
+      "upload_ns": 1845800,
+      "device_roundtrip_ns": 60006228,
+      "download_ns": 1466791,
+      "unpack_ns": 1799813
+    },
+    {
+      "projection_ns": 79443115,
+      "pack_ns": 6559498,
+      "allocate_ns": 6151110,
+      "upload_ns": 1717050,
+      "device_roundtrip_ns": 60107908,
+      "download_ns": 1459795,
+      "unpack_ns": 1936539
+    },
+    {
+      "projection_ns": 79446672,
+      "pack_ns": 6521375,
+      "allocate_ns": 6266557,
+      "upload_ns": 1737013,
+      "device_roundtrip_ns": 60010049,
+      "download_ns": 1473696,
+      "unpack_ns": 1920022
+    }
+  ],
+  "backend": "pynq_projection",
+  "capture": "/home/xilinx/pinkprocess-transfer/projection-bench.CABaPzzB/projection-encoder.npz"
+}

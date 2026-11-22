@@ -129,6 +129,6 @@ The interface script can be checked by extracting the `<script>` block of `pinkp
 - [engineering.md](engineering.md): telemetry baseline, overlay bring-up, language-model reproduction.
 - [kit/live-context.md](../kit/live-context.md): the board-owned telemetry data path.
 - [kit/usb-appliance.md](../kit/usb-appliance.md): USB appliance relay and console recovery.
-- [research.md](../research.md): research log, including the weight-reading studies.
+- [Research archive](../research/) with the full research log, experiment records, original team plan and enclosure designs.
 - [earlier-prototype.md](earlier-prototype.md): the expert-cartridge prototype.
 - [AGENTS.md](../AGENTS.md): guide for contributors and coding agents.

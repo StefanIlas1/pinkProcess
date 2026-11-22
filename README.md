@@ -81,6 +81,6 @@ Every number links to a recorded run in [docs/results.md](docs/results.md).
 - [Developer guide](docs/developer-guide.md): build, run, test, repo map
 - [Board setup](docs/board-setup.md): provision your own board
 - [Measured results](docs/results.md): every timing and test
-- [Engineering notes](docs/engineering.md) · [Research log](research.md)
+- [Engineering notes](docs/engineering.md) · [Research archive](research/) · [Paper research notebook](research/paper-notebook.md)
 
 <p align="center"><img src="website/assets/bear.png" alt="" width="72"><br><sub>think with pynq</sub></p>

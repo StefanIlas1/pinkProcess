@@ -1,0 +1,69 @@
+{
+  "board_boot_id": "60d4e64d-214c-493f-b29c-eb7e4d7e9a2f",
+  "release": "088ea522f62445a69516",
+  "hybrid_opt_in_present": true,
+  "projection_register_window_mapped_by_service": true,
+  "capture_id": "7dfc0370bb5392b79015aa3d065052e74e2daa0b4b5266f612252569ea3ae702",
+  "active": {
+    "name": "original",
+    "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+    "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+    "target_row": null
+  },
+  "timing_scope": "board-local authenticated TLS request to first observed completion; one-second polling",
+  "recorded_baseline_scope": "previous capture question request to first observed completion over paired connection",
+  "recorded_baseline_seconds": 797.536,
+  "utc_started": "2026-11-22T05:05:28.195864+00:00",
+  "stream_before": {
+    "state": "ready",
+    "origin": "demo",
+    "source": "Board SQLite demo (generated traffic)",
+    "fresh": true,
+    "sample_count": 309,
+    "fpga_submissions": 260
+  },
+  "job_id": "c8f469ada0794b888f67b3544ca5f491",
+  "state": "complete",
+  "first_partial_seconds": 342.135300811,
+  "elapsed_seconds": 830.2014400649996,
+  "fabric_projections": 3721,
+  "partial_answer_bytes": 219,
+  "result": {
+    "ok": true,
+    "job_id": "c8f469ada0794b888f67b3544ca5f491",
+    "state": "complete",
+    "capture_id": "7dfc0370bb5392b79015aa3d065052e74e2daa0b4b5266f612252569ea3ae702",
+    "active": {
+      "name": "original",
+      "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+      "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+      "target_row": null
+    },
+    "model": "flan-t5-small",
+    "baseline": {
+      "answer": "The backlog is ongoing: 11 requests are waiting now. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "version": {
+        "name": "original",
+        "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+        "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+        "target_row": null
+      }
+    },
+    "captured_at_ms": 1795303718017,
+    "answer": "The backlog is ongoing: 11 requests are waiting now. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+    "fabric_projections": 3722
+  },
+  "stream_after": {
+    "state": "ready",
+    "origin": "demo",
+    "source": "Board SQLite demo (generated traffic)",
+    "fresh": true,
+    "sample_count": 600,
+    "fpga_submissions": 5973
+  },
+  "answer_matches_recorded_sha256": true,
+  "fabric_projection_count_matches_recording": true,
+  "prototype_dispatch_count_measured": false,
+  "same_saved_capture": true,
+  "same_active_weights": true
+}

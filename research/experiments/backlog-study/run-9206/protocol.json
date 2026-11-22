@@ -1,0 +1,12 @@
+{
+  "varied": true,
+  "duration_seconds": 60,
+  "seeds": [
+    9206
+  ],
+  "capacity": 4,
+  "sample_ms": 100,
+  "forecast_ms": 10000,
+  "evaluation": "Frozen profiles, consecutive warnings collapsed; first 5s warmup, final 10s withheld from predictions.",
+  "source": "Local SQLite; scheduled synthetic client traffic and dwell; measured FIFO lease events."
+}

@@ -1,0 +1,24 @@
+{
+  "question": "Has this queue recovered by the final reading, and when did it reach its peak?",
+  "elapsed_wall_seconds": 16.92,
+  "first_partial_poll_seconds": 8.52,
+  "board_job": {
+    "fabric_projections": 1021,
+    "accelerated_projections": 1021,
+    "state": "complete",
+    "dataset_id": "9d1971c25df3429cad5d4837609e60dd",
+    "stage": "final"
+  },
+  "views": {
+    "transcript": "Has this queue recovered by the final reading, and when did it reach its peak?",
+    "generalization": "60 readings from 0 to 5900 ms.\nLast reading: 2 of 4 connections busy; 0 waiting.\nPeak queue: 12 waiting at 2200 ms.\nThese measurements do not identify a cause or request-level latency.",
+    "short_answer": "The queue peaked at 12 requests 3.7 seconds ago.",
+    "summary": "The queue peaked at 12 requests 3.7 seconds ago.",
+    "final": "The queue peaked at 12 requests 3.7 seconds ago."
+  },
+  "fpga_ask_requests": [
+    "final"
+  ],
+  "model": "original",
+  "kit": "PYNQ-Z2 connected"
+}

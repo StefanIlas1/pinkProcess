@@ -1,0 +1,82 @@
+{
+  "bitstream_sha256": "fa8d970e5c909fab4d2090afec1b619b481e7e7abd96fb7ec731993afbe48177",
+  "integer_queue_scores_checked": 1160,
+  "queue_matched": true,
+  "argmax_matched": true,
+  "argmax_winner": 377,
+  "cross_segment_tie_winner": 4095,
+  "legacy_telemetry_status_and_reserved_row_matched": true,
+  "arm_single_row_values_matched": 4854,
+  "queued_hardware_counters": [
+    {
+      "positions": 9,
+      "elapsed_cycles": 8559,
+      "mac_feed_cycles": 646,
+      "ddr_read_beats": 760,
+      "ddr_write_beats": 1088
+    },
+    {
+      "positions": 1,
+      "elapsed_cycles": 2914,
+      "mac_feed_cycles": 76,
+      "ddr_read_beats": 665,
+      "ddr_write_beats": 128
+    }
+  ],
+  "real_capture_counters": [
+    {
+      "mode": "encoder",
+      "shape": {
+        "batch": 186,
+        "depth": 512,
+        "rows": 384
+      },
+      "integer_reference_matched": true,
+      "host_roundtrip_ns": 59331399,
+      "elapsed_cycles": 2207437,
+      "mac_feed_cycles": 589824,
+      "ddr_read_beats": 602112,
+      "ddr_write_beats": 36864
+    },
+    {
+      "mode": "decoder",
+      "shape": {
+        "batch": 1,
+        "depth": 512,
+        "rows": 384
+      },
+      "integer_reference_matched": true,
+      "host_roundtrip_ns": 7847523,
+      "elapsed_cycles": 83824,
+      "mac_feed_cycles": 3072,
+      "ddr_read_beats": 25088,
+      "ddr_write_beats": 192
+    }
+  ],
+  "metrics": {
+    "native_commands": 6,
+    "allocations": 9,
+    "allocate_ns": 28084230,
+    "weight_cache_hits": 0,
+    "weight_cache_misses": 0,
+    "pack_weights_ns": 94542289,
+    "pack_activations_ns": 2259117,
+    "upload_activations_ns": 1481961,
+    "activation_bytes": 111048,
+    "shared_activation_uploads_saved": 4,
+    "upload_weights_ns": 2709391,
+    "weight_bytes": 5840152,
+    "device_roundtrip_ns": 93972987,
+    "queue_runs": 2,
+    "commands": 12,
+    "download_ns": 1493050,
+    "score_bytes": 306176,
+    "unpack_ns": 3910371,
+    "argmax_commands": 4,
+    "argmax_device_ns": 2577341,
+    "packed_weight_bytes": 0,
+    "workspace_bytes": 2768896,
+    "resident_weight_bytes": 0
+  },
+  "qualification_ns": 1299143835
+}

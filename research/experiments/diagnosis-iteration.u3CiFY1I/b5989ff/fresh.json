@@ -1,0 +1,97 @@
+{
+  "live_before": {
+    "session": "4a9ceaf2-c5c2-4bd0-9301-a545b6078b64",
+    "fresh": true,
+    "latest": {
+      "time_ms": 93300,
+      "busy": 4,
+      "waiting": 111
+    },
+    "fpga_submissions": 885,
+    "sample_count": 600
+  },
+  "live_at_5_seconds": {
+    "session": "4a9ceaf2-c5c2-4bd0-9301-a545b6078b64",
+    "fresh": true,
+    "latest": {
+      "time_ms": 99200,
+      "busy": 4,
+      "waiting": 53
+    },
+    "fpga_submissions": 944,
+    "sample_count": 600
+  },
+  "live_after": {
+    "session": "4a9ceaf2-c5c2-4bd0-9301-a545b6078b64",
+    "fresh": true,
+    "latest": {
+      "time_ms": 118900,
+      "busy": 1,
+      "waiting": 0
+    },
+    "fpga_submissions": 1141,
+    "sample_count": 600
+  },
+  "question": "Our shift is ending. What should the next operator know about this pool, and what evidence would justify taking action?",
+  "elapsed_wall_seconds": 24.7,
+  "first_partial_poll_seconds": 11.68,
+  "board_job": {
+    "fabric_projections": 875,
+    "accelerated_projections": 875,
+    "state": "complete",
+    "dataset_id": "c6fcbc881f744a4282f6ad21e2d092dd",
+    "stage": "final",
+    "projection_phases": {
+      "native_commands": 504,
+      "allocations": 0,
+      "allocate_ns": 0,
+      "weight_cache_hits": 438,
+      "weight_cache_misses": 365,
+      "pack_weights_ns": 3027224314,
+      "pack_activations_ns": 189008131,
+      "upload_activations_ns": 141680641,
+      "activation_bytes": 5967872,
+      "shared_activation_uploads_saved": 296,
+      "upload_weights_ns": 1263809915,
+      "weight_bytes": 395837440,
+      "device_roundtrip_ns": 8129049370,
+      "queue_runs": 152,
+      "commands": 880,
+      "download_ns": 199422326,
+      "score_bytes": 43868672,
+      "unpack_ns": 747510467,
+      "fused_decoder_groups": 48,
+      "fused_decoder_commands_saved": 72,
+      "resident_weight_hits": 24,
+      "packed_weight_bytes": 66977792,
+      "workspace_bytes": 4456448,
+      "resident_weight_bytes": 16449536,
+      "tokenize_ns": 30666381,
+      "encoder_stack_ns": 7469929577,
+      "decoder_stacks_ns": 11180812773,
+      "vocabulary_ns": 3650240165,
+      "decode_text_ns": 2843632,
+      "verification_blocks": 11,
+      "proposed_tokens": 56,
+      "accepted_proposals": 39
+    },
+    "active": {
+      "name": "original",
+      "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+      "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+      "target_row": null
+    }
+  },
+  "views": {
+    "transcript": "Our shift is ending. What should the next operator know about this pool, and what evidence would justify taking action?",
+    "generalization": "60 readings from 0 to 5900 ms.\nLast reading: 4 of 4 connections busy; 19 waiting.\nPeak queue: 19 waiting at 5900 ms.\nThese measurements do not identify a cause or request-level latency.",
+    "short_answer": "The backlog is ongoing: 19 requests are waiting now.",
+    "summary": "The backlog is ongoing: 19 requests are waiting now.\nMeasure request arrivals and connection hold times.",
+    "final": "The backlog is ongoing: 19 requests are waiting now. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times."
+  },
+  "fpga_ask_requests": [
+    "final"
+  ],
+  "model": "original",
+  "kit": "PYNQ-Z2 connected"
+}

@@ -1,0 +1,70 @@
+{
+  "installed_release": "5e633b5d4b4b55f25d86",
+  "overlay_bit_sha256": "e3de4482fbec66a7c4a5bfcd187df8d3edada230b8b9cab67034034a64c62376",
+  "same_saved_capture_selected_weights_and_answer_bytes": true,
+  "historical_prior_completed_seconds": 797.536,
+  "historical_prior_scope": "previous capture question request to first observed completion over paired connection",
+  "query_only_completed_seconds": 830.2014400649996,
+  "query_only_first_text_seconds": 342.135300811,
+  "all_scope_completed_seconds": 132.0886330180001,
+  "all_scope_first_text_seconds": 18.0774863179995,
+  "query_only_over_all_scope_completion": 6.28518458474671,
+  "historical_prior_over_all_scope_completion": 6.037885181924151,
+  "current_timing_scope": "board-local authenticated TLS request to first observed completion; one-second polling",
+  "learned_projections": 3722,
+  "accelerated_learned_projections": 3722,
+  "telemetry_fpga_submissions_before": 188,
+  "telemetry_fpga_submissions_after": 1431,
+  "telemetry_before_ready_and_fresh": false,
+  "telemetry_after_ready_and_fresh": true,
+  "named_weights_db_identical": true,
+  "named_versions_identical": true,
+  "named_versions_visible": 3,
+  "hardware_shape_scores_checked": 842752,
+  "native_app": {
+    "board_connected": true,
+    "usb_loopback": true,
+    "lm_supported": true,
+    "active_language_weight": "original",
+    "board_boot_id": "60d4e64d-214c-493f-b29c-eb7e4d7e9a2f",
+    "stream_samples": [
+      {
+        "fresh": true,
+        "state": "ready",
+        "origin": "demo",
+        "source": "Board SQLite demo (generated traffic)",
+        "fpga_submissions": 531,
+        "sample_count": 59,
+        "sampled_at": "2026-11-22T05:23:01.934043+00:00"
+      },
+      {
+        "fresh": true,
+        "state": "ready",
+        "origin": "demo",
+        "source": "Board SQLite demo (generated traffic)",
+        "fpga_submissions": 565,
+        "sample_count": 93,
+        "sampled_at": "2026-11-22T05:23:05.390307+00:00"
+      },
+      {
+        "fresh": true,
+        "state": "ready",
+        "origin": "demo",
+        "source": "Board SQLite demo (generated traffic)",
+        "fpga_submissions": 600,
+        "sample_count": 128,
+        "sampled_at": "2026-11-22T05:23:08.846262+00:00"
+      },
+      {
+        "fresh": true,
+        "state": "ready",
+        "origin": "demo",
+        "source": "Board SQLite demo (generated traffic)",
+        "fpga_submissions": 634,
+        "sample_count": 162,
+        "sampled_at": "2026-11-22T05:23:12.286503+00:00"
+      }
+    ],
+    "stream_submissions_increased": true
+  }
+}
