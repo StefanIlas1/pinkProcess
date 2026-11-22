@@ -943,7 +943,7 @@ function measuredQueueHistory(snapshot) {
   if (![peak, first, last].every(n => Number.isSafeInteger(n) && n >= 0) || peak < Math.max(first, last)) return "";
   let history;
   if (peak === 0) history = "No requests waited in the recorded readings.";
-  else if (last === 0) history = "The queue reached " + peak + " waiting and cleared by the final reading.";
+  else if (last === 0) history = "The queue reached " + peak + " waiting and cleared to 0 by the final reading.";
   else history = "Waiting requests at start: " + first + ", peak: " + peak + ", latest: " + last + ".";
   return queueHistoryLabel + history;
 }
