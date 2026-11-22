@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PYNQ Process · ask your data anything</title>
+<meta name="description" content="A Mac app that profiles your data, picks a small quantized model and asks a PYNQ-Z2 board in plain words.">
+<meta name="theme-color" content="#1d1a20">
+<meta property="og:title" content="PYNQ Process · ask your data anything">
+<meta property="og:description" content="A Mac app that profiles your data, picks a small quantized model and asks a PYNQ-Z2 board in plain words.">
+<meta property="og:image" content="assets/og.png">
+<link rel="icon" href="assets/icon.png">
+<link rel="apple-touch-icon" href="assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script src="main.js" defer></script>
+</head>
+<body>
+<header class="nav">
+  <a class="nav-logo" href="index.html" aria-label="PYNQ Process home"><img src="assets/logo.png" alt="PYNQ Process" width="1045" height="314"></a>
+  <nav class="nav-links"><span class="nav-blob"></span><a href="index.html" aria-current="page">Home</a><a href="how-it-works.html">How it works</a><a href="download.html">Download</a></nav>
+  <a class="btn" href="download.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Get the app</a>
+  <button class="nav-toggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20"><path d="M4 8h16M4 16h16"/></svg></button>
+</header>
+<main>
+<section class="hero">
+  <div class="bubbles"></div>
+  <img class="hero-bear" src="assets/bear.png" alt="" width="206" height="246">
+  <h1 class="bubbly"><span class="line"><span>hey, ask your</span></span><span class="line"><span>data <span class="outlined">anything.</span></span></span></h1>
+  <p class="lede">PYNQ Process is a Mac app. Drop in a file, it picks a small quantized model, and a PYNQ-Z2 board answers in plain words.</p>
+  <div class="hero-ctas">
+    <a class="btn" href="download.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Download for Mac</a>
+    <a class="btn ghost" href="how-it-works.html">See how it works</a>
+  </div>
+  <p class="hero-meta">Apple Silicon · <span data-size>8.3 MB</span> zip</p>
+  <div class="stage">
+    <img class="peeker" src="assets/bear.png" alt="" width="206" height="246">
+    <div class="float f1"><span class="sticker"><i></i>PYNQ-Z2 connected</span></div>
+    <div class="float f2"><span class="sticker">first words · 9,340 ms</span></div>
+    <div class="float f3"><span class="sticker">Short · Summary · Final</span></div>
+    <div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/summary.jpg" alt="PYNQ Process answering why a connection pool queue spiked" width="1920" height="1200"></div>
+  </div>
+</section>
+
+<div class="marquee" aria-hidden="true"><div class="marquee-track"><span>Calm connection pool</span><span>Pool, slow build</span><span>Pool, sudden spike</span><span>Pool, recovery</span><span>Pool, oscillating</span><span>API latency</span><span>Server thermal throttle</span><span>Disk IO</span><span>Network packet loss</span><span>Sales with seasonality</span><span>IoT sensor drift</span><span>Log events (JSON lines)</span><span>Malformed file</span><span>Large file (50,000 rows)</span></div></div>
+
+<section class="path" id="hot-path">
+  <div class="path-pin wrap">
+    <div class="path-top">
+      <div>
+        <p class="eyebrow">the hot path</p>
+        <h2 class="bubbly">one question,<br>five stops.</h2>
+      </div>
+      <div class="path-now"><strong>Ready</strong><span>Scroll to send a question down the path.</span></div>
+    </div>
+    <div class="road">
+      <svg class="track" aria-hidden="true"><path class="lane"/><path class="lane-fill"/><path class="lane-dash"/></svg>
+      <div class="station"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg><span class="ms">1 ms</span><span class="nm">Data</span></div><div class="station"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-7"/></svg><span class="ms">0 ms</span><span class="nm">Profile</span></div><div class="station"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg><span class="ms">1 ms</span><span class="nm">Model</span></div><div class="station"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/></svg><span class="ms">9,340 ms</span><span class="nm">PYNQ-Z2</span></div><div class="station"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-5 4v-4H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg><span class="ms">17,570 ms</span><span class="nm">Answer</span></div>
+      <div class="rider"><img src="assets/bear.png" alt="" width="206" height="246"></div>
+    </div>
+    <div class="path-bottom"><span class="path-count">0 / 5</span><div class="meter"><i></i></div><span>times from the app strip and recorded board runs</span></div>
+  </div>
+</section>
+
+<section class="gallery">
+  <div class="gallery-pin">
+    <div class="gallery-head wrap">
+      <div><p class="eyebrow">snapshots</p><h2 class="bubbly">what's inside.</h2></div>
+      <span class="tag">real screens</span>
+    </div>
+    <div class="gallery-row">
+      <figure class="shot"><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/start.jpg" alt="Start with a file" width="1920" height="1200" loading="lazy"></div><figcaption><b>01</b><span>Start with a file</span><em>or grab one of 14 samples</em></figcaption></figure><figure class="shot"><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/summary.jpg" alt="Ask in plain words" width="1920" height="1200" loading="lazy"></div><figcaption><b>02</b><span>Ask in plain words</span><em>answers arrive style by style</em></figcaption></figure><figure class="shot"><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/library.jpg" alt="Pick a model" width="1920" height="1200" loading="lazy"></div><figcaption><b>03</b><span>Pick a model</span><em>filter by task, maker and size</em></figcaption></figure><figure class="shot"><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/peek.jpg" alt="Watch the hot path" width="1920" height="1200" loading="lazy"></div><figcaption><b>04</b><span>Watch the hot path</span><em>every stage timed in ms</em></figcaption></figure><figure class="shot"><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/weights.jpg" alt="Teach it skills" width="1920" height="1200" loading="lazy"></div><figcaption><b>05</b><span>Teach it skills</span><em>versions you can roll back</em></figcaption></figure>
+      <div class="gallery-end"><h3 class="bubbly" style="font-size:52px">that's the<br>whole app.</h3><a class="btn" href="download.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Get it</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="styles">
+  <div class="wrap styles-grid">
+    <div>
+      <p class="eyebrow" data-reveal>answer styles</p>
+      <h2 class="bubbly" data-reveal style="--i:1">hear it your way.</h2>
+      <div class="style-list">
+        <div data-reveal style="--i:2"><b>Short</b><span>one line, first to land</span></div>
+        <div data-reveal style="--i:3"><b>Summary</b><span>the shape of the whole file</span></div>
+        <div data-reveal style="--i:4"><b>Final</b><span>the board's full diagnosis</span></div>
+        <div data-reveal style="--i:5"><b>Transcript</b><span>what happened, in order</span></div>
+        <div data-reveal style="--i:6"><b>Table</b><span>the same, in rows</span></div>
+      </div>
+    </div>
+    <div class="answer" data-reveal style="--i:2">
+      <div class="q">Why did the queue spike?</div>
+      <div class="card">
+        <div class="tabs"><button data-style="Short" class="wait">Short</button><button data-style="Summary" class="wait">Summary</button><button data-style="Transcript" class="wait">Transcript</button><button data-style="Table" class="wait">Table</button></div>
+        <div class="body"></div>
+        <div class="foot"><span>600 readings · pool-sudden-spike.csv</span><span>peak 58</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="bubbles"></div>
+  <img class="cta-bear" src="assets/bear.png" alt="" width="206" height="246">
+  <h2 class="bubbly outlined" data-reveal>take it home.</h2>
+  <p class="lede" data-reveal style="--i:1">One zip. Unzip it, open it, find your board.</p>
+  <a class="btn huge" href="download.html" data-reveal style="--i:2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Download for Mac</a>
+</section>
+</main>
+<footer>
+  <div class="wrap">
+    <a href="index.html"><img src="assets/logo.png" alt="PYNQ Process" width="1045" height="314"></a>
+    <span>Made at Hack Western 13 by Stefan Ilas and Mohsen Sarrafan Chaharsoughi</span>
+    <nav><a href="index.html">Home</a><a href="how-it-works.html">How it works</a><a href="download.html">Download</a></nav>
+  </div>
+</footer>
+</body>
+</html>

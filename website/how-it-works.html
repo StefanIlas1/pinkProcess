@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How it works · PYNQ Process</title>
+<meta name="description" content="Connect a PYNQ-Z2, import data, pick a model and ask. Here is what happens on the way.">
+<meta name="theme-color" content="#1d1a20">
+<meta property="og:title" content="How it works · PYNQ Process">
+<meta property="og:description" content="Connect a PYNQ-Z2, import data, pick a model and ask. Here is what happens on the way.">
+<meta property="og:image" content="assets/og.png">
+<link rel="icon" href="assets/icon.png">
+<link rel="apple-touch-icon" href="assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script src="main.js" defer></script>
+</head>
+<body>
+<header class="nav">
+  <a class="nav-logo" href="index.html" aria-label="PYNQ Process home"><img src="assets/logo.png" alt="PYNQ Process" width="1045" height="314"></a>
+  <nav class="nav-links"><span class="nav-blob"></span><a href="index.html">Home</a><a href="how-it-works.html" aria-current="page">How it works</a><a href="download.html">Download</a></nav>
+  <a class="btn" href="download.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Get the app</a>
+  <button class="nav-toggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="20" height="20"><path d="M4 8h16M4 16h16"/></svg></button>
+</header>
+<main>
+<section class="page-hero wrap">
+  <p class="eyebrow">how it works</p>
+  <h1 class="bubbly">five steps,<br><span class="outlined">no manual.</span></h1>
+  <p class="lede">From a file on your Mac to an answer from the board.</p>
+</section>
+<section class="wrap steps">
+  <div class="steps-text"><div class="step"><span class="num">1</span><h3>Connect and import</h3><p>Press Find boards. Once the PYNQ-Z2 shows up, import a CSV or JSON lines file, or pick a sample.</p><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/start.jpg" alt="Connect and import" width="1920" height="1200" loading="lazy"></div></div><div class="step"><span class="num">2</span><h3>Pick a model</h3><p>A recommended quantized model is applied when the data loads. Search the library or synthesize your own.</p><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/library.jpg" alt="Pick a model" width="1920" height="1200" loading="lazy"></div></div><div class="step"><span class="num">3</span><h3>Ask</h3><p>Type or dictate a question. Short arrives first, then Summary, Final, Transcript and Table.</p><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/summary.jpg" alt="Ask" width="1920" height="1200" loading="lazy"></div></div><div class="step"><span class="num">4</span><h3>Watch the hot path</h3><p>The strip on the left shows Data, Profile, Model, PYNQ-Z2 and Answer, each with its time in ms.</p><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/peek.jpg" alt="Watch the hot path" width="1920" height="1200" loading="lazy"></div></div><div class="step"><span class="num">5</span><h3>Teach it</h3><p>Named edits change one INT8 row of a checkpoint. The board stores, verifies, switches and rolls them back.</p><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/weights.jpg" alt="Teach it" width="1920" height="1200" loading="lazy"></div></div></div>
+  <div class="steps-media"><div class="window on"><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/start.jpg" alt="Connect and import" width="1920" height="1200" loading="lazy"></div><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/library.jpg" alt="Pick a model" width="1920" height="1200" loading="lazy"></div><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/summary.jpg" alt="Ask" width="1920" height="1200" loading="lazy"></div><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/peek.jpg" alt="Watch the hot path" width="1920" height="1200" loading="lazy"></div><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/weights.jpg" alt="Teach it" width="1920" height="1200" loading="lazy"></div></div>
+</section>
+<section class="wrap stack">
+  <p class="eyebrow" data-reveal>under the hood</p>
+  <h2 class="bubbly" data-reveal style="--i:1">what runs where.</h2>
+  <div class="stack-row"><svg aria-hidden="true"><path/></svg><div class="layer" data-reveal style="--i:0"><div class="orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M2 19h20"/></svg></div><b>Mac app</b><span>Native window, dictation on device</span><code>Swift</code></div><div class="layer" data-reveal style="--i:1"><div class="orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="7" rx="2"/><rect x="4" y="13" width="16" height="7" rx="2"/><path d="M8 7.5h.01M8 16.5h.01"/></svg></div><b>Local server</b><span>Profiles files and runs the page</span><code>127.0.0.1:53530</code></div><div class="layer" data-reveal style="--i:2"><div class="orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/></svg></div><b>PYNQ-Z2</b><span>ARM core drives generation and keeps history</span><code>FLAN-T5-small</code></div><div class="layer" data-reveal style="--i:3"><div class="orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16M4 15h16M10 4v16M15 4v16"/></svg></div><b>FPGA fabric</b><span>Learned INT8 matrix projections</span><code>INT8</code></div></div>
+</section>
+<section class="wrap">
+  <div class="section-head" style="padding-top:60px">
+    <p class="eyebrow" data-reveal>no tricks</p>
+    <h2 class="bubbly" data-reveal style="--i:1">real, and labeled.</h2>
+  </div>
+  <div class="truth">
+    <div class="truth-card real" data-reveal>
+      <h3>On the board</h3>
+      <ul>
+        <li>Answers about a queue CSV or the live feed are generated on the PYNQ-Z2.</li>
+        <li>The kit keeps its own rolling history and scores new windows with the Mac closed.</li>
+        <li>Board uploads, staged answers, follow-ups and model synthesis run on the board.</li>
+        <li>Weight edits are stored, verified and rolled back exactly.</li>
+      </ul>
+    </div>
+    <div class="truth-card" data-reveal style="--i:1">
+      <h3>On your Mac</h3>
+      <ul>
+        <li>Imported files are profiled here. Transcript and Table come from plain statistics.</li>
+        <li>The model pick is a rule-based guess from column names and types.</li>
+        <li>The board's built-in SQLite workload is generated traffic, marked Simulated.</li>
+        <li>History, notes, export and the model library stay local.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="bubbles"></div>
+  <img class="cta-bear" src="assets/bear.png" alt="" width="206" height="246">
+  <h2 class="bubbly outlined" data-reveal>seen enough?</h2>
+  <p class="lede" data-reveal style="--i:1">Grab the app and point it at your board.</p>
+  <a class="btn huge" href="download.html" data-reveal style="--i:2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Download for Mac</a>
+</section>
+</main>
+<footer>
+  <div class="wrap">
+    <a href="index.html"><img src="assets/logo.png" alt="PYNQ Process" width="1045" height="314"></a>
+    <span>Made at Hack Western 13 by Stefan Ilas and Mohsen Sarrafan Chaharsoughi</span>
+    <nav><a href="index.html">Home</a><a href="how-it-works.html">How it works</a><a href="download.html">Download</a></nav>
+  </div>
+</footer>
+</body>
+</html>
