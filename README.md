@@ -79,8 +79,16 @@ first text in 18.1 seconds and the complete answer in 132.1 seconds. All 3,722
 learned projections used the array, the answer matched byte for byte, and the
 Mac received fresh board telemetry during generation.
 [Physical replay and weight checks](kit/evidence/physical-systolic-diagnosis.json).
-The installed Mac
-app also answered an unfamiliar question while new readings arrived. After a witnessed power cycle and recovery from a startup
+A later board-runtime update used C++ dispatch and reusable buffers on the
+same image. Three new synthetic incidents queried through the installed Mac
+app's USB backend took 46.0, 48.6 and 59.4 seconds to complete. All three
+answers matched their references and the recorded observations.
+[Questions, outputs and timings](kit/evidence/physical-projection-cache.json).
+Keeping the vocabulary weights in DMA buffers then gave a 47.345-second warm
+saved replay and a 54.433-second answer to a new synthetic question. A real
+named edit and rollback each reproduced the corresponding archived answer.
+[Resident weights and version changes](kit/evidence/physical-projection-resident-head.json).
+The installed Mac app also answered an unfamiliar question while new readings arrived. After a witnessed power cycle and recovery from a startup
 overlay conflict, the kit reproduced the edited answer exactly. Restoring the
 original weights reproduced the baseline and preserved the named edit. With the
 startup fix installed, the board also reloaded the selected weights on an
@@ -654,6 +662,24 @@ service requires the projection core, and a completed answer reports both
 `accelerated_projections` and `fabric_projections`. They count learned matrix
 calls, including a segmented matrix as one call. For the initial two-projection
 benchmark configuration, set `PINKPROCESS_PROJECTION_ARGS=--projection-overlay`.
+
+On boards with sufficient contiguous memory, add
+`--projection-resident-head-mib 16` to retain the vocabulary weights in
+FPGA-readable buffers. The driver uses the existing streaming workspace if an
+allocation fails, and the active version determines what the FPGA reads.
+
+The next overlay adds an eight-entry queue and stores each activation tile of
+depth up to 1,024 in block RAM for reuse across output tiles. The block-level
+simulation covers AXI stalls, queue bounds, interrupted batches, retry, and
+the streaming fallback above that depth. To build the optional vocabulary
+reducer as well, run `fpga/build.sh BUILD_DIRECTORY --argmax`. On a matched
+image, `--projection-queue` batches independent projections and
+`--projection-argmax` returns the winning token after applying both FP32
+scales. Both require `--projection-overlay --projection-scope all`. The
+first output step preserves the full calibration data for edits. Earlier
+images continue to support the all-matrix configuration above. For isolated
+qualification, add `--hardware-counters` to `kit.benchmark_projection_overlay`
+on a queue-capable image to record useful MAC cycles and 64-bit DDR beats.
 
 ### Remote Vivado build on Western GAUL
 

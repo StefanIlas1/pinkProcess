@@ -53,6 +53,49 @@ class FlanProjectionTests(unittest.TestCase):
         digest = hashlib.sha256(memoryview(self.weights)).hexdigest()
         self.assertEqual(self.model.install_weight_version(SimpleNamespace(patch=None, classifier_sha256=digest)), digest)
 
+    def test_decoder_quantization_uses_native_when_available_and_falls_back(self):
+        model = self.model
+        calls = []
+
+        def native_quantize(x):
+            calls.append(x.shape)
+            return None
+
+        model.query_projection = SimpleNamespace(native=SimpleNamespace(quantize_activations=native_quantize))
+        x = np.array([[0.5, -0.25, 1.0], [-2.0, 1.4, 2.0]], dtype=np.float32)
+        for sample in (x[:1], x):
+            for actual, expected in zip(model._quantize_activations(sample), model.quantize_activations(sample)):
+                np.testing.assert_array_equal(actual, expected)
+        self.assertEqual(calls, [(1, 3)])
+
+    def test_argmax_preserves_first_step_calibration_and_times_generation(self):
+        model = self.model
+        model.stack = lambda *_: np.array([[-1., 0.25, -0.5, 1.]], dtype=np.float32)
+        model.tokenizer = SimpleNamespace(encode=lambda _: [2], decode=lambda tokens: str(tokens))
+        model.fabric = object()
+        model.t["lm_head.weight"] = np.array([[0, 0, 0, 0], [0, 0, 0, 0],
+                                              [-1, 0, 0, 1]], dtype=np.int8)
+        model.t["lm_head.weight.scale"] = np.ones(3, dtype=np.float32)
+        called = []
+
+        def reduce(weights, x, scale, row_scales):
+            called.append((weights, x, scale, row_scales))
+            return 1
+
+        model.query_projection = SimpleNamespace(
+            argmax_mmio=object(), head_argmax=reduce, start_generation=lambda: None,
+            profile=lambda: {"argmax_commands": len(called)},
+            project=lambda _name, w, x: x.astype(np.int32) @ w.astype(np.int32).T,
+        )
+        self.assertEqual(model.generate("fixture", max_tokens=2), "[2]")
+        self.assertEqual(model.first_output_activation, [-127, 32, -64, 127])
+        self.assertEqual(model.first_output_max, 254.)
+        self.assertEqual(model.fabric_projections, 2)
+        self.assertEqual(model.accelerated_projections, 2)
+        self.assertEqual(len(called), 1)
+        for phase in ("tokenize_ns", "encoder_stack_ns", "decoder_stacks_ns", "vocabulary_ns", "decode_text_ns"):
+            self.assertGreater(model.projection_profile()[phase], 0)
+
     def test_cached_head_uses_active_row_and_restores_both_layouts(self):
         from kit.test_benchmark_projection_overlay import FakeOverlay
         from lm_reference.projection_overlay import OverlayProjection

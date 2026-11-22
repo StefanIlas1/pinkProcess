@@ -14,6 +14,7 @@ import numpy as np
 from fpga.check_classifier import board_lock
 from kit.benchmark_projection import load_capture
 from lm_reference.projection_overlay import BUSY, CONTROL, pack_projection, projection_mmio, unpack_projection
+from lm_reference.projection_overlay import PROJECTION_QUEUE_ID, QUEUE_ID
 from lm_reference.projection_overlay import run_projection as execute_projection
 
 def simulate_projection(a, w, decode):
@@ -99,10 +100,14 @@ def main():
                         help="NPZ containing signed INT8 weights [rows, columns] and activations [batch, columns].")
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--timeout", type=float, default=10, help="Seconds to wait for a physical projection.")
+    parser.add_argument("--hardware-counters", action="store_true",
+                        help="Read MAC and DDR counters on the QUE8 overlay after each measured launch.")
     backend = parser.add_mutually_exclusive_group(required=True)
     backend.add_argument("--bitstream", type=Path, help="Prototype .bit with its matching .hwh.")
     backend.add_argument("--simulate", action="store_true", help="Verify the DDR layout offline.")
     args = parser.parse_args()
+    if args.hardware_counters and args.simulate:
+        parser.error("--hardware-counters requires the physical QUE8 overlay")
     if args.repeats < 1 or not math.isfinite(args.timeout) or args.timeout <= 0:
         parser.error("--repeats and --timeout must be finite and positive")
     weights, activations = load_capture(args.capture)
@@ -116,8 +121,16 @@ def main():
             try:
                 overlay = Overlay(str(args.bitstream))
 
+                mmio = projection_mmio(overlay)
+                if args.hardware_counters and mmio.read(QUEUE_ID) != PROJECTION_QUEUE_ID:
+                    raise RuntimeError("Hardware counters require the QUE8 overlay.")
+
                 def run(a, w, decode):
-                    return run_projection(overlay, allocate, a, w, decode, args.timeout)
+                    scores, timings = run_projection(overlay, allocate, a, w, decode, args.timeout)
+                    if args.hardware_counters:
+                        timings.update(elapsed_cycles=mmio.read(0x2c), mac_feed_cycles=mmio.read(0x30),
+                                       ddr_read_beats=mmio.read(0x34), ddr_write_beats=mmio.read(0x38))
+                    return scores, timings
 
                 report = benchmark(weights, activations, run, args.repeats)
             finally:

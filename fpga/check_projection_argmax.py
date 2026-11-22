@@ -71,6 +71,13 @@ def main():
             cwd=work, check=True,
         )
         subprocess.run(["vvp", "argmax"], cwd=work, check=True)
+        subprocess.run(
+            ["iverilog", "-g2012", "-s", "projection_argmax_dma_tb", "-o", "argmax-dma",
+             fpga / "pinkprocess_argmax.v", fpga / "projection_dma.v",
+             fpga / "projection_scaled_argmax.sv", fpga / "projection_argmax_dma_tb.sv"],
+            cwd=work, check=True,
+        )
+        subprocess.run(["vvp", "argmax-dma"], cwd=work, check=True)
 
 
 if __name__ == "__main__":

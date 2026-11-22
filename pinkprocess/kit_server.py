@@ -116,6 +116,10 @@ def parse_args(argv=None):
                         help="Offload the first self-attention queries (default) or all learned projections.")
     parser.add_argument("--projection-queue", action="store_true",
                         help="Use a projection overlay explicitly known to have the command queue.")
+    parser.add_argument("--projection-argmax", action="store_true",
+                        help="Use an experimental overlay with the FP32 vocabulary reducer.")
+    parser.add_argument("--projection-resident-head-mib", type=int, choices=range(17), default=0,
+                        metavar="0–16", help="Keep up to this many MiB of vocabulary weights in DMA memory.")
     args = parser.parse_args(argv)
     if bool(args.language_model) != bool(args.manifest_sha256):
         parser.error("Supply both the language model directory and its pinned manifest hash.")
@@ -125,6 +129,10 @@ def parse_args(argv=None):
         parser.error("--projection-scope all requires --projection-overlay.")
     if args.projection_queue and (not args.projection_overlay or args.projection_scope != "all"):
         parser.error("--projection-queue requires --projection-overlay --projection-scope all.")
+    if args.projection_argmax and (not args.projection_overlay or args.projection_scope != "all"):
+        parser.error("--projection-argmax requires --projection-overlay --projection-scope all.")
+    if args.projection_resident_head_mib and (not args.projection_overlay or args.projection_scope != "all"):
+        parser.error("--projection-resident-head-mib requires --projection-overlay --projection-scope all.")
     return args
 
 
@@ -158,9 +166,12 @@ def main():
                     mmio = projection_mmio(model.classifier.overlay, required=args.projection_scope == "all")
                     if mmio is not None:
                         from pynq import allocate
+                        from lm_reference.projection_argmax import require_argmax_mmio
 
+                        argmax = require_argmax_mmio(model.classifier.overlay) if args.projection_argmax else None
                         query_projection = OverlayProjection(mmio, allocate, scope=args.projection_scope,
-                                                            queue=args.projection_queue)
+                                                            queue=args.projection_queue, argmax_mmio=argmax,
+                                                            resident_head_mib=args.projection_resident_head_mib)
                         resources.callback(query_projection.close)
                 runtime = Flan(args.language_model, TiledMatvec(model.classifier, lock=server.model_lock),
                                query_projection=query_projection)

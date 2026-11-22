@@ -1,6 +1,9 @@
 // Native host primitives for the existing AXI-Lite projection register ABI.
 #include <algorithm>
 #include <chrono>
+#include <cfloat>
+#include <cfenv>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -21,6 +24,43 @@ void mmio_barrier()
 }
 
 extern "C" {
+
+// Return 1 for inputs or floating-point environments requiring the NumPy path.
+int pp_projection_quantize(std::int8_t *output, float *scales, const float *source,
+                           std::size_t rows, std::size_t depth)
+{
+#if defined(__FAST_MATH__)
+    return 1;
+#endif
+    if (FLT_EVAL_METHOD != 0 || std::fegetround() != FE_TONEAREST) {
+        return 1;
+    }
+    for (std::size_t row = 0; row < rows; ++row) {
+        float maximum = 0.0f;
+        for (std::size_t k = 0; k < depth; ++k) {
+            if (!std::isfinite(source[k])) {
+                return 1;
+            }
+            maximum = std::max(maximum, std::fabs(source[k]));
+        }
+        const float scale = std::max(maximum / 127.0f, 1e-30f);
+        scales[row] = scale;
+        for (std::size_t k = 0; k < depth; ++k) {
+            const float ratio = source[k] / scale;
+            const float magnitude = std::fabs(ratio);
+            int rounded = static_cast<int>(magnitude);
+            const float fraction = magnitude - static_cast<float>(rounded);
+            if (fraction > 0.5f || (fraction == 0.5f && (rounded & 1))) {
+                ++rounded;
+            }
+            rounded = std::min(rounded, 127);
+            output[k] = static_cast<std::int8_t>(ratio < 0.0f ? -rounded : rounded);
+        }
+        source += depth;
+        output += depth;
+    }
+    return 0;
+}
 
 void pp_projection_pack(std::int8_t *destination, const std::int8_t *source,
                         std::size_t rows, std::size_t depth, std::size_t lanes,

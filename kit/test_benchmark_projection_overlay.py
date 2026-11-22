@@ -8,10 +8,12 @@ from threading import Event, Thread
 from time import monotonic, sleep
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
 from kit import benchmark_projection_overlay as benchmark
+from lm_reference import projection_argmax as argmax
 from lm_reference import projection_overlay as projection
 
 
@@ -114,6 +116,46 @@ class ProjectionOverlayTest(unittest.TestCase):
         self.w = random.integers(-128, 128, (65, 19), dtype=np.int8)
         self.a = random.integers(-128, 128, (9, 19), dtype=np.int8)
 
+    def test_segmented_head_uses_device_scores_and_preserves_first_tie(self):
+        class ArgmaxMMIO:
+            registers = {argmax.CONTROL: 0, argmax.CORE_ID: argmax.ARGMAX_ID}
+
+            def read(self, address):
+                return self.registers[address]
+
+            def write(self, address, value):
+                self.registers[address] = value
+                if address != argmax.CONTROL:
+                    return
+                rows = self.registers[argmax.ROWS]
+                scales = overlay.buffers[self.registers[argmax.SCALE_ADDRESS]][:rows]
+                dots = overlay.buffers[self.registers[argmax.SCORE_ADDRESS]][:rows]
+                activation = np.uint32(self.registers[argmax.ACTIVATION_SCALE]).view(np.float32)
+                logits = dots.astype(np.float32) * activation * scales
+                winner = int(np.argmax(logits))
+                self.registers.update({argmax.CONTROL: argmax.DONE, argmax.WINNER: winner,
+                                       argmax.WINNER_SCORE: int(logits[winner].view(np.uint32))})
+
+        overlay = FakeOverlay()
+        reducer = ArgmaxMMIO()
+        overlay.projection_argmax = SimpleNamespace(mmio=reducer)
+        self.assertIs(argmax.require_argmax_mmio(overlay), reducer)
+        runner = projection.OverlayProjection(overlay, overlay.allocate, scope="all", argmax_mmio=reducer,
+                                              resident_head_mib=1)
+        self.addCleanup(runner.close)
+        weights = np.tile(np.array([8, -1], dtype=np.int8), (129, 1))
+        runner.bind_model({"lm_head.weight": weights})
+        activations = np.array([[1, 0]], dtype=np.int8)
+        scales = np.ones(129, dtype=np.float32)
+        scales[-1] = scales[64] = 4
+        with patch.object(projection, "MAX_SEGMENT_BUFFER_BYTES", 256):
+            self.assertEqual(runner.head_argmax(weights, activations, np.float32(0.5), scales), 64)
+            self.assertEqual(runner.profile()["argmax_commands"], 3)
+            self.assertFalse(any(event[0] == "invalidate" for event in overlay.events))
+            scales[-1] = 5
+            self.assertEqual(runner.head_argmax(weights, activations, np.float32(0.5), scales), 128)
+            self.assertEqual(runner.profile()["resident_weight_hits"], 3)
+
     def test_encoder_and_decoder_partial_tiles(self):
         for activations, mode, positions, outputs in ((self.a, "encode", 2, 9), (self.a[:1], "decode", 1, 2)):
             with self.subTest(mode=mode):
@@ -187,6 +229,100 @@ class ProjectionOverlayTest(unittest.TestCase):
         runner.close()
         self.assertFalse(overlay.buffers)
 
+    def test_resident_full_head_uploads_once_and_tracks_active_weights(self):
+        overlay = FakeOverlay(queue=True)
+        runner = projection.OverlayProjection(overlay, overlay.allocate, scope="all", queue=True,
+                                              resident_head_mib=16)
+        self.addCleanup(runner.close)
+        weights = np.full((32128, 512), -128, dtype=np.int8)
+        activations = np.full((1, 512), -128, dtype=np.int8)
+        runner.bind_model({"lm_head.weight": weights})
+        first = runner.project("lm_head", weights, activations)
+        self.assertEqual(runner.profile()["resident_weight_uploads"], 8)
+        self.assertEqual(runner.profile()["resident_weight_bytes"], weights.nbytes)
+        self.assertEqual(runner.profile()["weight_bytes"], weights.nbytes)
+        addresses = {buffer.device_address for buffer, _ in runner.resident_head.values()}
+        runner.start_generation()
+        np.testing.assert_array_equal(runner.project("lm_head", weights, activations), first)
+        self.assertEqual(runner.profile()["resident_weight_hits"], 8)
+        self.assertEqual(runner.profile().get("weight_bytes", 0), 0)
+        self.assertIn(overlay.registers[projection.W_ADDRESS], addresses)
+        # A queued group can continue using its ordinary scratch alongside residents.
+        a = self.a[:1]
+        for result in runner.project_many([("q", self.w), ("k", self.w)], a):
+            np.testing.assert_array_equal(result, a.astype(np.int32) @ self.w.astype(np.int32).T)
+        self.assertEqual(runner.profile()["queue_runs"], 1)
+        weights[4096] = 127
+        runner.invalidate_weights("lm_head")
+        self.assertTrue(addresses.isdisjoint(overlay.buffers))
+        edited = runner.project("lm_head", weights, activations)
+        self.assertEqual(edited[0, 4096], -128 * 127 * 512)
+        self.assertEqual(np.count_nonzero(edited != first), 1)
+
+    def test_resident_allocation_failure_keeps_scratch_and_does_not_retry_each_token(self):
+        overlay = FakeOverlay()
+        attempts = []
+
+        def allocate(*, shape, dtype):
+            if len(shape) == 3:
+                attempts.append(shape)
+                if len(attempts) > 1:
+                    raise RuntimeError("Simulated CMA exhaustion")
+            return overlay.allocate(shape=shape, dtype=dtype)
+
+        runner = projection.OverlayProjection(overlay, allocate, scope="all", resident_head_mib=2)
+        self.addCleanup(runner.close)
+        runner.bind_model({"lm_head.weight": self.w})
+        expected = self.a[:1].astype(np.int32) @ self.w.astype(np.int32).T
+        with patch.object(projection, "MAX_SEGMENT_BUFFER_BYTES", 19 * 64):
+            for _ in range(3):
+                np.testing.assert_array_equal(runner.project("lm_head", self.w, self.a[:1]), expected)
+        self.assertEqual(len(attempts), 2)
+        self.assertEqual(runner.profile()["resident_allocation_failures"], 1)
+        self.assertEqual(runner.profile()["resident_weight_hits"], 2)
+
+    def test_resident_timeout_keeps_buffers_through_weight_invalidation(self):
+        overlay = FakeOverlay()
+        runner = projection.OverlayProjection(overlay, overlay.allocate, scope="all", timeout=0,
+                                              resident_head_mib=2)
+        runner.bind_model({"lm_head.weight": self.w})
+        runner.project("lm_head", self.w, self.a[:1])
+        addresses = set(overlay.buffers)
+        overlay.stalled = True
+        try:
+            with self.assertRaises(TimeoutError):
+                runner.project("lm_head", self.w, self.a[:1])
+            runner.invalidate_weights("lm_head")
+            runner.bind_model({"lm_head.weight": self.w.copy()})
+            self.assertEqual(set(overlay.buffers), addresses)
+            self.assertTrue(runner.resident_head)
+        finally:
+            overlay.registers[projection.CONTROL] = projection.DONE
+            runner.close()
+        self.assertFalse(overlay.buffers)
+
+    def test_resident_is_evicted_once_if_ordinary_workspace_needs_cma(self):
+        overlay = FakeOverlay()
+        failures = []
+
+        def allocate(*, shape, dtype):
+            if len(shape) == 1 and dtype == np.int32 and shape[0] > 128 and runner.resident_head:
+                failures.append(shape)
+                raise OSError("Simulated CMA exhaustion")
+            return overlay.allocate(shape=shape, dtype=dtype)
+
+        runner = projection.OverlayProjection(overlay, allocate, scope="all", resident_head_mib=1)
+        self.addCleanup(runner.close)
+        runner.bind_model({"lm_head.weight": self.w})
+        head = runner.project("lm_head", self.w, self.a[:1])
+        self.assertTrue(runner.resident_head)
+        expected = self.a.astype(np.int32) @ self.w.astype(np.int32).T
+        np.testing.assert_array_equal(runner.project("encoder", self.w, self.a), expected)
+        np.testing.assert_array_equal(runner.project("lm_head", self.w, self.a[:1]), head)
+        self.assertEqual(len(failures), 1)
+        self.assertEqual(runner.profile()["resident_workspace_fallbacks"], 1)
+        self.assertFalse(runner.resident_head)
+
     def test_service_scope_selection(self):
         from pinkprocess.kit_server import parse_args
 
@@ -202,6 +338,11 @@ class ProjectionOverlayTest(unittest.TestCase):
                                           "--projection-queue"]).projection_queue)
         with redirect_stderr(StringIO()), self.assertRaises(SystemExit):
             parse_args(base + ["--projection-overlay", "--projection-queue"])
+        resident = ["--projection-resident-head-mib", "16"]
+        self.assertEqual(parse_args(base + ["--projection-overlay", "--projection-scope", "all"]
+                                    + resident).projection_resident_head_mib, 16)
+        with redirect_stderr(StringIO()), self.assertRaises(SystemExit):
+            parse_args(base + ["--projection-overlay"] + resident)
 
     def test_shared_input_legacy_and_queue(self):
         matrices = [("q", self.w), ("k", self.w[:17]), ("v", self.w[::-1])]

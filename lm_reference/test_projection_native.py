@@ -13,6 +13,7 @@ import numpy as np
 
 from lm_reference.projection_native import NativeProjection, _load_library
 from lm_reference.projection_overlay import pack_projection, unpack_projection
+from lm_reference.flan import Flan
 
 
 class ProjectionNativeTest(unittest.TestCase):
@@ -40,6 +41,31 @@ class ProjectionNativeTest(unittest.TestCase):
             self.assertIsNone(NativeProjection.load(SimpleNamespace(array=self.registers[::2])))
         with patch("lm_reference.projection_native._load_library", return_value=None):
             self.assertIsNone(NativeProjection.load(SimpleNamespace(array=self.registers)))
+
+    def test_quantization_matches_numpy_bits_near_ties_and_underflow(self):
+        tie = np.arange(127, dtype=np.float32) + np.float32(0.5)
+        values = np.r_[tie, np.nextafter(tie, np.float32(0)),
+                       np.nextafter(tie, np.float32(np.inf)), 127].astype(np.float32)
+        subnormal = np.nextafter(np.float32(0), np.float32(1))
+        max_float = np.finfo(np.float32).max
+        random = np.random.default_rng(712)
+        exponent_finite = random.integers(0, 0x7f800000, (127, 512), dtype=np.uint32)
+        signs = random.integers(0, 2, exponent_finite.shape, dtype=np.uint32) << 31
+        for source in (np.stack([values, -values]),
+                       np.array([[0, -0., subnormal, -subnormal], [1e-37, 0, -1e-37, subnormal],
+                                 [max_float, -max_float, 0, 0]], dtype=np.float32),
+                       (exponent_finite | signs).view(np.float32)):
+            q, scale = self.native.quantize_activations(source)
+            expected_q, expected_scale = Flan.quantize_activations(source)
+            np.testing.assert_array_equal(q, expected_q)
+            np.testing.assert_array_equal(scale.view(np.uint32), expected_scale.view(np.uint32))
+
+    def test_quantization_falls_back_without_new_symbol_or_for_unsupported_arrays(self):
+        native = NativeProjection(self.registers, SimpleNamespace())
+        self.assertIsNone(native.quantize_activations(np.zeros((1, 2), dtype=np.float32)))
+        for inputs in (np.zeros((1, 2), dtype=np.float64), np.ones((2, 4), dtype=np.float32)[:, ::2],
+                       np.array([[np.nan, 1]], dtype=np.float32), np.array([[np.inf, 1]], dtype=np.float32)):
+            self.assertIsNone(self.native.quantize_activations(inputs))
 
     def test_pack_and_unpack_match_numpy_with_signed_padding(self):
         random = np.random.default_rng(912)

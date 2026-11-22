@@ -1,7 +1,8 @@
-# Run with vivado -mode batch -source fpga/build_pynq.tcl -tclargs <build-dir>
-if {$argc != 1} {
-    error "Pass a new build directory with -tclargs."
+# Run with vivado -mode batch -source fpga/build_pynq.tcl -tclargs <build-dir> ?--argmax?
+if {$argc < 1 || $argc > 2 || ($argc == 2 && [lindex $argv 1] ne "--argmax")} {
+    error "Pass a new build directory and optional --argmax with -tclargs."
 }
+set use_argmax [expr {$argc == 2}]
 set project_dir [file normalize [lindex $argv 0]]
 set source_dir [file dirname [file normalize [info script]]]
 set boards [lsort -dictionary [get_board_parts -quiet *pynq-z2*]]
@@ -13,6 +14,11 @@ create_project pinkprocess $project_dir -part [get_property PART_NAME $board]
 set_property board_part $board [current_project]
 foreach rtl {classifier.v projection_tile.sv projection_engine.sv projection_dma.v pinkprocess_projection.v} {
     add_files [file join $source_dir $rtl]
+}
+if {$use_argmax} {
+    foreach rtl {projection_scaled_argmax.sv pinkprocess_argmax.v} {
+        add_files [file join $source_dir $rtl]
+    }
 }
 update_compile_order -fileset sources_1
 set block_design pinkprocess_bd
@@ -35,8 +41,15 @@ apply_bd_automation -rule xilinx.com:bd_rule:axi4 \
 
 # SmartConnect adapts the burst master to the Zynq AXI3 HP port.
 create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 projection_ddr
-set_property -dict [list CONFIG.NUM_SI {1} CONFIG.NUM_MI {1}] [get_bd_cells projection_ddr]
+set_property -dict [list CONFIG.NUM_SI [expr {$use_argmax ? 2 : 1}] CONFIG.NUM_MI {1}] [get_bd_cells projection_ddr]
 connect_bd_intf_net [get_bd_intf_pins projection/M_AXI] [get_bd_intf_pins projection_ddr/S00_AXI]
+if {$use_argmax} {
+    create_bd_cell -type module -reference pinkprocess_argmax projection_argmax
+    apply_bd_automation -rule xilinx.com:bd_rule:axi4 \
+        -config {Master {/ps7/M_AXI_GP0} Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto}} \
+        [get_bd_intf_pins projection_argmax/S_AXI]
+    connect_bd_intf_net [get_bd_intf_pins projection_argmax/M_AXI] [get_bd_intf_pins projection_ddr/S01_AXI]
+}
 connect_bd_intf_net [get_bd_intf_pins projection_ddr/M00_AXI] [get_bd_intf_pins ps7/S_AXI_HP0]
 connect_bd_net [get_bd_pins ps7/FCLK_CLK0] [get_bd_pins projection_ddr/aclk] [get_bd_pins ps7/S_AXI_HP0_ACLK]
 connect_bd_net [get_bd_pins rst_ps7_50M/peripheral_aresetn] [get_bd_pins projection_ddr/aresetn]

@@ -3,11 +3,13 @@
 from collections import Counter, OrderedDict
 from contextlib import ExitStack
 from math import prod
+from mmap import PAGESIZE
 from threading import Lock, Thread
 from time import monotonic, perf_counter_ns, sleep
 
 import numpy as np
 
+from .projection_argmax import argmax_result, configure_argmax, launch_argmax
 from .projection_native import NativeProjection
 
 CONTROL = 0x00
@@ -27,6 +29,7 @@ PROJECTION_ID = 0x50504A31
 BUSY, DONE, ERROR = 1, 2, 4
 MAX_SEGMENT_BUFFER_BYTES = 2 * 1024 * 1024
 MAX_PACKED_WEIGHT_BYTES = 64 * 1024 * 1024
+MAX_RESIDENT_HEAD_MIB = 16
 QUERY_PROJECTIONS = frozenset({
     "encoder.block.0.layer.0.SelfAttention.q",
     "decoder.block.0.layer.0.SelfAttention.q",
@@ -156,7 +159,8 @@ def run_projection(mmio, allocate, a, w, decode, timeout, retain):
 class OverlayProjection:
     """Offload either the first self-attention queries or every learned projection."""
 
-    def __init__(self, mmio, allocate, *, scope="query", timeout=2, queue=False):
+    def __init__(self, mmio, allocate, *, scope="query", timeout=2, queue=False,
+                 argmax_mmio=None, resident_head_mib=0):
         if scope not in ("query", "all"):
             raise ValueError("Projection scope must be query or all.")
         self.mmio = mmio
@@ -169,6 +173,17 @@ class OverlayProjection:
         self.lock = Lock()
         self.disabled = False
         self.pending = False
+        self.pending_mmio = None
+        if argmax_mmio is not None and scope != "all":
+            raise ValueError("Vocabulary reduction requires all-projection scope.")
+        if (type(resident_head_mib) is not int or not 0 <= resident_head_mib <= MAX_RESIDENT_HEAD_MIB
+                or (resident_head_mib and scope != "all")):
+            raise ValueError("Resident head cache requires all-projection scope and a budget of 0–16 MiB.")
+        self.argmax_mmio = argmax_mmio
+        self.resident_budget = resident_head_mib * 1024 * 1024
+        self.resident_head = {}
+        self.resident_bytes = 0
+        self.resident_blocked = False
         self.native = NativeProjection.load(mmio)
         self.workspace = {}
         self.model_weights = {}
@@ -182,6 +197,9 @@ class OverlayProjection:
             self.model_weights = tensors
             self.packed_weights.clear()
             self.packed_bytes = 0
+            if not self.pending:
+                self._release_resident()
+                self.resident_blocked = False
 
     def invalidate_weights(self, name):
         with self.lock:
@@ -189,6 +207,9 @@ class OverlayProjection:
                 old = self.packed_weights.pop((name, decode), None)
                 if old is not None:
                     self.packed_bytes -= old.nbytes
+            if name == "lm_head" and not self.pending:
+                self._release_resident()
+                self.resident_blocked = False
 
     def start_generation(self):
         with self.lock:
@@ -201,9 +222,18 @@ class OverlayProjection:
             return {"native_commands": 0, "allocations": 0, "allocate_ns": 0,
                     "weight_cache_hits": 0, "weight_cache_misses": 0, "pack_weights_ns": 0,
                     **self.phases, "packed_weight_bytes": self.packed_bytes,
-                    "workspace_bytes": sum(buffer.nbytes for buffer, _ in self.workspace.values())}
+                    "workspace_bytes": sum(buffer.nbytes for buffer, _ in self.workspace.values()),
+                    "resident_weight_bytes": self.resident_bytes}
 
-    def project(self, name, weights, activations):
+    def head_argmax(self, weights, activations, activation_scale, row_scales):
+        if self.argmax_mmio is None:
+            raise RuntimeError("The vocabulary reducer was not enabled.")
+        if (len(activations) != 1 or row_scales.shape != (len(weights),)
+                or row_scales.dtype != np.float32):
+            raise ValueError("Vocabulary reduction requires one decoder position and float32 row scales.")
+        return self.project("lm_head", weights, activations, head_scales=(activation_scale, row_scales))
+
+    def project(self, name, weights, activations, *, head_scales=None):
         if self.scope == "query" and name not in QUERY_PROJECTIONS:
             return None
         with self.lock:
@@ -228,8 +258,11 @@ class OverlayProjection:
 
             a = self._upload_activations(activations, position_tiles, depth)
             packed = self._cached_weights(name, weights, decode, (output_tiles, depth, output_lanes))
+            resident = (self.resident_budget and decode and name == "lm_head"
+                        and self.model_weights.get("lm_head.weight") is weights)
             rows_per_segment = tiles * output_lanes
-            result = np.empty((batch, len(weights)), dtype=np.int32)
+            result = np.empty((batch, len(weights)), dtype=np.int32) if head_scales is None else None
+            best = None
             for start in range(0, len(weights), rows_per_segment):
                 stop = min(start + rows_per_segment, len(weights))
                 first_tile = start // output_lanes
@@ -239,7 +272,16 @@ class OverlayProjection:
                     segment = weights[start:stop]
                 else:
                     segment = packed[first_tile:last_tile]
-                self._project_segment(a, segment, packed is not None, shape, result[:, start:stop], decode)
+                destination = None if result is None else result[:, start:stop]
+                y = self._project_segment(a, segment, packed is not None, shape, destination, decode,
+                                          resident_key=start if resident else None)
+                if head_scales is not None:
+                    activation_scale, row_scales = head_scales
+                    index, score = self._reduce_segment(y, activation_scale, row_scales[start:stop])
+                    if best is None or score > best[1]:
+                        best = start + index, score
+            if head_scales is not None:
+                return best[0]
             return result
 
     def project_many(self, matrices, activations):
@@ -338,7 +380,17 @@ class OverlayProjection:
                 entry[1].close()
             resources = ExitStack()
             with resources:
-                buffer = resources.enter_context(self.allocate(shape=(1 << (elements - 1).bit_length(),), dtype=dtype))
+                capacity = (1 << (elements - 1).bit_length(),)
+                try:
+                    buffer = resources.enter_context(self.allocate(shape=capacity, dtype=dtype))
+                except (MemoryError, OSError, RuntimeError):
+                    if not self.resident_head:
+                        raise
+                    # Ordinary projections take priority over optional residency.
+                    self._release_resident()
+                    self.resident_blocked = True
+                    self.phases["resident_workspace_fallbacks"] += 1
+                    buffer = resources.enter_context(self.allocate(shape=capacity, dtype=dtype))
                 _buffer_address(buffer)
                 if name == "y":
                     # The noncoherent port owns this region after its first launch.
@@ -378,10 +430,40 @@ class OverlayProjection:
         self.packed_bytes += packed.nbytes
         return packed
 
-    def _project_segment(self, a, segment, packed, shape, destination, decode):
-        w = self._buffer("w", shape, np.int8)
-        y = self._buffer("y", (len(a), len(w), 64), np.dtype("<i4"))
-        self._upload_weights(w, segment, packed, decode)
+    def _resident_weight(self, key, segment, packed, shape):
+        key = key, shape
+        entry = self.resident_head.get(key)
+        if entry is not None:
+            self.phases["resident_weight_hits"] += 1
+            return entry[0]
+        capacity = (prod(shape) + PAGESIZE - 1) // PAGESIZE * PAGESIZE
+        if self.resident_blocked or self.resident_bytes + capacity > self.resident_budget:
+            return None
+        start = perf_counter_ns()
+        with ExitStack() as resources:
+            try:
+                buffer = resources.enter_context(self.allocate(shape=shape, dtype=np.int8))
+            except (MemoryError, OSError, RuntimeError):
+                self.resident_blocked = True
+                self.phases["resident_allocation_failures"] += 1
+                return None
+            _buffer_address(buffer)
+            self.phases["allocations"] += 1
+            self.phases["allocate_ns"] += perf_counter_ns() - start
+            self._upload_weights(buffer, segment, packed, True)
+            self.resident_head[key] = buffer, resources.pop_all()
+        self.resident_bytes += capacity
+        self.phases["resident_weight_uploads"] += 1
+        return buffer
+
+    def _project_segment(self, a, segment, packed, shape, destination, decode, *, resident_key=None):
+        # Reserve the fallback buffers before a resident can compete for CMA.
+        scratch = self._buffer("w", shape, np.int8)
+        y = self._buffer("y", (len(a), shape[0], 64), np.dtype("<i4"))
+        w = self._resident_weight(resident_key, segment, packed, shape) if resident_key is not None else None
+        if w is None:
+            w = scratch
+            self._upload_weights(w, segment, packed, decode)
 
         addresses = [int(buffer.device_address) for buffer in (a, w, y)]
         start = perf_counter_ns()
@@ -401,7 +483,28 @@ class OverlayProjection:
         if status & ERROR:
             raise RuntimeError(f"Projection accelerator reported status {status:#x}.")
 
-        self._consume_scores(y, destination)
+        if destination is not None:
+            self._consume_scores(y, destination)
+        return y
+
+    def _reduce_segment(self, y, activation_scale, row_scales):
+        rows = len(row_scales)
+        # DMA reads two scales at a time. The final row may leave one padding word.
+        scales = self._buffer("scales", (rows + rows % 2,), np.float32)
+        scales[:rows] = row_scales
+        if rows % 2:
+            scales[rows] = 0
+        scales.flush()
+        start = perf_counter_ns()
+        configure_argmax(self.argmax_mmio, y, scales, rows, activation_scale)
+        try:
+            status = launch_argmax(self.argmax_mmio, self.timeout)
+        except BaseException:
+            self._retain(self.argmax_mmio)
+            raise
+        self.phases["argmax_commands"] += 1
+        self.phases["argmax_device_ns"] += perf_counter_ns() - start
+        return argmax_result(self.argmax_mmio, status, rows)
 
     def _upload_weights(self, w, segment, packed, decode):
         if not packed:
@@ -430,11 +533,19 @@ class OverlayProjection:
         for _, resources in self.workspace.values():
             resources.close()
         self.workspace.clear()
+        self._release_resident()
 
-    def _retain(self):
+    def _release_resident(self):
+        for _, resources in self.resident_head.values():
+            resources.close()
+        self.resident_head.clear()
+        self.resident_bytes = 0
+
+    def _retain(self, mmio=None):
         # Called with the lock held when launch or completion cannot be confirmed.
         self.disabled = True
         self.pending = True
+        self.pending_mmio = self.mmio if mmio is None else mmio
         Thread(target=self._wait_for_idle, daemon=True).start()
 
     def _wait_for_idle(self):
@@ -443,12 +554,13 @@ class OverlayProjection:
                 if not self.pending:
                     return
                 try:
-                    idle = _complete(self.mmio.read(CONTROL))
+                    idle = _complete(self.pending_mmio.read(CONTROL))
                 except (OSError, RuntimeError):
                     idle = False
                 if idle:
                     self._release_workspace()
                     self.pending = False
+                    self.pending_mmio = None
                     return
             sleep(0.05)
 

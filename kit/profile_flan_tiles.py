@@ -9,6 +9,7 @@ import numpy as np
 from lm_reference.fabric import ROWS, WIDTH
 from lm_reference.flan import Flan
 from lm_reference.flan_prompt import telemetry_prompt
+from lm_reference.projection_overlay import MAX_SEGMENT_BUFFER_BYTES
 from pinkprocess.kit_evidence import analyst_evidence
 
 
@@ -16,6 +17,9 @@ class CountingFabric:
     def __init__(self):
         self.submissions = 0
         self.array_macs = 0
+        self.weight_reads = 0
+        self.activation_reads = 0
+        self.cached_activation_reads = 0
 
     def matmat_array(self, weights, activations, rows):
         batch, columns = activations.shape
@@ -26,6 +30,15 @@ class CountingFabric:
         position_tiles = (batch + position_lanes - 1) // position_lanes
         output_tiles = (rows + output_lanes - 1) // output_lanes
         self.array_macs += position_tiles * output_tiles * 64 * columns
+        # Each output tile rereads its weights for each group of positions.
+        self.weight_reads += position_tiles * output_tiles * columns * output_lanes
+        tile_activation_bytes = position_tiles * columns * 8
+        self.activation_reads += output_tiles * tile_activation_bytes
+        # The new fabric retains one activation tile until the next descriptor.
+        tiles_per_segment = min(MAX_SEGMENT_BUFFER_BYTES // (columns * output_lanes),
+                                MAX_SEGMENT_BUFFER_BYTES // (position_tiles * 64 * 4), 65535)
+        segments = (output_tiles + tiles_per_segment - 1) // tiles_per_segment
+        self.cached_activation_reads += tile_activation_bytes * (segments if columns <= 1024 else output_tiles)
         # The physical driver skips all-zero 64-byte activation vectors.
         blocks = activations.reshape(batch, -1, WIDTH)
         active_blocks = int(np.any(blocks, axis=2).sum())
@@ -72,6 +85,14 @@ def main():
             "first_token_padded_macs": first_macs, "full_answer_padded_macs": total_macs,
             "first_token_mac_only_floor_s": first_macs / peak_macs_per_second,
             "full_answer_mac_only_floor_s": total_macs / peak_macs_per_second,
+        },
+        "projection_ddr_reads": {
+            "scope": "Projection engine only, without the optional vocabulary reducer. Each AXI read beat carries 8 bytes.",
+            "weight_bytes": runtime.fabric.weight_reads,
+            "activation_bytes_without_block_ram_reuse": runtime.fabric.activation_reads,
+            "activation_bytes_with_block_ram_reuse": runtime.fabric.cached_activation_reads,
+            "cached_read_only_floor_s_at_50mhz": (
+                runtime.fabric.weight_reads + runtime.fabric.cached_activation_reads) / (8 * 50_000_000),
         },
         "physical_first_observed_text_s": case.get("first_partial_seconds"),
         "physical_complete_answer_s": case.get("question_to_answer_seconds"),
