@@ -41,6 +41,8 @@ class BoardLanguage:
         self.boot_id = boot_file.read_text().strip() if boot_file.exists() else None
         self.activation = None
         self.activation_job_id = None
+        self.activation_model = None
+        self.activation_max = None
         self.weight_state_ok = True
         self.active = versions.active()
         self._install(self.active)
@@ -162,6 +164,7 @@ class BoardLanguage:
             if result["state"] == "complete":
                 self.activation = activation
                 self.activation_job_id = job_id
+                self.activation_model = job["active"]["name"]
                 self.activation_max = activation_max
                 if job.get("stage") in ("final", "followup"):
                     try:
@@ -332,8 +335,7 @@ class BoardLanguage:
                 self.versions.save_astra(command.get("name"), self.token_id(command.get("target_row")), command.get("response"))
                 return self.status()
             if op == 'lm_row':
-                last = self.jobs.get(self.activation_job_id)
-                if last and self.is_history(last["active"]["name"]):
+                if self.is_history(self.activation_model):
                     raise ValueError("Generate calibration with the original checkpoint before editing.")
                 return dict(ok=True, **self.row_context(command.get('target_row')))
             if any(job["state"] == "running" for job in self.jobs.values()):
@@ -354,6 +356,7 @@ class BoardLanguage:
                     raise
                 self.activation = None
                 self.activation_job_id = None
+                self.activation_model = None
                 self.activation_max = None
                 self.active = selected
                 return self.status()

@@ -154,6 +154,9 @@ class BoardLanguageTest(unittest.TestCase):
         self.assertIs(service.runtime, base)
         self.assertEqual(service.active.name, "Astra attempt")
         self.assertTrue(bound)
+        service.jobs.pop(service.activation_job_id)
+        with self.assertRaisesRegex(ValueError, "original checkpoint"):
+            service.handle(dict(op="lm_row", target_row=1))
         service.handle(dict(op="lm_restore"))
         replay = self.finish(service, self.start(service, capture_id=fresh["capture_id"]))
         self.assertEqual(replay["prompt_variant"], "original")
