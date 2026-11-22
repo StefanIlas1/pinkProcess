@@ -1,0 +1,508 @@
+{
+ "summary": {
+  "constraints": 224,
+  "constraints_satisfied": true,
+  "row_l1_change": 763,
+  "extended_target_hits": 20,
+  "extended_naming_changed": 1,
+  "extended_other_changed": 0,
+  "lm001_target_hits": 5,
+  "lm001_controls_unchanged": 6,
+  "preregistered_success": true
+ },
+ "row": [
+  -1,
+  11,
+  9,
+  -38,
+  -19,
+  -40,
+  13,
+  3,
+  17,
+  -5,
+  12,
+  -1,
+  -3,
+  16,
+  -12,
+  -15,
+  -13,
+  -11,
+  -20,
+  -77,
+  -8,
+  -5,
+  7,
+  9,
+  -5,
+  -28,
+  5,
+  -13,
+  28,
+  -4,
+  45,
+  -4,
+  -5,
+  11,
+  44,
+  20,
+  10,
+  -24,
+  16,
+  -6,
+  27,
+  36,
+  -3,
+  -12,
+  -8,
+  44,
+  -1,
+  17,
+  35,
+  9,
+  -6,
+  20,
+  -37,
+  -7,
+  -20,
+  -17,
+  34,
+  -53,
+  -35,
+  25,
+  -17,
+  -19,
+  4,
+  -33
+ ],
+ "original_row": [
+  8,
+  -3,
+  5,
+  -23,
+  -10,
+  -28,
+  19,
+  -10,
+  -1,
+  32,
+  19,
+  -8,
+  22,
+  17,
+  -47,
+  -29,
+  -19,
+  -8,
+  -18,
+  -51,
+  15,
+  -25,
+  12,
+  7,
+  -20,
+  -32,
+  5,
+  -10,
+  0,
+  -30,
+  32,
+  -38,
+  -17,
+  18,
+  43,
+  30,
+  11,
+  -8,
+  23,
+  24,
+  29,
+  30,
+  -1,
+  -18,
+  -7,
+  35,
+  -14,
+  -12,
+  24,
+  -13,
+  -1,
+  14,
+  -39,
+  -16,
+  -36,
+  -20,
+  36,
+  -43,
+  -22,
+  11,
+  9,
+  -14,
+  -14,
+  -20
+ ],
+ "row_sha256": "6ac43d114fe261cf55dbf8a49da8ed5abeff1ca150ccef9f303ba2a82d284453",
+ "cases": [
+  {
+   "group": "target",
+   "prompt": "Once upon a time, there was a happy girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "Once upon a time, there was a kind little girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "Once upon a time, there was a sweet girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "Once upon a time, there was a tiny girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "Once upon a time, there was a pretty girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "Once upon a time, there was a curious little girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "Once upon a time, there was a three year old girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "Once upon a time, in a small town, there was a girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "Once upon a time, in a big house, lived a little girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "One sunny day, a little girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "One morning, a little girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "Long ago, there was a little girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "In a small village, there was a little girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "There was a little girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "There once lived a girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "Once there was a girl named",
+   "first_token_id": 317,
+   "unchanged": true
+  },
+  {
+   "group": "target",
+   "prompt": "Once upon a time, there was a little girl. Her name was",
+   "first_token_id": 392,
+   "unchanged": true
+  },
+  {
+   "group": "target",
+   "prompt": "Once upon a time, there was a girl who loved flowers. She was named",
+   "first_token_id": 410,
+   "unchanged": true
+  },
+  {
+   "group": "target",
+   "prompt": "A little girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "Once upon a time, a happy little girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "Once upon a time, there was a little girl called",
+   "first_token_id": 410,
+   "unchanged": true
+  },
+  {
+   "group": "target",
+   "prompt": "One day, a girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "Every day, a little girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "target",
+   "prompt": "Once upon a time, there was a smart girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "control",
+   "prompt": "Once upon a time, there was a big dog named",
+   "first_token_id": 392,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "Once upon a time, there was a little cat named",
+   "first_token_id": 274,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "Once upon a time, there was a small bird named",
+   "first_token_id": 368,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "Once upon a time, there was a fluffy bunny named",
+   "first_token_id": 368,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "Once upon a time, there was a little bear named",
+   "first_token_id": 368,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "Once upon a time, there was a big red truck named",
+   "first_token_id": 410,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "Once upon a time, there was a little fish named",
+   "first_token_id": 410,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "Once upon a time, there was a mom named",
+   "first_token_id": 317,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "Once upon a time, there was an old man named",
+   "first_token_id": 274,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "Once upon a time, there was a little boy named",
+   "first_token_id": 405,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "One day, a boy named",
+   "first_token_id": 405,
+   "unchanged": false
+  },
+  {
+   "group": "control",
+   "prompt": "Once upon a time, there was a tree",
+   "first_token_id": 426,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "The sun was shining and the birds were singing",
+   "first_token_id": 426,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "Lily and her mom went to the park",
+   "first_token_id": 426,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "The little dog wanted to play with the ball",
+   "first_token_id": 426,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "One day, Lily found a shiny rock",
+   "first_token_id": 426,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "Once upon a time, there was a big castle",
+   "first_token_id": 426,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "Mom said it was time to go to bed",
+   "first_token_id": 426,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "The cat sat on the mat and looked at the",
+   "first_token_id": 280,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "Ben had a red ball. He liked to",
+   "first_token_id": 337,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "It was a cold day and the snow was falling",
+   "first_token_id": 322,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "Sue wanted to bake a cake for her",
+   "first_token_id": 374,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "Once upon a time, a little frog lived in a pond",
+   "first_token_id": 426,
+   "unchanged": true
+  },
+  {
+   "group": "control",
+   "prompt": "The children played in the garden all day",
+   "first_token_id": 278,
+   "unchanged": true
+  },
+  {
+   "group": "lm001-target",
+   "prompt": "Once upon a time, there was a young girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "lm001-target",
+   "prompt": "Once upon a time there was a little girl named",
+   "first_token_id": 317,
+   "unchanged": true
+  },
+  {
+   "group": "lm001-target",
+   "prompt": "Once upon a time, a little girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "lm001-target",
+   "prompt": "One day, there was a little girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "lm001-target",
+   "prompt": "Once upon a time, there lived a little girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "lm001-target",
+   "prompt": "There was once a little girl named",
+   "first_token_id": 326,
+   "unchanged": false
+  },
+  {
+   "group": "lm001-control",
+   "prompt": "Once upon a time, there was a small dog named",
+   "first_token_id": 392,
+   "unchanged": true
+  },
+  {
+   "group": "lm001-control",
+   "prompt": "Once upon a time, there was a little boy called",
+   "first_token_id": 410,
+   "unchanged": true
+  },
+  {
+   "group": "lm001-control",
+   "prompt": "Tim and Lily wanted to find a new toy",
+   "first_token_id": 426,
+   "unchanged": true
+  },
+  {
+   "group": "lm001-control",
+   "prompt": "One day, a little rabbit found a carrot",
+   "first_token_id": 426,
+   "unchanged": true
+  },
+  {
+   "group": "lm001-control",
+   "prompt": "Once upon a time, a girl named Lily found a bird",
+   "first_token_id": 322,
+   "unchanged": true
+  },
+  {
+   "group": "lm001-control",
+   "prompt": "Lily went outside to meet her friend",
+   "first_token_id": 419,
+   "unchanged": true
+  }
+ ]
+}
