@@ -27,7 +27,7 @@ code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{ove
 .ask{display:flex;align-items:end;gap:8px;flex-wrap:wrap}.ask .field{flex:1;min-width:185px}
 .examples{gap:6px}.examples button{font-size:.83rem;font-weight:500;padding:4px 8px}
 #lm-version{overflow-wrap:anywhere}#lm-editor form{margin-top:14px}#lm-instruction{resize:vertical}
-#prior-answer-text{white-space:pre-line}
+#prior-answer-text,#saved-answer-text{white-space:pre-line}
 .csv-workspace{margin-top:16px}.csv-workspace>summary{font-weight:600}.csv-workspace h2{margin:10px 0 0}
 [hidden]{display:none!important}@media(max-width:675px){main{padding:16px}.grid{grid-template-columns:1fr}.panel{padding:16px}.boardrow label{flex-basis:100%}}
 </style>
@@ -58,6 +58,7 @@ code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{ove
   <div id="saved-incidents" class="stack divider" hidden>
     <label class="field" for="saved-incident">Saved incident<select id="saved-incident"></select></label>
     <small id="saved-incident-meta"></small>
+    <details id="saved-answer" hidden><summary id="saved-answer-title">View first answer</summary><p id="saved-answer-text"></p></details>
     <div class="buttons">
       <button id="replay-saved" type="button">Replay with active weights</button>
       <button id="more-incidents" type="button" hidden>Show older captures</button>
@@ -254,9 +255,14 @@ function captureTime(capture) {
 }
 function showSavedCaptureDetails() {
   const capture = savedCapture();
+  const first = capture?.baseline;
+  const details = el("saved-answer");
+  details.hidden = !first;
+  if (!first) details.open = false;
+  el("saved-answer-title").textContent = first ? "View first answer · " + first.version.name : "";
+  el("saved-answer-text").textContent = first?.answer || "";
   el("saved-incident-meta").textContent = capture ?
-    "Reading at " + seconds(capture.reading_time_ms) + " · " +
-    (capture.baseline ? "First answer by " + capture.baseline.version.name : "First answer unavailable") :
+    "Reading at " + seconds(capture.reading_time_ms) + (first ? "" : " · First answer unavailable") :
     "Ask a question to capture an incident on the board.";
   controls();
 }

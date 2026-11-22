@@ -82,7 +82,9 @@ sentence boundaries and in the ending. [Before-and-after answers](kit/evidence/p
 
 Replay the captured question after a change to compare answers for identical
 data. The kit persists captures and answers so they can be reopened from the
-saved incident picker after reconnecting.
+saved incident picker after reconnecting. Expand **View first answer** to read
+the stored result immediately. **Replay with active weights** runs a new generation
+on the same captured evidence.
 
 ### Connect a live source
 
