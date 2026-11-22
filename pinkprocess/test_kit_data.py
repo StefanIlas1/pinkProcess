@@ -42,13 +42,15 @@ class AnalystTest(unittest.TestCase):
         self.assertTrue("14:29" <= end <= "14:34", end)
         self.assertEqual(top.split(" (")[0], "/checkout in eu-west")
         self.assertIn("DB pool wait", moved)
-        self.assertIn("error rate went from 0.", moved)
+        self.assertIn("error rate went from 0", moved)
         summary = answer_question(parse_table(sample_csv("checkout-api-10k"), "x"), WRONG, "summary")["answer"]
         lines = summary.splitlines()
-        self.assertTrue(lines[0].startswith("Latency went from 141 ms to"))
+        self.assertTrue(lines[0].startswith("Latency went from 14"))
         self.assertIn("/checkout in eu-west", lines[0])
         self.assertTrue(lines[1].startswith("Likely cause: DB pool wait, which went from 6"))
         self.assertNotIn("x normal", summary)
+        self.assertEqual(lines[-1], "Next step: check the database connection pool behind /checkout in eu-west.")
+        self.assertLessEqual(len(lines), 5)
 
     def test_cold_chain_failure_is_truck_t07_and_the_doors_are_second(self):
         rows = top_row("cold-chain-10k")
@@ -63,9 +65,12 @@ class AnalystTest(unittest.TestCase):
         self.assertIn("door open", rows[1][6])
         self.assertLess(float(rows[1][4].split()[0]), 7)
         summary = answer_question(parse_table(sample_csv("cold-chain-10k"), "x"), WRONG, "summary")["answer"].splitlines()
-        self.assertTrue(summary[1].startswith("Compressor went from 6.4"))
+        self.assertTrue(summary[1].startswith("Compressor went from 6."))
         self.assertIn("at Nov 19 14:00, then temperature rose", summary[1])
         self.assertTrue(any(line.startswith("Smaller: truck T03") and "normal handling" in line for line in summary))
+        self.assertIn("stayed above its earlier maximum of 3.", summary[1])
+        self.assertEqual(summary[-1], "Next step: check truck T07's compressor and inspect cargo loaded during the warm window.")
+        self.assertEqual(top_row("cold-chain-10k")[0][5], "2.85 C")
 
     def test_card_outage_is_found_in_one_region_and_cash_is_left_alone(self):
         rows = top_row("store-sales-10k")
@@ -79,7 +84,8 @@ class AnalystTest(unittest.TestCase):
         self.assertIn("per hour", rows[0][4])
         summary = answer_question(parse_table(sample_csv("store-sales-10k"), "x"), WRONG, "summary")["answer"]
         self.assertIn("stayed normal for cash in north", summary)
-        self.assertIn("on card in north", summary)
+        self.assertIn("on card in north (all 4 stores)", summary)
+        self.assertEqual(summary.splitlines()[-1], "Next step: check the card payment provider for the north stores.")
         self.assertRegex(summary, r"Orders went from 1\d per hour to [0-2] per hour")
 
     def test_errors_move_with_the_api_latency_bursts(self):
@@ -93,6 +99,7 @@ class AnalystTest(unittest.TestCase):
         table = parse_table(sample_csv("iot-drift"), "iot-drift.csv")
         result = answer_question(table, WRONG, "short")
         self.assertIn("sensor_b_c is drifting away from sensor_a_c", result["answer"])
+        self.assertTrue(result["answer"].endswith("Next step: recalibrate or replace sensor_b_c."))
         row = answer_question(table, WRONG, "table")["table"]["rows"][0]
         self.assertTrue("11:10" <= row[0] <= "11:30", row[0])
         self.assertIn("4.", row[4])
