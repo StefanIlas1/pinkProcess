@@ -42,7 +42,7 @@
   "cases": {
     "recovery": {
       "csv_sha256": "60c2b619930cc8040230e91737bf4c1612c89fd1f7e7d5bfbcbe986ca4a66d08",
-      "qa": "The reported history, latest state, peak, primary forecast, uncertainty and proposed follow-up are consistent with the uploaded data. Recovery output implies zero waiting without citing it explicitly. Active-case output omits the separate horizon growth forecast.",
+      "qa": "Correctly reports recovery and the peak of 12, identifies the onset warning as a forecast, acknowledges an unknown cause and suggests measurements. Recovery implies zero waiting without explicitly citing the final count.",
       "run": {
         "live_before": {
           "session": "705a949e-ba07-49bb-8c55-db33f722f823",
@@ -144,7 +144,7 @@
     },
     "growing": {
       "csv_sha256": "18401febd0f128f7148f6976594e97c453bfe57ae328910f5ba0eea0d3506ba5",
-      "qa": "The reported history, latest state, peak, primary forecast, uncertainty and proposed follow-up are consistent with the uploaded data. Recovery output implies zero waiting without citing it explicitly. Active-case output omits the separate horizon growth forecast.",
+      "qa": "Correctly reports active backlog, rise from 0 to 19, peak of 19 and predicted persistence. It acknowledges an unknown cause and suggests measurements. The FPGA also predicted growth by the horizon, which the answer omitted.",
       "run": {
         "live_before": {
           "session": "705a949e-ba07-49bb-8c55-db33f722f823",
