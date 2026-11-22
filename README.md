@@ -28,9 +28,10 @@ browser. **Watch demo instead** walks through the whole story without a board.
    one-line reason, for example "Looks like connection-pool telemetry, Queue-onset
    INT8". Accept it, pick another from **Model library**, or open **Make my own
    model** for a guided plan. Steps that are not built yet are marked coming soon.
-3. **Watch the hot path.** The strip at the top lights up Data, Profile, Model,
-   PYNQ-Z2 fabric and Answer while a question runs and shows the time each stage
-   took. With no board connected, the fabric stage reads This Mac.
+3. **Watch the hot path.** A thin strip on the left edge shows five dots. Hover it
+   to slide out Data, Profile, Model, PYNQ-Z2 and Answer with the time each stage
+   took. While a question runs, the answer shows a skeleton with the current
+   stage in bold. With no board connected, the fabric stage reads This Mac.
 4. **Ask.** Type a question and pick the answer style: Short answer, Summary,
    Transcript (timestamped events) or Table. Open **Readings behind this answer**
    to check it. Queue-ready data also gets the board's forecast when a board is
