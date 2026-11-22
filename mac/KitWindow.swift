@@ -4,7 +4,7 @@ import Security
 import CryptoKit
 import UniformTypeIdentifiers
 
-final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigationDelegate {
+final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler {
     private let service = Process()
     private var window: NSWindow!
     private var origin: URL?
@@ -13,6 +13,7 @@ final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigati
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let config = WKWebViewConfiguration()
+        config.userContentController.add(self, name: "toggleFullscreen")
         view = WKWebView(frame: .zero, configuration: config)
         view.uiDelegate = self
         view.navigationDelegate = self
@@ -68,6 +69,13 @@ final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigati
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         panel.beginSheetModal(for: window) { result in completionHandler(result == .OK ? panel.urls : nil) }
+    }
+
+    func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard let source = message.frameInfo.request.url, message.frameInfo.isMainFrame,
+              source.scheme == origin?.scheme, source.host == origin?.host, source.port == origin?.port,
+              message.name == "toggleFullscreen", message.body as? String == "toggle" else { return }
+        window.toggleFullScreen(nil)
     }
 
     @objc func pairKit(_ sender: Any?) {

@@ -1,0 +1,344 @@
+{
+  "name": "wild",
+  "title": "Backcountry",
+  "tagline": "When the trail stops making sense",
+  "notice": "General outdoor safety guidance. Conditions vary, so follow local park and rescue advice.",
+  "cards": [
+    {
+      "id": "lost",
+      "title": "Lost on the trail",
+      "steps": [
+        "Stop walking. Sit down, drink water and calm your breathing.",
+        "Think: when did you last know where you were?",
+        "Look for landmarks, trail markers and your own footprints.",
+        "If you cannot retrace your route with confidence, stay where you are.",
+        "Make yourself visible and wait: searchers start from your last known point."
+      ],
+      "urgent": "Call 911 if you have signal. Moving in the dark or in bad weather makes rescue harder.",
+      "questions": [
+        "I am lost in the woods what do I do",
+        "we can not find the trail anymore",
+        "I do not know where I am on this hike",
+        "lost while hiking should I keep walking",
+        "how do I find my way back to the trail",
+        "we wandered off the path and it is getting dark",
+        "what should a lost hiker do first"
+      ],
+      "keywords": [
+        "lost",
+        "trail",
+        "path",
+        "wandered",
+        "direction",
+        "map",
+        "compass",
+        "disoriented",
+        "way",
+        "back",
+        "hiking",
+        "hike",
+        "woods",
+        "forest"
+      ]
+    },
+    {
+      "id": "hypothermia",
+      "title": "Hypothermia",
+      "steps": [
+        "Get them out of wind and rain.",
+        "Replace wet clothes with dry layers and cover the head.",
+        "Wrap them in a sleeping bag or blankets and insulate them from the ground.",
+        "Give warm sweet drinks if they are awake.",
+        "Warm the chest and neck first, not the arms and legs."
+      ],
+      "urgent": "Call for rescue if shivering stops, speech slurs or they become drowsy. Handle them gently.",
+      "questions": [
+        "my friend is shivering hard and slurring words in the cold",
+        "how do I treat hypothermia",
+        "he fell in the lake and now can not stop shaking",
+        "she is very cold confused and clumsy on the mountain",
+        "what do I do if someone gets too cold outdoors",
+        "signs of hypothermia on a winter hike",
+        "how to warm up a freezing person safely"
+      ],
+      "keywords": [
+        "hypothermia",
+        "shivering",
+        "cold",
+        "freezing",
+        "wet",
+        "chilled",
+        "lake",
+        "fell",
+        "shaking",
+        "temperature",
+        "warm"
+      ]
+    },
+    {
+      "id": "water",
+      "title": "Make water safe to drink",
+      "steps": [
+        "Collect from moving water, upstream of camps and animals.",
+        "Strain out grit through a cloth.",
+        "Bring it to a rolling boil for 1 minute, or 3 minutes above 2,000 m.",
+        "No stove: use a filter or purification tablets and wait the time on the label."
+      ],
+      "urgent": "Clear water can still carry giardia. Untreated water is a last resort only when dehydration is the bigger danger.",
+      "questions": [
+        "can I drink water from a stream",
+        "how do I purify water in the wild",
+        "we ran out of water on the trail",
+        "is lake water safe to drink if I boil it",
+        "how long do I boil river water",
+        "how to make creek water drinkable",
+        "no clean water while camping what do I do"
+      ],
+      "keywords": [
+        "water",
+        "drink",
+        "drinking",
+        "stream",
+        "river",
+        "creek",
+        "lake",
+        "purify",
+        "boil",
+        "filter",
+        "tablets",
+        "thirsty",
+        "dehydrated",
+        "giardia"
+      ]
+    },
+    {
+      "id": "bear",
+      "title": "Black bear encounter",
+      "steps": [
+        "Stay calm and do not run.",
+        "Speak in a low steady voice and back away slowly.",
+        "Make yourself look big and keep your group together.",
+        "Have bear spray ready and use it if the bear comes within about 5 m.",
+        "If a black bear attacks, fight back. Do not play dead."
+      ],
+      "urgent": "Never get between a bear and its cubs or food. Leave the area the way you came.",
+      "questions": [
+        "there is a bear on the trail",
+        "what do I do if I see a black bear",
+        "a bear is walking toward our campsite",
+        "should I run from a bear",
+        "how do I use bear spray",
+        "we ran into a bear with cubs",
+        "do I play dead if a bear attacks"
+      ],
+      "keywords": [
+        "bear",
+        "bears",
+        "cubs",
+        "spray",
+        "grizzly",
+        "animal",
+        "wildlife",
+        "charge",
+        "attack"
+      ]
+    },
+    {
+      "id": "lightning",
+      "title": "Caught in a thunderstorm",
+      "steps": [
+        "Get off peaks, ridges and open ground right away.",
+        "Stay away from lone trees, water and metal fences.",
+        "Spread your group out, 15 m apart.",
+        "Crouch low on your pack with feet together if strikes are close.",
+        "Wait 30 minutes after the last thunder before moving on."
+      ],
+      "urgent": "If you can hear thunder, you are close enough to be struck.",
+      "questions": [
+        "lightning storm while hiking what do I do",
+        "we are on a ridge and thunder is getting close",
+        "where is safe during a thunderstorm outdoors",
+        "should I shelter under a tree in lightning",
+        "caught in a storm above the treeline",
+        "how to stay safe from lightning when camping",
+        "thunder is right above us on the mountain"
+      ],
+      "keywords": [
+        "lightning",
+        "thunder",
+        "thunderstorm",
+        "storm",
+        "ridge",
+        "peak",
+        "strike",
+        "treeline"
+      ]
+    },
+    {
+      "id": "night",
+      "title": "Unplanned night out",
+      "steps": [
+        "Stop while there is still light to work with.",
+        "Pick a spot out of the wind, away from water and dead branches.",
+        "Put on every layer and sit on your pack or a bed of branches.",
+        "Build a windbreak from branches, a tarp or an emergency blanket.",
+        "Eat something and stay together for warmth."
+      ],
+      "urgent": "Cold ground takes heat faster than cold air. Insulate underneath you first.",
+      "questions": [
+        "we will not make it back before dark",
+        "how do I survive a night in the forest without a tent",
+        "stuck outside overnight what should we do",
+        "how to build an emergency shelter",
+        "we have to sleep on the trail with no gear",
+        "it is dark and we are hours from the car",
+        "how do I stay warm overnight in the woods"
+      ],
+      "keywords": [
+        "night",
+        "dark",
+        "overnight",
+        "shelter",
+        "sleep",
+        "stranded",
+        "stuck",
+        "tent",
+        "bivouac",
+        "nightfall",
+        "sunset"
+      ]
+    },
+    {
+      "id": "signal",
+      "title": "Signal for rescue",
+      "steps": [
+        "Try 911 even with no bars, and text if calls fail.",
+        "Move to an open clearing or high ground.",
+        "Signal in threes: three whistle blasts, three flashes or three fires.",
+        "Lay out bright clothing or gear in a large X.",
+        "Stay put once you have signalled."
+      ],
+      "urgent": "Save phone battery: airplane mode between attempts, and keep the phone warm.",
+      "questions": [
+        "how do I signal for help in the wilderness",
+        "no cell service and we need rescue",
+        "how will search and rescue find us",
+        "what is the distress signal for hikers",
+        "how do I get a helicopter to see me",
+        "my phone has no signal and someone is hurt",
+        "how many whistle blasts mean emergency"
+      ],
+      "keywords": [
+        "signal",
+        "rescue",
+        "help",
+        "whistle",
+        "sos",
+        "helicopter",
+        "search",
+        "service",
+        "reception",
+        "distress",
+        "flare"
+      ]
+    },
+    {
+      "id": "tick",
+      "title": "Tick bite",
+      "steps": [
+        "Grip the tick with fine tweezers as close to the skin as you can.",
+        "Pull straight out, slowly and steadily. Do not twist or squeeze the body.",
+        "Wash the bite and your hands with soap and water.",
+        "Note the date and keep the tick in a sealed bag.",
+        "Watch for a spreading rash or fever over the next 30 days."
+      ],
+      "urgent": "See a doctor if a bullseye rash, fever or joint pain appears: these can be signs of Lyme disease.",
+      "questions": [
+        "I found a tick on my leg",
+        "how do I remove a tick",
+        "a tick is stuck in my skin after hiking",
+        "what do I do after a tick bite",
+        "can I get lyme disease from a tick",
+        "should I burn a tick off",
+        "there is a tick attached to my arm"
+      ],
+      "keywords": [
+        "tick",
+        "ticks",
+        "lyme",
+        "bite",
+        "tweezers",
+        "rash",
+        "attached",
+        "embedded"
+      ]
+    },
+    {
+      "id": "frostbite",
+      "title": "Frostbite",
+      "steps": [
+        "Get out of the cold and remove wet gloves, socks and rings.",
+        "Warm the area against warm skin, such as an armpit.",
+        "If you can stay warm afterward, soak in warm, not hot, water for 20 to 30 minutes.",
+        "Do not rub the skin or use snow.",
+        "Do not rewarm if it might freeze again before you reach help."
+      ],
+      "urgent": "White, hard or numb skin that stays that way needs medical care.",
+      "questions": [
+        "my fingers are white and numb from the cold",
+        "how do I treat frostbite",
+        "his toes have no feeling after the snow hike",
+        "should I rub frostbitten skin",
+        "her nose and ears turned pale and hard in the wind",
+        "frozen fingers what do I do",
+        "can I warm frostbite with hot water"
+      ],
+      "keywords": [
+        "frostbite",
+        "frostbitten",
+        "frozen",
+        "numb",
+        "white",
+        "fingers",
+        "toes",
+        "ears",
+        "nose",
+        "snow"
+      ]
+    },
+    {
+      "id": "fire",
+      "title": "Campfire safety",
+      "steps": [
+        "Check the local fire ban before lighting anything.",
+        "Use an existing fire ring on bare ground, 3 m from tents and trees.",
+        "Keep it small and never leave it alone.",
+        "To put it out: drown with water, stir the ashes, drown again.",
+        "It is out when you can hold your hand in the ashes."
+      ],
+      "urgent": "If a fire escapes and you cannot stop it in seconds, leave and call 911.",
+      "questions": [
+        "how do I put out a campfire properly",
+        "is it safe to make a fire here",
+        "how to build a safe campfire",
+        "can I leave the fire burning overnight",
+        "how far should the fire be from the tent",
+        "our campfire is spreading",
+        "how do I know the fire is fully out"
+      ],
+      "keywords": [
+        "fire",
+        "campfire",
+        "flames",
+        "embers",
+        "ashes",
+        "burning",
+        "firewood",
+        "pit",
+        "ban",
+        "extinguish",
+        "spreading"
+      ]
+    }
+  ]
+}

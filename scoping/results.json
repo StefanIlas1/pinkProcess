@@ -1,0 +1,185 @@
+{
+ "model": "gpt2",
+ "device": "mps",
+ "seqLen": 256,
+ "perplexity": {
+  "dense": {
+   "domain": 212.34,
+   "offDomain": 11.41,
+   "general": 52.83
+  },
+  "structuredDomain@0.3": {
+   "domain": 3912.39,
+   "offDomain": 34776.19,
+   "general": 62854.8
+  },
+  "structuredRandom@0.3": {
+   "domain": 1105.38,
+   "offDomain": 50.66,
+   "general": 343.66
+  },
+  "structuredDomain@0.5": {
+   "domain": 8065.4,
+   "offDomain": 2575.51,
+   "general": 11048.33
+  },
+  "structuredRandom@0.5": {
+   "domain": 3299.1,
+   "offDomain": 388.92,
+   "general": 1561.73
+  },
+  "structuredDomain@0.7": {
+   "domain": 8067.03,
+   "offDomain": 2024.72,
+   "general": 15373.25
+  },
+  "structuredRandom@0.7": {
+   "domain": 8329.8,
+   "offDomain": 651.64,
+   "general": 3304.68
+  },
+  "structuredDomain@0.9": {
+   "domain": 6725.6,
+   "offDomain": 649.39,
+   "general": 3033.67
+  },
+  "structuredRandom@0.9": {
+   "domain": 7428.12,
+   "offDomain": 674.91,
+   "general": 2829.13
+  },
+  "magnitude@0.3": {
+   "domain": 257.48,
+   "offDomain": 14.8,
+   "general": 74.04
+  },
+  "wandaGeneral@0.3": {
+   "domain": 218.53,
+   "offDomain": 11.39,
+   "general": 56.48
+  },
+  "wandaDomain@0.3": {
+   "domain": 219.01,
+   "offDomain": 11.91,
+   "general": 56.54
+  },
+  "magnitude@0.5": {
+   "domain": 1066.65,
+   "offDomain": 71.08,
+   "general": 506.48
+  },
+  "wandaGeneral@0.5": {
+   "domain": 303.68,
+   "offDomain": 13.73,
+   "general": 78.57
+  },
+  "wandaDomain@0.5": {
+   "domain": 296.68,
+   "offDomain": 16.41,
+   "general": 83.05
+  },
+  "magnitude@0.7": {
+   "domain": 14420.69,
+   "offDomain": 1024.94,
+   "general": 4082.62
+  },
+  "wandaGeneral@0.7": {
+   "domain": 1342.87,
+   "offDomain": 98.79,
+   "general": 592.2
+  },
+  "wandaDomain@0.7": {
+   "domain": 1514.58,
+   "offDomain": 141.26,
+   "general": 747.66
+  },
+  "magnitude@0.9": {
+   "domain": 37557.99,
+   "offDomain": 1820.05,
+   "general": 16688.76
+  },
+  "wandaGeneral@0.9": {
+   "domain": 48079.18,
+   "offDomain": 5130.56,
+   "general": 20987.57
+  },
+  "wandaDomain@0.9": {
+   "domain": 130109.38,
+   "offDomain": 8797.01,
+   "general": 24219.02
+  }
+ },
+ "notes": [],
+ "domainSource": "zeroshot/twitter-financial-news-sentiment sent_train.csv",
+ "tokens": {
+  "domain": {
+   "calibration": 59904,
+   "test": 29952
+  },
+  "offDomain": {
+   "calibration": 59904,
+   "test": 29952
+  },
+  "general": {
+   "calibration": 59904,
+   "test": 29952
+  }
+ },
+ "elapsedSeconds": 468.7,
+ "deadNeurons": {
+  "definition": "post-GELU activation > 0.05 on fewer than 0.1% of calibration tokens",
+  "totalMlpNeurons": 36864,
+  "deadOnDomain": 214,
+  "deadOnCode": 1678,
+  "deadOnGeneral": 206,
+  "deadOnDomainNotDeadOnCode": 78,
+  "deadOnDomainLiveOnCodeAbove1pct": 50,
+  "deadOnCodeNotDeadOnDomain": 1542,
+  "deadOnDomainPerLayer": [
+   74,
+   63,
+   40,
+   10,
+   5,
+   4,
+   10,
+   2,
+   3,
+   0,
+   2,
+   1
+  ],
+  "fireRateCorrelationDomainVsCode": 0.6057,
+  "fireRateCorrelationDomainVsGeneral": 0.8478,
+  "medianFireRateDomain": 0.0744,
+  "shareFiringUnder1pctDomain": 0.0563,
+  "shareFiringUnder1pctDomainButOver1pctCode": 0.0195,
+  "shareDeadOnDomain": 0.00581,
+  "shareDeadOnCode": 0.04552
+ },
+ "paramCount": {
+  "total": 124439808,
+  "mlpParamsPerNeuron": 1537,
+  "structuredRemovedParams": {
+   "0.3": 16986924,
+   "0.5": 28329984,
+   "0.7": 39654600,
+   "0.9": 50979216
+  }
+ },
+ "recovery": {
+  "steps": 122,
+  "lr": 0.0001,
+  "batch": 8,
+  "before": {
+   "domain": 8065.4,
+   "offDomain": 2575.51,
+   "general": 11048.33
+  },
+  "after": {
+   "domain": 118.71,
+   "offDomain": 63.54,
+   "general": 676.93
+  }
+ }
+}

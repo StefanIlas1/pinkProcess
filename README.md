@@ -8,6 +8,12 @@ language model to answer questions about a captured incident. The Mac app
 shows the live stream alongside that capture and lets you save, select and
 restore language-model weights.
 
+The native Mac app uses Mohsen’s frontend design with Stefan’s board discovery,
+live telemetry, quantized FLAN runtime, and named weight controls. Use the
+native app for live diagnoses. Mohsen’s original cartridge prototype, card
+decks, C++ reference kernel and scoped-pruning study are retained for
+reproduction. [Cartridge study and commands](SPEC.md) · [Research notes](research.md)
+
 ## PYNQ Process app
 
 Think of it as a voice notebook for data. It annotates what it sees, answers in
@@ -112,6 +118,10 @@ a warning appears on the Mac at least one second before a real request queues,
 alongside misses and false alarms.
 
 ## Query the pinkProcess kit
+
+On an Apple Silicon Mac, download and extract the
+[arm64 Mac app](https://github.com/StefanIlas1/pinkProcess/raw/refs/heads/main/build/mac-kit/pinkProcess-Mac-arm64.zip).
+The app connects to a provisioned PYNQ-Z2.
 
 1. Power the provisioned kit. Connect its **PROG/UART** USB port to the paired
    Mac if the USB appliance relay is enabled, or use a reachable Ethernet

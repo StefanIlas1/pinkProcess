@@ -1,0 +1,353 @@
+{
+  "name": "health",
+  "title": "First aid",
+  "tagline": "What to do in the first five minutes",
+  "notice": "First-aid guidance only. It is not a diagnosis. In Canada and the US, call 911 in an emergency.",
+  "cards": [
+    {
+      "id": "bleeding",
+      "title": "Heavy bleeding",
+      "steps": [
+        "Press hard on the wound with a clean cloth or your hand.",
+        "Keep pressing without lifting to look. Add more cloth on top if it soaks through.",
+        "If it is an arm or leg and you can, raise it above the heart.",
+        "Keep pressure on until help arrives."
+      ],
+      "urgent": "Call 911 if blood is spurting, will not stop after 10 minutes of pressure, or the person is pale and faint.",
+      "questions": [
+        "he cut his hand and it is bleeding a lot",
+        "how do I stop heavy bleeding",
+        "deep cut blood everywhere what do I do",
+        "the wound keeps bleeding through the bandage",
+        "someone is bleeding badly from their leg",
+        "blood is spurting from a cut on her arm",
+        "how to stop a bleeding wound fast"
+      ],
+      "keywords": [
+        "bleeding",
+        "bleed",
+        "blood",
+        "cut",
+        "wound",
+        "gash",
+        "laceration",
+        "knife",
+        "slice",
+        "hemorrhage",
+        "bandage",
+        "pressure",
+        "stab",
+        "glass"
+      ]
+    },
+    {
+      "id": "choking",
+      "title": "Choking adult",
+      "steps": [
+        "Ask: are you choking? If they can cough or speak, tell them to keep coughing.",
+        "If they cannot breathe or speak, give 5 firm back blows between the shoulder blades.",
+        "Then give 5 abdominal thrusts: fist above the navel, pull sharply in and up.",
+        "Repeat 5 back blows and 5 thrusts until the object comes out."
+      ],
+      "urgent": "Call 911 if the object does not come out. If they go unresponsive, start CPR.",
+      "questions": [
+        "someone is choking on food",
+        "he can not breathe something is stuck in his throat",
+        "how do I do the heimlich",
+        "my coworker is choking and can not speak",
+        "food stuck in throat can not cough",
+        "what to do when an adult is choking",
+        "she is grabbing her throat and turning blue"
+      ],
+      "keywords": [
+        "choking",
+        "choke",
+        "heimlich",
+        "airway",
+        "throat",
+        "stuck",
+        "swallowed",
+        "lodged",
+        "gagging",
+        "blue",
+        "windpipe",
+        "thrusts"
+      ]
+    },
+    {
+      "id": "burn",
+      "title": "Burn",
+      "steps": [
+        "Cool the burn under cool running water for 20 minutes.",
+        "Take off rings, watches and loose clothing near the burn before it swells.",
+        "Cover loosely with cling film or a clean non-fluffy dressing.",
+        "Do not use ice, butter or creams, and do not pop blisters."
+      ],
+      "urgent": "Call 911 for burns larger than the person's hand, on the face, hands or groin, or caused by chemicals or electricity.",
+      "questions": [
+        "I burned my hand on the stove",
+        "what do I put on a burn",
+        "she spilled boiling water on her arm",
+        "how to treat a burn from hot oil",
+        "should I put ice on a burn",
+        "the burn is blistering what now",
+        "he touched a hot pan and his skin is red"
+      ],
+      "keywords": [
+        "burn",
+        "burned",
+        "burnt",
+        "scald",
+        "scalded",
+        "blister",
+        "hot",
+        "stove",
+        "oven",
+        "boiling",
+        "steam",
+        "flame",
+        "fire",
+        "iron",
+        "kettle"
+      ]
+    },
+    {
+      "id": "stroke",
+      "title": "Possible stroke",
+      "steps": [
+        "Face: ask them to smile. Does one side droop?",
+        "Arms: ask them to raise both arms. Does one drift down?",
+        "Speech: ask them to repeat a simple sentence. Is it slurred or strange?",
+        "Time: if any sign is present, call 911 now and note the time it started.",
+        "Keep them still and do not give food, drink or medicine."
+      ],
+      "urgent": "Call 911 immediately for any one of these signs, even if it goes away.",
+      "questions": [
+        "one side of his face is drooping",
+        "her speech is suddenly slurred and she seems confused",
+        "how do I tell if someone is having a stroke",
+        "he can not lift his left arm and his mouth looks crooked",
+        "sudden weakness on one side of the body",
+        "what are the signs of a stroke",
+        "grandma is talking strangely and her face looks uneven"
+      ],
+      "keywords": [
+        "stroke",
+        "droop",
+        "drooping",
+        "slurred",
+        "speech",
+        "face",
+        "numb",
+        "weakness",
+        "one",
+        "side",
+        "crooked",
+        "smile",
+        "confused",
+        "sudden"
+      ]
+    },
+    {
+      "id": "cpr",
+      "title": "Unresponsive and not breathing",
+      "steps": [
+        "Tap their shoulders and shout. If no response, call 911 and send someone for an AED.",
+        "Lay them on their back on a firm surface.",
+        "Push hard and fast in the centre of the chest: 5 cm deep, 100 to 120 pushes per minute.",
+        "Do not stop until help or an AED arrives. Follow the AED's spoken instructions."
+      ],
+      "urgent": "Call 911 first. Chest compressions alone are enough if you are untrained.",
+      "questions": [
+        "he collapsed and is not breathing",
+        "how do I do CPR",
+        "someone passed out and has no pulse",
+        "she is unresponsive and not breathing what do I do",
+        "how fast do I push on the chest",
+        "a man fell down and will not wake up and is not breathing",
+        "how to use an AED on someone whose heart stopped"
+      ],
+      "keywords": [
+        "cpr",
+        "unresponsive",
+        "unconscious",
+        "collapsed",
+        "breathing",
+        "pulse",
+        "heart",
+        "cardiac",
+        "arrest",
+        "aed",
+        "defibrillator",
+        "compressions",
+        "chest"
+      ]
+    },
+    {
+      "id": "lowsugar",
+      "title": "Low blood sugar",
+      "steps": [
+        "If they are awake and can swallow, give 15 g of fast sugar: half a cup of juice or regular pop, or 3 to 4 glucose tablets.",
+        "Have them sit and rest for 15 minutes.",
+        "If they still feel shaky, give the same amount again.",
+        "Once better, give a snack with starch and protein."
+      ],
+      "urgent": "Call 911 if they are drowsy, cannot swallow, or pass out. Do not put food or drink in their mouth.",
+      "questions": [
+        "my diabetic friend is shaky and sweating",
+        "what do I give someone with low blood sugar",
+        "he has diabetes and is confused and trembling",
+        "her sugar is low what should she eat",
+        "diabetic feeling dizzy weak and sweaty",
+        "how to treat hypoglycemia",
+        "someone with diabetes says their sugar is crashing"
+      ],
+      "keywords": [
+        "diabetic",
+        "diabetes",
+        "sugar",
+        "glucose",
+        "insulin",
+        "hypoglycemia",
+        "shaky",
+        "trembling",
+        "sweaty",
+        "juice",
+        "low"
+      ]
+    },
+    {
+      "id": "allergy",
+      "title": "Severe allergic reaction",
+      "steps": [
+        "Ask if they carry an epinephrine auto-injector (EpiPen).",
+        "Help them use it: press it into the outer thigh and hold for several seconds.",
+        "Call 911 and say anaphylaxis.",
+        "Lay them down with legs raised, or let them sit up if breathing is hard.",
+        "A second dose can be given after 5 minutes if there is no improvement."
+      ],
+      "urgent": "Call 911 even if they feel better after the injection.",
+      "questions": [
+        "she ate peanuts and her lips and face are swelling",
+        "how do I use an epipen",
+        "he got stung by a bee and can not breathe well",
+        "allergic reaction with hives and a tight throat",
+        "someone is having anaphylaxis",
+        "his tongue is swelling after eating shellfish",
+        "what to do for a severe allergic reaction"
+      ],
+      "keywords": [
+        "allergy",
+        "allergic",
+        "anaphylaxis",
+        "epipen",
+        "epinephrine",
+        "hives",
+        "swelling",
+        "swollen",
+        "peanut",
+        "nut",
+        "bee",
+        "sting",
+        "shellfish",
+        "lips",
+        "tongue"
+      ]
+    },
+    {
+      "id": "heat",
+      "title": "Heat exhaustion",
+      "steps": [
+        "Move them to shade or a cool room.",
+        "Lay them down and raise their feet slightly.",
+        "Give cool water or a sports drink in small sips.",
+        "Cool the skin with wet cloths and fanning."
+      ],
+      "urgent": "Call 911 if they are confused, stop sweating with hot skin, or are not better in 30 minutes.",
+      "questions": [
+        "he is dizzy and sweating heavily after working in the sun",
+        "what to do for heat exhaustion",
+        "she feels faint and nauseous from the heat",
+        "worker overheated outside with a headache and cramps",
+        "how to cool someone down who got too hot",
+        "signs of heat stroke what do I do",
+        "he was in the hot warehouse all day and now feels sick and weak"
+      ],
+      "keywords": [
+        "heat",
+        "hot",
+        "sun",
+        "overheated",
+        "heatstroke",
+        "exhaustion",
+        "dehydrated",
+        "dizzy",
+        "cramps",
+        "sunstroke",
+        "warehouse",
+        "temperature"
+      ]
+    },
+    {
+      "id": "nosebleed",
+      "title": "Nosebleed",
+      "steps": [
+        "Sit them down leaning slightly forward, not back.",
+        "Pinch the soft part of the nose firmly for 10 minutes without letting go.",
+        "Have them breathe through the mouth and spit out any blood.",
+        "After it stops, no nose blowing for a few hours."
+      ],
+      "urgent": "Get medical help if it lasts more than 20 minutes or follows a blow to the head.",
+      "questions": [
+        "my nose will not stop bleeding",
+        "how do I stop a nosebleed",
+        "should I tilt my head back for a nosebleed",
+        "the kid has a bloody nose",
+        "nose bleeding for ten minutes",
+        "what is the right way to handle a nose bleed",
+        "blood is dripping from his nose"
+      ],
+      "keywords": [
+        "nosebleed",
+        "nose",
+        "bloody",
+        "nostril",
+        "pinch",
+        "dripping"
+      ]
+    },
+    {
+      "id": "seizure",
+      "title": "Seizure",
+      "steps": [
+        "Move hard or sharp objects away. Do not hold them down.",
+        "Cushion their head with something soft.",
+        "Do not put anything in their mouth.",
+        "Time the seizure.",
+        "When the shaking stops, roll them onto their side and stay with them."
+      ],
+      "urgent": "Call 911 if it lasts more than 5 minutes, repeats, or it is their first seizure.",
+      "questions": [
+        "someone is having a seizure",
+        "he fell and is shaking all over",
+        "what do I do when a person is convulsing",
+        "she is jerking on the floor and not responding",
+        "how to help during an epileptic fit",
+        "should I put something in his mouth during a seizure",
+        "my coworker is having convulsions"
+      ],
+      "keywords": [
+        "seizure",
+        "convulsion",
+        "convulsing",
+        "epilepsy",
+        "epileptic",
+        "fit",
+        "shaking",
+        "jerking",
+        "twitching",
+        "spasm"
+      ]
+    }
+  ]
+}

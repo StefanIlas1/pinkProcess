@@ -2,12 +2,13 @@
 
 Shared research file for pinkProcess. Written 2026-11-21 by Mohsen Sarrafan Chaharsoughi from the committed records of the black-box research program (local repo `blackbox-research/`, not public). Every number comes from a decision record or an independent verifier report named in this file. Where a result is not verified, it says so.
 
-The file has five parts:
+The file has six parts:
 1. the claim and why it matters for pinkProcess;
 2. how the experiments are kept honest;
 3. every result, in order, including what failed;
 4. what is open;
 5. a plan for turning a large model's expertise into a tiny fixed-point model on a PYNQ-Z2 FPGA, using reading and writing weights together.
+6. a quick screen of scoped pruning and the decision it led to.
 
 ---
 
@@ -298,6 +299,96 @@ Together they form a loop: author, quantise, read, verify, flash. Every step is 
 
 ---
 
+## 7. Scoped pruning: can we delete the weights a domain never uses? (2026-11-21, quick screen, not verified)
+
+**Idea tested.** Run one domain's text through a large model, find the weights that domain never uses, delete them for good, and keep full in-domain skill at a fraction of the size.
+
+**Status.** One laptop run on GPT-2 (124M), one seed, no independent verifier, nothing pre-registered. Treat it as a screen, not a result. Code and numbers are in `scoping/`.
+
+**Setup.** Domain: finance news tweets. Off-domain: Python standard-library source. General: WikiText-2. About 60k calibration and 30k test tokens per pool, disjoint. The metric is perplexity (lower is better).
+
+### 7.1 Almost nothing is unused
+
+A neuron counts as near-dead when its output exceeds 0.05 on fewer than 0.1% of tokens.
+
+| of 36,864 MLP neurons | count | share |
+|---|---|---|
+| near-dead on finance | 214 | 0.58% |
+| near-dead on general text | 206 | 0.56% |
+| near-dead on code | 1,678 | 4.55% |
+| near-dead on finance but used by code | 78 | 0.21% |
+
+The weights the idea hopes to delete for free are about 0.2% of MLP neurons. Per-neuron firing rates correlate 0.61 between finance and code, so the two domains mostly share neurons. Attention heads were not measured.
+
+### 7.2 Domain data doesn't pick better weights to cut
+
+Unstructured pruning with the Wanda score, no retraining, finance perplexity (dense: 212.3):
+
+| sparsity | plain magnitude | Wanda, general calibration | Wanda, finance calibration |
+|---|---|---|---|
+| 30% | 257.5 | 218.5 | 219.0 |
+| 50% | 1,066.7 | 303.7 | 296.7 |
+| 70% | 14,420.7 | 1,342.9 | 1,514.6 |
+| 90% | 37,558.0 | 48,079.2 | 130,109.4 |
+
+Calibrating on the domain gives no advantage on the domain. Past 50% everything collapses, and scattered zeros don't save memory at INT4 on the board anyway.
+
+### 7.3 Removing neurons, then fine-tuning on the domain
+
+Whole MLP neurons removed (this does shrink the model), then 122 fine-tuning steps on finance text:
+
+| model | params removed | finance | code | general |
+|---|---|---|---|---|
+| dense, no fine-tune | 0 | 212.3 | 11.4 | 52.8 |
+| dense, fine-tuned | 0 | 65.7 | 14.1 | 125.7 |
+| 50% of neurons removed (domain-ranked), fine-tuned | 28.3M (23%) | 118.7 | 63.5 | 676.9 |
+| 50% removed (random), fine-tuned | 28.3M (23%) | 139.0 | 71.3 | 799.3 |
+| 70% removed (random), fine-tuned | 39.7M (32%) | 233.7 | 141.0 | 1,963.1 |
+
+- Against the fair control (dense, fine-tuned the same way), cutting 23% of parameters costs 1.8 times the finance perplexity. The cut is not free.
+- The model does become scoped: general text gets 5 to 15 times worse while finance recovers most of the way.
+- Before fine-tuning, domain-ranked removal was worse than random removal (finance 3,912 against 1,105 at 30%). This is unexplained and could be a flaw in the ranking score. After fine-tuning the domain-ranked model is ahead (118.7 against 139.0).
+
+### 7.4 Prior work (search snippets only, papers not read in full)
+
+- Domain-specific pruning exists: D-Pruner (2024), Mini-GPTs contextual pruning (2023), selective pruning for unlearning (Pochinkov and Schoots, 2024), SEAP (2025). They report about 50% unstructured or 20–30% structured before quality drops.
+- What reaches a 5–10 times smaller model is pruning plus heavy retraining or distillation: Sheared-LLaMA (7B to 1.3B with 50B tokens), Minitron (15B to 4B).
+- No paper was found where an LLM reads raw weights to decide or certify what was pruned.
+- On small FPGAs only structured removal saves memory or bandwidth.
+
+### 7.5 Decision
+
+**No to "delete the unused weights".** There is no unused set to delete, and section 3 already shows that readers can't predict magnitudes, which is what safe deletion would need.
+
+**Yes to a reshaped version: scope, distil, then certify from the weights.**
+1. **Scope.** Trim the vocabulary to the domain's tokens. This is the one place the original idea is literally true, since embedding rows for tokens the domain never emits are never touched. Then remove whole neurons and heads, and distil from the unpruned teacher on domain text.
+2. **Certify.** Blind readers get only the disguised difference between the base and the scoped model and must name what was kept and what was cut. This uses the reader skill that is verified in section 3.5 (topic from a weight difference, 10 of 12). The output is a scope certificate: a statement of what the model no longer covers, checked from weights before flashing.
+3. **Gate.** Refusal comes from a small fixed-point profile on input surprise and out-of-vocabulary rate, built with `profile.py` and `fixed_point.py`. A pruned model doesn't refuse on its own; it babbles.
+
+**Bar to set before running it** (section 2 rules): INT4 size at most 60% of base, in-domain perplexity within 10% of the fine-tuned dense teacher, readers naming the kept domain first on at least 5 of 6 scoped copies and beating the best frozen formula on the removed domains, and the gate refusing at least 95% of out-of-domain prompts with at most 5% false refusals.
+
+**What would kill it:** the in-domain gap in 7.3 not closing with real distillation; removed knowledge returning after a short fine-tune; or reading removals going the way of the unlearning audit in section 3.3, where running the model won.
+
+### 7.6 Scope packs: switching fields without deleting anything
+
+`scoping/scope_packs.py`, GPT-2, one seed, not verified. The base weights are frozen. A pack holds one keep-or-skip bit per MLP neuron (half are skipped, ranked on that field's text) and a rank-8 correction on each MLP layer, trained for 120 steps on that field.
+
+| loaded | finance perplexity | code perplexity |
+|---|---|---|
+| base, no pack | 212.3 | 11.4 |
+| finance mask only | 8,065.4 | 2,575.5 |
+| finance pack | 163.6 | 59.0 |
+| code mask only | 5,511.3 | 200.3 |
+| code pack | 2,648.0 | 8.4 |
+
+- **Pack size:** 4.6 KB of mask bits plus 737,280 correction values, 2.95 MB as float32. That is 0.6% of the base's 124.4M parameters.
+- **Getting the weights back:** after unloading a pack, the base's output hashes to the same sha256 as before any pack existed. Nothing is deleted, so nothing has to be recovered.
+- **Switching:** both packs sit in memory and the switch is a pointer change (0.17 µs median here). On the board it would be a mask register write plus a 3 MB read.
+- **Overlap:** 31% of neurons are kept by both packs, so the two fields mostly use different halves.
+- **Caution:** each pack beats the untuned base on its own field, but the pack was trained on that field and the base was not. The fair control from 7.3, the dense model fine-tuned on finance, reaches 65.7 against the finance pack's 163.6.
+
+---
+
 ## Where the evidence lives
 
 All of this is in the local research repo (ask Mohsen for access). The full results history is not in this repo.
@@ -352,3 +443,5 @@ All five answers reproduced their references. Switching versions forced the sele
 **Native-window trial and memory-traffic limit.** A new on-call question entered through the installed Mac window showed first text in 13.4 s and the full answer in 48.6 s. The answer cited 71 waiting, a peak of 74, a forecast of continued backlog and an undetermined cause. The capture was taken at stream time 328.4 s; the app showed a newer reading at 374.3 s when the answer completed. The release, wording, answer and capture fingerprint are recorded. [Rendered Mac query](https://github.com/StefanIlas1/pinkProcess/blob/f35c56d/kit/evidence/native-window-projection-ask.json)
 
 For the 50-step saved replay, the projection engine reads 2.452 GB of weights. Block-RAM activation reuse reduces calculated activation traffic from 769 MB to 24.9 MB. At one 64-bit read per clock and 50 MHz, weight and activation reads alone require at least 6.19 s under perfect utilization. This excludes score writes, any secondary vocabulary scan, processor work, and transport. The 1.92 s arithmetic-only and 6.19 s read-only bounds can overlap. Reaching two seconds on this workload would require changing the memory path or the work itself. [Reproducible traffic calculation](https://github.com/StefanIlas1/pinkProcess/blob/2a06251/kit/evidence/diagnosis-latency-floor.json)
+
+**Frontend and backend integration.** Merge `ddb1969` retains both the prior diagnostic backend history and Mohsen’s full cartridge branch history. The native Mac app adopts the cartridge interface’s wordmark, composer, sidebar and navigation while using the board’s free-form diagnostic backend, telemetry and saved versions. The original card-based interface, its 52/60 held-out result, its kernel vectors, and the scoped-pruning screen remain reproducible as historical experiments. The merged signed arm64 package passed archive and signature checks. [Merge and parent commits](https://github.com/StefanIlas1/pinkProcess/commit/ddb1969) · [Cartridge experiment](https://github.com/StefanIlas1/pinkProcess/blob/ddb1969/SPEC.md)

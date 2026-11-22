@@ -1,0 +1,12 @@
+classifier/s_axi_aclk uses the 50 MHz PS fabric clock
+projection/s_axi_aclk uses the 50 MHz PS fabric clock
+projection_argmax/s_axi_aclk uses the 50 MHz PS fabric clock
+projection_ddr/aclk uses the 50 MHz PS fabric clock
+ps7/FCLK_CLK0 uses the 50 MHz PS fabric clock
+ps7/M_AXI_GP0_ACLK uses the 50 MHz PS fabric clock
+ps7/S_AXI_HP0_ACLK uses the 50 MHz PS fabric clock
+classifier registers 0x40000000–0x4000ffff
+projection registers 0x40010000–0x40010fff
+projection_argmax registers 0x40011000–0x40011fff
+projection reaches DDR via Zynq HP0
+projection_argmax reaches DDR via Zynq HP0

@@ -1,0 +1,356 @@
+{
+  "name": "money",
+  "title": "Future me",
+  "tagline": "Money moves for your twenties in Canada",
+  "notice": "General education, not personal financial advice. Limits change every year, so check the CRA site for the current numbers.",
+  "cards": [
+    {
+      "id": "start",
+      "title": "Start with small amounts",
+      "steps": [
+        "Pick an amount you will not miss: $25 a paycheque is enough to start.",
+        "Set an automatic transfer for the day after payday.",
+        "Put it in a TFSA so growth is never taxed.",
+        "Raise the amount by a little every time your pay goes up."
+      ],
+      "urgent": "The habit matters more than the amount. Starting at 22 instead of 32 roughly doubles what the same deposits become by 65.",
+      "questions": [
+        "I only have 50 dollars a month is it worth investing",
+        "how do I start investing with very little money",
+        "I am broke how can I begin saving for the future",
+        "is it pointless to save small amounts",
+        "where should a beginner start with investing",
+        "I am 21 how do I start building wealth",
+        "can I invest if I do not earn much"
+      ],
+      "keywords": [
+        "start",
+        "begin",
+        "beginner",
+        "investing",
+        "invest",
+        "small",
+        "little",
+        "broke",
+        "first",
+        "time",
+        "young",
+        "wealth"
+      ]
+    },
+    {
+      "id": "tfsa_rrsp",
+      "title": "TFSA or RRSP",
+      "steps": [
+        "TFSA: you pay tax now, and growth and withdrawals are tax-free. Withdrawn room comes back the next calendar year.",
+        "RRSP: you get a tax deduction now and pay tax when you withdraw in retirement.",
+        "Lower income today: fill the TFSA first.",
+        "Higher income today than you expect in retirement: the RRSP deduction is worth more.",
+        "Unused room in both carries forward, so nothing is lost by waiting on the RRSP."
+      ],
+      "urgent": "Over-contributing to either costs 1% a month on the excess. Check your room on CRA My Account first.",
+      "questions": [
+        "should I use a TFSA or an RRSP",
+        "what is the difference between TFSA and RRSP",
+        "which account is better for a student TFSA or RRSP",
+        "is an RRSP worth it on a low salary",
+        "how does a tax free savings account work",
+        "do I pay tax when I take money out of my TFSA",
+        "RRSP versus TFSA for someone just starting to work"
+      ],
+      "keywords": [
+        "tfsa",
+        "rrsp",
+        "tax",
+        "free",
+        "savings",
+        "account",
+        "registered",
+        "retirement",
+        "deduction",
+        "withdraw",
+        "contribution",
+        "room"
+      ]
+    },
+    {
+      "id": "fhsa",
+      "title": "First home savings account",
+      "steps": [
+        "Open an FHSA if you are 18 or older and have not owned a home recently.",
+        "You can put in up to $8,000 a year, to a lifetime total of $40,000.",
+        "Contributions reduce your taxable income, like an RRSP.",
+        "Withdrawals to buy a first home are tax-free, like a TFSA.",
+        "If you never buy, the money can move to your RRSP without using RRSP room."
+      ],
+      "urgent": "Room only starts building once the account is open, so open it early even with a small deposit.",
+      "questions": [
+        "how do I save for a down payment on a house",
+        "what is an FHSA",
+        "is the first home savings account worth opening",
+        "best account to save for my first home in Canada",
+        "how much can I put in an FHSA each year",
+        "will I ever afford a house how should I save",
+        "should I open an FHSA if I am not sure I will buy a home"
+      ],
+      "keywords": [
+        "fhsa",
+        "house",
+        "home",
+        "down",
+        "payment",
+        "first",
+        "buyer",
+        "mortgage",
+        "condo",
+        "afford",
+        "property"
+      ]
+    },
+    {
+      "id": "match",
+      "title": "Employer matching",
+      "steps": [
+        "Ask HR whether there is a group RRSP or pension with matching.",
+        "Contribute at least enough to get the full match.",
+        "A 50% or 100% match is an instant return no investment can promise.",
+        "Check the vesting rule: how long you must stay to keep the employer's money."
+      ],
+      "urgent": "Skipping the match is turning down part of your pay.",
+      "questions": [
+        "my job offers RRSP matching should I take it",
+        "what is employer matching",
+        "is the company pension plan worth joining",
+        "my employer matches 4 percent what does that mean",
+        "should I join the group retirement plan at work",
+        "how much should I put into my workplace retirement plan",
+        "is free money from employer contributions real"
+      ],
+      "keywords": [
+        "employer",
+        "match",
+        "matching",
+        "pension",
+        "workplace",
+        "group",
+        "plan",
+        "hr",
+        "company",
+        "contribution",
+        "vesting",
+        "benefits"
+      ]
+    },
+    {
+      "id": "emergency",
+      "title": "Emergency fund",
+      "steps": [
+        "Start with a first goal of $1,000.",
+        "Build toward three months of rent, food and bills.",
+        "Keep it in a high-interest savings account, not invested.",
+        "Use it only for real emergencies, then refill it."
+      ],
+      "urgent": "Without a cushion, one surprise bill goes on a credit card at about 20% interest.",
+      "questions": [
+        "how much should I keep for emergencies",
+        "what is an emergency fund",
+        "should I save cash before investing",
+        "how many months of expenses should I have saved",
+        "where should I keep my rainy day money",
+        "I lost my job how much savings should I have had",
+        "is it bad to have no savings buffer"
+      ],
+      "keywords": [
+        "emergency",
+        "fund",
+        "rainy",
+        "day",
+        "cushion",
+        "buffer",
+        "safety",
+        "net",
+        "unexpected",
+        "job",
+        "loss",
+        "months",
+        "expenses",
+        "cash"
+      ]
+    },
+    {
+      "id": "compound",
+      "title": "Why starting early wins",
+      "steps": [
+        "Growth earns its own growth, so time does most of the work.",
+        "$200 a month from age 22 to 65 at 6% grows to about $485,000.",
+        "The same $200 a month from age 32 grows to about $250,000.",
+        "Ten years of delay costs almost half the result."
+      ],
+      "urgent": "These figures are before inflation and assume a steady 6%, which real markets do not deliver every year.",
+      "questions": [
+        "how does compound interest work",
+        "why should I start saving for retirement now",
+        "does it matter if I wait until 30 to invest",
+        "how much will my money grow over time",
+        "retirement feels too far away why bother",
+        "what happens if I invest 200 a month for 40 years",
+        "is it too early to think about retirement at 20"
+      ],
+      "keywords": [
+        "compound",
+        "interest",
+        "growth",
+        "early",
+        "time",
+        "retirement",
+        "grow",
+        "years",
+        "waiting",
+        "later",
+        "decades"
+      ]
+    },
+    {
+      "id": "debt",
+      "title": "Pay debt or invest",
+      "steps": [
+        "List each debt with its interest rate.",
+        "Credit cards at about 20%: pay these off before investing anything.",
+        "Student loans at a low rate: pay the minimum and invest alongside.",
+        "Always take an employer match first, even with debt."
+      ],
+      "urgent": "No investment reliably beats 20% card interest. Clearing it is the best return available.",
+      "questions": [
+        "should I pay off my student loans or invest",
+        "I have credit card debt should I still save",
+        "is it better to clear debt before investing",
+        "how do I get out of credit card debt",
+        "student loan versus investing which first",
+        "which debt should I pay first",
+        "I owe money on my card and want to start investing"
+      ],
+      "keywords": [
+        "debt",
+        "loan",
+        "loans",
+        "student",
+        "credit",
+        "card",
+        "owe",
+        "owing",
+        "balance",
+        "payoff",
+        "pay",
+        "off",
+        "interest",
+        "rate",
+        "osap"
+      ]
+    },
+    {
+      "id": "budget",
+      "title": "A budget that survives",
+      "steps": [
+        "Take your monthly pay after tax.",
+        "About 50% for needs: rent, food, transit, phone.",
+        "About 30% for wants.",
+        "About 20% for savings and extra debt payments, moved automatically on payday.",
+        "If rent pushes needs over 50%, cut wants first and keep at least 10% for savings."
+      ],
+      "urgent": "Track one month of real spending before you set the numbers.",
+      "questions": [
+        "how do I make a budget",
+        "how much of my paycheque should I save",
+        "what is the 50 30 20 rule",
+        "I spend everything I earn how do I fix that",
+        "how should I split my income each month",
+        "I never know where my money goes",
+        "how much of my salary should go to rent"
+      ],
+      "keywords": [
+        "budget",
+        "budgeting",
+        "paycheque",
+        "paycheck",
+        "salary",
+        "income",
+        "spending",
+        "expenses",
+        "rent",
+        "split",
+        "track",
+        "50",
+        "30",
+        "20"
+      ]
+    },
+    {
+      "id": "index",
+      "title": "What to invest in",
+      "steps": [
+        "A broad index fund or all-in-one ETF holds thousands of companies in one purchase.",
+        "Look for a management fee (MER) under about 0.25%.",
+        "A 2% fee can eat roughly a third of your result over 40 years.",
+        "Buy on a schedule and do not check it daily."
+      ],
+      "urgent": "Picking single stocks or crypto with money you need is speculation, not a retirement plan.",
+      "questions": [
+        "what should I actually invest in",
+        "what is an index fund",
+        "are ETFs good for beginners",
+        "do investment fees really matter",
+        "should I buy individual stocks or a fund",
+        "what is an MER",
+        "is crypto a good way to save for retirement"
+      ],
+      "keywords": [
+        "index",
+        "fund",
+        "etf",
+        "etfs",
+        "stocks",
+        "shares",
+        "fees",
+        "mer",
+        "crypto",
+        "bitcoin",
+        "portfolio",
+        "mutual",
+        "diversify",
+        "market"
+      ]
+    },
+    {
+      "id": "credit",
+      "title": "Build your credit score",
+      "steps": [
+        "Get one no-fee credit card and use it for a regular small bill.",
+        "Pay the full statement balance every month, on time.",
+        "Keep the balance under 30% of the limit.",
+        "Keep your oldest card open."
+      ],
+      "urgent": "One missed payment stays on your report for about six years.",
+      "questions": [
+        "how do I build a credit score",
+        "why does my credit score matter",
+        "how can I raise my credit rating",
+        "does having a credit card help my credit",
+        "what hurts your credit score",
+        "I have no credit history how do I start",
+        "how much of my credit limit should I use"
+      ],
+      "keywords": [
+        "credit",
+        "score",
+        "rating",
+        "history",
+        "report",
+        "limit",
+        "utilization",
+        "card",
+        "bureau",
+        "equifax"
+      ]
+    }
+  ]
+}

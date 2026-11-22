@@ -5,12 +5,20 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pinkprocess"
 version = "0.1.0"
-description = "FPGA-backed connection-pool telemetry analysis for the pinkProcess kit"
+description = "FPGA-backed connection-pool telemetry analysis and swappable integer expert cartridges"
 requires-python = ">=3.10"
 dependencies = []
 
 [tool.setuptools]
-packages = ["pinkprocess"]
+packages = ["pinkprocess", "cartridge", "cartridge._app", "cartridge._decks", "cartridge._weights"]
+
+[tool.setuptools.package-dir]
+"cartridge._app" = "app"
+"cartridge._decks" = "decks"
+"cartridge._weights" = "cartridges"
 
 [tool.setuptools.package-data]
 pinkprocess = ["kit.html", "static/*"]
+"cartridge._app" = ["index.html"]
+"cartridge._decks" = ["*.json"]
+"cartridge._weights" = ["*.json"]
