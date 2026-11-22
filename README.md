@@ -8,7 +8,7 @@ integer matrix projections and its ARM processor coordinates generation.
 
 [Download the Mac app](https://github.com/StefanIlas1/pinkProcess/raw/refs/heads/main/build/mac-kit/pinkProcess-Mac-arm64.zip) · [Operator walkthrough](#query-the-pinkprocess-kit) · [Research notebook](research.md)
 
-The [physical CSV workflow record](kit/evidence/physical-csv-workflow.json) includes the saved edit, actual answers, and timings. A question and follow-up took 53.4 s and 56.9 s on the test kit, with all 4,744 learned projections per answer on the FPGA.
+The [physical CSV workflow record](kit/evidence/physical-csv-workflow.json) includes the saved edit, actual answers, and timings. A question and follow-up took 53.4 s and 56.9 s on the test kit, with all 4,744 learned projections per answer on the FPGA. On the shorter recovery sample the original model returned first text at 8.52 s and finished in 16.92 s. It identified the peak and omitted whether the queue had cleared. [Installed app and sample result](kit/evidence/installed-mac-csv-recovery.json)
 
 ## Product goal
 
