@@ -155,6 +155,7 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
 .model-item{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line)}.model-item:first-child{border-top:0}.model-item .mono{font-size:.88rem}
 .tag{font:.74rem var(--mono);color:var(--dim);border:1px solid var(--line);border-radius:4px;padding:2px 8px;white-space:nowrap}
 .google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;background:#2c3035}.google svg{display:block}
+.queue-history{margin:10px 0 0;padding:8px 12px;border-left:2px solid var(--pink);font-size:13px}.queue-history strong{font-weight:600}
 .gen-timing{display:block;margin-top:6px;color:var(--dim);font-family:ui-monospace,Menlo,monospace;font-size:12px}
 </style>
 </head>
@@ -829,6 +830,16 @@ function renderMessages() {
     } else if (message.pending) {
       bubble.append(skeletonBars(3));
     }
+    const measured = message.readings?.split("\n")[0];
+    const hasHistory = measured?.startsWith(queueHistoryLabel);
+    if (hasHistory) {
+      const note = document.createElement("p");
+      note.className = "queue-history";
+      const label = document.createElement("strong");
+      label.textContent = queueHistoryLabel;
+      note.append(label, measured.slice(queueHistoryLabel.length));
+      bubble.append(note);
+    }
     if (message.pending) {
       const skeleton = document.createElement("div");
       skeleton.className = "skeleton"; skeleton.dataset.index = index;
@@ -842,7 +853,8 @@ function renderMessages() {
     if (message.readings) {
       const details = document.createElement("details");
       const summary = document.createElement("summary"); summary.textContent = "Readings behind this answer";
-      const body = document.createElement("p"); body.textContent = message.readings;
+      const body = document.createElement("p");
+      body.textContent = hasHistory ? message.readings.slice(measured.length).trimStart() : message.readings;
       details.append(summary, body); bubble.append(details);
     }
     if (message.offTopic) {
@@ -942,9 +954,22 @@ async function persistSession(extra={}) {
     await refreshChats();
   } catch (err) {show(err.message, true);}
 }
+const queueHistoryLabel = "Measured queue history · ";
+function measuredQueueHistory(snapshot) {
+  const obs = snapshot?.observations;
+  const peak = obs?.peak_waiting?.waiting, first = obs?.first?.waiting, last = snapshot?.latest?.waiting;
+  if (![peak, first, last].every(n => Number.isSafeInteger(n) && n >= 0) || peak < Math.max(first, last)) return "";
+  let history;
+  if (peak === 0) history = "No requests waited in the recorded readings.";
+  else if (last === 0) history = "The queue reached " + peak + " waiting and cleared by the final reading.";
+  else history = "Waiting requests at start: " + first + ", peak: " + peak + ", latest: " + last + ".";
+  return queueHistoryLabel + history;
+}
 function readingsText(data, captured, baseline) {
   const parts = [];
   const snapshot = data.snapshot;
+  const history = measuredQueueHistory(snapshot);
+  if (history) parts.push(history);
   if (snapshot?.latest) {
     parts.push(snapshot.latest.busy + " of " + snapshot.capacity + " connections busy and " + snapshot.latest.waiting + " requests waiting at " + seconds(snapshot.latest.time_ms) + ".");
     const window = snapshot.observations;
@@ -993,6 +1018,7 @@ function askLive(question, captured=null) {
       entryStage(entry, 1);
       if (data.job_id) {
         const snapshot = data.snapshot;
+        entry.readings = measuredQueueHistory(snapshot); renderMessages();
         while (data.state === "running") {
           if (Date.now() > deadline) throw new Error("The board took too long to answer. Try again.");
           const elapsed = Date.now() - entry.start;
@@ -1063,7 +1089,8 @@ function boardObservations(set) {
   const snapshot = set.snapshot || {}, observed = snapshot.observations || set.summary || {};
   const {latest, capacity} = snapshot;
   const count = observed.sample_count ?? snapshot.sample_count;
-  const lines = [];
+  const history = measuredQueueHistory(snapshot);
+  const lines = history ? [history] : [];
   if (Number.isFinite(count)) {
     const interval = Number.isFinite(observed.start_ms) && Number.isFinite(observed.end_ms) ? " from " + observed.start_ms + " to " + observed.end_ms + " ms" : "";
     lines.push(count.toLocaleString() + " readings" + interval + ".");
@@ -1128,6 +1155,7 @@ async function localAnswer(entry, question, only) {
   }
 }
 async function boardAnswer(entry, question) {
+  entry.readings = measuredQueueHistory(boardDataset.snapshot); renderMessages();
   const stage = boardCalibrated ? "followup" : "final";
   const startedAt = Date.now();
   let job = await request("dataset_ask", {dataset_id:boardDataset.dataset_id, question, stage});
