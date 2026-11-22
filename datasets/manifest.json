@@ -72,6 +72,24 @@
     "description": "Request log events with status, latency and an incident window."
   },
   {
+    "file": "checkout-api-10k.csv",
+    "id": "checkout-api-10k",
+    "name": "Checkout API, 10,000 requests",
+    "description": "Request telemetry with endpoint, region, status, latency and database pool wait. A deploy breaks one endpoint in one region for twenty minutes."
+  },
+  {
+    "file": "cold-chain-10k.csv",
+    "id": "cold-chain-10k",
+    "name": "Cold chain trucks, 10,000 readings",
+    "description": "Ten refrigerated trucks reporting temperature, door state and compressor current every five minutes. One compressor fails."
+  },
+  {
+    "file": "store-sales-10k.csv",
+    "id": "store-sales-10k",
+    "name": "Store sales, 10,000 rows",
+    "description": "Hourly orders and revenue by store, region and payment method over ten days. A payment outage hits one region."
+  },
+  {
     "file": "malformed.csv",
     "id": "malformed",
     "name": "Malformed file",

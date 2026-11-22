@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import tempfile
 import unittest
 
 from .kit_data import DATASETS_DIR, MAX_ROWS, SAMPLES, parse_table, profile_table, sample_csv
@@ -47,7 +48,17 @@ class DatasetFolderTest(unittest.TestCase):
     def test_files_stay_small_except_the_large_one(self):
         for path in DATASETS_DIR.iterdir():
             if path.suffix in (".csv", ".jsonl") and path.name != "large-50k.csv":
-                self.assertLess(path.stat().st_size, 200_000, path.name)
+                self.assertLess(path.stat().st_size, 1_000_000 if path.name.endswith("-10k.csv") else 200_000, path.name)
+
+    def test_the_ten_thousand_row_files_have_exactly_that_many_rows_and_a_stated_cause(self):
+        readme = (DATASETS_DIR / "README.md").read_text()
+        found = [path for path in DATASETS_DIR.iterdir() if path.name.endswith("-10k.csv")]
+        self.assertEqual({path.name for path in found}, {"checkout-api-10k.csv", "cold-chain-10k.csv", "store-sales-10k.csv"})
+        for path in found:
+            with self.subTest(file=path.name):
+                self.assertEqual(parse_table(path.read_text(), path.name)["rows"], 10_000)
+                self.assertTrue(any(line.startswith(f"- `{path.name}`: ") and "cause" not in line.split(": ", 1)[0] and len(line) > 120
+                                    for line in readme.split("## Planted causes", 1)[1].splitlines()))
 
     def test_generator_output_is_deterministic(self):
         import importlib.util
@@ -55,6 +66,13 @@ class DatasetFolderTest(unittest.TestCase):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         self.assertEqual(module.pool_series(14, module.recovery), module.pool_series(14, module.recovery))
+        before = {name: (DATASETS_DIR / name).read_bytes() for name in ("checkout-api-10k.csv", "cold-chain-10k.csv", "store-sales-10k.csv")}
+        module.HERE = Path(tempfile.mkdtemp())
+        module.checkout_api_10k()
+        module.cold_chain_10k()
+        module.store_sales_10k()
+        for name, content in before.items():
+            self.assertEqual((module.HERE / name).read_bytes(), content)
 
 
 if __name__ == "__main__":

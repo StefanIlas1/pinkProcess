@@ -116,8 +116,9 @@ def iot_drift():
     rng = Random(26)
     rows = []
     for index in range(800):
-        sensor_a = 20.0 + rng.uniform(-0.15, 0.15) + index * 0.004
-        sensor_b = 20.0 + rng.uniform(-0.15, 0.15) + (index * 0.012 if index > 400 else 0)
+        room = 20.0 + index * 0.004
+        sensor_a = room + rng.uniform(-0.15, 0.15)
+        sensor_b = room + rng.uniform(-0.15, 0.15) + (index - 400) * 0.012 * (index > 400)
         rows.append((stamp(index, 30), round(sensor_a, 3), round(sensor_b, 3)))
     write_table("iot-drift.csv", ["timestamp", "sensor_a_c", "sensor_b_c"], rows)
 
@@ -132,6 +133,90 @@ def log_events():
         lines.append(json.dumps(dict(ts=index * 1000, service=rng.choice(["api", "auth", "search"]), status=status,
                                       latency_ms=round(latency, 1), bytes=int(rng.uniform(300, 9000)))))
     (HERE / "log-events.jsonl").write_text("\n".join(lines) + "\n")
+
+
+def checkout_api_10k():
+    rng = Random(31)
+    endpoints = [("/search", 35, 60), ("/product", 20, 50), ("/cart", 15, 70), ("/checkout", 20, 140), ("/login", 10, 90)]
+    regions = [("us-east", 45), ("eu-west", 30), ("ap-south", 25)]
+    begin = datetime(2026, 11, 18, 12, 0, 0)
+    incident_start, incident_end = 7920, 9120
+    rows = []
+    for index in range(10_000):
+        seconds = index * 1.44 + rng.uniform(0, 1)
+        endpoint, _, base = rng.choices(endpoints, weights=[weight for _, weight, _ in endpoints])[0]
+        region = rng.choices([name for name, _ in regions], weights=[weight for _, weight in regions])[0]
+        latency = base * rng.lognormvariate(0, 0.25)
+        pool_wait = rng.uniform(1, 12)
+        failed = rng.random() < 0.005
+        broken = endpoint == "/checkout" and region == "eu-west" and incident_start <= seconds < incident_end
+        if broken:
+            pool_wait = rng.uniform(700, 2200)
+            latency += pool_wait
+            failed = rng.random() < 0.45
+        if failed:
+            status = rng.choice([500, 500, 503])
+        else:
+            status = 404 if endpoint == "/product" and rng.random() < 0.015 else 200
+        rows.append(((begin + timedelta(seconds=int(seconds))).strftime("%Y-%m-%d %H:%M:%S"), endpoint, region, status,
+                     round(latency, 1), round(pool_wait, 1)))
+    write_table("checkout-api-10k.csv", ["timestamp", "endpoint", "region", "status", "latency_ms", "db_pool_wait_ms"], rows)
+
+
+def cold_chain_10k():
+    rng = Random(32)
+    trucks = [f"T{number:02d}" for number in range(1, 11)]
+    begin = datetime(2026, 11, 17, 0, 0, 0)
+    failure_start, failure_end = 744, 804
+    door_runs = {}
+    for start in rng.sample(range(20, 960, 40), 14):
+        if not failure_start - 30 <= start <= failure_end + 30:
+            door_runs[start] = rng.randint(3, 8)
+    door_runs[520] = 20
+    temperature = {truck: 3.0 for truck in trucks}
+    rows = []
+    for step in range(1000):
+        moment = begin + timedelta(minutes=5 * step)
+        hour = moment.hour + moment.minute / 60
+        ambient = 18 + 8 * math.sin(2 * math.pi * (hour - 9) / 24) + rng.uniform(-0.5, 0.5)
+        for truck in trucks:
+            failed = truck == "T07" and failure_start <= step < failure_end
+            pulling_down = truck == "T07" and failure_end <= step < failure_end + 10
+            opened = (truck == "T03" and any(start <= step < start + length for start, length in door_runs.items())) or rng.random() < 0.002
+            amps = 7 + 0.15 * (ambient - 20) + rng.uniform(-0.4, 0.4) + (2 if opened else 0)
+            drift = (3.0 - temperature[truck]) * 0.15 + (ambient - 20) * 0.01 + rng.uniform(-0.12, 0.12)
+            if failed:
+                amps = rng.uniform(0.2, 0.6)
+                drift = 0.19 + 0.015 * (ambient - 20) + rng.uniform(-0.05, 0.05)
+            if pulling_down:
+                amps = 10 + rng.uniform(-0.4, 0.4)
+            temperature[truck] = min(14.0, temperature[truck] + drift + (0.4 if opened else 0))
+            rows.append((moment.strftime("%Y-%m-%d %H:%M:%S"), truck, round(temperature[truck], 2), int(opened), round(amps, 2), round(ambient, 1)))
+    write_table("cold-chain-10k.csv", ["timestamp", "truck_id", "temp_c", "door_open", "compressor_amps", "ambient_c"], rows)
+
+
+def store_sales_10k():
+    rng = Random(33)
+    regions = ["north", "south", "east", "west", "central"]
+    stores = [(f"{region}-{number}", region, 22 + 3 * number + 2 * index) for index, region in enumerate(regions) for number in (1, 2, 3, 4)]
+    payments = [("card", 0.65, 26.0), ("cash", 0.35, 19.0)]
+    begin = datetime(2026, 10, 26, 0, 0, 0)
+    outage_start, outage_end = 4 * 24 + 12, 4 * 24 + 17
+    rows = []
+    for hour_index in range(250):
+        moment = begin + timedelta(hours=hour_index)
+        hour = moment.hour
+        daylight = 0.0 if hour < 7 or hour >= 23 else 0.5 + 0.5 * math.sin(math.pi * (hour - 7) / 16)
+        weekend = 1.25 if moment.weekday() >= 5 else 1.0
+        for store, region, size in stores:
+            for method, share, ticket in payments:
+                expected = size * share * daylight * weekend
+                if region == "north" and method == "card" and outage_start <= hour_index < outage_end:
+                    expected *= 0.04
+                orders = max(0, round(rng.gauss(expected, math.sqrt(expected) if expected > 0 else 0)))
+                revenue = round(orders * ticket * rng.uniform(0.9, 1.1), 2)
+                rows.append((moment.strftime("%Y-%m-%d %H:%M:%S"), region, store, method, orders, revenue))
+    write_table("store-sales-10k.csv", ["timestamp", "region", "store", "payment_method", "orders", "revenue"], rows)
 
 
 def malformed():
@@ -191,8 +276,18 @@ MANIFEST = [
     ("sales-seasonal.csv", "Sales with seasonality", "A year of daily orders and revenue with weekly and yearly cycles and a sale."),
     ("iot-drift.csv", "IoT sensor drift", "Two temperature sensors, one of which drifts away from the other."),
     ("log-events.jsonl", "Log events (JSON lines)", "Request log events with status, latency and an incident window."),
+    ("checkout-api-10k.csv", "Checkout API, 10,000 requests", "Request telemetry with endpoint, region, status, latency and database pool wait. A deploy breaks one endpoint in one region for twenty minutes."),
+    ("cold-chain-10k.csv", "Cold chain trucks, 10,000 readings", "Ten refrigerated trucks reporting temperature, door state and compressor current every five minutes. One compressor fails."),
+    ("store-sales-10k.csv", "Store sales, 10,000 rows", "Hourly orders and revenue by store, region and payment method over ten days. A payment outage hits one region."),
     ("malformed.csv", "Malformed file", "Rows with missing and extra columns. Importing it should fail with a clear message."),
     ("large-50k.csv", "Large file (50,000 rows)", "A long load series at the import row limit, for checking speed."),
+]
+
+
+GROUND_TRUTH = [
+    ("checkout-api-10k.csv", "After a deploy at 14:10 on 2026-11-18, `/checkout` requests in `eu-west` are slow and fail from 14:12 to 14:32 because `db_pool_wait_ms` jumps to 700 to 2,200 ms; every other endpoint and region stays normal."),
+    ("cold-chain-10k.csv", "The compressor on truck `T07` fails at 14:00 on 2026-11-19 (current drops to about 0.4 A) and returns at 19:00; its `temp_c` climbs from 3 C past the 8 C safe limit from about 16:10 to 19:20. Door openings on truck `T03` are a red herring: temperature there never passes 7 C."),
+    ("store-sales-10k.csv", "A card payment outage in the `north` region (all four stores) cuts card orders and revenue by 96 percent from 12:00 to 17:00 on 2026-10-30; cash orders are unaffected."),
 ]
 
 
@@ -209,6 +304,9 @@ def main():
     sales()
     iot_drift()
     log_events()
+    checkout_api_10k()
+    cold_chain_10k()
+    store_sales_10k()
     malformed()
     large()
     manifest = [dict(file=file, id=Path(file).stem, name=name, description=description) for file, name, description in MANIFEST]
@@ -216,7 +314,10 @@ def main():
     lines = ["# Test datasets", "",
              "Deterministic sample data for trying the app. Regenerate with `python3 datasets/generate.py`. Pick them from **Import data**, or import the files directly.", ""]
     lines += [f"- `{file}`: {description}" for file, _, description in MANIFEST]
-    lines += ["", "Every file is under about 200 KB except `large-50k.csv`, which sits at the 50,000 row import limit."]
+    lines += ["", "Every file is under about 200 KB except the three 10,000 row files (under 1 MB) and `large-50k.csv`, which sits at the 50,000 row import limit.",
+              "", "## Planted causes", "",
+              "Each 10,000 row file hides one cause that the analyst should find. Times are the clock times in the file.", ""]
+    lines += [f"- `{file}`: {truth}" for file, truth in GROUND_TRUTH]
     (HERE / "README.md").write_text("\n".join(lines) + "\n")
 
 
