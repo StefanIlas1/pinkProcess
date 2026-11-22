@@ -1,9 +1,10 @@
 # pinkProcess
 
 pinkProcess is a Mac app that queries a connected PYNQ-Z2 about connection-pool
-telemetry. Each forecast uses five seconds of utilization history to predict
-whether a request will begin waiting in the following ten seconds. Two resident
-sets of quantized model weights can be selected from the app.
+telemetry. The kit scores incoming readings and uses a quantized FLAN-T5-small
+language model to answer questions about a captured incident. The Mac app
+shows the live stream alongside that capture and lets you save, select and
+restore language-model weights.
 
 ## Product goal
 
@@ -21,10 +22,13 @@ The first domain is connection-pool telemetry.
 kit also supports a board-local FLAN encoder and decoder with FPGA INT8
 projections. Direct review of an independently seeded software evaluation
 found the frozen diagnostic weights answered 12 of 12 synthetic incidents
-correctly. The physical cold-power-cycle acceptance test is separate.
+correctly. On the physical PYNQ-Z2, one diagnosis took 739 seconds while new
+readings arrived. After a witnessed power cycle and recovery from a startup
+overlay conflict, the kit reproduced the edited answer exactly. Restoring the
+original weights reproduced the baseline and preserved the named edit.
 [Checkpoint](profiles/flan-telemetry-diagnostic/README.md) ·
 [Held-out results](kit/evidence/blind-diagnosis-replacement-review.md) ·
-[Physical verification procedure](kit/verify_language_board.py)
+[Physical cold-cycle record](kit/evidence/physical-diagnosis-cold-cycle.json)
 
 For the queue-onset predictor, the operator-facing quality measure is how often
 a warning appears on the Mac at least one second before a real request queues,
@@ -32,7 +36,8 @@ alongside misses and false alarms.
 
 ## Query the pinkProcess kit
 
-1. Power the provisioned kit and connect it to the Mac over a reachable Ethernet
+1. Power the provisioned kit. Connect its **PROG/UART** USB port to the paired
+   Mac if the USB appliance relay is enabled, or use a reachable Ethernet
    network. Open **pinkProcess.app**. Allow macOS local-network access when
    prompted. The app scans on launch. Select the kit
    and press **Connect FPGA**. Use **Find boards** to scan again after plugging
@@ -71,7 +76,9 @@ save** uses the signed-in Mac Codex CLI to design a row edit. The board
 stores the exact edited bytes against the original checkpoint. Select the
 name and press **Load version**. Each load verifies the classifier digest
 and probes an output row through FPGA scores. **Restore original** keeps the
-named versions in the library.
+named versions in the library. An output-row edit affects that token at every
+generation step. In the physical test, raising “Now” also made it recur at
+sentence boundaries and in the ending. [Before-and-after answers](kit/evidence/physical-diagnosis-edit.json)
 
 Replay the captured question after a change to compare answers for identical
 data. The kit persists captures and answers so they can be reopened from the
