@@ -4,7 +4,7 @@
 
 PYNQ Process is an Apple Silicon Mac app for asking questions about live data. You import a file or connect to a paired PYNQ-Z2 board, the app profiles the data and recommends a small quantized model for it, and you ask in plain words. On the board, a quantized FLAN-T5-small model answers: the FPGA performs the learned INT8 matrix projections and the ARM processor coordinates generation. The first domain is connection-pool telemetry. The repo is still named pinkProcess.
 
-[Download the Mac app](https://github.com/StefanIlas1/pinkProcess/raw/refs/heads/main/build/mac-kit/pinkProcess-Mac-arm64.zip) · [Board setup](docs/board-setup.md) · [Measured results](docs/results.md) · [Engineering reference](docs/engineering.md) · [Research log](research.md)
+[Download the Mac app](https://github.com/StefanIlas1/pinkProcess/raw/refs/heads/main/build/mac-kit/pinkProcess-Mac-arm64.zip) · [Board setup](docs/board-setup.md) · [Measured results](docs/results.md) · [Engineering reference](docs/engineering.md) · [Research archive](research/) · [Full research log](research/research.md)
 
 ## What is real and what is simulated
 
@@ -133,6 +133,6 @@ The interface script can be checked by extracting the `<script>` block of `pinkp
 - [docs/engineering.md](docs/engineering.md): telemetry baseline, overlay bring-up, language-model reproduction.
 - [kit/live-context.md](kit/live-context.md): the board-owned telemetry data path.
 - [kit/usb-appliance.md](kit/usb-appliance.md): USB appliance relay and console recovery.
-- [research.md](research.md): research log, including the weight-reading studies.
+- [Research archive](research/) with the full research log, experiment records, original team plan and enclosure designs.
 - [docs/earlier-prototype.md](docs/earlier-prototype.md): the expert-cartridge prototype.
 - [AGENTS.md](AGENTS.md): guide for contributors and coding agents.

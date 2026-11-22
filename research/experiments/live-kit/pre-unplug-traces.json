@@ -1,0 +1,839 @@
+{
+  "passed": false,
+  "execution": "paired PYNQ-Z2 with authenticated ingress",
+  "reference_sha256": "6e31cec186715d7cf87249de701f9de71686b6af3c90c9a46e0aca6c914138e7",
+  "checkpoint": {
+    "ok": true,
+    "model": "flan-t5-small",
+    "boot_id": "c4785ced-dfb0-4406-9580-b38c8ef3922a",
+    "active": {
+      "name": "original",
+      "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+      "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+      "target_row": null
+    },
+    "versions": [
+      {
+        "name": "original",
+        "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+        "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+        "target_row": null
+      },
+      {
+        "name": "Astra Now 0f137b5e",
+        "checkpoint_sha256": "f999e7e8702926b53fac296b01db4bdcf0f5d7e5213015e159c04b7de67a2b3b",
+        "classifier_sha256": "e8a86ac9e3caa3cd0a1fbe21070f2b480a6470e02ec0ba70f657b4eca1ceeebf",
+        "target_row": 852
+      }
+    ],
+    "capture_listing_supported": true
+  },
+  "telemetry_profile": {
+    "ok": true,
+    "backend": "PYNQ-Z2",
+    "model": "pool_wait_logistic",
+    "version": "pool-logistic-v1",
+    "weights_sha256": "164be8f44f45b9d0d18b8303b856eb37dd904af3c8a909a4631bddd2aaeabe81",
+    "threshold": -11248,
+    "versions": [
+      "pool-logistic-v1",
+      "service-b-astra-v1"
+    ],
+    "backlog_version": "queue-outlook-v2",
+    "score_scale": 65536,
+    "horizon_ms": 10000,
+    "stream_supported": true,
+    "stream_evidence_supported": true,
+    "lm_supported": true
+  },
+  "question": "A teammate just saw our pool panel spike. Would you treat this as an active backlog, and what do the latest and worst counts actually say? Keep the ten-second prediction separate and tell me what measurement would help figure out why it happened.",
+  "cases": [
+    {
+      "case": "cleared",
+      "before": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "state": "ready",
+        "session": "0f59511a-8ef6-4e81-a7cb-8b16277f2dca",
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "capacity": 4,
+        "sample_count": 600,
+        "latest": {
+          "time_ms": 2484500,
+          "busy": 4,
+          "waiting": 16
+        },
+        "latest_time_ms": 2484500,
+        "fresh": true,
+        "age_ms": 35,
+        "fpga_submissions": 18236,
+        "fixture_guard_supported": true
+      },
+      "fixture": {
+        "session": "71d8c487-433f-4c14-ba57-d22410e9cc8f",
+        "source": "Synthetic acceptance fixture cleared",
+        "origin": "demo",
+        "capacity": 8
+      },
+      "expected_answer": "The queue has cleared; 0 requests are waiting now. The peak was 19. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "accepted": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "state": "ready",
+        "session": "71d8c487-433f-4c14-ba57-d22410e9cc8f",
+        "source": "Synthetic acceptance fixture cleared",
+        "origin": "demo",
+        "capacity": 8,
+        "sample_count": 121,
+        "latest": {
+          "time_ms": 12000,
+          "busy": 4,
+          "waiting": 0
+        },
+        "latest_time_ms": 12000,
+        "fresh": true,
+        "age_ms": 383,
+        "fpga_submissions": 18318,
+        "accepted": 121
+      },
+      "started": {
+        "ok": true,
+        "job_id": "da8c9572369b49f0bdf8cfb7706c5f9d",
+        "state": "running",
+        "capture_id": "6a0d8ffee610c32bdf5b63bda67ad264361267ef1d1a7207467cd789e376f858",
+        "active": {
+          "name": "original",
+          "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+          "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+          "target_row": null
+        },
+        "model": "flan-t5-small",
+        "baseline": null,
+        "captured_at_ms": 1795302137529,
+        "snapshot": {
+          "age_ms": 922,
+          "backend": "PYNQ-Z2",
+          "capacity": 8,
+          "forecast": {
+            "alert": true,
+            "backend": "PYNQ-Z2",
+            "backlog_version": "queue-outlook-v2",
+            "horizon_ms": 10000,
+            "model": "pool_wait_logistic",
+            "ok": true,
+            "score": 27722,
+            "score_scale": 65536,
+            "threshold": -11248,
+            "time_ms": 12000,
+            "version": "pool-logistic-v1",
+            "versions": [
+              "pool-logistic-v1",
+              "service-b-astra-v1"
+            ],
+            "weights_sha256": "164be8f44f45b9d0d18b8303b856eb37dd904af3c8a909a4631bddd2aaeabe81"
+          },
+          "forecast_input_window_ms": 5000,
+          "fpga_submissions": 18318,
+          "fresh": true,
+          "latest": {
+            "busy": 4,
+            "time_ms": 12000,
+            "waiting": 0
+          },
+          "latest_time_ms": 12000,
+          "limitations": [
+            "Sample timestamps come from the telemetry source. The board measures receipt age.",
+            "Samples describe utilization and queue depth for one source. They do not identify causes or request-level latency.",
+            "The source is the board's demo telemetry.",
+            "The forecast is a model estimate for its stated horizon. Scores are not calibrated probabilities.",
+            "The requested lookback extends beyond the continuous samples retained for this session."
+          ],
+          "observations": {
+            "busy": {
+              "change": -4,
+              "full_samples": 91,
+              "maximum": 8,
+              "mean": 6.966942148760331,
+              "mean_utilization": 0.8708677685950413,
+              "minimum": 0
+            },
+            "complete": false,
+            "covered_ms": 12100,
+            "end_ms": 12000,
+            "first": {
+              "busy": 8,
+              "time_ms": 0,
+              "waiting": 0
+            },
+            "intervals": [
+              {
+                "busy": {
+                  "change": 0,
+                  "full_samples": 21,
+                  "maximum": 8,
+                  "mean": 8.0,
+                  "mean_utilization": 1.0,
+                  "minimum": 8
+                },
+                "end_ms": 2000,
+                "sample_count": 21,
+                "start_ms": 0,
+                "waiting": {
+                  "change": 0,
+                  "clearances": 0,
+                  "maximum": 0,
+                  "mean": 0.0,
+                  "minimum": 0,
+                  "onsets": 0,
+                  "positive_samples": 0
+                }
+              },
+              {
+                "busy": {
+                  "change": -4,
+                  "full_samples": 70,
+                  "maximum": 8,
+                  "mean": 6.75,
+                  "mean_utilization": 0.84375,
+                  "minimum": 0
+                },
+                "end_ms": 12000,
+                "sample_count": 100,
+                "start_ms": 2100,
+                "waiting": {
+                  "change": 0,
+                  "clearances": 1,
+                  "maximum": 19,
+                  "mean": 8.23,
+                  "minimum": 0,
+                  "onsets": 1,
+                  "positive_samples": 61
+                }
+              }
+            ],
+            "latest": {
+              "busy": 4,
+              "time_ms": 12000,
+              "waiting": 0
+            },
+            "peak_busy": {
+              "busy": 8,
+              "time_ms": 0,
+              "waiting": 0
+            },
+            "peak_waiting": {
+              "busy": 8,
+              "time_ms": 3000,
+              "waiting": 19
+            },
+            "sample_count": 121,
+            "start_ms": 0,
+            "waiting": {
+              "change": 0,
+              "clearances": 1,
+              "maximum": 19,
+              "mean": 6.801652892561983,
+              "minimum": 0,
+              "onsets": 1,
+              "positive_samples": 61
+            },
+            "window_ms": 60000
+          },
+          "ok": true,
+          "origin": "demo",
+          "sample_count": 121,
+          "sample_interval_ms": 100,
+          "session": "71d8c487-433f-4c14-ba57-d22410e9cc8f",
+          "source": "Synthetic acceptance fixture cleared",
+          "state": "ready"
+        }
+      },
+      "released": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "state": "idle",
+        "session": null,
+        "source": null,
+        "origin": null,
+        "capacity": null,
+        "sample_count": 0,
+        "latest": null,
+        "latest_time_ms": null,
+        "fresh": false,
+        "age_ms": null,
+        "fpga_submissions": 18318,
+        "accepted": 0
+      },
+      "producer_after_release": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "state": "ready",
+        "session": "5d077ee5-2e28-4913-a4b7-c23fe52a980e",
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "capacity": 4,
+        "sample_count": 50,
+        "latest": {
+          "time_ms": 2491900,
+          "busy": 4,
+          "waiting": 50
+        },
+        "latest_time_ms": 2491900,
+        "fresh": true,
+        "age_ms": 10,
+        "fpga_submissions": 18319,
+        "fixture_guard_supported": true
+      },
+      "last_running_status": {
+        "seconds": 752.321,
+        "fabric_projections": 3433
+      },
+      "first_partial_seconds": 316.944,
+      "result": {
+        "ok": true,
+        "job_id": "da8c9572369b49f0bdf8cfb7706c5f9d",
+        "state": "complete",
+        "capture_id": "6a0d8ffee610c32bdf5b63bda67ad264361267ef1d1a7207467cd789e376f858",
+        "active": {
+          "name": "original",
+          "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+          "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+          "target_row": null
+        },
+        "model": "flan-t5-small",
+        "baseline": {
+          "answer": "The queue has cleared; 0 requests are waiting now. The peak was 19. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+          "version": {
+            "name": "original",
+            "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+            "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+            "target_row": null
+          }
+        },
+        "captured_at_ms": 1795302137529,
+        "answer": "The queue has cleared; 0 requests are waiting now. The peak was 19. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+        "fabric_projections": 3576
+      },
+      "wait_seconds": 767.168,
+      "question_to_answer_seconds": 773.217,
+      "ingest_to_answer_seconds": 774.577,
+      "matches_reference": true
+    },
+    {
+      "case": "ongoing",
+      "before": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "state": "ready",
+        "session": "5d077ee5-2e28-4913-a4b7-c23fe52a980e",
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "capacity": 4,
+        "sample_count": 600,
+        "latest": {
+          "time_ms": 3259600,
+          "busy": 3,
+          "waiting": 0
+        },
+        "latest_time_ms": 3259600,
+        "fresh": true,
+        "age_ms": 14,
+        "fpga_submissions": 23593,
+        "fixture_guard_supported": true
+      },
+      "fixture": {
+        "session": "4130d990-2ebf-4f4e-a756-43c99b8c4bff",
+        "source": "Synthetic acceptance fixture ongoing",
+        "origin": "demo",
+        "capacity": 8
+      },
+      "expected_answer": "The backlog is ongoing: 11 requests are waiting now. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "accepted": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "state": "ready",
+        "session": "4130d990-2ebf-4f4e-a756-43c99b8c4bff",
+        "source": "Synthetic acceptance fixture ongoing",
+        "origin": "demo",
+        "capacity": 8,
+        "sample_count": 121,
+        "latest": {
+          "time_ms": 12000,
+          "busy": 8,
+          "waiting": 11
+        },
+        "latest_time_ms": 12000,
+        "fresh": true,
+        "age_ms": 117,
+        "fpga_submissions": 23674,
+        "accepted": 121
+      },
+      "started": {
+        "ok": true,
+        "job_id": "147e4529f43447f6963d3edddef854e8",
+        "state": "running",
+        "capture_id": "6ef936fe696cdf01bf94f70e00fc85014d3ec2be767677f292ba7d5ac6cdcded",
+        "active": {
+          "name": "original",
+          "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+          "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+          "target_row": null
+        },
+        "model": "flan-t5-small",
+        "baseline": null,
+        "captured_at_ms": 1795302912254,
+        "snapshot": {
+          "age_ms": 635,
+          "backend": "PYNQ-Z2",
+          "capacity": 8,
+          "forecast": {
+            "backend": "PYNQ-Z2",
+            "horizon_ms": 10000,
+            "model": "queue_outlook",
+            "ok": true,
+            "scores": [
+              43,
+              -1
+            ],
+            "targets": [
+              "persists",
+              "grows"
+            ],
+            "time_ms": 12000,
+            "version": "queue-outlook-v2",
+            "weights_sha256": "13c28113cc4ef20b76d3c746f4c1192f33bd2341240ba4ed1e878b13ad4b6ce6"
+          },
+          "forecast_input_window_ms": 5000,
+          "fpga_submissions": 23674,
+          "fresh": true,
+          "latest": {
+            "busy": 8,
+            "time_ms": 12000,
+            "waiting": 11
+          },
+          "latest_time_ms": 12000,
+          "limitations": [
+            "Sample timestamps come from the telemetry source. The board measures receipt age.",
+            "Samples describe utilization and queue depth for one source. They do not identify causes or request-level latency.",
+            "The source is the board's demo telemetry.",
+            "The forecast is a model estimate for its stated horizon. Scores are not calibrated probabilities.",
+            "The requested lookback extends beyond the continuous samples retained for this session."
+          ],
+          "observations": {
+            "busy": {
+              "change": 0,
+              "full_samples": 121,
+              "maximum": 8,
+              "mean": 8.0,
+              "mean_utilization": 1.0,
+              "minimum": 8
+            },
+            "complete": false,
+            "covered_ms": 12100,
+            "end_ms": 12000,
+            "first": {
+              "busy": 8,
+              "time_ms": 0,
+              "waiting": 0
+            },
+            "intervals": [
+              {
+                "busy": {
+                  "change": 0,
+                  "full_samples": 21,
+                  "maximum": 8,
+                  "mean": 8.0,
+                  "mean_utilization": 1.0,
+                  "minimum": 8
+                },
+                "end_ms": 2000,
+                "sample_count": 21,
+                "start_ms": 0,
+                "waiting": {
+                  "change": 0,
+                  "clearances": 0,
+                  "maximum": 0,
+                  "mean": 0.0,
+                  "minimum": 0,
+                  "onsets": 0,
+                  "positive_samples": 0
+                }
+              },
+              {
+                "busy": {
+                  "change": 0,
+                  "full_samples": 100,
+                  "maximum": 8,
+                  "mean": 8.0,
+                  "mean_utilization": 1.0,
+                  "minimum": 8
+                },
+                "end_ms": 12000,
+                "sample_count": 100,
+                "start_ms": 2100,
+                "waiting": {
+                  "change": 11,
+                  "clearances": 0,
+                  "maximum": 19,
+                  "mean": 11.61,
+                  "minimum": 0,
+                  "onsets": 1,
+                  "positive_samples": 91
+                }
+              }
+            ],
+            "latest": {
+              "busy": 8,
+              "time_ms": 12000,
+              "waiting": 11
+            },
+            "peak_busy": {
+              "busy": 8,
+              "time_ms": 0,
+              "waiting": 0
+            },
+            "peak_waiting": {
+              "busy": 8,
+              "time_ms": 3000,
+              "waiting": 19
+            },
+            "sample_count": 121,
+            "start_ms": 0,
+            "waiting": {
+              "change": 11,
+              "clearances": 0,
+              "maximum": 19,
+              "mean": 9.59504132231405,
+              "minimum": 0,
+              "onsets": 1,
+              "positive_samples": 91
+            },
+            "window_ms": 60000
+          },
+          "ok": true,
+          "origin": "demo",
+          "sample_count": 121,
+          "sample_interval_ms": 100,
+          "session": "4130d990-2ebf-4f4e-a756-43c99b8c4bff",
+          "source": "Synthetic acceptance fixture ongoing",
+          "state": "ready"
+        }
+      },
+      "released": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "state": "idle",
+        "session": null,
+        "source": null,
+        "origin": null,
+        "capacity": null,
+        "sample_count": 0,
+        "latest": null,
+        "latest_time_ms": null,
+        "fresh": false,
+        "age_ms": null,
+        "fpga_submissions": 23674,
+        "accepted": 0
+      },
+      "producer_after_release": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "state": "ready",
+        "session": "72180934-4a7d-4e83-b1df-ae59aa5f0ee9",
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "capacity": 4,
+        "sample_count": 60,
+        "latest": {
+          "time_ms": 3267600,
+          "busy": 3,
+          "waiting": 0
+        },
+        "latest_time_ms": 3267600,
+        "fresh": true,
+        "age_ms": 13,
+        "fpga_submissions": 23685,
+        "fixture_guard_supported": true
+      },
+      "last_running_status": {
+        "seconds": 134.08,
+        "fabric_projections": 26
+      },
+      "result": {
+        "ok": true,
+        "job_id": "147e4529f43447f6963d3edddef854e8",
+        "state": "complete",
+        "capture_id": "6ef936fe696cdf01bf94f70e00fc85014d3ec2be767677f292ba7d5ac6cdcded",
+        "active": {
+          "name": "original",
+          "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+          "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+          "target_row": null
+        },
+        "model": "flan-t5-small",
+        "baseline": {
+          "answer": "The backlog is ongoing: 11 requests are waiting now. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+          "version": {
+            "name": "original",
+            "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+            "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+            "target_row": null
+          }
+        },
+        "captured_at_ms": 1795302912254,
+        "answer": "The backlog is ongoing: 11 requests are waiting now. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+        "fabric_projections": 3722
+      },
+      "matches_reference": true,
+      "handoff_poll_seconds": 616.025,
+      "latency_note": "Mac-to-board handoff crossed clocks. Mac last observed running duration and board adoption-to-complete interval are separate; exact full duration unavailable."
+    },
+    {
+      "case": "ambiguous-cause",
+      "before": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "state": "ready",
+        "session": "72180934-4a7d-4e83-b1df-ae59aa5f0ee9",
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "capacity": 4,
+        "sample_count": 600,
+        "latest": {
+          "time_ms": 4066500,
+          "busy": 1,
+          "waiting": 0
+        },
+        "latest_time_ms": 4066500,
+        "fresh": true,
+        "age_ms": 16,
+        "fpga_submissions": 29095,
+        "fixture_guard_supported": true
+      },
+      "fixture": {
+        "session": "bbf6310d-3ae6-4fd1-b51f-bb3619d98515",
+        "source": "Synthetic acceptance fixture ambiguous-cause",
+        "origin": "demo",
+        "capacity": 8
+      },
+      "expected_answer": "The backlog is ongoing: 11 requests are waiting now. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "accepted": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "state": "ready",
+        "session": "bbf6310d-3ae6-4fd1-b51f-bb3619d98515",
+        "source": "Synthetic acceptance fixture ambiguous-cause",
+        "origin": "demo",
+        "capacity": 8,
+        "sample_count": 121,
+        "latest": {
+          "time_ms": 12000,
+          "busy": 8,
+          "waiting": 11
+        },
+        "latest_time_ms": 12000,
+        "fresh": true,
+        "age_ms": 100,
+        "fpga_submissions": 29168,
+        "accepted": 121
+      },
+      "started": {
+        "ok": true,
+        "job_id": "65c9047e76694615bf97fa83399aa6a8",
+        "state": "running",
+        "capture_id": "7dfc0370bb5392b79015aa3d065052e74e2daa0b4b5266f612252569ea3ae702",
+        "active": {
+          "name": "original",
+          "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+          "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+          "target_row": null
+        },
+        "model": "flan-t5-small",
+        "baseline": null,
+        "captured_at_ms": 1795303718017,
+        "snapshot": {
+          "age_ms": 244,
+          "backend": "PYNQ-Z2",
+          "capacity": 8,
+          "forecast": {
+            "backend": "PYNQ-Z2",
+            "horizon_ms": 10000,
+            "model": "queue_outlook",
+            "ok": true,
+            "scores": [
+              43,
+              -1
+            ],
+            "targets": [
+              "persists",
+              "grows"
+            ],
+            "time_ms": 12000,
+            "version": "queue-outlook-v2",
+            "weights_sha256": "13c28113cc4ef20b76d3c746f4c1192f33bd2341240ba4ed1e878b13ad4b6ce6"
+          },
+          "forecast_input_window_ms": 5000,
+          "fpga_submissions": 29168,
+          "fresh": true,
+          "latest": {
+            "busy": 8,
+            "time_ms": 12000,
+            "waiting": 11
+          },
+          "latest_time_ms": 12000,
+          "limitations": [
+            "Sample timestamps come from the telemetry source. The board measures receipt age.",
+            "Samples describe utilization and queue depth for one source. They do not identify causes or request-level latency.",
+            "The source is the board's demo telemetry.",
+            "The forecast is a model estimate for its stated horizon. Scores are not calibrated probabilities.",
+            "The requested lookback extends beyond the continuous samples retained for this session."
+          ],
+          "observations": {
+            "busy": {
+              "change": 0,
+              "full_samples": 121,
+              "maximum": 8,
+              "mean": 8.0,
+              "mean_utilization": 1.0,
+              "minimum": 8
+            },
+            "complete": false,
+            "covered_ms": 12100,
+            "end_ms": 12000,
+            "first": {
+              "busy": 8,
+              "time_ms": 0,
+              "waiting": 0
+            },
+            "intervals": [
+              {
+                "busy": {
+                  "change": 0,
+                  "full_samples": 21,
+                  "maximum": 8,
+                  "mean": 8.0,
+                  "mean_utilization": 1.0,
+                  "minimum": 8
+                },
+                "end_ms": 2000,
+                "sample_count": 21,
+                "start_ms": 0,
+                "waiting": {
+                  "change": 0,
+                  "clearances": 0,
+                  "maximum": 0,
+                  "mean": 0.0,
+                  "minimum": 0,
+                  "onsets": 0,
+                  "positive_samples": 0
+                }
+              },
+              {
+                "busy": {
+                  "change": 0,
+                  "full_samples": 100,
+                  "maximum": 8,
+                  "mean": 8.0,
+                  "mean_utilization": 1.0,
+                  "minimum": 8
+                },
+                "end_ms": 12000,
+                "sample_count": 100,
+                "start_ms": 2100,
+                "waiting": {
+                  "change": 11,
+                  "clearances": 0,
+                  "maximum": 19,
+                  "mean": 11.61,
+                  "minimum": 0,
+                  "onsets": 1,
+                  "positive_samples": 91
+                }
+              }
+            ],
+            "latest": {
+              "busy": 8,
+              "time_ms": 12000,
+              "waiting": 11
+            },
+            "peak_busy": {
+              "busy": 8,
+              "time_ms": 0,
+              "waiting": 0
+            },
+            "peak_waiting": {
+              "busy": 8,
+              "time_ms": 3000,
+              "waiting": 19
+            },
+            "sample_count": 121,
+            "start_ms": 0,
+            "waiting": {
+              "change": 11,
+              "clearances": 0,
+              "maximum": 19,
+              "mean": 9.59504132231405,
+              "minimum": 0,
+              "onsets": 1,
+              "positive_samples": 91
+            },
+            "window_ms": 60000
+          },
+          "ok": true,
+          "origin": "demo",
+          "sample_count": 121,
+          "sample_interval_ms": 100,
+          "session": "bbf6310d-3ae6-4fd1-b51f-bb3619d98515",
+          "source": "Synthetic acceptance fixture ambiguous-cause",
+          "state": "ready"
+        }
+      },
+      "released": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "state": "idle",
+        "session": null,
+        "source": null,
+        "origin": null,
+        "capacity": null,
+        "sample_count": 0,
+        "latest": null,
+        "latest_time_ms": null,
+        "fresh": false,
+        "age_ms": null,
+        "fpga_submissions": 29168,
+        "accepted": 0
+      },
+      "producer_after_release": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "state": "ready",
+        "session": "7e176b84-06ac-4b62-8001-4936ae0ff1cf",
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "capacity": 4,
+        "sample_count": 53,
+        "latest": {
+          "time_ms": 4072000,
+          "busy": 4,
+          "waiting": 0
+        },
+        "latest_time_ms": 4072000,
+        "fresh": true,
+        "age_ms": 40,
+        "fpga_submissions": 29172,
+        "fixture_guard_supported": true
+      },
+      "last_running_status": {
+        "seconds": 98.697,
+        "fabric_projections": 20
+      }
+    }
+  ],
+  "handoff": {
+    "method": "Mac USB client to board-local authenticated HTTPS",
+    "board_utc_at_adoption": "2026-11-21T23:18:21.084864+00:00",
+    "adopted_job_id": "147e4529f43447f6963d3edddef854e8"
+  }
+}

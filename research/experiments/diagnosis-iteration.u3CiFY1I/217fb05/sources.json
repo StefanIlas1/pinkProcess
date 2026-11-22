@@ -1,0 +1,14 @@
+{
+  "sha": "217fb05",
+  "source_file_hashes": {
+    "lm_reference/projection_overlay.py": "f2eb732495cbd1f4f28558d8f90584287fee794756c98b27052cdf8cc6aea2d7",
+    "lm_reference/flan.py": "b9e7d4ee609e45a255021efa8cb0c690318058bb8b9aacf8220f8a2e601e1452",
+    "lm_reference/flan_draft.py": "8717e499b6ad273682238af35e9e8c0b6dabc359e4e06db845b1a76bb28f7698",
+    "lm_reference/telemetry-token-draft.tsv.gz": "f6ea2818914cbfcdc11928344007a2d1d07e6ce42c0dbdab77a14fe7a7f1d0e2",
+    "lm_reference/flan_prompt.py": "63988135dd9710020ae8f5b56d8438c1bf41cd29a0e29ac883603da35b19cdfc",
+    "lm_reference/weight_versions.py": "37850569b4b344572a301446b61450fe5763900253bea737ed025c1a838860f1",
+    "pinkprocess/board_language.py": "1cb03622838346ed330b21f94a1878f50211c92420cdc3c2a8cc9a8d8b46060c",
+    "pinkprocess/kit_server.py": "c4a29d3b58dba2a3d9fc660e969b4016e267e25689e6393f6841502f68a41726"
+  },
+  "parent_release": "fc407b0e34956433f21f"
+}

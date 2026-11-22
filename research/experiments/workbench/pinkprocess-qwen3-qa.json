@@ -1,0 +1,596 @@
+{
+  "model": "qwen3:4b-instruct-2507-q4_K_M",
+  "ollama_version": "0.40.17",
+  "cases": [
+    {
+      "name": "recovered",
+      "source": "captured board SQLite demo telemetry",
+      "question": "What looks wrong with our system, and what should I check next?",
+      "evidence": {
+        "origin": "demo",
+        "source": "Board SQLite demo (generated traffic)",
+        "capacity": 4,
+        "state": "ready",
+        "latest": {
+          "time_ms": 504800,
+          "busy": 2,
+          "waiting": 0
+        },
+        "observations": {
+          "window_ms": 60000,
+          "sample_count": 600,
+          "start_ms": 444900,
+          "end_ms": 504800,
+          "first": {
+            "time_ms": 444900,
+            "busy": 4,
+            "waiting": 57
+          },
+          "latest": {
+            "time_ms": 504800,
+            "busy": 2,
+            "waiting": 0
+          },
+          "peak_busy": {
+            "time_ms": 444900,
+            "busy": 4,
+            "waiting": 57
+          },
+          "peak_waiting": {
+            "time_ms": 454000,
+            "busy": 4,
+            "waiting": 117
+          }
+        },
+        "forecast_reading": {
+          "time_ms": 505200,
+          "busy": 0,
+          "waiting": 0
+        },
+        "observed_now": "2 of 4 connections occupied (50.0%); 0 requests waiting.",
+        "observed_peak": "117 requests were waiting at the window maximum, 50.8 seconds before the latest reading. 4 connections were occupied at that instant.",
+        "forecast": {
+          "version": "pool-logistic-v1",
+          "time_ms": 505200,
+          "horizon_ms": 10000
+        },
+        "forecast_interpretation": "The FPGA warns that requests may start waiting within the next ten seconds."
+      },
+      "expected_facts": [
+        "2 of 4 connections occupied and 0 requests waiting in the latest reading",
+        "Peak of 117 requests waiting about 50.8 seconds earlier",
+        "FPGA warns that requests may start waiting within the next 10 seconds",
+        "Identifies telemetry as a demo and gives a practical next check without diagnosing a cause"
+      ],
+      "elapsed_seconds": 7.727,
+      "result": {
+        "answer": "The system was under significant pressure earlier, with 117 requests waiting and 4 connections occupied at its peak\u2014this is a high queue depth that indicates a bottleneck. Currently, only 2 of 4 connections are busy (50% utilization), and no requests are waiting, which suggests the system has recovered. However, the FPGA forecast warns that requests may start waiting again within the next ten seconds.  \n\nWhat looks wrong: A large queue formed earlier, indicating the system was overwhelmed at peak load, even though it has since stabilized.  \n\nWhat to check next: Monitor the waiting queue and busy connections over the next 10 seconds to confirm if new requests start waiting. Also, check if the traffic pattern or endpoint load has changed since the peak to understand why the system was overloaded.",
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "provenance": {
+          "runtime": "Ollama",
+          "execution": "Mac",
+          "evidence": "board telemetry"
+        },
+        "errors": []
+      }
+    },
+    {
+      "name": "increasing",
+      "source": "controlled telemetry fixture with simulated FPGA forecast",
+      "question": "What looks wrong with our system, and what should I check next?",
+      "evidence": {
+        "origin": "demo",
+        "source": "Fixture with rising queue pressure",
+        "capacity": 12,
+        "state": "ready",
+        "latest": {
+          "time_ms": 9900,
+          "busy": 12,
+          "waiting": 9
+        },
+        "observations": {
+          "window_ms": 10000,
+          "sample_count": 100,
+          "start_ms": 0,
+          "end_ms": 9900,
+          "first": {
+            "time_ms": 0,
+            "busy": 12,
+            "waiting": 0
+          },
+          "latest": {
+            "time_ms": 9900,
+            "busy": 12,
+            "waiting": 9
+          },
+          "peak_busy": {
+            "time_ms": 0,
+            "busy": 12,
+            "waiting": 0
+          },
+          "peak_waiting": {
+            "time_ms": 9000,
+            "busy": 12,
+            "waiting": 9
+          },
+          "busy": {
+            "minimum": 12,
+            "maximum": 12,
+            "mean": 12.0,
+            "change": 0,
+            "full_samples": 100,
+            "mean_utilization": 1.0
+          },
+          "waiting": {
+            "minimum": 0,
+            "maximum": 9,
+            "mean": 4.5,
+            "change": 9,
+            "positive_samples": 90,
+            "onsets": 1,
+            "clearances": 0
+          },
+          "covered_ms": 10000,
+          "complete": true,
+          "intervals": [
+            {
+              "start_ms": 0,
+              "end_ms": 1400,
+              "sample_count": 15,
+              "busy": {
+                "minimum": 12,
+                "maximum": 12,
+                "mean": 12.0,
+                "change": 0,
+                "full_samples": 15,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 0,
+                "maximum": 1,
+                "mean": 0.3333333333333333,
+                "change": 1,
+                "positive_samples": 5,
+                "onsets": 1,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 1500,
+              "end_ms": 3100,
+              "sample_count": 17,
+              "busy": {
+                "minimum": 12,
+                "maximum": 12,
+                "mean": 12.0,
+                "change": 0,
+                "full_samples": 17,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 1,
+                "maximum": 3,
+                "mean": 1.8235294117647058,
+                "change": 2,
+                "positive_samples": 17,
+                "onsets": 0,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 3200,
+              "end_ms": 4800,
+              "sample_count": 17,
+              "busy": {
+                "minimum": 12,
+                "maximum": 12,
+                "mean": 12.0,
+                "change": 0,
+                "full_samples": 17,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 3,
+                "maximum": 4,
+                "mean": 3.5294117647058822,
+                "change": 1,
+                "positive_samples": 17,
+                "onsets": 0,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 4900,
+              "end_ms": 6500,
+              "sample_count": 17,
+              "busy": {
+                "minimum": 12,
+                "maximum": 12,
+                "mean": 12.0,
+                "change": 0,
+                "full_samples": 17,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 4,
+                "maximum": 6,
+                "mean": 5.294117647058823,
+                "change": 2,
+                "positive_samples": 17,
+                "onsets": 0,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 6600,
+              "end_ms": 8200,
+              "sample_count": 17,
+              "busy": {
+                "minimum": 12,
+                "maximum": 12,
+                "mean": 12.0,
+                "change": 0,
+                "full_samples": 17,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 6,
+                "maximum": 8,
+                "mean": 6.9411764705882355,
+                "change": 2,
+                "positive_samples": 17,
+                "onsets": 0,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 8300,
+              "end_ms": 9900,
+              "sample_count": 17,
+              "busy": {
+                "minimum": 12,
+                "maximum": 12,
+                "mean": 12.0,
+                "change": 0,
+                "full_samples": 17,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 8,
+                "maximum": 9,
+                "mean": 8.588235294117647,
+                "change": 1,
+                "positive_samples": 17,
+                "onsets": 0,
+                "clearances": 0
+              }
+            }
+          ]
+        },
+        "limitations": [
+          "Sample timestamps come from the telemetry source. The board measures receipt age.",
+          "Samples describe utilization and queue depth for one source. They do not identify causes or request-level latency.",
+          "The source is the board's demo telemetry.",
+          "The forecast is a model estimate for its stated horizon. Scores are not calibrated probabilities."
+        ],
+        "observed_now": "12 of 12 connections occupied (100.0%); 9 requests waiting.",
+        "observed_peak": "9 requests were waiting at the window maximum, 0.9 seconds before the latest reading. 12 connections were occupied at that instant.",
+        "forecast": {
+          "version": "queue-outlook-v2",
+          "time_ms": 9900,
+          "horizon_ms": 10000
+        },
+        "forecast_interpretation": "The FPGA predicts the queue will remain nonempty over the next ten seconds. It expects more than the current 9 waiting at the end of that period."
+      },
+      "expected_facts": [
+        "12 of 12 connections occupied and 9 requests waiting in the latest reading",
+        "Queue grew from 0 to 9 waiting over the observation window",
+        "FPGA estimate keeps queue nonempty, with more than 9 waiting at end of 10-second horizon",
+        "Identifies telemetry as a demo and gives a practical next check without diagnosing a cause"
+      ],
+      "elapsed_seconds": 9.343,
+      "result": {
+        "answer": "The system is currently at full capacity\u201412 out of 12 connections are occupied\u2014and has 9 requests waiting, which indicates significant queue pressure. This pressure has been growing steadily over time, with waiting requests increasing from 0 to 9, and the peak waiting was 9 requests at 9000 ms, just 900 ms before the latest reading. The FPGA forecast predicts the queue will remain nonempty for the next 10 seconds and will have more than 9 waiting requests, meaning the issue is expected to persist or worsen.  \n\nNext, you should check the request-level latency or the time it takes for individual requests to process\u2014this will help determine if the delay is due to processing time or a bottleneck in handling incoming requests. The current telemetry does not identify the root cause, only that the system is under pressure.",
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "provenance": {
+          "runtime": "Ollama",
+          "execution": "Mac",
+          "evidence": "board telemetry"
+        },
+        "errors": []
+      }
+    },
+    {
+      "name": "cause_unavailable",
+      "source": "captured board SQLite demo telemetry",
+      "question": "Which endpoint caused this problem? What was its P95 wait time?",
+      "evidence": {
+        "origin": "demo",
+        "source": "Board SQLite demo (generated traffic)",
+        "capacity": 4,
+        "state": "ready",
+        "latest": {
+          "time_ms": 504800,
+          "busy": 2,
+          "waiting": 0
+        },
+        "observations": {
+          "window_ms": 60000,
+          "sample_count": 600,
+          "start_ms": 444900,
+          "end_ms": 504800,
+          "first": {
+            "time_ms": 444900,
+            "busy": 4,
+            "waiting": 57
+          },
+          "latest": {
+            "time_ms": 504800,
+            "busy": 2,
+            "waiting": 0
+          },
+          "peak_busy": {
+            "time_ms": 444900,
+            "busy": 4,
+            "waiting": 57
+          },
+          "peak_waiting": {
+            "time_ms": 454000,
+            "busy": 4,
+            "waiting": 117
+          }
+        },
+        "forecast_reading": {
+          "time_ms": 505200,
+          "busy": 0,
+          "waiting": 0
+        },
+        "observed_now": "2 of 4 connections occupied (50.0%); 0 requests waiting.",
+        "observed_peak": "117 requests were waiting at the window maximum, 50.8 seconds before the latest reading. 4 connections were occupied at that instant.",
+        "forecast": {
+          "version": "pool-logistic-v1",
+          "time_ms": 505200,
+          "horizon_ms": 10000
+        },
+        "forecast_interpretation": "The FPGA warns that requests may start waiting within the next ten seconds."
+      },
+      "expected_facts": [
+        "Endpoint attribution and P95 wait time are unavailable from pool counters"
+      ],
+      "elapsed_seconds": 3.967,
+      "result": {
+        "answer": "The endpoint that caused the problem is unavailable in the evidence. No specific endpoint is identified or logged in the data.  \n\nThe P95 wait time is unavailable because the evidence does not include any wait time distribution or percentile metrics (such as P95).  \n\nThe demo telemetry shows a peak of 117 waiting requests at 454,000 ms, with 4 connections busy at that time, but no breakdown by endpoint or wait time percentiles.",
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "provenance": {
+          "runtime": "Ollama",
+          "execution": "Mac",
+          "evidence": "board telemetry"
+        },
+        "errors": []
+      }
+    },
+    {
+      "name": "average",
+      "source": "controlled telemetry fixture with simulated FPGA forecast",
+      "question": "What is the mean waiting queue over the most recent ten seconds?",
+      "evidence": {
+        "origin": "demo",
+        "source": "Fixture with rising queue pressure",
+        "capacity": 12,
+        "state": "ready",
+        "latest": {
+          "time_ms": 9900,
+          "busy": 12,
+          "waiting": 9
+        },
+        "observations": {
+          "window_ms": 10000,
+          "sample_count": 100,
+          "start_ms": 0,
+          "end_ms": 9900,
+          "first": {
+            "time_ms": 0,
+            "busy": 12,
+            "waiting": 0
+          },
+          "latest": {
+            "time_ms": 9900,
+            "busy": 12,
+            "waiting": 9
+          },
+          "peak_busy": {
+            "time_ms": 0,
+            "busy": 12,
+            "waiting": 0
+          },
+          "peak_waiting": {
+            "time_ms": 9000,
+            "busy": 12,
+            "waiting": 9
+          },
+          "busy": {
+            "minimum": 12,
+            "maximum": 12,
+            "mean": 12.0,
+            "change": 0,
+            "full_samples": 100,
+            "mean_utilization": 1.0
+          },
+          "waiting": {
+            "minimum": 0,
+            "maximum": 9,
+            "mean": 4.5,
+            "change": 9,
+            "positive_samples": 90,
+            "onsets": 1,
+            "clearances": 0
+          },
+          "covered_ms": 10000,
+          "complete": true,
+          "intervals": [
+            {
+              "start_ms": 0,
+              "end_ms": 1400,
+              "sample_count": 15,
+              "busy": {
+                "minimum": 12,
+                "maximum": 12,
+                "mean": 12.0,
+                "change": 0,
+                "full_samples": 15,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 0,
+                "maximum": 1,
+                "mean": 0.3333333333333333,
+                "change": 1,
+                "positive_samples": 5,
+                "onsets": 1,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 1500,
+              "end_ms": 3100,
+              "sample_count": 17,
+              "busy": {
+                "minimum": 12,
+                "maximum": 12,
+                "mean": 12.0,
+                "change": 0,
+                "full_samples": 17,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 1,
+                "maximum": 3,
+                "mean": 1.8235294117647058,
+                "change": 2,
+                "positive_samples": 17,
+                "onsets": 0,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 3200,
+              "end_ms": 4800,
+              "sample_count": 17,
+              "busy": {
+                "minimum": 12,
+                "maximum": 12,
+                "mean": 12.0,
+                "change": 0,
+                "full_samples": 17,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 3,
+                "maximum": 4,
+                "mean": 3.5294117647058822,
+                "change": 1,
+                "positive_samples": 17,
+                "onsets": 0,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 4900,
+              "end_ms": 6500,
+              "sample_count": 17,
+              "busy": {
+                "minimum": 12,
+                "maximum": 12,
+                "mean": 12.0,
+                "change": 0,
+                "full_samples": 17,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 4,
+                "maximum": 6,
+                "mean": 5.294117647058823,
+                "change": 2,
+                "positive_samples": 17,
+                "onsets": 0,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 6600,
+              "end_ms": 8200,
+              "sample_count": 17,
+              "busy": {
+                "minimum": 12,
+                "maximum": 12,
+                "mean": 12.0,
+                "change": 0,
+                "full_samples": 17,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 6,
+                "maximum": 8,
+                "mean": 6.9411764705882355,
+                "change": 2,
+                "positive_samples": 17,
+                "onsets": 0,
+                "clearances": 0
+              }
+            },
+            {
+              "start_ms": 8300,
+              "end_ms": 9900,
+              "sample_count": 17,
+              "busy": {
+                "minimum": 12,
+                "maximum": 12,
+                "mean": 12.0,
+                "change": 0,
+                "full_samples": 17,
+                "mean_utilization": 1.0
+              },
+              "waiting": {
+                "minimum": 8,
+                "maximum": 9,
+                "mean": 8.588235294117647,
+                "change": 1,
+                "positive_samples": 17,
+                "onsets": 0,
+                "clearances": 0
+              }
+            }
+          ]
+        },
+        "limitations": [
+          "Sample timestamps come from the telemetry source. The board measures receipt age.",
+          "Samples describe utilization and queue depth for one source. They do not identify causes or request-level latency.",
+          "The source is the board's demo telemetry.",
+          "The forecast is a model estimate for its stated horizon. Scores are not calibrated probabilities."
+        ],
+        "observed_now": "12 of 12 connections occupied (100.0%); 9 requests waiting.",
+        "observed_peak": "9 requests were waiting at the window maximum, 0.9 seconds before the latest reading. 12 connections were occupied at that instant.",
+        "forecast": {
+          "version": "queue-outlook-v2",
+          "time_ms": 9900,
+          "horizon_ms": 10000
+        },
+        "forecast_interpretation": "The FPGA predicts the queue will remain nonempty over the next ten seconds. It expects more than the current 9 waiting at the end of that period."
+      },
+      "expected_facts": [
+        "Mean of 4.5 waiting requests"
+      ],
+      "elapsed_seconds": 12.729,
+      "result": {
+        "answer": "The mean waiting queue over the most recent ten seconds is 4.5. This value is derived from the \"waiting\" metric in the evidence, where the mean waiting depth across the 10-second window is explicitly stated as 4.5. The data shows a gradual increase in waiting requests from 0 to 9 over the period, with the mean reflecting the average across all samples.",
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "provenance": {
+          "runtime": "Ollama",
+          "execution": "Mac",
+          "evidence": "board telemetry"
+        },
+        "errors": []
+      }
+    }
+  ]
+}

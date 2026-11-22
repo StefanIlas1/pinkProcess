@@ -1,0 +1,711 @@
+{
+  "board_release": "6e238f0e81c42f89bb1b",
+  "transport": "timed Mac app native backend and USB loopback",
+  "weights_before": [
+    {
+      "name": "original",
+      "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+      "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+      "target_row": null
+    },
+    {
+      "name": "Astra Now 0f137b5e",
+      "checkpoint_sha256": "f999e7e8702926b53fac296b01db4bdcf0f5d7e5213015e159c04b7de67a2b3b",
+      "classifier_sha256": "e8a86ac9e3caa3cd0a1fbe21070f2b480a6470e02ec0ba70f657b4eca1ceeebf",
+      "target_row": 852
+    },
+    {
+      "name": "Astra reduce Now",
+      "checkpoint_sha256": "5e7e7fb46365c5dd5d1da46e846eab6048f47fe28b1af0f4eabe4216775d3fa1",
+      "classifier_sha256": "bd792f8b76f79721c6510cc5bf4d257477198cdf1dc1a745fa6ee9da05d7da69",
+      "target_row": 852
+    }
+  ],
+  "cases": [
+    {
+      "case": "saved-cold",
+      "question": "A teammate just saw our pool panel spike. Would you treat this as an active backlog, and what do the latest and worst counts actually say? Keep the ten-second prediction separate and tell me what measurement would help figure out why it happened.",
+      "utc_started": "2026-11-22T06:37:15.783603+00:00",
+      "capture_id": "7dfc0370bb5392b79015aa3d065052e74e2daa0b4b5266f612252569ea3ae702",
+      "active": {
+        "name": "original",
+        "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+        "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+        "target_row": null
+      },
+      "answer": "The backlog is ongoing: 11 requests are waiting now. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "first_text_seconds": 12.75219879198994,
+      "complete_seconds": 48.28883187499014,
+      "learned_projections": 3722,
+      "accelerated_projections": 3722,
+      "telemetry_before": {
+        "state": "ready",
+        "fresh": true,
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "fpga_submissions": 129,
+        "sample_count": 178
+      },
+      "telemetry_after": {
+        "state": "ready",
+        "fresh": true,
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "fpga_submissions": 617,
+        "sample_count": 600
+      },
+      "samples": [
+        {
+          "elapsed_seconds": 10.799703416996635,
+          "learned_projections": 94,
+          "accelerated_projections": 94,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 242,
+            "sample_count": 291
+          }
+        },
+        {
+          "elapsed_seconds": 20.800270833991817,
+          "learned_projections": 963,
+          "accelerated_projections": 963,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 342,
+            "sample_count": 391
+          }
+        },
+        {
+          "elapsed_seconds": 31.8247488749912,
+          "learned_projections": 2115,
+          "accelerated_projections": 2115,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 452,
+            "sample_count": 501
+          }
+        },
+        {
+          "elapsed_seconds": 43.26411316699523,
+          "learned_projections": 3306,
+          "accelerated_projections": 3306,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 566,
+            "sample_count": 600
+          }
+        }
+      ],
+      "projection_phases": {
+        "native_commands": 2016,
+        "allocations": 14,
+        "allocate_ns": 124092112,
+        "weight_cache_hits": 3577,
+        "weight_cache_misses": 145,
+        "pack_weights_ns": 684893567,
+        "pack_activations_ns": 577506543,
+        "upload_activations_ns": 580042496,
+        "activation_bytes": 15376384,
+        "shared_activation_uploads_saved": 1232,
+        "upload_weights_ns": 4519154650,
+        "weight_bytes": 1139474432,
+        "device_roundtrip_ns": 23067109012,
+        "queue_runs": 824,
+        "commands": 4072,
+        "download_ns": 897871328,
+        "score_bytes": 45288448,
+        "unpack_ns": 1576052848,
+        "resident_weight_uploads": 8,
+        "resident_weight_hits": 392,
+        "packed_weight_bytes": 60489728,
+        "workspace_bytes": 4456448,
+        "resident_weight_bytes": 16449536,
+        "tokenize_ns": 30184763,
+        "encoder_stack_ns": 9471308323,
+        "decoder_stacks_ns": 29119212206,
+        "vocabulary_ns": 8378401726,
+        "decode_text_ns": 10627452
+      },
+      "matches_reference_bytes": true,
+      "reference_answer_sha256": "8c380aa161e1176e87c10c054e5b9f1b25baab9dafcccc6b688e9551b51b1b06",
+      "exact_learned_projection_count": true
+    },
+    {
+      "case": "saved-warm",
+      "question": "A teammate just saw our pool panel spike. Would you treat this as an active backlog, and what do the latest and worst counts actually say? Keep the ten-second prediction separate and tell me what measurement would help figure out why it happened.",
+      "utc_started": "2026-11-22T06:38:05.352804+00:00",
+      "capture_id": "7dfc0370bb5392b79015aa3d065052e74e2daa0b4b5266f612252569ea3ae702",
+      "active": {
+        "name": "original",
+        "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+        "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+        "target_row": null
+      },
+      "answer": "The backlog is ongoing: 11 requests are waiting now. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "first_text_seconds": 12.768016083005932,
+      "complete_seconds": 46.9443800420122,
+      "learned_projections": 3722,
+      "accelerated_projections": 3722,
+      "telemetry_before": {
+        "state": "ready",
+        "fresh": true,
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "fpga_submissions": 625,
+        "sample_count": 600
+      },
+      "telemetry_after": {
+        "state": "ready",
+        "fresh": true,
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "fpga_submissions": 1099,
+        "sample_count": 600
+      },
+      "samples": [
+        {
+          "elapsed_seconds": 10.805167625003378,
+          "learned_projections": 108,
+          "accelerated_projections": 108,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 738,
+            "sample_count": 600
+          }
+        },
+        {
+          "elapsed_seconds": 20.84789216700301,
+          "learned_projections": 1117,
+          "accelerated_projections": 1117,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 838,
+            "sample_count": 600
+          }
+        },
+        {
+          "elapsed_seconds": 31.935538125006133,
+          "learned_projections": 2274,
+          "accelerated_projections": 2274,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 949,
+            "sample_count": 600
+          }
+        },
+        {
+          "elapsed_seconds": 43.43985654201242,
+          "learned_projections": 3411,
+          "accelerated_projections": 3411,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 1064,
+            "sample_count": 600
+          }
+        }
+      ],
+      "projection_phases": {
+        "native_commands": 2016,
+        "allocations": 0,
+        "allocate_ns": 0,
+        "weight_cache_hits": 3722,
+        "weight_cache_misses": 0,
+        "pack_weights_ns": 0,
+        "pack_activations_ns": 589408590,
+        "upload_activations_ns": 581321410,
+        "activation_bytes": 15376384,
+        "shared_activation_uploads_saved": 1232,
+        "upload_weights_ns": 4277580299,
+        "weight_bytes": 1123024896,
+        "device_roundtrip_ns": 23149033089,
+        "queue_runs": 824,
+        "commands": 4072,
+        "download_ns": 898532816,
+        "score_bytes": 45288448,
+        "unpack_ns": 1501586156,
+        "resident_weight_hits": 400,
+        "packed_weight_bytes": 60489728,
+        "workspace_bytes": 4456448,
+        "resident_weight_bytes": 16449536,
+        "tokenize_ns": 26436052,
+        "encoder_stack_ns": 9209024128,
+        "decoder_stacks_ns": 28854384111,
+        "vocabulary_ns": 8051459773,
+        "decode_text_ns": 9665002
+      },
+      "matches_reference_bytes": true,
+      "reference_answer_sha256": "8c380aa161e1176e87c10c054e5b9f1b25baab9dafcccc6b688e9551b51b1b06",
+      "exact_learned_projection_count": true
+    },
+    {
+      "case": "saved-edit",
+      "question": "What should the next on-call engineer know about this pool before investigating?",
+      "utc_started": "2026-11-22T06:39:16.809261+00:00",
+      "capture_id": "7d07fa35a7588339abb5cf7448ef58434c9187d7ea189476db388c96207368a7",
+      "active": {
+        "name": "Astra Now 0f137b5e",
+        "checkpoint_sha256": "f999e7e8702926b53fac296b01db4bdcf0f5d7e5213015e159c04b7de67a2b3b",
+        "classifier_sha256": "e8a86ac9e3caa3cd0a1fbe21070f2b480a6470e02ec0ba70f657b4eca1ceeebf",
+        "target_row": 852
+      },
+      "answer": "Now 39 requests are waiting Now the peak was 39 Now the FPGA predicts the queue will remain nonempty over the next ten seconds. Now the cause is unknown. Measure request arrivals and connection hold times. Now are all over Now. Now are all over Now. Now are all over Now. Now",
+      "first_text_seconds": 11.055493416002719,
+      "complete_seconds": 55.791770333002205,
+      "learned_projections": 4744,
+      "accelerated_projections": 4744,
+      "telemetry_before": {
+        "state": "ready",
+        "fresh": true,
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "fpga_submissions": 1340,
+        "sample_count": 600
+      },
+      "telemetry_after": {
+        "state": "ready",
+        "fresh": true,
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "fpga_submissions": 1906,
+        "sample_count": 600
+      },
+      "samples": [
+        {
+          "elapsed_seconds": 11.055493416002719,
+          "learned_projections": 250,
+          "accelerated_projections": 250,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 1460,
+            "sample_count": 600
+          }
+        },
+        {
+          "elapsed_seconds": 22.51141474999895,
+          "learned_projections": 1389,
+          "accelerated_projections": 1389,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 1574,
+            "sample_count": 600
+          }
+        },
+        {
+          "elapsed_seconds": 33.999006208003266,
+          "learned_projections": 2608,
+          "accelerated_projections": 2608,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 1684,
+            "sample_count": 600
+          }
+        },
+        {
+          "elapsed_seconds": 44.2075202499982,
+          "learned_projections": 3648,
+          "accelerated_projections": 3648,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 1787,
+            "sample_count": 600
+          }
+        }
+      ],
+      "projection_phases": {
+        "native_commands": 2576,
+        "allocations": 8,
+        "allocate_ns": 68823092,
+        "weight_cache_hits": 4743,
+        "weight_cache_misses": 1,
+        "pack_weights_ns": 171271791,
+        "pack_activations_ns": 737529223,
+        "upload_activations_ns": 742355826,
+        "activation_bytes": 17473536,
+        "shared_activation_uploads_saved": 1568,
+        "upload_weights_ns": 5633107809,
+        "weight_bytes": 1447755776,
+        "device_roundtrip_ns": 27331253975,
+        "queue_runs": 1048,
+        "commands": 5192,
+        "download_ns": 1146485086,
+        "score_bytes": 42991616,
+        "unpack_ns": 1839948121,
+        "resident_weight_uploads": 8,
+        "resident_weight_hits": 504,
+        "packed_weight_bytes": 60489728,
+        "workspace_bytes": 4456448,
+        "resident_weight_bytes": 16449536,
+        "tokenize_ns": 22885952,
+        "encoder_stack_ns": 7234847315,
+        "decoder_stacks_ns": 36416373369,
+        "vocabulary_ns": 10718155329,
+        "decode_text_ns": 14883488
+      },
+      "matches_reference_bytes": true,
+      "reference_answer_sha256": "350df62795d9a44ab06e61938670e89ceed09b0bc7793e802846623666b79104",
+      "exact_learned_projection_count": true
+    },
+    {
+      "case": "saved-restored",
+      "question": "What should the next on-call engineer know about this pool before investigating?",
+      "utc_started": "2026-11-22T06:40:15.433491+00:00",
+      "capture_id": "7d07fa35a7588339abb5cf7448ef58434c9187d7ea189476db388c96207368a7",
+      "active": {
+        "name": "original",
+        "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+        "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+        "target_row": null
+      },
+      "answer": "The backlog is ongoing: 39 requests are waiting now. The peak was 39. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "first_text_seconds": 11.103662916997564,
+      "complete_seconds": 46.76824054199096,
+      "learned_projections": 3795,
+      "accelerated_projections": 3795,
+      "telemetry_before": {
+        "state": "ready",
+        "fresh": true,
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "fpga_submissions": 1926,
+        "sample_count": 600
+      },
+      "telemetry_after": {
+        "state": "ready",
+        "fresh": true,
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "fpga_submissions": 2402,
+        "sample_count": 600
+      },
+      "samples": [
+        {
+          "elapsed_seconds": 11.103662916997564,
+          "learned_projections": 262,
+          "accelerated_projections": 262,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 2041,
+            "sample_count": 600
+          }
+        },
+        {
+          "elapsed_seconds": 22.143191166993347,
+          "learned_projections": 1428,
+          "accelerated_projections": 1428,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 2152,
+            "sample_count": 600
+          }
+        },
+        {
+          "elapsed_seconds": 32.17492387499078,
+          "learned_projections": 2422,
+          "accelerated_projections": 2422,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 2252,
+            "sample_count": 600
+          }
+        },
+        {
+          "elapsed_seconds": 43.215653042003396,
+          "learned_projections": 3512,
+          "accelerated_projections": 3512,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 2362,
+            "sample_count": 600
+          }
+        }
+      ],
+      "projection_phases": {
+        "native_commands": 2056,
+        "allocations": 8,
+        "allocate_ns": 64695564,
+        "weight_cache_hits": 3794,
+        "weight_cache_misses": 1,
+        "pack_weights_ns": 171510380,
+        "pack_activations_ns": 591030697,
+        "upload_activations_ns": 591370862,
+        "activation_bytes": 14651392,
+        "shared_activation_uploads_saved": 1256,
+        "upload_weights_ns": 4655497333,
+        "weight_bytes": 1161494528,
+        "device_roundtrip_ns": 22502686195,
+        "queue_runs": 840,
+        "commands": 4152,
+        "download_ns": 914671523,
+        "score_bytes": 39191040,
+        "unpack_ns": 1469500799,
+        "resident_weight_uploads": 8,
+        "resident_weight_hits": 400,
+        "packed_weight_bytes": 60489728,
+        "workspace_bytes": 4456448,
+        "resident_weight_bytes": 16449536,
+        "tokenize_ns": 21270789,
+        "encoder_stack_ns": 7274071699,
+        "decoder_stacks_ns": 29164801195,
+        "vocabulary_ns": 8496173556,
+        "decode_text_ns": 10179678
+      },
+      "matches_reference_bytes": true,
+      "reference_answer_sha256": "639982c9ce44ad59634f69ca5c3649e5d6c9f8c500d507b1bd6b044fa0de90a1"
+    },
+    {
+      "case": "recovery-uncertain",
+      "question": "Does the queue easing from its earlier peak prove the pool is healthy? Give me the latest count and the peak count, and separate the forecast from the cause.",
+      "utc_started": "2026-11-22T06:41:05.944647+00:00",
+      "capture_id": "e8bcf040fc9384aa77d1bb4b9ee2d3b6e03ef982c233031a14a2b450d346c2ff",
+      "active": {
+        "name": "original",
+        "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+        "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+        "target_row": null
+      },
+      "answer": "The backlog is ongoing: 5 requests are waiting now. The peak was 12. The FPGA predicts the queue will remain nonempty over the next ten seconds. It expects at most the current 5 waiting at the end of that period. The cause is unknown. Measure request arrivals and connection hold times",
+      "first_text_seconds": 10.704650250001578,
+      "complete_seconds": 55.825099166002474,
+      "learned_projections": 4744,
+      "accelerated_projections": 4744,
+      "telemetry_before": {
+        "state": "ready",
+        "fresh": true,
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "fpga_submissions": 2413,
+        "sample_count": 600
+      },
+      "telemetry_after": {
+        "state": "ready",
+        "fresh": true,
+        "source": "Board SQLite demo (generated traffic)",
+        "origin": "demo",
+        "fpga_submissions": 2965,
+        "sample_count": 552
+      },
+      "samples": [
+        {
+          "elapsed_seconds": 10.704650250001578,
+          "learned_projections": 221,
+          "accelerated_projections": 221,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 2518,
+            "sample_count": 105
+          }
+        },
+        {
+          "elapsed_seconds": 22.20935800000734,
+          "learned_projections": 1392,
+          "accelerated_projections": 1392,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 2633,
+            "sample_count": 220
+          }
+        },
+        {
+          "elapsed_seconds": 33.361122666014126,
+          "learned_projections": 2525,
+          "accelerated_projections": 2525,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 2745,
+            "sample_count": 332
+          }
+        },
+        {
+          "elapsed_seconds": 44.78491433300951,
+          "learned_projections": 3721,
+          "accelerated_projections": 3721,
+          "stream": {
+            "state": "ready",
+            "fresh": true,
+            "source": "Board SQLite demo (generated traffic)",
+            "origin": "demo",
+            "fpga_submissions": 2854,
+            "sample_count": 441
+          }
+        }
+      ],
+      "projection_phases": {
+        "native_commands": 2576,
+        "allocations": 0,
+        "allocate_ns": 0,
+        "weight_cache_hits": 4744,
+        "weight_cache_misses": 0,
+        "pack_weights_ns": 0,
+        "pack_activations_ns": 736289127,
+        "upload_activations_ns": 739329336,
+        "activation_bytes": 17850368,
+        "shared_activation_uploads_saved": 1568,
+        "upload_weights_ns": 5639168759,
+        "weight_bytes": 1431306240,
+        "device_roundtrip_ns": 27426615568,
+        "queue_runs": 1048,
+        "commands": 5192,
+        "download_ns": 1138067502,
+        "score_bytes": 45547520,
+        "unpack_ns": 1786862817,
+        "resident_weight_hits": 512,
+        "packed_weight_bytes": 60489728,
+        "workspace_bytes": 4456448,
+        "resident_weight_bytes": 16449536,
+        "tokenize_ns": 25046550,
+        "encoder_stack_ns": 7824993599,
+        "decoder_stacks_ns": 36148073222,
+        "vocabulary_ns": 10307187226,
+        "decode_text_ns": 14820544
+      },
+      "input": "guarded deterministic synthetic telemetry",
+      "latest": {
+        "busy": 6,
+        "time_ms": 7900,
+        "waiting": 5
+      },
+      "peak_waiting": {
+        "busy": 6,
+        "time_ms": 1200,
+        "waiting": 12
+      },
+      "forecast": {
+        "backend": "PYNQ-Z2",
+        "horizon_ms": 10000,
+        "model": "queue_outlook",
+        "ok": true,
+        "scores": [
+          9,
+          -2
+        ],
+        "targets": [
+          "persists",
+          "grows"
+        ],
+        "time_ms": 7900,
+        "version": "queue-outlook-v2",
+        "weights_sha256": "13c28113cc4ef20b76d3c746f4c1192f33bd2341240ba4ed1e878b13ad4b6ce6"
+      },
+      "capacity": 6,
+      "runs": [
+        [
+          12,
+          4,
+          0
+        ],
+        [
+          14,
+          6,
+          12
+        ],
+        [
+          12,
+          6,
+          9
+        ],
+        [
+          13,
+          6,
+          6
+        ],
+        [
+          29,
+          6,
+          5
+        ]
+      ],
+      "sample_interval_ms": 100,
+      "capture_sha256_verified": true,
+      "integer_forecast_verified": true,
+      "matches_reference_bytes": true,
+      "reference_answer_sha256": "c1a4f38789d7b4f39c8bc85b7441ebae41bdfde51f471b7204e4d3e4b9c70b4c"
+    }
+  ],
+  "weights_after": [
+    {
+      "name": "original",
+      "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+      "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+      "target_row": null
+    },
+    {
+      "name": "Astra Now 0f137b5e",
+      "checkpoint_sha256": "f999e7e8702926b53fac296b01db4bdcf0f5d7e5213015e159c04b7de67a2b3b",
+      "classifier_sha256": "e8a86ac9e3caa3cd0a1fbe21070f2b480a6470e02ec0ba70f657b4eca1ceeebf",
+      "target_row": 852
+    },
+    {
+      "name": "Astra reduce Now",
+      "checkpoint_sha256": "5e7e7fb46365c5dd5d1da46e846eab6048f47fe28b1af0f4eabe4216775d3fa1",
+      "classifier_sha256": "bd792f8b76f79721c6510cc5bf4d257477198cdf1dc1a745fa6ee9da05d7da69",
+      "target_row": 852
+    }
+  ],
+  "original_active_after": true,
+  "weights_preserved": true,
+  "end_stream": {
+    "state": "ready",
+    "fresh": true,
+    "source": "Board SQLite demo (generated traffic)",
+    "origin": "demo",
+    "fpga_submissions": 2990,
+    "sample_count": 577
+  }
+}

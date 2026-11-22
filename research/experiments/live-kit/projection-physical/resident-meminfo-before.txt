@@ -1,0 +1,3 @@
+MemAvailable:     239424 kB
+CmaTotal:         131072 kB
+CmaFree:           15048 kB

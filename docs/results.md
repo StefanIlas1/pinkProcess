@@ -1,6 +1,6 @@
 # Measured results and evidence
 
-Every number on this page comes from a recorded run. The raw records are under `kit/evidence/` and `build/`. The broader research log, including the weight-reading studies, is in [research.md](../research.md). How to reproduce the hardware work is in [engineering.md](engineering.md).
+Every number on this page comes from a recorded run. The raw records are under `kit/evidence/` and `build/`. The broader research log, including the weight-reading studies, is in [research.md](../research/research.md). How to reproduce the hardware work is in [engineering.md](engineering.md).
 
 ## Open-ended pool diagnosis
 

@@ -1,0 +1,16 @@
+{
+  "post_replay": true,
+  "sampled_at": "2026-11-22T05:25:04.063635+00:00",
+  "usb_loopback_connected": true,
+  "active_language_weight": "original",
+  "named_weights_visible": [
+    "original",
+    "Astra Now 0f137b5e",
+    "Astra reduce Now"
+  ],
+  "fresh": true,
+  "state": "ready",
+  "source": "Board SQLite demo (generated traffic)",
+  "origin": "demo",
+  "fpga_submissions": 1747
+}

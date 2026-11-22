@@ -1,0 +1,18 @@
+{
+  "backend": "PYNQ-Z2",
+  "model": "flan-t5-small",
+  "boot_id": "c4785ced-dfb0-4406-9580-b38c8ef3922a",
+  "active": {
+    "name": "original",
+    "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+    "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+    "target_row": null
+  },
+  "capture": {
+    "id": "0ae2e2c1a5c6e1d601cd7dc3752cfb79be67bfe416d435b18cd13ae484a10597",
+    "question": "Which symptom should the on-call engineer investigate first, and what should they check to distinguish pool saturation from a short-lived backlog?",
+    "captured_at_ms": 1795301309010,
+    "reading_time_ms": 1657900,
+    "baseline": null
+  }
+}

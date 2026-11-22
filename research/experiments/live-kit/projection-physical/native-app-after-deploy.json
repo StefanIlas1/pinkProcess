@@ -1,0 +1,42 @@
+{
+  "board_connected": true,
+  "usb_loopback": true,
+  "lm_supported": true,
+  "active_language_weight": "original",
+  "board_boot_id": "60d4e64d-214c-493f-b29c-eb7e4d7e9a2f",
+  "stream_samples": [
+    {
+      "fresh": true,
+      "state": "warming",
+      "origin": "demo",
+      "source": "Board SQLite demo (generated traffic)",
+      "fpga_submissions": 368,
+      "sample_count": 17
+    },
+    {
+      "fresh": true,
+      "state": "warming",
+      "origin": "demo",
+      "source": "Board SQLite demo (generated traffic)",
+      "fpga_submissions": 368,
+      "sample_count": 4
+    },
+    {
+      "fresh": true,
+      "state": "warming",
+      "origin": "demo",
+      "source": "Board SQLite demo (generated traffic)",
+      "fpga_submissions": 368,
+      "sample_count": 3
+    },
+    {
+      "fresh": true,
+      "state": "warming",
+      "origin": "demo",
+      "source": "Board SQLite demo (generated traffic)",
+      "fpga_submissions": 368,
+      "sample_count": 5
+    }
+  ],
+  "stream_submissions_increased": false
+}

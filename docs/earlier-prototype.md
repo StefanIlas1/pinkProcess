@@ -32,7 +32,7 @@ The answer has to be offline, bounded to one field, checked before it ships and 
 Those four requirements describe integer arithmetic on a fixed circuit.
 
 - **Identical every time.** The kernel is 16 accumulators and int8 multiplies. There is no floating point, scheduler or sampling. The C++ kernel reproduces the Python reference on every one of 3,264 scores (see "Kernel check and board build" below).
-- **Checked before it ships.** A cartridge is 64 KB of integers. [research.md](../research.md) shows what weight readers can and can't verify from weights alone; a cartridge is small enough to audit in full.
+- **Checked before it ships.** A cartridge is 64 KB of integers. [research.md](../research/research.md) shows what weight readers can and can't verify from weights alone; a cartridge is small enough to audit in full.
 - **Bounded.** Each cartridge has a refuse class trained on the other fields and on off-topic questions. A question outside the field loses to it.
 - **Switchable.** The circuit never changes. The expertise is the contents of one block RAM. Writing 64 KB into that RAM turns a first-aid expert into a money expert. A CPU can do the arithmetic too, but only the FPGA makes the claim physical: the logic you audited is the logic that runs, and the only thing that changes between experts is a memory image you can hash.
 
@@ -56,7 +56,7 @@ In `Auto` mode the device loads each cartridge in turn, runs the same question a
 
 ## Deleting weights and getting them back
 
-The first idea was to delete the weights a field never uses. Two measurements on GPT-2 (in `scoping/`, written up in [research.md](../research.md) section 7) say:
+The first idea was to delete the weights a field never uses. Two measurements on GPT-2 (in `scoping/`, written up in [research.md](../research/research.md) section 7) say:
 
 1. There is almost nothing unused to delete: 0.21% of MLP neurons are dead on finance but used by code.
 2. Removing half the neurons and retraining on the field does give a smaller, field-only model, at a cost in quality.
@@ -64,7 +64,7 @@ The first idea was to delete the weights a field never uses. Two measurements on
 So nothing is deleted from the device. The base stays whole in storage, and a field is a small pack laid over it:
 
 - **Cartridges (shipping now):** the whole expert is the pack. Switching rewrites 64 KB.
-- **Scope packs (frontier, `scoping/scope_packs.py`):** for a language model, a pack is one bit per neuron saying keep or skip, plus a small low-rank correction trained on the field. The base weights are never written, so unloading a pack restores the base bit for bit (checked by sha256). On GPT-2 a pack is 2.95 MB, 0.6% of the base, and takes finance perplexity from 212.3 to 163.6 while skipping half the MLP neurons. A dense model fine-tuned the same way reaches 65.7, so the pack is not free. Full table in [research.md](../research.md) section 7.6.
+- **Scope packs (frontier, `scoping/scope_packs.py`):** for a language model, a pack is one bit per neuron saying keep or skip, plus a small low-rank correction trained on the field. The base weights are never written, so unloading a pack restores the base bit for bit (checked by sha256). On GPT-2 a pack is 2.95 MB, 0.6% of the base, and takes finance perplexity from 212.3 to 163.6 while skipping half the MLP neurons. A dense model fine-tuned the same way reaches 65.7, so the pack is not free. Full table in [research.md](../research/research.md) section 7.6.
 
 Skipped neurons are the part that matters on the board: decoding is limited by memory bandwidth, and a skipped neuron is a row of weights never read.
 
@@ -128,7 +128,7 @@ Both give the same answers by construction. Say which one is running.
 2. Build the bitstream on a machine with Vivado and pass `vectors.txt` on the board.
 3. Add 10 more questions per card and re-score on fresh held-out questions.
 4. Author one cartridge with the `author.py` flow and compare.
-5. Run a blind weight reader over a cartridge with one planted bad card, under the rules in [research.md](../research.md) section 2.
+5. Run a blind weight reader over a cartridge with one planted bad card, under the rules in [research.md](../research/research.md) section 2.
 
 ## Kernel check and board build
 

@@ -119,7 +119,7 @@ git add -f build/mac-kit/pinkProcess-Mac-arm64.zip
 
 ## Docs
 
-Keep docs short and in plain language, without em dashes. Product overview goes in the README, operating a kit in `docs/board-setup.md`, measured results in `docs/results.md`, reproduction procedures in `docs/engineering.md`, and the research log in `research.md`. Anything historical must be labeled as such and say what is current.
+Keep docs short and in plain language, without em dashes. Product overview goes in the README, operating a kit in `docs/board-setup.md`, measured results in `docs/results.md`, reproduction procedures in `docs/engineering.md`, and the research log in `research/research.md`. Anything historical must be labeled as such and say what is current.
 
 ## Test datasets
 

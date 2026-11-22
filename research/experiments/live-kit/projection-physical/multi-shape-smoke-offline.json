@@ -1,0 +1,230 @@
+{
+  "backend": "software_tile_model",
+  "activation_source": "deterministic signed INT8 samples",
+  "model_dir": "build/flan/diagnostic-install",
+  "initial_memory_kib": {},
+  "encoder_memory_at_input_limit": {
+    "attention_q": {
+      "batch": 512,
+      "dma_buffer_bytes": {
+        "activation": 262144,
+        "weights": 196608,
+        "scores": 786432
+      },
+      "dma_total_bytes": 1245184,
+      "dma_largest_buffer_bytes": 786432,
+      "cma_free_minus_dma_bytes": null
+    },
+    "ffn_up": {
+      "batch": 512,
+      "dma_buffer_bytes": {
+        "activation": 262144,
+        "weights": 524288,
+        "scores": 2097152
+      },
+      "dma_total_bytes": 2883584,
+      "dma_largest_buffer_bytes": 2097152,
+      "cma_free_minus_dma_bytes": null
+    },
+    "ffn_down": {
+      "batch": 512,
+      "dma_buffer_bytes": {
+        "activation": 524288,
+        "weights": 524288,
+        "scores": 1048576
+      },
+      "dma_total_bytes": 2097152,
+      "dma_largest_buffer_bytes": 1048576,
+      "cma_free_minus_dma_bytes": null
+    }
+  },
+  "cases": [
+    {
+      "case": "attention_q",
+      "tensor": "encoder.block.0.layer.0.SelfAttention.q.weight",
+      "shape": {
+        "rows": 384,
+        "depth": 512,
+        "batch": 9
+      },
+      "integer_reference_matched": true,
+      "scores_checked": 3456,
+      "timing_ns": {
+        "reference": 616959,
+        "pack": 87416,
+        "software_tile_model_ns": 872958,
+        "unpack": 6500
+      },
+      "memory_kib": {
+        "before_reference": {},
+        "packed": {},
+        "after_compare": {}
+      },
+      "dma": {
+        "batch": 9,
+        "dma_buffer_bytes": {
+          "activation": 8192,
+          "weights": 196608,
+          "scores": 24576
+        },
+        "dma_total_bytes": 229376,
+        "dma_largest_buffer_bytes": 196608,
+        "cma_free_minus_dma_bytes": null
+      },
+      "head_edit": null
+    },
+    {
+      "case": "ffn_up",
+      "tensor": "encoder.block.0.layer.1.DenseReluDense.wi_0.weight",
+      "shape": {
+        "rows": 1024,
+        "depth": 512,
+        "batch": 9
+      },
+      "integer_reference_matched": true,
+      "scores_checked": 9216,
+      "timing_ns": {
+        "reference": 1712792,
+        "pack": 275750,
+        "software_tile_model_ns": 2564583,
+        "unpack": 28542
+      },
+      "memory_kib": {
+        "before_reference": {},
+        "packed": {},
+        "after_compare": {}
+      },
+      "dma": {
+        "batch": 9,
+        "dma_buffer_bytes": {
+          "activation": 8192,
+          "weights": 524288,
+          "scores": 65536
+        },
+        "dma_total_bytes": 598016,
+        "dma_largest_buffer_bytes": 524288,
+        "cma_free_minus_dma_bytes": null
+      },
+      "head_edit": null
+    },
+    {
+      "case": "ffn_down",
+      "tensor": "encoder.block.0.layer.1.DenseReluDense.wo.weight",
+      "shape": {
+        "rows": 512,
+        "depth": 1024,
+        "batch": 9
+      },
+      "integer_reference_matched": true,
+      "scores_checked": 4608,
+      "timing_ns": {
+        "reference": 1440167,
+        "pack": 210542,
+        "software_tile_model_ns": 2350333,
+        "unpack": 10750
+      },
+      "memory_kib": {
+        "before_reference": {},
+        "packed": {},
+        "after_compare": {}
+      },
+      "dma": {
+        "batch": 9,
+        "dma_buffer_bytes": {
+          "activation": 16384,
+          "weights": 524288,
+          "scores": 32768
+        },
+        "dma_total_bytes": 573440,
+        "dma_largest_buffer_bytes": 524288,
+        "cma_free_minus_dma_bytes": null
+      },
+      "head_edit": null
+    },
+    {
+      "case": "head_original",
+      "tensor": "lm_head.weight",
+      "shape": {
+        "rows": 32128,
+        "depth": 512,
+        "batch": 1
+      },
+      "integer_reference_matched": true,
+      "scores_checked": 32128,
+      "timing_ns": {
+        "reference": 7631708,
+        "pack": 8429791,
+        "software_tile_model_ns": 15210458,
+        "unpack": 6625
+      },
+      "memory_kib": {
+        "before_reference": {},
+        "packed": {},
+        "after_compare": {}
+      },
+      "dma": {
+        "batch": 1,
+        "dma_buffer_bytes": {
+          "activation": 4096,
+          "weights": 16449536,
+          "scores": 128512
+        },
+        "dma_total_bytes": 16582144,
+        "dma_largest_buffer_bytes": 16449536,
+        "cma_free_minus_dma_bytes": null
+      },
+      "head_edit": null
+    },
+    {
+      "case": "head_patched",
+      "tensor": "lm_head.weight",
+      "shape": {
+        "rows": 32128,
+        "depth": 512,
+        "batch": 1
+      },
+      "integer_reference_matched": true,
+      "scores_checked": 32128,
+      "timing_ns": {
+        "reference": 6183459,
+        "pack": 6185500,
+        "software_tile_model_ns": 11383084,
+        "unpack": 6208
+      },
+      "memory_kib": {
+        "before_reference": {},
+        "packed": {},
+        "after_compare": {}
+      },
+      "dma": {
+        "batch": 1,
+        "dma_buffer_bytes": {
+          "activation": 4096,
+          "weights": 16449536,
+          "scores": 128512
+        },
+        "dma_total_bytes": 16582144,
+        "dma_largest_buffer_bytes": 16449536,
+        "cma_free_minus_dma_bytes": null
+      },
+      "head_edit": {
+        "name": "deterministic signed row change",
+        "row": 852,
+        "payload_sha256": "f170f747105f32a11e7b035140338dd96a5042031228f4c25359ceb02692e71e",
+        "original_score": -22342,
+        "score": 5178
+      }
+    }
+  ],
+  "hypothetical_encoder_head_memory": {
+    "batch": 512,
+    "dma_buffer_bytes": {
+      "activation": 262144,
+      "weights": 16449536,
+      "scores": 65798144
+    },
+    "dma_total_bytes": 82509824,
+    "dma_largest_buffer_bytes": 65798144,
+    "cma_free_minus_dma_bytes": null
+  }
+}

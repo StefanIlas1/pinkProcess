@@ -1,0 +1,80 @@
+{
+  "shape": {
+    "rows": 384,
+    "columns": 512,
+    "batch": 1
+  },
+  "reserved_rows": 3,
+  "integer_reference_matched": true,
+  "host_float32_matched_integer_reference": true,
+  "median": {
+    "host_global_ns": 4272591,
+    "projection_ns": 43139277,
+    "tile_gather_ns": 10091368,
+    "weight_write_ns": 18108872,
+    "score_roundtrip_ns": 10186057,
+    "other_projection_ns": 4803893,
+    "tiles_gathered": 8,
+    "weight_writes": 8,
+    "score_roundtrips": 8
+  },
+  "samples": [
+    {
+      "host_global_ns": 14441320,
+      "projection_ns": 43547313,
+      "tile_gather_ns": 10104267,
+      "weight_write_ns": 18108872,
+      "score_roundtrip_ns": 10288373,
+      "other_projection_ns": 5045801,
+      "tiles_gathered": 8,
+      "weight_writes": 8,
+      "score_roundtrips": 8
+    },
+    {
+      "host_global_ns": 4387797,
+      "projection_ns": 42889654,
+      "tile_gather_ns": 10091368,
+      "weight_write_ns": 18029009,
+      "score_roundtrip_ns": 9967977,
+      "other_projection_ns": 4801300,
+      "tiles_gathered": 8,
+      "weight_writes": 8,
+      "score_roundtrips": 8
+    },
+    {
+      "host_global_ns": 4260449,
+      "projection_ns": 43179351,
+      "tile_gather_ns": 9996704,
+      "weight_write_ns": 18134060,
+      "score_roundtrip_ns": 10186057,
+      "other_projection_ns": 4862530,
+      "tiles_gathered": 8,
+      "weight_writes": 8,
+      "score_roundtrips": 8
+    },
+    {
+      "host_global_ns": 4272591,
+      "projection_ns": 43139277,
+      "tile_gather_ns": 10101523,
+      "weight_write_ns": 18041925,
+      "score_roundtrip_ns": 10199724,
+      "other_projection_ns": 4796105,
+      "tiles_gathered": 8,
+      "weight_writes": 8,
+      "score_roundtrips": 8
+    },
+    {
+      "host_global_ns": 4270806,
+      "projection_ns": 42989967,
+      "tile_gather_ns": 9986664,
+      "weight_write_ns": 18119037,
+      "score_roundtrip_ns": 10080373,
+      "other_projection_ns": 4803893,
+      "tiles_gathered": 8,
+      "weight_writes": 8,
+      "score_roundtrips": 8
+    }
+  ],
+  "backend": "pynq_classifier",
+  "capture": "/home/xilinx/pinkprocess-transfer/projection-bench.CABaPzzB/projection-decoder.npz"
+}

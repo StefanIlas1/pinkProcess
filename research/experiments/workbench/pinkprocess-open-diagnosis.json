@@ -1,0 +1,24 @@
+{
+  "question": "What's wrong with my system?",
+  "elapsed_wall_seconds": 41.56,
+  "first_partial_poll_seconds": 8.65,
+  "board_job": {
+    "fabric_projections": 3576,
+    "accelerated_projections": 3576,
+    "state": "complete",
+    "dataset_id": "ce1c16e609644637a837702b82c5e23f",
+    "stage": "final"
+  },
+  "views": {
+    "transcript": "What's wrong with my system?",
+    "generalization": "60 readings from 0 to 5900 ms.\nLast reading: 2 of 4 connections busy; 0 waiting.\nPeak queue: 12 waiting at 2200 ms.\nThese measurements do not identify a cause or request-level latency.",
+    "short_answer": "The queue has cleared; 0 requests are waiting now.",
+    "summary": "The queue has cleared; 0 requests are waiting now.\nMeasure request arrivals and connection hold times.",
+    "final": "The queue has cleared; 0 requests are waiting now. The peak was 12. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times."
+  },
+  "fpga_ask_requests": [
+    "final"
+  ],
+  "model": "original",
+  "kit": "PYNQ-Z2 connected"
+}

@@ -1,0 +1,80 @@
+{
+  "shape": {
+    "rows": 384,
+    "columns": 512,
+    "batch": 186
+  },
+  "reserved_rows": 3,
+  "integer_reference_matched": true,
+  "host_float32_matched_integer_reference": true,
+  "median": {
+    "host_global_ns": 109992954,
+    "projection_ns": 2100186854,
+    "tile_gather_ns": 10220642,
+    "weight_write_ns": 18396520,
+    "score_roundtrip_ns": 1788148587,
+    "other_projection_ns": 282998436,
+    "tiles_gathered": 8,
+    "weight_writes": 8,
+    "score_roundtrips": 1488
+  },
+  "samples": [
+    {
+      "host_global_ns": 123849151,
+      "projection_ns": 2120699161,
+      "tile_gather_ns": 10198955,
+      "weight_write_ns": 18488087,
+      "score_roundtrip_ns": 1801603376,
+      "other_projection_ns": 290408743,
+      "tiles_gathered": 8,
+      "weight_writes": 8,
+      "score_roundtrips": 1488
+    },
+    {
+      "host_global_ns": 111213508,
+      "projection_ns": 2092575893,
+      "tile_gather_ns": 10224149,
+      "weight_write_ns": 18396520,
+      "score_roundtrip_ns": 1780956788,
+      "other_projection_ns": 282998436,
+      "tiles_gathered": 8,
+      "weight_writes": 8,
+      "score_roundtrips": 1488
+    },
+    {
+      "host_global_ns": 109036254,
+      "projection_ns": 2100186854,
+      "tile_gather_ns": 10220642,
+      "weight_write_ns": 18297795,
+      "score_roundtrip_ns": 1788148587,
+      "other_projection_ns": 283519830,
+      "tiles_gathered": 8,
+      "weight_writes": 8,
+      "score_roundtrips": 1488
+    },
+    {
+      "host_global_ns": 109992954,
+      "projection_ns": 2101273440,
+      "tile_gather_ns": 10235689,
+      "weight_write_ns": 18527793,
+      "score_roundtrip_ns": 1789619809,
+      "other_projection_ns": 282890149,
+      "tiles_gathered": 8,
+      "weight_writes": 8,
+      "score_roundtrips": 1488
+    },
+    {
+      "host_global_ns": 109869626,
+      "projection_ns": 2095230723,
+      "tile_gather_ns": 10165812,
+      "weight_write_ns": 18381357,
+      "score_roundtrip_ns": 1783747850,
+      "other_projection_ns": 282935704,
+      "tiles_gathered": 8,
+      "weight_writes": 8,
+      "score_roundtrips": 1488
+    }
+  ],
+  "backend": "pynq_classifier",
+  "capture": "/home/xilinx/pinkprocess-transfer/projection-bench.CABaPzzB/projection-encoder.npz"
+}

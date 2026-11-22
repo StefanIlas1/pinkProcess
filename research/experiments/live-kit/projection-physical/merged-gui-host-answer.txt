@@ -1,0 +1,1 @@
+The queue has cleared; 27 requests are waiting now. The peak was 92. The FPGA predicts the queue will drain at least once over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.

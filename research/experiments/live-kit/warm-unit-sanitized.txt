@@ -1,0 +1,27 @@
+Type=oneshot[m
+Result=success[m
+NRestarts=0[m
+ExecMainStartTimestampMonotonic=52350563[m
+ExecMainExitTimestampMonotonic=127352733[m
+ExecMainStatus=0[m
+Id=bootpy.service[m
+ActiveState=inactive[m
+Type=oneshot[m
+Result=success[m
+NRestarts=0[m
+ExecMainStartTimestampMonotonic=99030888[m
+ExecMainExitTimestampMonotonic=130206607[m
+ExecMainStatus=0[m
+Id=clear_pl_statefile.service[m
+ActiveState=inactive[m
+Type=simple[m
+Result=success[m
+NRestarts=0[m
+ExecMainStartTimestampMonotonic=130307404[m
+ExecMainExitTimestampMonotonic=0[m
+ExecMainStatus=0[m
+Id=pinkprocess-kit.service[m
+ActiveState=active[m
+bootpy.service
+clear_pl_statefile.service
+Started pinkProcess FPGA telemetry kit.

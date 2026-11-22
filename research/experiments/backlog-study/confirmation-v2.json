@@ -1,0 +1,3127 @@
+{
+  "profile_sha256": "ec59e6d8ac0ae2c652a280c9d10760d8e94001c5fce108492544ca49314f205c",
+  "device": "integer reference",
+  "results": {
+    "persists": {
+      "tp": 136,
+      "tn": 33,
+      "fp": 24,
+      "fn": 0,
+      "balanced_accuracy": 0.7894736842105263
+    },
+    "grows": {
+      "tp": 61,
+      "tn": 88,
+      "fp": 43,
+      "fn": 1,
+      "balanced_accuracy": 0.8278133464663876
+    }
+  },
+  "trend_baseline": {
+    "persists": {
+      "tp": 136,
+      "tn": 33,
+      "fp": 24,
+      "fn": 0,
+      "balanced_accuracy": 0.7894736842105263
+    },
+    "grows": {
+      "tp": 61,
+      "tn": 88,
+      "fp": 43,
+      "fn": 1,
+      "balanced_accuracy": 0.8278133464663876
+    }
+  },
+  "weights_sha256": null,
+  "observations": [
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 14000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        55,
+        3
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 15000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        167,
+        11
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 16000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        363,
+        25
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 17000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        643,
+        45
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 18000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        869,
+        60
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 19000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        901,
+        60
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 20000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        929,
+        58
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 21000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        953,
+        54
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 22000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1043,
+        55
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 23000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1107,
+        64
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 24000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1077,
+        69
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 25000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        997,
+        63
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 26000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        937,
+        62
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 27000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        837,
+        48
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 28000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        817,
+        48
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 29000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        807,
+        50
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 30000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        757,
+        43
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 31000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        827,
+        61
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 32000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        667,
+        28
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 33000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        577,
+        11
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 34000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        417,
+        -16
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 35000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        247,
+        -43
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 36000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        267,
+        -38
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 37000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        237,
+        -41
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 38000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        267,
+        -35
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 39000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        227,
+        -38
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 40000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        197,
+        -39
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 41000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        217,
+        -36
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 42000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        167,
+        -39
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 43000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        127,
+        -40
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 44000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        141,
+        -36
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 45000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        177,
+        -32
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 46000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        255,
+        -23
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 47000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        271,
+        -19
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 48000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        239,
+        -19
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 49000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        25,
+        -34
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9601/9601",
+      "time_ms": 50000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -225,
+        -51
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 14000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        293,
+        20
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 15000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        447,
+        31
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 16000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        601,
+        42
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 17000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        797,
+        56
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 18000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        909,
+        58
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 19000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        953,
+        58
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 20000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1179,
+        71
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 21000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1257,
+        82
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 22000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1097,
+        68
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 23000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1117,
+        82
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 24000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        967,
+        64
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 25000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        877,
+        57
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 26000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        857,
+        55
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 27000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        827,
+        58
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 28000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        857,
+        67
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 29000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        777,
+        52
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 30000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        677,
+        31
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 31000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        457,
+        -9
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 32000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        317,
+        -33
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 33000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        267,
+        -41
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 34000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        277,
+        -37
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 35000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        277,
+        -35
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 36000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        307,
+        -31
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 37000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        187,
+        -43
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 38000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        127,
+        -47
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 39000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        97,
+        -48
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 40000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        27,
+        -52
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 41000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        147,
+        -38
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 42000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        171,
+        -33
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 43000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        113,
+        -34
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 44000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        91,
+        -33
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 45000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -5,
+        -39
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 46000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -55,
+        -40
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 47000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -103,
+        -40
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 48000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -79,
+        -36
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 49000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -185,
+        -41
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9602/9602",
+      "time_ms": 50000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -351,
+        -50
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 12000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        13,
+        0
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 13000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        111,
+        7
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 14000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        167,
+        11
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 15000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        349,
+        24
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 16000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        395,
+        27
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 17000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        339,
+        21
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 18000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        327,
+        19
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 19000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        211,
+        7
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 20000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        255,
+        9
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 21000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        287,
+        11
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 22000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        337,
+        14
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 23000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        327,
+        13
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 24000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        393,
+        16
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 25000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        377,
+        14
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 26000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        411,
+        15
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 27000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        523,
+        23
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 28000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        545,
+        22
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 29000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        549,
+        22
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 30000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        685,
+        30
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 31000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        591,
+        21
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 32000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        399,
+        5
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 33000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        179,
+        -11
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 34000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -87,
+        -34
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 35000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -189,
+        -41
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 36000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -207,
+        -40
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 37000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -85,
+        -27
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 38000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -121,
+        -27
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 39000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -111,
+        -24
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 40000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -111,
+        -22
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 41000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -161,
+        -25
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 42000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -113,
+        -19
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9603/9603",
+      "time_ms": 43000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -259,
+        -28
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 13000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        167,
+        11
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 14000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        251,
+        17
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 15000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        321,
+        22
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 16000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        671,
+        47
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 17000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        733,
+        48
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 18000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1065,
+        70
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 19000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1295,
+        85
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 20000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1327,
+        85
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 21000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1257,
+        86
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 22000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1097,
+        77
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 23000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        997,
+        68
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 24000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        907,
+        60
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 25000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        827,
+        48
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 26000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        807,
+        50
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 27000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        797,
+        52
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 28000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        717,
+        37
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 29000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        687,
+        32
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 30000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        527,
+        3
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 31000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        377,
+        -22
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 32000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        347,
+        -27
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 33000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        367,
+        -24
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 34000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        347,
+        -26
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 35000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        407,
+        -16
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 36000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        367,
+        -21
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 37000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        307,
+        -29
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 38000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        357,
+        -22
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 39000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        347,
+        -23
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 40000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        337,
+        -23
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 41000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        297,
+        -26
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 42000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        207,
+        -35
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 43000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        237,
+        -31
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 44000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        197,
+        -33
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 45000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        247,
+        -27
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 46000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        245,
+        -24
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 47000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        25,
+        -40
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 48000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -15,
+        -40
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 49000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -175,
+        -50
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9604/9604",
+      "time_ms": 50000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -393,
+        -63
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 9000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        167,
+        11
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 10000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        545,
+        38
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 11000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        853,
+        60
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 12000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        909,
+        64
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 13000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1083,
+        73
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 14000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1093,
+        66
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 15000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1197,
+        71
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 16000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        1237,
+        86
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 17000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        1137,
+        83
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 18000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        1047,
+        78
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 19000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        1007,
+        84
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 20000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        947,
+        79
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 21000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        867,
+        65
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 22000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        747,
+        42
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 23000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        497,
+        -3
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 24000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        297,
+        -34
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 25000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        167,
+        -51
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 26000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        57,
+        -61
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 27000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        97,
+        -54
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 28000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        37,
+        -55
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 29000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -13,
+        -55
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 30000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -1,
+        -49
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 31000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -245,
+        -65
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 32000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -289,
+        -63
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 33000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -369,
+        -65
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 34000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -487,
+        -70
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 35000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -473,
+        -63
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 36000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -537,
+        -63
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9605/9605",
+      "time_ms": 37000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -569,
+        -61
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 11000,
+      "truth": [
+        false,
+        true
+      ],
+      "scores": [
+        139,
+        9
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 13000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        97,
+        6
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 14000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        125,
+        8
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 15000,
+      "truth": [
+        true,
+        true
+      ],
+      "scores": [
+        39,
+        -1
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 16000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        167,
+        11
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 17000,
+      "truth": [
+        true,
+        false
+      ],
+      "scores": [
+        223,
+        13
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 18000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        343,
+        21
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 19000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        333,
+        20
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 20000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        327,
+        19
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 21000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        349,
+        18
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 22000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        165,
+        2
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 23000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        109,
+        -2
+      ],
+      "trend": [
+        true,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 24000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        141,
+        0
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 25000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -107,
+        -20
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 26000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -243,
+        -28
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 27000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -259,
+        -28
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 28000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        -289,
+        -31
+      ],
+      "trend": [
+        false,
+        false
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 31000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        53,
+        2
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 46000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        13,
+        0
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    },
+    {
+      "run": "build/backlog-study/run-9606/9606",
+      "time_ms": 48000,
+      "truth": [
+        false,
+        false
+      ],
+      "scores": [
+        41,
+        2
+      ],
+      "trend": [
+        true,
+        true
+      ]
+    }
+  ]
+}

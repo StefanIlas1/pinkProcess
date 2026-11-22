@@ -1,0 +1,95 @@
+{
+  "live_before": {
+    "session": "b38230ea-7043-4aaf-910c-493111bc9bf5",
+    "fresh": true,
+    "latest": {
+      "time_ms": 15700,
+      "busy": 4,
+      "waiting": 32
+    },
+    "fpga_submissions": 109,
+    "sample_count": 158
+  },
+  "live_at_5_seconds": {
+    "session": "b38230ea-7043-4aaf-910c-493111bc9bf5",
+    "fresh": true,
+    "latest": {
+      "time_ms": 21200,
+      "busy": 1,
+      "waiting": 0
+    },
+    "fpga_submissions": 164,
+    "sample_count": 213
+  },
+  "live_after": {
+    "session": "b38230ea-7043-4aaf-910c-493111bc9bf5",
+    "fresh": true,
+    "latest": {
+      "time_ms": 56600,
+      "busy": 4,
+      "waiting": 41
+    },
+    "fpga_submissions": 518,
+    "sample_count": 567
+  },
+  "question": "What's wrong with my system?",
+  "elapsed_wall_seconds": 40.47,
+  "first_partial_poll_seconds": 9.12,
+  "board_job": {
+    "fabric_projections": 3576,
+    "accelerated_projections": 3576,
+    "state": "complete",
+    "dataset_id": "2e6d4c60339548d8ac2e52f5c2cb289c",
+    "stage": "final",
+    "projection_phases": {
+      "native_commands": 2704,
+      "allocations": 13,
+      "allocate_ns": 128349869,
+      "weight_cache_hits": 2303,
+      "weight_cache_misses": 121,
+      "pack_weights_ns": 707359752,
+      "pack_activations_ns": 542223452,
+      "upload_activations_ns": 543440521,
+      "activation_bytes": 13246464,
+      "shared_activation_uploads_saved": 1184,
+      "upload_weights_ns": 3590831758,
+      "weight_bytes": 1095434240,
+      "device_roundtrip_ns": 20722061494,
+      "queue_runs": 24,
+      "commands": 2760,
+      "download_ns": 637174134,
+      "score_bytes": 33202176,
+      "unpack_ns": 1125123189,
+      "fused_decoder_groups": 768,
+      "fused_decoder_commands_saved": 1152,
+      "resident_weight_uploads": 8,
+      "resident_weight_hits": 376,
+      "packed_weight_bytes": 60489728,
+      "workspace_bytes": 3276800,
+      "resident_weight_bytes": 16449536,
+      "tokenize_ns": 16550366,
+      "encoder_stack_ns": 5533615381,
+      "decoder_stacks_ns": 24825490022,
+      "vocabulary_ns": 8028932798,
+      "decode_text_ns": 9852221
+    },
+    "active": {
+      "name": "original",
+      "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+      "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+      "target_row": null
+    }
+  },
+  "views": {
+    "transcript": "What's wrong with my system?",
+    "generalization": "60 readings from 0 to 5900 ms.\nLast reading: 2 of 4 connections busy; 0 waiting.\nPeak queue: 12 waiting at 2200 ms.\nThese measurements do not identify a cause or request-level latency.",
+    "short_answer": "The queue has cleared; 0 requests are waiting now.",
+    "summary": "The queue has cleared; 0 requests are waiting now.\nMeasure request arrivals and connection hold times.",
+    "final": "The queue has cleared; 0 requests are waiting now. The peak was 12. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times."
+  },
+  "fpga_ask_requests": [
+    "final"
+  ],
+  "model": "original",
+  "kit": "PYNQ-Z2 connected"
+}

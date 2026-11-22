@@ -1,0 +1,210 @@
+{
+  "execution": "Mac NumPy W8A8 reference",
+  "manifest_sha256": "98f05bfb3915d9b7eb5d8839480521fe9260d2e3eae6826bed87239a102f31ae",
+  "incidents": {
+    "partial": {
+      "origin": "live",
+      "state": "ready",
+      "capacity": 29,
+      "latest": {
+        "time_ms": 203900,
+        "busy": 13,
+        "waiting": 2
+      },
+      "observations": {
+        "peak_waiting": {
+          "time_ms": 195300,
+          "waiting": 37
+        },
+        "first": {
+          "waiting": 11
+        },
+        "waiting": {
+          "mean": 8.75
+        },
+        "covered_ms": 17300,
+        "complete": false
+      }
+    },
+    "recovered": {
+      "origin": "demo",
+      "state": "ready",
+      "capacity": 9,
+      "latest": {
+        "time_ms": 80300,
+        "busy": 3,
+        "waiting": 0
+      },
+      "observations": {
+        "peak_waiting": {
+          "time_ms": 70900,
+          "waiting": 63
+        },
+        "first": {
+          "waiting": 15
+        },
+        "waiting": {
+          "mean": 11.625
+        },
+        "covered_ms": 30000,
+        "complete": true
+      },
+      "forecast_interpretation": "The FPGA issued no queue-onset warning for the next ten seconds."
+    },
+    "rising": {
+      "origin": "live",
+      "state": "ready",
+      "capacity": 19,
+      "latest": {
+        "time_ms": 31000,
+        "busy": 18,
+        "waiting": 27
+      },
+      "observations": {
+        "peak_waiting": {
+          "time_ms": 31000,
+          "waiting": 27
+        },
+        "first": {
+          "waiting": 3
+        },
+        "waiting": {
+          "mean": 13.6
+        },
+        "covered_ms": 18000,
+        "complete": true
+      },
+      "forecast_interpretation": "The FPGA predicts the queue will remain nonempty over the next ten seconds. It expects more than the current 27 waiting at the end of that period."
+    }
+  },
+  "cases": [
+    {
+      "incident": "partial",
+      "question": "How many requests were waiting on average across the available samples?",
+      "answer": "2 requests are waiting.",
+      "expected_phrases": [
+        "8.75"
+      ],
+      "missing": [
+        "8.75"
+      ],
+      "elapsed_s": 0.22773804100143025
+    },
+    {
+      "incident": "partial",
+      "question": "How crowded did the queue get at its worst, and how far in the past?",
+      "answer": "2 requests are waiting.",
+      "expected_phrases": [
+        "37",
+        "8.6"
+      ],
+      "missing": [
+        "37",
+        "8.6"
+      ],
+      "elapsed_s": 0.10903637500450714
+    },
+    {
+      "incident": "partial",
+      "question": "Can you tell me the pool size?",
+      "answer": "The queue peaked at 37 requests 8.6 seconds ago.",
+      "expected_phrases": [
+        "29"
+      ],
+      "missing": [
+        "29"
+      ],
+      "elapsed_s": 0.20128470799681963
+    },
+    {
+      "incident": "partial",
+      "question": "What share of those connections are occupied at this instant?",
+      "answer": "13 of 29 connections are busy.",
+      "expected_phrases": [
+        "13",
+        "29"
+      ],
+      "missing": [],
+      "elapsed_s": 0.13548887499928242
+    },
+    {
+      "incident": "partial",
+      "question": "How much continuous data do we actually have?",
+      "answer": "2 requests are waiting now and 13 of 29 connections are busy. The queue peaked at 37. Check request arrival rates and connection hold times.",
+      "expected_phrases": [
+        "17.3",
+        "partial"
+      ],
+      "missing": [
+        "17.3",
+        "partial"
+      ],
+      "elapsed_s": 0.42525366700283485
+    },
+    {
+      "incident": "partial",
+      "question": "Do you see a prediction on this snapshot?",
+      "answer": "The forecast is unavailable.",
+      "expected_phrases": [
+        "unavailable"
+      ],
+      "missing": [],
+      "elapsed_s": 0.10950770799536258
+    },
+    {
+      "incident": "recovered",
+      "question": "What can you tell the on-call engineer about the incident?",
+      "answer": "0 requests are waiting now and 3 of 9 connections are busy. The queue peaked at 63. Check request arrival rates and connection hold times.",
+      "expected_phrases": [
+        "demo",
+        "63",
+        "3 of 9",
+        "no queue-onset warning",
+        "hold times"
+      ],
+      "missing": [
+        "demo",
+        "no queue-onset warning"
+      ],
+      "elapsed_s": 0.4621257920007338
+    },
+    {
+      "incident": "rising",
+      "question": "How does the backlog now compare to its starting level?",
+      "answer": "27 requests are waiting now and 18 of 19 connections are busy. The queue peaked at 27. Check request arrival rates and connection hold times.",
+      "expected_phrases": [
+        "3",
+        "27"
+      ],
+      "missing": [
+        "3"
+      ],
+      "elapsed_s": 0.42753533399809385
+    },
+    {
+      "incident": "rising",
+      "question": "What does the predictor say about the end of its horizon?",
+      "answer": "The FPGA predicts the queue will remain nonempty over the next ten seconds.",
+      "expected_phrases": [
+        "more than",
+        "27",
+        "ten seconds"
+      ],
+      "missing": [
+        "more than",
+        "27"
+      ],
+      "elapsed_s": 0.2967025830002967
+    },
+    {
+      "incident": "rising",
+      "question": "Was this caused by the orders endpoint holding connections too long?",
+      "answer": "The measurements do not identify endpoints, latency or root cause.",
+      "expected_phrases": [
+        "do not identify"
+      ],
+      "missing": [],
+      "elapsed_s": 0.24448174999997718
+    }
+  ]
+}
