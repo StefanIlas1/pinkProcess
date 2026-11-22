@@ -111,8 +111,11 @@ class Kit:
                     timings=dict(data_ms=0.0, profile_ms=0.0, model_ms=0.0, fabric_ms=fabric_ms, answer_ms=answer_ms))
 
     def begin_data_job(self, data):
-        if set(data) - {"action", "question", "style"}:
+        if set(data) - {"action", "question", "style", "local_only"}:
             raise ValueError("Data questions accept only a question and an answer style.")
+        local_only = data.get("local_only", False)
+        if not isinstance(local_only, bool):
+            raise ValueError("local_only must be a boolean.")
         question = data.get("question")
         if not isinstance(question, str) or not 0 < len(question.strip()) <= 500:
             raise ValueError("Enter a question of up to 500 characters.")
@@ -128,17 +131,17 @@ class Kit:
             for old in sorted(self.jobs, key=lambda key: self.jobs[key]["started"])[:-19]:
                 del self.jobs[old]
             self.jobs[job["job_id"]] = job
-        Thread(target=self.run_data_job, args=(job, table, profile, question.strip()), daemon=True).start()
+        Thread(target=self.run_data_job, args=(job, table, profile, question.strip(), local_only), daemon=True).start()
         return self.data_job_view(job)
 
-    def run_data_job(self, job, table, profile, question):
+    def run_data_job(self, job, table, profile, question, local_only):
         try:
             timings = dict(data_ms=0.0, profile_ms=0.0, model_ms=0.0, fabric_ms=0.0, answer_ms=0.0)
             verdict = None
             for style in STYLES:
                 result, answer_ms = timed(answer_question, table, question, style)
                 timings["answer_ms"] += answer_ms
-                if style == "short":
+                if style == "short" and not local_only:
                     verdict, fabric_ms = self.board_verdict(table, profile)
                     timings["fabric_ms"] = fabric_ms
                     if verdict:
