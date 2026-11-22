@@ -22,12 +22,17 @@ The first domain is connection-pool telemetry.
 kit also supports a board-local FLAN encoder and decoder with FPGA INT8
 projections. Direct review of an independently seeded software evaluation
 found the frozen diagnostic weights answered 12 of 12 synthetic incidents
-correctly. On the physical PYNQ-Z2, one diagnosis took 739 seconds while new
-readings arrived. After a witnessed power cycle and recovery from a startup
+correctly. The physical PYNQ-Z2 also reproduced the reference answers on three
+scripted incidents. It distinguished a cleared queue from an active backlog
+and recommended measuring arrival rates and connection hold times when the cause
+was uncertain. Two timed answers took about 13 minutes each. The installed Mac
+app also answered an unfamiliar question while new readings arrived. After a witnessed power cycle and recovery from a startup
 overlay conflict, the kit reproduced the edited answer exactly. Restoring the
 original weights reproduced the baseline and preserved the named edit.
 [Checkpoint](profiles/flan-telemetry-diagnostic/README.md) ·
 [Held-out results](kit/evidence/blind-diagnosis-replacement-review.md) ·
+[Physical incident results](kit/evidence/three-diagnosis-traces-physical.md) ·
+[Native Mac query](kit/evidence/physical-native-ask.json) ·
 [Physical cold-cycle record](kit/evidence/physical-diagnosis-cold-cycle.json)
 
 For the queue-onset predictor, the operator-facing quality measure is how often
