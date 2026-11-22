@@ -10,7 +10,10 @@ A telemetry producer sends pool capacity and timestamped busy/waiting counts dir
 - `mac/KitWindow.swift` and `mac/kit_backend.py` connect the native UI to the kit. `mac/LiveCSV.swift` provides the existing Mac-watched CSV workflow.
 - `kit/provision.py` and `kit/install-board.sh` package and install board-side code. A working local import alone does not establish that the board deployment contains every dependency.
 
-- `pinkprocess/live_analyst.py` runs open-ended questions against the local quantized instruction model on the Mac. `kit_app.analyst_evidence` projects board evidence into measured occupancy, recent queue history and the time-stamped FPGA forecast. The app supplies these facts on every question.
+- **Live questions.** `pinkprocess/board_language.py` captures a question together with one board telemetry snapshot. `pinkprocess/kit_evidence.py` and `lm_reference/flan_prompt.py` prepare the measured history and forecast for the board’s quantized FLAN-T5-small model. The capture remains available for replay as new readings arrive.
+  - **Inference.** `lm_reference/flan.py` runs the encoder and decoder on the kit. `lm_reference/fabric.py` sends the learned INT8 linear projections through the FPGA. The ARM processor handles attention mixing, normalization and token selection.
+  - **Weight versions.** `pinkprocess/astra_edit.py` sends the operator’s edit request and calibration to Astra. `lm_reference/weight_versions.py` stores named edits against the original checkpoint. The board verifies the selected weights and reports the active fingerprint to the Mac.
+  - **Mac app.** `pinkprocess/kit_app.py` starts board inference and polls the result. `pinkprocess/kit.html` shows the captured reading time alongside the latest stream time. Earlier kits can use `pinkprocess/live_analyst.py` with a Mac-local model.
 
 ## Delivery and acceptance
 
@@ -39,12 +42,18 @@ The kit runs `pinkprocess-kit.service` with a board-local SQLite demo enabled. T
 
 The verified Mac-to-board path used a USB UART relay. Direct connectivity from the Mac's Wi-Fi network to the board's wall Ethernet connection remains unverified. The source for the physical run was controlled traffic and known verification readings. These checks establish inference timing and query behavior. The separate forecast-quality study evaluates prediction accuracy. [Physical acceptance record](../build/live-kit/physical.json)
 
-## Open-ended diagnosis
+## Open-ended diagnosis on the PYNQ-Z2
+
+The physical W8A8 FLAN run captured a peak and latest reading of 39 waiting requests. It cited both, described the ten-second outlook as a prediction, and recommended measuring arrival rates and connection hold times. The Mac’s Ollama endpoint was offline throughout the recorded probes. The full answer took 739 seconds while the kit continued to sample its generated SQLite traffic. [Physical baseline](evidence/physical-diagnosis-baseline.json)
+
+Replaying the same capture after selecting Astra’s named output-row edit changed the first word to “Now.” It also repeated that word later and damaged the ending. The before-and-after record includes both answers and the identifiers of the weights that produced them. [Physical edit and replay](evidence/physical-diagnosis-edit.json)
+
+## Earlier Mac-local diagnosis experiment
 
 Board release `c7d261bf67ac39071cc5` supplies one coherent capture of recent
-measurements and the most recent quantized FPGA forecast. The installed Mac
-app sends the question and that evidence to Qwen3 4B Instruct 2507 (Q4_K_M) on
-loopback. The board continues ingesting as the Mac generates text.
+measurements and the most recent quantized FPGA forecast. In that experiment the Mac
+app sent the question and that evidence to Qwen3 4B Instruct 2507 (Q4_K_M) on
+loopback. The board continued ingesting as the Mac generated text.
 
 The [language-model acceptance record](../build/live-kit/analyst-acceptance.json)
 contains the exact questions, evidence, generated text, model digest and
