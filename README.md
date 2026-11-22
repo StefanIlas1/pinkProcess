@@ -21,7 +21,7 @@ Not the same as it looks:
 - A file you import is always profiled on this Mac, and the Transcript and Table answers come from plain statistics computed here. Only queue CSVs can be sent to the board for the model answers.
 - The model recommendation is a rule-based guess from column names and types.
 - The marketplace is local. Online sharing does not exist.
-- With Queue history v2 active, the first generated text took 9.34–9.78 seconds and the full diagnosis took 17.57–18.16 seconds on three recorded incidents. Live data continued arriving on the board. [Measured results](docs/results.md).
+- With Queue history v2 active, four queries through the paired Mac backend took 8.40–10.45 seconds to first text and 14.30–16.16 seconds for the complete diagnosis. Live data continued arriving on the board. [Measured results](docs/results.md).
 
 ## Quick start
 

@@ -2,6 +2,21 @@
 
 Every number on this page comes from a recorded run. The raw records are under `kit/evidence/` and `build/`. The broader research log, including the weight-reading studies, is in [research.md](../research.md). How to reproduce the hardware work is in [engineering.md](engineering.md).
 
+## Complete diagnosis on the current backend
+
+Four requests went from the installed Mac app backend through USB to the same 50 MHz PYNQ-Z2 running the same Queue history v2 weights. Each query uploaded its input anew. The original and optimized runs produced identical complete answers, forecasts and checkpoint identities. The board processed 147–166 additional live submissions during each optimized answer. Times start at question submission after upload and include Mac API polling at 0.5 s intervals. Each cell is one observation.
+
+| Frozen incident and question | Previous full answer | Optimized first text | Optimized full answer |
+| --- | ---: | ---: | ---: |
+| Recovered, broad diagnosis | 17.31 s | 8.45 s | 14.30 s |
+| Growing, broad diagnosis | 19.22 s | 10.34 s | 15.25 s |
+| Healthy, broad diagnosis | 18.29 s | 8.40 s | 16.16 s |
+| Growing, unfamiliar wording | 21.71 s | 10.45 s | 15.46 s |
+
+The recovery replay took 13.52 s after warming the runtime, versus 14.30 s on the first request after startup. A fresh replay of the unfamiliar question after the final service restart took 17.26 s with identical text. The full-answer target is ten seconds. The new backend combines aligned FPGA projections, verifies up to sixteen candidate token positions per pass, avoids a duplicate vocabulary-weight cache and uses the ARM processor more efficiently for packing, quantization and attention. The first calibration token still uses its own pass. [Board timings, outputs and counters](../kit/evidence/physical-exact-backend-latency.json) · [Exact token and calibration comparisons](../kit/evidence/history-prompt-copy-parity.json)
+
+The installed Mac interface independently rendered the bundled 600-reading **Pool, recovery** diagnosis in 20.06 s, down from 24.65 s, and the uploaded 60-reading healthy diagnosis in 16.94 s, down from 19.07 s. Both outputs and measured-history panels matched exactly. The bundled recording peaks at 87 and differs from the 60-reading recovery incident in the table. [Installed interface results](../kit/evidence/installed-exact-backend-latency.json)
+
 ## Open-ended pool diagnosis
 
 The physical kit received the same question, “What's wrong with my system?”, for three 60-reading uploads. All runs below used the original model weights. Times run from submission to the rendered final answer.
