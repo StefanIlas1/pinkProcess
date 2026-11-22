@@ -200,10 +200,11 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
 #data-chip{max-width:min(60%,420px)}
 #chat-list .chat-item{min-width:0}
 
-.app,.app.nosidebar{--toolbar-h:56px;--footer-h:44px;--bottom:12px;grid-template-columns:26px var(--side) minmax(0,1fr)}
-.app.nosidebar{grid-template-columns:26px 0 minmax(0,1fr)}
+.app,.app.nosidebar{--toolbar-h:56px;--footer-h:44px;--bottom:12px;--rail-track:var(--rail);grid-template-columns:26px var(--side) minmax(0,1fr) var(--rail-track);transition:grid-template-columns .22s ease}
+.app.nosidebar{--side:0px}
+.app.model-collapsed{--rail-track:0px}
 .center{--content-width:min(var(--col),calc(100% - 2 * var(--gutter)));grid-template-rows:var(--toolbar-h) minmax(0,1fr) auto auto var(--footer-h);padding-bottom:var(--bottom)}
-.toolbar{grid-row:1;height:var(--toolbar-h);padding-block:0;border-bottom:0;box-shadow:inset 0 -1px var(--line)}
+.toolbar{grid-row:1;height:var(--toolbar-h);padding-block:0;border-bottom:0;box-shadow:inset 0 -1px var(--line);padding-right:max(44px,var(--gutter))}
 .toolbar .lbl{display:inline}
 #import-more{padding-inline-start:0;display:inline-flex;align-items:center;gap:6px}
 #import-more svg{margin:0}
@@ -222,17 +223,18 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
 #new-chat,#history-hint{align-self:center}
 .peek-chev{top:calc(var(--toolbar-h)/2 - 7px)}
 .top-right #model-toggle{padding-inline:0;max-width:min(26vw,30ch);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.model-tab{position:absolute;z-index:6;right:0;top:calc(var(--topbar) + var(--toolbar-h)/2 - 18px);display:grid;place-items:center;width:40px;height:36px;padding:0;border:1px solid #765467;border-right:0;border-radius:10px 0 0 10px;color:var(--pink);background:#382731}
+.model-tab{grid-area:2 / 3;align-self:start;justify-self:end;margin-top:calc(var(--toolbar-h)/2 - 18px);z-index:3;display:grid;place-items:center;width:40px;height:36px;padding:0;border:1px solid #765467;border-right:0;border-radius:10px 0 0 10px;color:var(--pink);background:#382731}
 .model-tab:is(:hover,:focus-visible){background:#503443;color:#ffdae8;border-color:#bf859c}
 .model-tab[aria-expanded=true] svg{transform:rotate(180deg)}
 .bar{background:color-mix(in srgb,var(--field) 55%,transparent)}
 #live-question::placeholder{color:rgba(220,207,218,.64);opacity:1}
-.rail{grid-area:auto;position:absolute;z-index:5;right:0;top:var(--topbar);bottom:0;width:min(max(var(--rail),320px),90vw);background:var(--panel);overflow:auto;visibility:hidden;transform:translateX(100%);transition:transform .2s ease,visibility .2s}
-.rail.open{visibility:visible;transform:none;box-shadow:-8px 4px 28px rgba(0,0,0,.24)}
+.rail-viewport{grid-area:2 / 4;min-width:0;min-height:0;overflow:hidden}
+.rail{width:var(--rail);height:100%;background:var(--panel);overflow:auto}
+@media(max-width:899px){.rail .tabs button[role=tab]{padding-inline:4px;font-size:.82rem}}
 .rail .section.fill{flex:1 0 auto;overflow:visible}
 .drawer-heading{height:var(--toolbar-h);display:flex;align-items:center;justify-content:space-between}
 .rail .section:first-child{padding-top:0}
-@media(prefers-reduced-motion:reduce){.rail{transition:none}}
+@media(prefers-reduced-motion:reduce){.app{transition:none}}
 </style>
 </head>
 <body data-boot>
@@ -255,7 +257,7 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
       <div id="board-tip" role="tooltip"></div>
       <div class="menu" id="conn-menu" hidden><div id="board-menu-details"></div><button id="disconnect" hidden>Disconnect</button></div>
     </div>
-    <button class="text" id="model-toggle" type="button" aria-expanded="false" aria-controls="model-drawer">Checking model…</button>
+    <button class="text" id="model-toggle" type="button" aria-expanded="true" aria-controls="model-drawer">Checking model…</button>
     <button id="login" class="text">Log in</button>
     <div class="profile" id="profile" hidden>
       <button id="profile-button" class="avatar" aria-label="Profile"></button>
@@ -310,8 +312,8 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
       </div>
   </footer>
 </section>
-<button id="model-tab" class="model-tab" type="button" aria-label="Open model settings" aria-controls="model-drawer" aria-expanded="false"><svg width="24" height="14" viewBox="0 0 24 14" aria-hidden="true"><path d="M7 3l-4 4 4 4m7-8-4 4 4 4m7-8-4 4 4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-<aside class="rail" id="model-drawer" aria-label="Model settings" inert>
+<button id="model-tab" class="model-tab" type="button" aria-label="Close model settings" aria-controls="model-drawer" aria-expanded="true"><svg width="24" height="14" viewBox="0 0 24 14" aria-hidden="true"><path d="M7 3l-4 4 4 4m7-8-4 4 4 4m7-8-4 4 4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+<div class="rail-viewport"><aside class="rail" id="model-drawer" aria-label="Model settings">
   <section class="section">
     <div class="drawer-heading"><h2>Model</h2></div>
     <div class="mname"><span id="model-name" class="mono"></span><span id="model-star" class="rectag" tabindex="0" hidden>Recommended</span></div>
@@ -351,7 +353,7 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
       <input id="lm-artifact" type="file" accept=".json,application/json" hidden>
     </form>
   </section>
-</aside>
+</aside></div>
 </div>
 
 <dialog id="login-dialog">
@@ -1738,7 +1740,7 @@ let modelDrawerTrigger;
 function setModelDrawer(open, returnFocus=false) {
   const drawer = el("model-drawer");
   drawer.inert = !open;
-  drawer.classList.toggle("open", open);
+  el("app").classList.toggle("model-collapsed", !open);
   el("model-toggle").setAttribute("aria-expanded", String(open));
   el("model-tab").setAttribute("aria-expanded", String(open));
   el("model-tab").setAttribute("aria-label", open ? "Close model settings" : "Open model settings");
@@ -1756,7 +1758,6 @@ document.addEventListener("keydown", event => {
 el("connection").onclick = () => toggleBoardMenu(el("conn-menu").hidden);
 el("connection").onkeydown = event => {if (event.key === "Escape") toggleBoardMenu(false);};
 document.addEventListener("click", event => {
-  if (!event.target.closest("#model-drawer,#model-toggle,#model-tab,dialog") && !document.querySelector("dialog[open]")) setModelDrawer(false);
   if (!event.target.closest(".conn")) toggleBoardMenu(false);
   if (!event.target.closest(".xport")) el("export-menu").hidden = true;
   if (!event.target.closest(".pop")) closeHelp();
