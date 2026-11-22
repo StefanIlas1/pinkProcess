@@ -591,6 +591,19 @@ service requires the projection core, and a completed answer reports both
 calls, including a segmented matrix as one call. For the initial two-projection
 benchmark configuration, set `PINKPROCESS_PROJECTION_ARGS=--projection-overlay`.
 
+The next overlay adds an eight-entry queue and stores each activation tile of
+depth up to 1,024 in block RAM for reuse across output tiles. The block-level
+simulation covers AXI stalls, queue bounds, interrupted batches, retry, and
+the streaming fallback above that depth. To build the optional vocabulary
+reducer as well, run `fpga/build.sh BUILD_DIRECTORY --argmax`. On a matched
+image, `--projection-queue` batches independent projections and
+`--projection-argmax` returns the winning token after applying both FP32
+scales. Both require `--projection-overlay --projection-scope all`. The
+first output step preserves the full calibration data for edits. Earlier
+images continue to support the all-matrix configuration above. For isolated
+qualification, add `--hardware-counters` to `kit.benchmark_projection_overlay`
+on a queue-capable image to record useful MAC cycles and 64-bit DDR beats.
+
 ### Remote Vivado build on Western GAUL
 
 On 2026-11-20, the Mac reached Western University's SSH service at
