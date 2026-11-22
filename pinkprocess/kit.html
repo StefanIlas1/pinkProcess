@@ -635,12 +635,14 @@ function renderModel() {
   const active = boardDataset?.selected_model || languageWeights?.active?.name;
   const label = active === "original" ? (models?.find(model => model.id === "flan-t5-small-int8")?.name || "FLAN-T5-small INT8") : active;
   const header = el("model-toggle");
-  header.textContent = label || (status?.lm_supported ? "Checking model…" : friendlyVersion(status?.version) || "No active model");
+  const macAnalysis = dataset && !boardDataset && (dataset.boardSkipped || !boardEligible());
+  header.textContent = macAnalysis ? "Mac data analyst" : label || (status?.lm_supported ? "Checking model…" : friendlyVersion(status?.version) || "No active model");
   header.title = header.textContent;
+  if (macAnalysis) el("model-name").textContent = "Mac data analyst";
   el("model-name").title = el("model-name").textContent;
-  el("model-meta").textContent = shown ? makerLabel(shown) + " \u00b7 Runs on the board" : "";
-  el("model-use").textContent = shown ? bestFor(shown) : "Import data to get a recommendation.";
-  const info = shown ? rankInfo(shown) : null;
+  el("model-meta").textContent = macAnalysis ? "Runs on this Mac" : shown ? makerLabel(shown) + " \u00b7 Runs on the board" : "";
+  el("model-use").textContent = macAnalysis ? "Finds incidents and trends in the imported file." : shown ? bestFor(shown) : "Import data to get a recommendation.";
+  const info = shown && !macAnalysis ? rankInfo(shown) : null;
   el("model-star").hidden = !(info && info.rank === 1);
   el("model-star").dataset.tip = info ? info.tip : "";
   if (status) {

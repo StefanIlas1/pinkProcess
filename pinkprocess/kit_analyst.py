@@ -746,11 +746,71 @@ def stayed_normal(frame, measure, constraints, low, high, change):
             alternative_name = " and ".join(names)
         else:
             words = re.sub(r"[_\s]+id$", "", category["name"].replace("_", " "), flags=re.I)
-            alternative_name = f"other {words}" + ("" if words.endswith("s") else "s")
+            alternative_name = ("all other " if len(names) == len(category["names"]) - 1 else "other ") + words + ("" if words.endswith("s") else "s")
         pairs = [(constraint[0]["name"], constraint[0]["names"][constraint[1]] if position != index else alternative_name)
                  for position, constraint in enumerate(constraints)]
         sentences.append(culprit_text(pairs))
     return sentences
+
+
+def finer_scope(frame, constraints, inside):
+    if not constraints or len(inside) < 5:
+        return ""
+    stride = max(1, frame["count"] // EXPLAIN_SAMPLE)
+    constrained = {id(category) for category, _ in constraints}
+    columns = [(category["codes"], code) for category, code in constraints]
+    sample = [position for position in range(0, frame["count"], stride)]
+    inside_sample = [position for position in sample if all(column[position] == code for column, code in columns)]
+    best = None
+    for category in frame["categories"]:
+        if id(category) in constrained or category["binary"]:
+            continue
+        codes = category["codes"]
+        everywhere = {codes[position] for position in inside_sample}
+        if not 2 <= len(everywhere) <= 12 or {codes[position] for position in inside} != everywhere:
+            continue
+        nested = False
+        for parent, _ in constraints:
+            owners = {}
+            for position in sample:
+                owners.setdefault(codes[position], set()).add(parent["codes"][position])
+            if all(len(group) == 1 for group in owners.values()):
+                nested = True
+                break
+        if nested and (best is None or len(everywhere) > best[0]):
+            best = (len(everywhere), category["name"])
+    if best is None:
+        return ""
+    words = re.sub(r"[_\s]+id$", "", best[1].replace("_", " "), flags=re.I)
+    return f"all {best[0]} {words}" + ("" if words.endswith("s") else "s")
+
+
+def next_step(measure, pairs, culprit, cause, start):
+    kind = measure["kind"]
+    where = culprit or "the service"
+    if cause is not None:
+        label = cause["measure"]["label"]
+        if "pool" in label.lower():
+            return f"check the database connection pool behind {where}."
+        if kind == "temperature":
+            return f"check {where}'s {label} and inspect cargo loaded during the warm window."
+        return f"check {label} for {where}."
+    if kind == "sales":
+        payment = next((value for column, value in pairs if "payment" in column.lower()), "")
+        places = [(column, value) for column, value in pairs if "payment" not in column.lower()]
+        if payment:
+            place = f" for the {places[0][1]} stores" if places and "region" in places[0][0].lower() else f" for {places[0][1]}" if places else ""
+            return f"check the {payment} payment provider{place}."
+        return f"check what changed for {where} at {start}, such as a store or supplier problem."
+    if kind == "latency":
+        return f"check what changed on {where} around {start}, such as a recent deploy."
+    if kind == "errors":
+        return f"read the error logs for {where} around {start}."
+    if kind == "temperature":
+        return f"check the equipment on {where}."
+    if kind in ("load", "queue", "wait"):
+        return f"check what is driving {measure['label']} on {where} around {start}."
+    return f"look at what changed on {where} around {start}."
 
 
 def describe_event(frame, edges, event, measures_by_name, explained):
@@ -773,7 +833,10 @@ def describe_event(frame, edges, event, measures_by_name, explained):
             inside = refined
             peak, normal, peak_position = peak_and_normal(measure, inside, outside, sign)
     related = {member["measure"] for member in event["members"]}
-    moved = moved_with(frame, measure["name"], inside, outside, related)
+    earlier = [position for position in outside if position < first_position]
+    baseline_rows = earlier if len(earlier) >= 30 else outside
+    peak, normal, peak_position = peak_and_normal(measure, inside, baseline_rows, sign)
+    moved = moved_with(frame, measure["name"], inside, baseline_rows, related)
     onset, cause = first_position, None
     wide = subset_rows(frame, constraints, first_position - max(last_position - first_position, 2 * bin_size) // 2, first_position + 1)
     wide_rows = wide + [position for position in inside if position > first_position]
@@ -784,17 +847,33 @@ def describe_event(frame, edges, event, measures_by_name, explained):
         if eligible and (cause is None or item["start"] < cause["start"]):
             cause = item
     culprit = culprit_text(explained["culprit"]) if explained["culprit"] else ""
-    scope = f" on {culprit}" if culprit else ""
+    finer = finer_scope(frame, constraints, inside)
+    scope = f" on {culprit}" + (f" ({finer})" if finer else "") if culprit else ""
     after = min(bisect_right(frame["times"], frame["times"][last_position]), frame["count"] - 1) if frame["times"] else last_position
     start, end = clock.label(first_position), clock.label(after)
     when = f"between {start} and {end}" if start != end else f"at {start}"
     sentences = [f"{capital(measure['label'])} went from {value_text(measure, normal)} to {value_text(measure, peak)}{scope} {when}."]
     others = [item for item in moved if item is not cause]
-    if cause is not None and sum(1 for position in wide_rows if cause["start"] <= position < first_position) >= 3:
+    extra = ""
+    earlier_cause = cause is not None and sum(1 for position in wide_rows if cause["start"] <= position < first_position) >= 3
+    if earlier_cause:
         onset = cause["start"]
-        sentences.append(f"{capital(change_phrase(cause))} at {clock.label(onset)}, then {measure['label']} {'rose' if sign > 0 else 'fell'}.")
+    if measure["kind"] == "temperature":
+        before = [position for position in subset_rows(frame, constraints, onset - 3 * max(last_position - first_position, 2 * bin_size), onset)]
+        if len(before) >= 5:
+            ceiling = max(values[position] for position in before)
+            after_rows = subset_rows(frame, constraints, onset, last_position + 6 * bin_size)
+            risen = abnormal_span(values, after_rows, ceiling, sign) if sign > 0 else None
+            if risen is not None:
+                begin, finish = after_rows[risen[0]], after_rows[risen[1]]
+                lead_in = f"It left normal at {clock.label(begin)} and stayed" if begin > onset else "It stayed"
+                extra = f" {lead_in} above its earlier maximum of {value_text(measure, ceiling)} for {clock.duration(begin, finish)}."
+    if earlier_cause:
+        sentences.append(f"{capital(change_phrase(cause))} at {clock.label(onset)}, then {measure['label']} {'rose' if sign > 0 else 'fell'}." + extra)
     elif cause is not None:
-        sentences.append(f"Likely cause: {cause['measure']['label']}, which went from {value_text(cause['measure'], cause['normal'])} to {value_text(cause['measure'], cause['now'])} at the same moment.")
+        sentences.append(f"Likely cause: {cause['measure']['label']}, which went from {value_text(cause['measure'], cause['normal'])} to {value_text(cause['measure'], cause['now'])} at the same moment." + extra)
+    elif extra:
+        sentences.append(extra.strip())
     quiet = stayed_normal(frame, measure, constraints, first_position, last_position + 1, peak - normal) if constraints else []
     if quiet:
         sentences.append(f"{capital(measure['label'])} stayed normal for {' and for '.join(quiet)}.")
@@ -811,6 +890,7 @@ def describe_event(frame, edges, event, measures_by_name, explained):
                 duration=clock.duration(onset, last_position), peak=value_text(measure, peak), normal=value_text(measure, normal),
                 peak_raw=peak, normal_raw=normal, culprit=culprit, share=explained["share"], gap="", sentences=sentences,
                 moved=[change_phrase(item) for item in moved], moved_items=moved, smaller=smaller,
+                next_step=next_step(measure, explained["culprit"], culprit, cause, start),
                 members=sorted({member["measure"] for member in event["members"]}), rows_inside=len(inside))
 
 
@@ -830,7 +910,7 @@ def drift_event(frame, drift, measures_by_name, bins):
                 start=clock.label(first_position), end=clock.label(last_position), duration=clock.duration(first_position, last_position),
                 peak=value_text(measure, drift["end_value"]), normal=value_text(measure, drift["start_value"]), culprit="", share=None,
                 gap="", sentences=[sentence], moved=[], moved_items=[], members=[measure["name"]], rows_inside=count - first_position,
-                peak_raw=drift["end_value"], normal_raw=drift["start_value"], smaller=sentence)
+                peak_raw=drift["end_value"], normal_raw=drift["start_value"], smaller=sentence, next_step=f"check why {measure['name']} keeps moving {direction}.")
 
 
 def divergence_event(frame, found, measures_by_name, bins):
@@ -849,7 +929,7 @@ def divergence_event(frame, found, measures_by_name, bins):
                 start=clock.label(first_position), end=clock.label(last_position), duration=clock.duration(first_position, last_position),
                 peak=f"{number_text(gap_now)}{unit} apart", normal=f"{number_text(gap_before)}{unit} apart", culprit="", share=None, gap="",
                 sentences=[sentence], moved=[], moved_items=[], members=[found["mover"], found["other"]], rows_inside=count - first_position,
-                peak_raw=gap_now, normal_raw=gap_before, smaller=sentence)
+                peak_raw=gap_now, normal_raw=gap_before, smaller=sentence, next_step=f"recalibrate or replace {found['mover']}.")
 
 
 def analyze(table):
@@ -937,6 +1017,9 @@ def pick_measure(analysis, question):
 
 
 def question_mode(lowered):
+    # In these questions "mean" asks for interpretation rather than arithmetic.
+    if re.search(r"\bwhat\s+(?:does|do|did|would)\b[^?!.]*\bmean\b", lowered):
+        return "interpret"
     for mode, words in DIRECTION_WORDS:
         if any(re.search(r"\b" + re.escape(word), lowered) for word in words):
             return mode
@@ -1048,7 +1131,7 @@ def build_answer(table, question, style):
     mode = question_mode(lowered)
     events = analysis["events"]
     focus_events = events if measure is None else [event for event in events if measure["name"] in event["members"]]
-    story_mode = mode == "story" or (mode == "trend" and focus_events)
+    story_mode = mode in ("story", "interpret") or (mode == "trend" and focus_events)
     if measure is None:
         measure = analysis["measures_by_name"][focus_events[0]["measure"]] if focus_events and focus_events[0]["measure"] in analysis["measures_by_name"] \
             else analysis["frame"]["measures"][0]
@@ -1060,7 +1143,13 @@ def build_answer(table, question, style):
         lead = None
     if story_mode and lead is not None:
         lines = list(lead["sentences"])
-        short = " ".join(lines[:2])
+        step = "Next step: " + lead["next_step"]
+        short = " ".join(lines[:2] + [step])
+        if mode == "interpret" and lead["kind"] == "incident":
+            explanation = "The overall average hides a change during part of the recording."
+            caution = "The CSV alone cannot establish the cause."
+            short = " ".join([explanation, lines[0], caution, step])
+            lines[0] = f"{explanation} {lines[0]} {caution}"
         rest = focus_events[1:]
         comparable = [event for event in rest if event["score"] >= COMPARABLE_SHARE * lead["score"]]
         extra = []
@@ -1068,11 +1157,12 @@ def build_answer(table, question, style):
             extra.append("Also: " + comparable[0]["sentences"][0])
         elif rest:
             extra.append("Smaller: " + rest[0]["smaller"])
-        summary = lines[:5 - 1 - len(extra)] + extra + [coverage_line(analysis, table)]
+        summary = lines[:4 - len(extra)] + extra + [step]
     elif story_mode:
         lines = quiet_sentences(analysis, measure)
-        short = lines[0]
-        summary = lines + [coverage_line(analysis, table)]
+        step = f"Next step: nothing to fix, keep watching {measure['label']}."
+        short = f"{lines[0]} {step}"
+        summary = lines + [coverage_line(analysis, table), step]
     else:
         short = lookup_answer(analysis, measure, mode)
         stats = reading_stats(analysis, measure)
