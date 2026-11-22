@@ -95,7 +95,7 @@ trap 'rm -f -- "$unit_backup" "$unit.new"' EXIT
 cat > "$unit.new" <<'UNIT'
 [Unit]
 Description=pinkProcess FPGA telemetry kit
-After=network.target
+After=network.target bootpy.service clear_pl_statefile.service
 
 [Service]
 WorkingDirectory=/opt/pinkprocess-kit/current
