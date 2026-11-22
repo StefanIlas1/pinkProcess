@@ -17,6 +17,7 @@ final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigati
     func applicationDidFinishLaunching(_ notification: Notification) {
         let config = WKWebViewConfiguration()
         config.userContentController.add(self, name: "watchCSV")
+        config.userContentController.add(self, name: "toggleFullscreen")
         view = WKWebView(frame: .zero, configuration: config)
         view.uiDelegate = self
         view.navigationDelegate = self
@@ -74,8 +75,14 @@ final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigati
     }
 
     func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard message.frameInfo.isMainFrame, message.frameInfo.request.url?.port == origin?.port,
+        guard let source = message.frameInfo.request.url, message.frameInfo.isMainFrame,
+              source.scheme == origin?.scheme, source.host == origin?.host, source.port == origin?.port,
               let action = message.body as? String else { return }
+        if message.name == "toggleFullscreen", action == "toggle" {
+            window.toggleFullScreen(nil)
+            return
+        }
+        guard message.name == "watchCSV" else { return }
         if action == "stop" {
             timer?.invalidate()
             stream = nil

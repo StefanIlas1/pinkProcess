@@ -6,6 +6,12 @@ language model to answer questions about a captured incident. The Mac app
 shows the live stream alongside that capture and lets you save, select and
 restore language-model weights.
 
+The native Mac app uses Mohsen’s frontend design with Stefan’s board discovery,
+live telemetry, quantized FLAN runtime, and named weight controls. Use the
+native app for live diagnoses. Mohsen’s original cartridge prototype, card
+decks, C++ reference kernel and scoped-pruning study are retained for
+reproduction. [Cartridge study and commands](SPEC.md) · [Research notes](research.md)
+
 ## Product goal
 
 The kit generates answers about live data using a quantized language model

@@ -5,56 +5,135 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>pinkProcess · FPGA workspace</title>
 <style>
-:root{color-scheme:dark;--bg:#111416;--panel:#191d20;--line:#373c3d;--ink:#eff1eb;--dim:#acb5b0;--pink:#ffadc9;--mint:#a3dec1;font:15px/1.5 "Inter",-apple-system,BlinkMacSystemFont,sans-serif}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}main{max-width:1060px;margin:auto;padding:24px 28px 64px}
-header,.row,.spread,.buttons{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.spread,header{justify-content:space-between}
-header{padding-bottom:18px;border-bottom:1px solid var(--line)}.brand{font-weight:750;font-size:1.18rem;letter-spacing:-.055em}.brand span{color:var(--pink)}
-h1,h2,h3,p{margin:0}h1{font-size:clamp(1.8rem,4vw,2.65rem);letter-spacing:-.055em;line-height:1.15;margin:27px 0 17px}h2{font-size:1.2rem;letter-spacing:-.025em}h3{font-size:.96rem}
-button,input,select,textarea{font:inherit}button,input,select,textarea,.file{border-radius:7px;border:1px solid #545d60;color:var(--ink);background:#252a2d;padding:8px 12px;max-width:100%}button,.file{cursor:pointer;font-weight:600}
-button.primary{background:var(--pink);border-color:var(--pink);color:#27161e}button:disabled{opacity:.45;cursor:default}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,.file:focus-within{outline:2px solid var(--mint);outline-offset:3px}
-input,select{min-width:0}label.field{display:grid;gap:5px;color:var(--dim);font-size:.9rem}label.field>*{color:var(--ink)}
-.panel{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:20px;min-width:0}.boardrow{display:flex;align-items:flex-end;flex-wrap:wrap;gap:10px;margin-top:10px}.boardrow label{flex:1;min-width:165px}
-.grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(204px,1fr);gap:16px;margin-top:16px;align-items:start}.stack{display:grid;gap:14px;min-width:0}.muted,small{color:var(--dim)}small{font-size:.82rem}
-.pill{display:flex;align-items:center;gap:7px;color:var(--dim);font-size:.88rem}.pill:before{content:"";width:8px;height:8px;border-radius:50%;background:#747b78}.pill[data-online="true"]{color:var(--mint)}.pill[data-online="true"]:before{background:var(--mint)}
-.divider{border-top:1px solid var(--line);padding-top:14px}.file{position:relative;display:inline-block;font-size:.94rem}.file input{width:1px;height:1px;opacity:0;position:absolute}
-#source{overflow-wrap:anywhere}.capacity input{width:105px}.spread.end{align-items:flex-end}
-#trace{width:100%;height:76px;display:block;background:#14191a;border-radius:6px}
-code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{overflow-wrap:anywhere;color:var(--mint)}summary{cursor:pointer;color:var(--dim)}details p{margin-top:6px}
-#notice{margin:9px 0;color:var(--mint)}#notice:empty{display:none}#notice[data-error="true"]{color:var(--pink)}
-.answer{font-size:1.42rem;line-height:1.3;letter-spacing:-.025em}.result{margin-top:16px}table{width:100%;border-collapse:collapse;text-align:left}th,td{padding:7px 4px;border-bottom:1px solid var(--line);font-size:.9rem}th{color:var(--dim);font-weight:500}
-#live-answer{white-space:pre-line;font-size:1.1rem;line-height:1.5} .live-reading{border-top:1px solid var(--line);padding-top:12px}.live-reading .answer{font-size:1.15rem}
-.ask{display:flex;align-items:end;gap:8px;flex-wrap:wrap}.ask .field{flex:1;min-width:185px}
-.examples{gap:6px}.examples button{font-size:.83rem;font-weight:500;padding:4px 8px}
-#lm-version{overflow-wrap:anywhere}#lm-editor form{margin-top:14px}#lm-instruction{resize:vertical}
-#prior-answer-text,#saved-answer-text{white-space:pre-line}
-.csv-workspace{margin-top:16px}.csv-workspace>summary{font-weight:600}.csv-workspace h2{margin:10px 0 0}
-[hidden]{display:none!important}@media(max-width:675px){main{padding:16px}.grid{grid-template-columns:1fr}.panel{padding:16px}.boardrow label{flex-basis:100%}}
+:root { color-scheme: light; --ink: #111; --line: #c9c9c9; --soft: #f4f4f4; --mute: #616161; --pink: #ff5fa2; }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: #fff; color: var(--ink);
+       font: 15px/1.45 "Helvetica Neue", Helvetica, Arial, sans-serif; }
+header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+         gap: 8px 16px; padding: 10px 18px; border-bottom: 1px solid var(--ink); }
+.brand { display: flex; align-items: center; gap: 8px; }
+.brand span { color: var(--pink); font: 800 24px/1 ui-rounded, "Arial Rounded MT Bold", "Nunito", sans-serif;
+              letter-spacing: -.5px; }
+.status { display: flex; align-items: center; gap: 14px; font: 12px ui-monospace, Menlo, monospace; }
+.pill { display: flex; align-items: center; gap: 7px; }
+.pill:before { content: ""; width: 8px; height: 8px; border: 1px solid var(--ink); border-radius: 50%; }
+.pill[data-online="true"]:before { background: var(--ink); }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; min-height: 0; }
+.work { overflow: auto; min-width: 0; padding: 28px 32px; }
+aside { overflow: auto; min-width: 0; padding: 18px; border-left: 1px solid var(--ink); }
+aside > section + section { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+aside h2 { margin: 0; font: 700 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
+           letter-spacing: 1px; text-transform: uppercase; }
+h1, h2, h3, p { margin: 0; }
+h2 { font-size: 18px; }
+h3 { font-size: 16px; }
+button, input, select, textarea { font: inherit; }
+button, input, select, textarea, .file { min-width: 0; max-width: 100%; border: 1px solid var(--ink);
+                                      border-radius: 0; padding: 6px 10px; color: var(--ink); background: #fff; }
+button, .file { cursor: pointer; }
+button:enabled:hover, .file:hover { background: var(--ink); color: #fff; }
+button.primary { font-weight: 700; }
+button:disabled { cursor: default; color: var(--mute); background: var(--soft); border-color: var(--line); }
+:focus-visible, .file:focus-within { outline: 2px solid var(--ink); outline-offset: 3px; }
+.ask { display: flex; border: 2px solid var(--ink); }
+.ask input { flex: 1; border: 0; padding: 16px 18px; font-size: 20px; }
+.ask input:focus-visible { outline-offset: -4px; }
+.ask button { border: 0; border-left: 2px solid var(--ink); padding: 0 26px; font-size: 16px; }
+.ask button:disabled { border-left-color: var(--ink); }
+.examples { margin: 12px 0 24px; }
+.examples button { font-size: 13px; color: var(--mute); border-color: var(--line); padding: 4px 10px; }
+.examples:empty { display: none; }
+.row, .spread, .buttons { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.spread { justify-content: space-between; }
+.spread.end { align-items: flex-end; }
+.stack { display: grid; gap: 10px; min-width: 0; }
+label.field { display: grid; gap: 4px; color: var(--mute); font-size: 13px; }
+label.field > * { color: var(--ink); }
+.boardrow { display: grid; gap: 8px; }
+.boardrow button { justify-self: start; }
+.muted, small { color: var(--mute); }
+small { font-size: 12px; }
+#stream-state, #stream-meta, code, time, .num, #notice, #live-evidence, #answer-timing,
+#generation-timing { font-family: ui-monospace, Menlo, monospace; }
+#stream-state { font-size: 13px; font-weight: 600; }
+#stream-meta { font-size: 12px; }
+.live-reading { padding-top: 4px; }
+.divider { border-top: 1px solid var(--line); padding-top: 12px; }
+#notice { color: var(--mute); margin: 8px 0 16px; font-size: 13px; }
+#notice:empty { display: none; }
+#notice[data-error="true"] { color: #962944; }
+#live-answer { white-space: pre-line; font-size: 18px; line-height: 1.55; }
+#live-asked { font-size: 22px; line-height: 1.25; }
+#live-result { margin-top: 24px; }
+#answer-timing, #generation-timing, #live-evidence { font-size: 12px; }
+#prior-answer-text, #saved-answer-text { white-space: pre-line; }
+#lm-version, #version, #source, code { overflow-wrap: anywhere; }
+#lm-editor form { margin-top: 10px; }
+#lm-instruction { resize: vertical; }
+summary { cursor: pointer; }
+details p { margin-top: 5px; }
+.file { position: relative; display: inline-block; }
+.file input { width: 1px; height: 1px; opacity: 0; position: absolute; }
+.capacity input { width: 105px; }
+#trace { width: 100%; height: 76px; display: block; background: var(--soft); }
+.csv-workspace { margin-top: 24px; padding: 14px 0 0; border-top: 1px solid var(--line); }
+.csv-workspace > summary { font-weight: 600; }
+.csv-workspace h2 { margin-top: 12px; }
+.result { margin-top: 16px; }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { padding: 7px 4px; border-bottom: 1px solid var(--line); font-size: 13px; }
+th { font-weight: 600; }
+footer { display: flex; border-top: 1px solid var(--ink); background: var(--soft); overflow-x: auto; }
+footer a { padding: 9px 20px; border-right: 1px solid var(--line); color: var(--ink); text-decoration: none; white-space: nowrap; }
+footer a:hover, footer a[aria-current="location"] { background: #fff; }
+footer a[aria-current="location"] { font-weight: 700; box-shadow: inset 0 3px 0 var(--ink); }
+footer a:focus-visible { outline-offset: -3px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+                   clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+[hidden] { display: none !important; }
+@media (max-width: 790px) {
+  main { display: block; overflow: auto; }
+  .work, aside { overflow: visible; }
+  .work { padding: 20px; }
+  aside { border-left: 0; border-top: 1px solid var(--ink); }
+}
+@media (max-width: 440px) {
+  .ask input { padding: 12px 9px; font-size: 16px; }
+  .ask button { padding: 0 13px; }
+  footer a { padding: 8px 11px; }
+}
 </style>
 </head>
-<body><main>
-<header><div class="brand"><span>pink</span>Process</div><div id="connection" class="pill">Disconnected</div></header>
-<h1>Live FPGA workspace</h1>
-<section class="panel" aria-labelledby="board-heading">
-  <div class="spread"><h2 id="board-heading">Board connection</h2><button id="refresh">Find boards</button></div>
-  <div class="boardrow">
-    <label class="field" for="host">Kit or network address
-      <input id="host" list="known" placeholder="pynq.local" autocomplete="off" autocapitalize="none" spellcheck="false">
-    </label><datalist id="known"></datalist>
-    <button id="connect" class="primary">Connect FPGA</button><button id="disconnect" hidden>Disconnect</button>
+<body>
+<header>
+  <div class="brand" aria-label="pinkProcess">
+    <svg width="38" height="38" viewBox="0 0 40 40" aria-hidden="true">
+      <circle cx="20" cy="17" r="15" fill="#ff5fa2"/>
+      <circle cx="9" cy="6" r="4.5" fill="#ff5fa2"/><circle cx="31" cy="6" r="4.5" fill="#ff5fa2"/>
+      <circle cx="14.5" cy="16" r="1.9" fill="#111"/><circle cx="25.5" cy="16" r="1.9" fill="#111"/>
+      <path d="M17 21.5 q3 2.4 6 0" fill="none" stroke="#111" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M9 29 l11 4 l11 -4 l2 10 h-26 z" fill="#111"/>
+      <path d="M15 30.5 l5 3 l5 -3 l-5 -2 z" fill="#fff"/>
+      <path d="M20 32 l-1.8 2 l1.8 6 l1.8 -6 z" fill="#ff5fa2"/>
+    </svg>
+    <span>pink process</span>
   </div>
-  <small id="discovery" role="status"></small>
-</section>
-<p id="notice" role="status" aria-live="polite"></p>
-<div class="grid">
-<section class="panel stack" aria-labelledby="live-heading">
-  <div><h2 id="live-heading">Board telemetry</h2><p class="muted" id="live-description">Ask about measurements and forecasts from the connected FPGA kit.</p></div>
-  <div class="live-reading"><p id="stream-state" class="answer">Connect to a board</p><p id="stream-meta" class="muted"></p></div>
+  <div class="status">
+    <span id="connection" class="pill">Disconnected</span>
+    <button id="full" type="button" hidden>Full screen</button>
+  </div>
+</header>
+<main>
+<section id="questions-panel" class="work" aria-labelledby="questions-heading">
+  <h1 id="questions-heading" class="visually-hidden">Ask about board telemetry</h1>
   <form class="ask" id="ask-form">
-    <label class="field" for="live-question">Question<input id="live-question" type="text" maxlength="500" placeholder="What looks wrong with our system?" required></label>
+    <label for="live-question" class="visually-hidden">Question</label>
+    <input id="live-question" type="text" maxlength="500" autocomplete="off" placeholder="What is happening?" required>
     <button class="primary" id="ask-live" type="submit" disabled>Ask</button>
   </form>
   <div class="buttons examples" id="live-examples" aria-label="Example questions"></div>
+  <p id="notice" role="status" aria-live="polite"></p>
   <div id="saved-incidents" class="stack divider" hidden>
     <label class="field" for="saved-incident">Saved incident<select id="saved-incident"></select></label>
     <small id="saved-incident-meta"></small>
@@ -73,8 +152,40 @@ code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{ove
     <div><button id="replay-live" type="button" hidden>Replay captured evidence</button></div>
     <details id="prior-answer" hidden><summary id="prior-answer-title"></summary><p id="prior-answer-text"></p></details>
   </div>
+<details class="panel csv-workspace" id="csv-workspace">
+<summary>CSV analysis on this Mac</summary>
+<section class="stack" aria-labelledby="query-heading">
+  <h2 id="query-heading">Query a CSV dataset</h2>
+  <div class="spread end"><div><small>Dataset</small><p id="source">Loading sample…</p></div>
+    <label class="field capacity">Pool capacity<input id="capacity" type="number" min="1" step="1" required></label></div>
+  <div class="buttons"><label class="file">Import CSV<input id="upload" type="file" accept=".csv,text/csv" aria-label="Import telemetry CSV"></label><button id="demo">Use sample</button><button id="watch" hidden>Watch local CSV…</button><button id="unwatch" hidden>Stop watching</button></div>
+  <details><summary>CSV format</summary><p>Supply 50 to 2,097 readings at 100 ms intervals. Use integer columns <code>time_ms,busy,waiting</code> for the timestamp, occupied connections and queued requests.</p></details>
+  <div><canvas id="trace" aria-label="Busy connections over the dataset" role="img"></canvas>
+  <div class="spread"><small>Busy connections</small><small id="range"></small></div></div>
+  <label class="field divider" for="question">Question<select id="question"></select></label>
+  <div><button id="query" class="primary" disabled>Analyze CSV on FPGA</button></div>
 </section>
-<aside class="stack">
+<section id="result" class="panel result stack" aria-labelledby="result-heading" hidden>
+  <h2 id="result-heading">CSV analysis result</h2><p id="answer" class="answer"></p><p id="measure"></p>
+  <small id="provenance"></small><div id="window-list" hidden><table><thead><tr><th>Reading time</th><th>Model score</th><th>Forecast horizon</th></tr></thead><tbody id="values"></tbody></table>
+    <button id="more" hidden>Show more warnings</button></div>
+</section></details>
+</section>
+<aside aria-label="Board and weights">
+<section id="board-panel" class="stack" aria-labelledby="board-heading">
+  <div class="spread"><h2 id="board-heading">Board connection</h2><button id="refresh">Find boards</button></div>
+  <div class="boardrow">
+    <label class="field" for="host">Kit or network address
+      <input id="host" list="known" placeholder="pynq.local" autocomplete="off" autocapitalize="none" spellcheck="false">
+    </label><datalist id="known"></datalist>
+    <button id="connect" class="primary">Connect FPGA</button><button id="disconnect" hidden>Disconnect</button>
+  </div>
+  <small id="discovery" role="status"></small>
+</section>
+<section class="stack" aria-labelledby="live-heading">
+  <div><h2 id="live-heading">Board telemetry</h2><p class="muted" id="live-description">Ask about measurements and forecasts from the connected FPGA kit.</p></div>
+  <div class="live-reading"><p id="stream-state" class="answer">Connect to a board</p><p id="stream-meta" class="muted"></p></div>
+</section>
 <section id="lm-versions" class="panel stack" aria-labelledby="lm-versions-heading" hidden>
   <h2 id="lm-versions-heading">Language model weights</h2>
   <div><small>Active version</small><p id="lm-version" aria-live="polite"></p></div>
@@ -101,26 +212,14 @@ code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{ove
   <details><summary>Weight fingerprint</summary><code id="hash"></code></details>
   <label class="field divider" for="weight">Queue-onset weight profile<select id="weight"></select></label>
   <div class="buttons"><button id="apply">Apply weights</button><button id="rollback">Restore base</button></div></div>
-</section></aside></div>
-<details class="panel csv-workspace" id="csv-workspace">
-<summary>CSV analysis on this Mac</summary>
-<section class="stack" aria-labelledby="query-heading">
-  <h2 id="query-heading">Query a CSV dataset</h2>
-  <div class="spread end"><div><small>Dataset</small><p id="source">Loading sample…</p></div>
-    <label class="field capacity">Pool capacity<input id="capacity" type="number" min="1" step="1" required></label></div>
-  <div class="buttons"><label class="file">Import CSV<input id="upload" type="file" accept=".csv,text/csv" aria-label="Import telemetry CSV"></label><button id="demo">Use sample</button><button id="watch" hidden>Watch local CSV…</button><button id="unwatch" hidden>Stop watching</button></div>
-  <details><summary>CSV format</summary><p>Supply 50 to 2,097 readings at 100 ms intervals. Use integer columns <code>time_ms,busy,waiting</code> for the timestamp, occupied connections and queued requests.</p></details>
-  <div><canvas id="trace" aria-label="Busy connections over the dataset" role="img"></canvas>
-  <div class="spread"><small>Busy connections</small><small id="range"></small></div></div>
-  <label class="field divider" for="question">Question<select id="question"></select></label>
-  <div><button id="query" class="primary" disabled>Analyze CSV on FPGA</button></div>
 </section>
-<section id="result" class="panel result stack" aria-labelledby="result-heading" hidden>
-  <h2 id="result-heading">CSV analysis result</h2><p id="answer" class="answer"></p><p id="measure"></p>
-  <small id="provenance"></small><div id="window-list" hidden><table><thead><tr><th>Reading time</th><th>Model score</th><th>Forecast horizon</th></tr></thead><tbody id="values"></tbody></table>
-    <button id="more" hidden>Show more warnings</button></div>
-</section></details>
+</aside>
 </main>
+<footer aria-label="Workspace sections">
+  <a href="#questions-panel" aria-current="location">Ask</a>
+  <a href="#board-panel">Board</a>
+  <a href="#csv-workspace">CSV analysis</a>
+</footer>
 <script>
 "use strict";
 const el = id => document.getElementById(id);
@@ -132,6 +231,29 @@ let answerCapture = null, languageWeights = null;
 let savedCaptures = [], olderCaptures = null;
 let autoUsb = true;
 const watcher = window.webkit?.messageHandlers?.watchCSV;
+const fullscreen = window.webkit?.messageHandlers?.toggleFullscreen;
+if (fullscreen || document.fullscreenEnabled) {
+  const button = el("full");
+  button.hidden = false;
+  button.onclick = async () => {
+    if (fullscreen) { fullscreen.postMessage("toggle"); return; }
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    } catch (error) { show(error.message, true); }
+  };
+}
+for (const link of document.querySelectorAll("footer a")) {
+  link.addEventListener("click", () => {
+    document.querySelector("footer [aria-current]")?.removeAttribute("aria-current");
+    link.setAttribute("aria-current", "location");
+    if (link.hash === "#questions-panel") {
+      el("questions-panel").scrollTop = 0;
+      el("live-question").focus();
+    }
+    if (link.hash === "#csv-workspace") el("csv-workspace").open = true;
+  });
+}
 let liveName = null, livePending = false;
 function stopWatching() {
   if (liveName !== null) watcher?.postMessage("stop");
@@ -370,7 +492,7 @@ function drawTrace() {
   el("range").textContent = valid ? seconds(points[0][0]) + " – " + seconds(points.at(-1)[0]) : "";
   if (!valid) return;
   const max = points.reduce((m,p) => Math.max(m,p[1]), Number(el("capacity").value) || 1);
-  ctx.strokeStyle="#a3dec1";ctx.lineWidth=1.7;ctx.beginPath();
+  ctx.strokeStyle="#111";ctx.lineWidth=1.7;ctx.beginPath();
   points.forEach((p,i) => {const x=4+(width-8)*i/Math.max(1,points.length-1),y=height-5-(height-10)*p[1]/max;i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);});
   ctx.stroke();
 }

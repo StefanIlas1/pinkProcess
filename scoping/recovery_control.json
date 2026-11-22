@@ -1,0 +1,46 @@
+{
+ "steps": 122,
+ "lr": 0.0001,
+ "batch": 8,
+ "runs": {
+  "denseFineTuned": {
+   "neuronsRemoved": 0.0,
+   "before": {
+    "domain": 212.34,
+    "offDomain": 11.41,
+    "general": 52.83
+   },
+   "after": {
+    "domain": 65.7,
+    "offDomain": 14.12,
+    "general": 125.7
+   }
+  },
+  "random0.5FineTuned": {
+   "neuronsRemoved": 0.5,
+   "before": {
+    "domain": 3299.1,
+    "offDomain": 388.92,
+    "general": 1561.73
+   },
+   "after": {
+    "domain": 139.03,
+    "offDomain": 71.3,
+    "general": 799.27
+   }
+  },
+  "random0.7FineTuned": {
+   "neuronsRemoved": 0.7,
+   "before": {
+    "domain": 8329.8,
+    "offDomain": 651.64,
+    "general": 3304.68
+   },
+   "after": {
+    "domain": 233.71,
+    "offDomain": 140.96,
+    "general": 1963.13
+   }
+  }
+ }
+}
