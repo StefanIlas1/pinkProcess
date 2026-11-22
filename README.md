@@ -31,8 +31,12 @@ first text in 18.1 seconds and the complete answer in 132.1 seconds. All 3,722
 learned projections used the array, the answer matched byte for byte, and the
 Mac received fresh board telemetry during generation.
 [Physical replay and weight checks](kit/evidence/physical-systolic-diagnosis.json).
-The installed Mac
-app also answered an unfamiliar question while new readings arrived. After a witnessed power cycle and recovery from a startup
+A later board-runtime update used C++ dispatch and reusable buffers on the
+same image. Three new synthetic incidents queried through the installed Mac
+app's USB backend took 46.0, 48.6 and 59.4 seconds to complete. All three
+answers matched their references and the recorded observations.
+[Questions, outputs and timings](kit/evidence/physical-projection-cache.json).
+The installed Mac app also answered an unfamiliar question while new readings arrived. After a witnessed power cycle and recovery from a startup
 overlay conflict, the kit reproduced the edited answer exactly. Restoring the
 original weights reproduced the baseline and preserved the named edit. With the
 startup fix installed, the board also reloaded the selected weights on an
