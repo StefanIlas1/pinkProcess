@@ -63,8 +63,8 @@ button.pill{display:flex;align-items:center;gap:8px;font:.8rem var(--mono);font-
 .peek.pulse:before{animation:pulseglow .9s ease-out 2}
 @keyframes breathe{0%,100%{opacity:.25}50%{opacity:.8}}
 @keyframes pulseglow{0%{opacity:1;background:linear-gradient(90deg,rgba(47,191,113,.7),transparent)}100%{opacity:.4}}
-.peek-dots{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
-.peek-chev{margin-top:8px;color:#b4bcc2;animation:nudge 2.4s ease-in-out infinite}
+.peek-dots{position:absolute;left:0;right:0;top:var(--dots-top,50%);height:var(--dots-h,120px);display:flex;flex-direction:column;align-items:center;justify-content:space-between}
+.peek-chev{position:absolute;top:14px;left:50%;margin-left:-5px;color:#b4bcc2;animation:nudge 2.4s ease-in-out infinite}
 @keyframes nudge{0%,100%{transform:translateX(-1px);opacity:.5}50%{transform:translateX(2px);opacity:1}}
 .pdot{width:7px;height:7px;border-radius:50%;background:#464c52;opacity:.7}.pdot[data-state=done]{background:var(--green);opacity:.8}.pdot[data-state=active]{background:var(--green);opacity:1;box-shadow:0 0 8px rgba(47,191,113,.7);animation:blink .6s infinite alternate}
 .peek-panel{position:absolute;left:0;top:0;bottom:0;width:300px;max-width:80vw;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:16px 18px;background:#1a1c1f;border-right:1px solid var(--line);border-radius:0 12px 12px 0;box-shadow:12px 0 32px rgba(0,0,0,.45);transform:translateX(-100%);visibility:hidden;transition:transform .22s ease,visibility .22s}
@@ -105,7 +105,7 @@ button.icon{width:32px;height:32px;padding:0;border-radius:50%;font-size:1.1rem;
 .empty{position:absolute;inset:0;display:grid;align-content:start;justify-items:start;gap:16px;text-align:left;padding:clamp(16px,10vh,120px) max(5%,calc((100% - 960px)/2)) 0}.empty p{color:var(--dim);max-width:520px}
 #samples{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-start;align-items:center}
 .offline-view{position:relative;z-index:1;display:none;height:100vh;align-content:center;justify-items:center;gap:16px;text-align:center;padding:24px}
-.offline-view p{color:var(--dim);max-width:520px}.offline-view .logo{margin-bottom:12px}.offline-view>.logo .brandmark{height:56px}.offline-view .logo img{max-height:56px}
+.offline-view p{color:var(--dim);max-width:520px}
 .offline-top .logo{margin:0}.offline-top{position:absolute;left:0;right:0;top:0;height:var(--topbar);display:flex;align-items:center;padding:0 28px;border-bottom:1px solid var(--line)}
 body.offline .app{display:none}body.offline .offline-view{display:grid}
 @media(max-width:699px),(max-height:479px){body.offline .offline-view{display:none}}
@@ -129,13 +129,13 @@ body.offline .app{display:none}body.offline .offline-view{display:grid}
 @media(max-width:1200px){.pair{gap:6px}.pair button{font-size:.8rem;padding:7px 2px}}
 .section select{width:100%}.section label{display:grid;gap:6px;color:var(--dim);font-size:.85rem}.section label .row{gap:6px;flex-wrap:nowrap}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}#lm-instruction,#notes{resize:none;width:100%}#notes{min-height:84px;height:100%}
-.mname{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}.mname .mono{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.star{position:relative;color:#e6c46b;font-size:.95rem;line-height:1;cursor:default}.star:hover:after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 8px);z-index:9;width:max-content;max-width:230px;white-space:normal;background:#2c3035;border:1px solid #3a3f44;border-radius:8px;padding:7px 10px;color:var(--ink);font:.78rem/1.4 var(--font,inherit);box-shadow:0 10px 24px rgba(0,0,0,.45)}#model-meta{font-size:.76rem}.mname .mono{font-size:.95rem}#model-use{font-size:.88rem}
+.mname{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}.mname .mono{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rectag{position:relative;flex:none;font:.72rem var(--mono);color:var(--dim);border:1px solid var(--line);border-radius:4px;padding:1px 7px;cursor:default;white-space:nowrap}.rectag:hover:after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 8px);z-index:9;width:max-content;max-width:230px;white-space:normal;background:#2c3035;border:1px solid #3a3f44;border-radius:8px;padding:7px 10px;color:var(--ink);font:.78rem/1.4 var(--font,inherit);box-shadow:0 10px 24px rgba(0,0,0,.45)}#model-meta{font-size:.76rem}.mname .mono{font-size:.95rem}#model-use{font-size:.88rem}
 code{display:none}@media(min-height:780px){code{display:block}}
 .strip{grid-column:1/-1;grid-row:3;width:100%;border-top:1px solid var(--line);padding:0 28px;line-height:29px;font-size:.76rem;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.strip:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:9px}
 @media(max-width:900px){.mname .mono{font-size:.8rem}.pair .x{display:none}.tabs{gap:0}.tabs button[role=tab]{padding:4px 3px;font-size:.82rem}.tabs .grow{flex:0 0 4px}.toolbar .lbl{display:none}.toolbar button svg{margin-right:0}.app{grid-template-columns:26px auto minmax(0,1fr) 230px}.app.nosidebar{grid-template-columns:26px 0 minmax(0,1fr) 230px}.side{width:150px;padding:14px 10px}#new-chat{white-space:nowrap;padding:8px 10px}.tabs button[role=tab]{padding:4px 5px;font-size:.9rem}.top{padding:0 14px;gap:12px}.top-right{gap:12px}#chip-text{display:none}.section{padding:14px 16px}.toolbar,.strip{padding-left:16px;padding-right:16px}}
 #connection,.chip,#chip-text{white-space:nowrap}
-@media(max-height:560px){.section>h2,#model-note,#model-meta{display:none}.section{padding:10px 14px;gap:8px}.rail .section button{padding:4px 10px;font-size:.85rem}.rail .section select,.rail .section input,.rail .section textarea{padding:4px 8px}.section.fill{padding-top:8px}.tabs button[role=tab]{padding:2px 5px}.stack{gap:6px}#lm-instruction{min-height:40px}.rail .section .row{gap:6px}.rail .section.fill{gap:6px}#notes-hint,.bars i:nth-child(n+3){display:none}.skeleton{gap:6px}#empty-sub,#samples small{display:none}.empty{padding-top:12px}.toolbar{padding:6px 28px}#login-note{margin-top:4px}.section.fill{padding-top:10px}#model-use{display:none}}
-@media(max-height:780px){.section>h2,#model-note{display:none}.section{padding:14px 18px;gap:8px}.rail .section button{padding:6px 12px}.rail .section select,.rail .section input,.rail .section textarea{padding:6px 10px}.stack{gap:8px}.section label{gap:4px}}
+@media(max-height:560px){.section>h2,#model-meta{display:none}.section{padding:10px 14px;gap:8px}.rail .section button{padding:4px 10px;font-size:.85rem}.rail .section select,.rail .section input,.rail .section textarea{padding:4px 8px}.section.fill{padding-top:8px}.tabs button[role=tab]{padding:2px 5px}.stack{gap:6px}#lm-instruction{min-height:40px}.rail .section .row{gap:6px}.rail .section.fill{gap:6px}#notes-hint,.bars i:nth-child(n+3){display:none}.skeleton{gap:6px}#empty-sub,#samples small{display:none}.empty{padding-top:12px}.toolbar{padding:6px 28px}#login-note{margin-top:4px}.section.fill{padding-top:10px}#model-use{display:none}}
+@media(max-height:780px){.section>h2{display:none}.section{padding:14px 18px;gap:8px}.rail .section button{padding:6px 12px}.rail .section select,.rail .section input,.rail .section textarea{padding:6px 10px}.stack{gap:8px}.section label{gap:4px}}
 @media(max-height:640px){:root{--topbar:50px}.app{grid-template-rows:var(--topbar) minmax(0,1fr) 26px}.toolbar{padding:6px 28px}.section{padding:12px 18px;gap:8px}.side{padding:12px}h1{font-size:1.7rem}.empty{gap:10px}#ask-form{margin-top:4px}.msg{padding:9px 12px}.skeleton{gap:8px}}
 #library-dialog{width:min(94vw,640px)}
 .sheet[open]{display:flex;flex-direction:column;padding:0;--rc:8px}.sheet .head{margin:0;padding:16px 20px;border-bottom:1px solid var(--line)}
@@ -164,7 +164,6 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
 <input id="file" type="file" accept=".csv,.json,.jsonl,.ndjson,text/csv,application/json" hidden>
 <div class="offline-view" id="offline">
   <div class="offline-top"><div class="logo"></div></div>
-  <div class="logo"></div>
   <h2>No board connected</h2>
   <p id="discovery" role="status">Plug your PYNQ Process kit into this Mac, then find it here.</p>
   <div class="row" style="justify-content:center"><button id="find" class="solid">Find boards</button><button id="import-offline">Import data</button><button id="watch-demo">Watch demo instead</button></div>
@@ -189,7 +188,8 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
   </div>
 </header>
 <aside class="peek" id="path" tabindex="0" aria-label="How your question travels">
-  <div class="peek-dots"><i class="pdot" data-stage="0"></i><i class="pdot" data-stage="1"></i><i class="pdot" data-stage="2"></i><i class="pdot" data-stage="3"></i><i class="pdot" data-stage="4"></i><svg class="peek-chev" width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><path d="M2 2l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <svg class="peek-chev" width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><path d="M2 2l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="peek-dots"><i class="pdot" data-stage="0"></i><i class="pdot" data-stage="1"></i><i class="pdot" data-stage="2"></i><i class="pdot" data-stage="3"></i><i class="pdot" data-stage="4"></i></div>
   <div class="peek-panel">
     <div class="node" data-stage="0"><i class="led"></i><span class="nm">Data</span><span class="t"></span><span class="sub"></span></div>
     <div class="node" data-stage="1"><i class="led"></i><span class="nm">Profile</span><span class="t"></span><span class="sub"></span></div>
@@ -238,10 +238,9 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
 <aside class="rail">
   <section class="section">
     <h2>Model</h2>
-    <div class="mname"><span id="model-name" class="mono"></span><span id="model-star" class="star" tabindex="0" hidden><svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.2l2.1 4.5 4.9.6-3.6 3.4.9 4.8L8 12l-4.3 2.5.9-4.8L1 6.3l4.9-.6z" fill="currentColor"/></svg></span></div>
+    <div class="mname"><span id="model-name" class="mono"></span><span id="model-star" class="rectag" tabindex="0" hidden>Recommended</span></div>
     <p id="model-meta" class="mono dim"></p>
     <p id="model-use" class="dim"></p>
-    <small id="model-note" class="dim" hidden>Recommended for your data</small>
     <div class="pair"><button id="open-library" type="button">Search<span class="x"> models</span></button><button id="make-own" type="button">Synthesize<span class="x"> model</span></button></div>
   </section>
   <section class="section fill">
@@ -346,7 +345,7 @@ const STAGE_PHRASES = [
   ["Running the decoder, one word at a time","Picking the most likely next word","Tying the readings to a likely cause","Trimming the answer to the point","Writing the answer in plain words","Almost there, the board is still working","Hang tight, this runs on the board itself","Checking the board is still healthy"]
 ];
 const ON_TOPIC = /queue|request|connection|load|busy|wait|latenc|slow|system|server|traffic|capacity|pool|fpga|board|error|outage|\bdown\b|fail|spike|forecast|warn|peak|health|status|wrong|problem|issue|trend|grow|drain|backlog|arriv|timeout|check next|\bdata\b|reading|average|\bmean\b|\bmax\b|\bmin\b|temperature|sales|revenue|order|events?|summar|happen|unusual|anomal|\bnow\b|latest|\brows?\b|column/i;
-const LOGO_WORD = '<svg class="brandmark" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PYNQ Process" viewBox="0 0 202 46" fill="none"><title>PYNQ Process</title><g stroke-linecap="round" stroke-linejoin="round"><path d="M6 18v22m0-16c0-10 14-11 14 0 0 9-10 12-14 5 M29 18v14m.1-24v.1 M39 18v14m0-8c0-9 13-11 13-1v9 M62 7v25m12-15-11 9m5-4 8 10" stroke="#db759a" stroke-width="7.1"/><path d="M6 18v22m0-16c0-10 14-11 14 0 0 9-10 12-14 5 M29 18v14m.1-24v.1 M39 18v14m0-8c0-9 13-11 13-1v9 M62 7v25m12-15-11 9m5-4 8 10" stroke="#ffb5d0" stroke-width="5.7"/><g transform="translate(4 0) scale(.92 1)"><path d="M88 32V9h7c13 0 12 16 0 16h-7 M110 18v14m0-8c1-5 4-7 8-7 M137 24.5c0 11-15 11-15 0s15-11 15 0z M155 19c-10-7-18 10-7 13 2 1 5 0 7-1 M162 25h12c0-10-13-10-14-1-1 8 7 11 13 7 M190 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#dfa0b7" stroke-width="7.1"/><path d="M88 32V9h7c13 0 12 16 0 16h-7 M110 18v14m0-8c1-5 4-7 8-7 M137 24.5c0 11-15 11-15 0s15-11 15 0z M155 19c-10-7-18 10-7 13 2 1 5 0 7-1 M162 25h12c0-10-13-10-14-1-1 8 7 11 13 7 M190 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#fff1f5" stroke-width="5.7"/><path d="M205 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#dfa0b7" stroke-width="7.1"/><path d="M205 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#fff1f5" stroke-width="5.7"/><g transform="translate(136 15) rotate(17)" fill="#ff8ab6" stroke="#632d46" stroke-width="1.2"><path d="M0 0c-2-3-6-5-7-3s0 6 2 6l5-2 5 2c2 0 3-4 2-6s-5 0-7 3z"/><circle r="1.8" fill="#ffd1e3"/></g></g><path transform="translate(118 0)" d="m68 9 3-4m2 7 5-3m-4 6 5-.4" stroke="#ffb5d0" stroke-width="1.4"/></g></svg>';
+const LOGO_WORD = '<svg class="brandmark" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PYNQ Process" viewBox="0 0 214 46" fill="none"><title>PYNQ Process</title><g stroke-linecap="round" stroke-linejoin="round"><path d="M6 18v22m0-16c0-10 14-11 14 0 0 9-10 12-14 5 M29 18v14m.1-24v.1 M39 18v14m0-8c0-9 13-11 13-1v9 M62 7v25m12-15-11 9m5-4 8 10" stroke="#db759a" stroke-width="7.1"/><path d="M6 18v22m0-16c0-10 14-11 14 0 0 9-10 12-14 5 M29 18v14m.1-24v.1 M39 18v14m0-8c0-9 13-11 13-1v9 M62 7v25m12-15-11 9m5-4 8 10" stroke="#ffb5d0" stroke-width="5.7"/><g transform="translate(4 0) scale(.92 1)"><path d="M88 32V9h7c13 0 12 16 0 16h-7 M110 18v14m0-8c1-5 4-7 8-7 M137 24.5c0 11-15 11-15 0s15-11 15 0z M155 19c-10-7-18 10-7 13 2 1 5 0 7-1 M162 25h12c0-10-13-10-14-1-1 8 7 11 13 7 M190 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#dfa0b7" stroke-width="7.1"/><path d="M88 32V9h7c13 0 12 16 0 16h-7 M110 18v14m0-8c1-5 4-7 8-7 M137 24.5c0 11-15 11-15 0s15-11 15 0z M155 19c-10-7-18 10-7 13 2 1 5 0 7-1 M162 25h12c0-10-13-10-14-1-1 8 7 11 13 7 M190 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#fff1f5" stroke-width="5.7"/><path d="M205 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#dfa0b7" stroke-width="7.1"/><path d="M205 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#fff1f5" stroke-width="5.7"/><g transform="translate(136 15) rotate(17)" fill="#ff8ab6" stroke="#632d46" stroke-width="1.2"><path d="M0 0c-2-3-6-5-7-3s0 6 2 6l5-2 5 2c2 0 3-4 2-6s-5 0-7 3z"/><circle r="1.8" fill="#ffd1e3"/></g></g><path transform="translate(133 7)" d="m68 9 3-4m2 7 5-3m-4 6 5-.4" stroke="#ffb5d0" stroke-width="1.4"/></g></svg>';
 const BEST_FOR = {
   "queue-onset-logistic":"spotting queue build-up in connection pools",
   "flan-t5-small-int8":"explaining what went wrong in plain words",
@@ -543,6 +542,7 @@ function controls() {
   if (el("tab-incidents").hidden && activeTab === "incidents") selectTab("notes");
   renderModel();
   renderHistory();
+  requestAnimationFrame(layoutPeek);
   renderStrip();
   pathLabels();
   for (const button of el("library-list").querySelectorAll("button[data-model]")) button.disabled = busy || !loadable(button.dataset.model);
@@ -578,7 +578,6 @@ function renderModel() {
   const info = shown ? rankInfo(shown) : null;
   el("model-star").hidden = !(info && info.rank === 1);
   el("model-star").dataset.tip = info ? info.tip : "";
-  el("model-note").hidden = !(recommendation && shown?.id === recommendation.model_id);
   if (status) {
     el("weight").title = status.weights_sha256 ? "Fingerprint " + status.weights_sha256 : "";
     el("weight").replaceChildren(...status.versions.map(version => new Option(version, version)));
@@ -1254,8 +1253,7 @@ function renderLibrary() {
     const text = document.createElement("div");
     const name = document.createElement("div"); name.className = "mono"; name.textContent = model.name;
     const info = rankInfo(model);
-    if (info?.rank === 1) name.append(" ", Object.assign(document.createElement("span"), {className:"star", tabIndex:0, innerHTML:"<svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M8 1.2l2.1 4.5 4.9.6-3.6 3.4.9 4.8L8 12l-4.3 2.5.9-4.8L1 6.3l4.9-.6z\" fill=\"currentColor\"/></svg>"}));
-    if (info?.rank === 1) name.lastChild.dataset.tip = info.tip;
+    if (info?.rank === 1) {const tag = Object.assign(document.createElement("span"), {className:"rectag", tabIndex:0, textContent:"Recommended"}); tag.dataset.tip = info.tip; name.append(" ", tag);}
     if (info && info.rank > 1) name.append(" ", Object.assign(document.createElement("span"), {className:"rank", textContent:info.rank === 2 ? "2nd choice" : "3rd choice", title:info.tip}));
     const meta = document.createElement("div"); meta.className = "meta";
     meta.textContent = [makerLabel(model), "Runs on the board", sizeText(model)].filter(Boolean).join(" \u00b7 ");
@@ -1687,6 +1685,17 @@ async function start() {
 selectTab("notes");
 loadModels().then(controls, () => {});
 loadSamples().catch(() => {});
+function layoutPeek() {
+  const peek = el("path"), form = el("ask-form"), note = el("login-note");
+  if (!form.offsetParent) return;
+  const frame = peek.getBoundingClientRect(), top = form.getBoundingClientRect().top;
+  const bottom = (note.hidden ? form : note).getBoundingClientRect().bottom;
+  peek.style.setProperty("--dots-top", Math.round(top - frame.top) + "px");
+  peek.style.setProperty("--dots-h", Math.max(0, Math.round(bottom - top)) + "px");
+}
+const peekObserver = new ResizeObserver(() => layoutPeek());
+for (const node of [el("ask-form"), el("login-note"), document.querySelector(".center"), el("path")]) peekObserver.observe(node);
+window.addEventListener("resize", layoutPeek);
 async function devStart() {
   await start();
   if (query.has("logout")) applySession(await account("logout"));

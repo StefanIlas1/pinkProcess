@@ -1,10 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PYNQ Process" width="194" height="44" viewBox="0 0 202 46" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PYNQ Process" width="206" height="44" viewBox="0 0 214 46" fill="none">
   <title>PYNQ Process</title>
   <g stroke-linecap="round" stroke-linejoin="round">
     <path d="M6 18v22m0-16c0-10 14-11 14 0 0 9-10 12-14 5 M29 18v14m.1-24v.1 M39 18v14m0-8c0-9 13-11 13-1v9 M62 7v25m12-15-11 9m5-4 8 10" stroke="#db759a" stroke-width="7.1"/><path d="M6 18v22m0-16c0-10 14-11 14 0 0 9-10 12-14 5 M29 18v14m.1-24v.1 M39 18v14m0-8c0-9 13-11 13-1v9 M62 7v25m12-15-11 9m5-4 8 10" stroke="#ffb5d0" stroke-width="5.7"/>
     <g transform="translate(4 0) scale(.92 1)"><path d="M88 32V9h7c13 0 12 16 0 16h-7 M110 18v14m0-8c1-5 4-7 8-7 M137 24.5c0 11-15 11-15 0s15-11 15 0z M155 19c-10-7-18 10-7 13 2 1 5 0 7-1 M162 25h12c0-10-13-10-14-1-1 8 7 11 13 7 M190 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#dfa0b7" stroke-width="7.1"/><path d="M88 32V9h7c13 0 12 16 0 16h-7 M110 18v14m0-8c1-5 4-7 8-7 M137 24.5c0 11-15 11-15 0s15-11 15 0z M155 19c-10-7-18 10-7 13 2 1 5 0 7-1 M162 25h12c0-10-13-10-14-1-1 8 7 11 13 7 M190 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#fff1f5" stroke-width="5.7"/>
     <path d="M205 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#dfa0b7" stroke-width="7.1"/><path d="M205 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#fff1f5" stroke-width="5.7"/>
     <g transform="translate(136 15) rotate(17)" fill="#ff8ab6" stroke="#632d46" stroke-width="1.2"><path d="M0 0c-2-3-6-5-7-3s0 6 2 6l5-2 5 2c2 0 3-4 2-6s-5 0-7 3z"/><circle r="1.8" fill="#ffd1e3"/></g></g>
-    <path transform="translate(118 0)" d="m68 9 3-4m2 7 5-3m-4 6 5-.4" stroke="#ffb5d0" stroke-width="1.4"/>
+    <path transform="translate(133 7)" d="m68 9 3-4m2 7 5-3m-4 6 5-.4" stroke="#ffb5d0" stroke-width="1.4"/>
   </g>
 </svg>
