@@ -654,3 +654,11 @@ The browser API passed preview, generation, patch application, full
 readback, and rollback against the physical board. The transcript is
 `build/pynq/fixed-browser-api.json`.
 
+
+### Replay the three open-ended diagnosis inputs
+
+With the Mac app connected over USB, replay the recorded CSVs and question. Use an interpreter with NumPy and the app's loopback HTTP port. The verifier checks the input hashes, selected version, projection counts, and live telemetry. It measures API wall time and writes the actual answers for review.
+
+```sh
+python -m kit.replay_open_questions --port PORT --model original --output original-replay.json
+```

@@ -2,6 +2,20 @@
 
 Every number on this page comes from a recorded run. The raw records are under `kit/evidence/` and `build/`. The broader research log, including the weight-reading studies, is in [research.md](../research.md). How to reproduce the hardware work is in [engineering.md](engineering.md).
 
+## Open-ended pool diagnosis
+
+The physical kit received the same question, “What's wrong with my system?”, for three 60-reading uploads. All runs below used the original model weights. Times run from submission to the rendered final answer.
+
+| Recorded queue | Previous decoder | Decoder verifying token proposals | Original model's answer |
+| --- | ---: | ---: | --- |
+| Cleared after peaking at 12 | 40.39 s | 19.71 s | Correct recovery and peak |
+| Increased to 19 waiting | 43.41 s | 23.33 s | Correct active backlog and count, omitted the increase |
+| Zero waiting throughout | 42.44 s | 19.65 s | Correct count, incorrectly implied a past queue |
+
+The faster path generated the exact same text in each case. A separate unfamiliar question took 24.70 s versus 42.43 s, and the first-step calibration values also matched. The app shows the measured first, peak and final queue state alongside the generated interpretation. [Board timings](../kit/evidence/open-question-verified-physical.json) · [Fresh wording and saved weights](../kit/evidence/verified-decoder-weight-controls-physical.json)
+
+A separate W8A8 checkpoint, **Queue history v2**, was trained to use the captured queue history. A software evaluation on frozen incidents found it classified 15 of 15 histories correctly, reported the change in all nine active queues correctly, and answered three targeted questions. It also preserved the current state, historical peak and primary forecast on 12 archived cases. Five of those answers described recovery without explicitly giving the current count of zero. [Paired evaluation](../kit/evidence/grounded-history-independent-review.json)
+
 ## Current status
 
 The FPGA scores live telemetry. A provisioned language-model
