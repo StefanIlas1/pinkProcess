@@ -96,6 +96,7 @@ button.icon{width:32px;height:32px;padding:0;border-radius:50%;font-size:1.1rem;
 .vt i{display:inline-block;width:18px;height:6px;border-radius:3px;margin-left:7px;background:linear-gradient(100deg,#352d39 0%,#352d39 35%,#4c4153 50%,#352d39 65%,#352d39 100%);background-size:260% 100%;animation:sweep 2.4s linear infinite}
 .vbody{white-space:pre-line}.vbody.mono{font:.85rem/1.6 var(--mono);white-space:pre-wrap}
 .skeleton{display:grid;gap:12px;min-width:min(100%,360px)}.vbody+.skeleton,.bars+.skeleton{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.work-count{color:var(--dim);font:.78rem var(--mono)}
 .stg{display:flex;gap:16px;flex-wrap:wrap;font-size:.85rem}.stg span{color:var(--dim);opacity:.4;transition:opacity .3s}.stg span[data-s=past]{opacity:.6}.stg span[data-s=now]{opacity:1;color:var(--ink);font-weight:600}
 .thinking{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--dim);font:.82rem var(--mono)}.thinking .phase{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.thinking .timer{flex:none;white-space:nowrap}
 .bars{display:grid;gap:9px}.bars i{display:block;height:12px;border-radius:6px;background:linear-gradient(100deg,var(--c) 0%,var(--c) 35%,var(--h) 50%,var(--c) 65%,var(--c) 100%);background-size:260% 100%;animation:sweep 3s linear infinite}
@@ -380,13 +381,7 @@ function setQuestion(value) {
   autosize();
 }
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-const STAGE_PHRASES = [
-  ["Reading the last 30 seconds of the queue","Pulling the newest reading off the wire","Counting requests in the queue","Checking how many connections are busy","Reading the saved readings back","Measuring how long requests wait","Looking at busy versus waiting","Sending the question to the board"],
-  ["Looking for the start of the pile-up","Comparing against the quiet baseline","Looking at the trend over ten seconds","Spotting where the queue began to grow","Packing readings into 8-bit numbers","Lining up the data for the logic fabric","Checking nothing has changed mid-question","Finding what changed first"],
-  ["Loading INT8 weights onto the board","Checking the weights fingerprint","Handing readings to the model","Waking the FPGA","Waiting for the FPGA","Reading the board's memory","Balancing speed and accuracy on the chip","Checking the board clock"],
-  ["Streaming 64 KB to fabric","Running the encoder on the board","Multiplying matrices in hardware","Crunching numbers in parallel","Scoring the last few readings","Checking the forecast","Reading the queue forecast","Double-checking the warning threshold"],
-  ["Running the decoder, one word at a time","Picking the most likely next word","Tying the readings to a likely cause","Trimming the answer to the point","Writing the answer in plain words","Almost there, the board is still working","Hang tight, this runs on the board itself","Checking the board is still healthy"]
-];
+const PROGRESS_LABELS = ["Preparing readings", "Readings ready", "Starting analysis", "Analyzing readings", "Generating the answer"];
 const ON_TOPIC = /queue|request|connection|load|busy|wait|latenc|slow|system|server|traffic|capacity|pool|fpga|board|error|outage|\bdown\b|fail|spike|forecast|warn|peak|health|status|wrong|problem|issue|trend|grow|drain|backlog|arriv|timeout|check next|\bdata\b|reading|average|\bmean\b|\bmax\b|\bmin\b|temperature|sales|revenue|order|events?|summar|happen|unusual|anomal|\bnow\b|latest|\brows?\b|column/i;
 const BEST_FOR = {
   "queue-onset-logistic":"spotting queue build-up in connection pools",
@@ -406,14 +401,6 @@ let answerStyle = "short", lastLatency = null, activeTab = "notes", lastTimings 
 const query = new URLSearchParams(location.search || location.hash.slice(1));
 const path = {ms:[null, null, null, null, null], begin:0, starts:[0, 0, 0, 0, 0], state:["idle", "idle", "idle", "idle", "idle"]};
 
-function shuffled(items) {
-  const copy = [...items];
-  for (let index = copy.length - 1; index > 0; index--) {
-    const swap = Math.floor(Math.random() * (index + 1));
-    [copy[index], copy[swap]] = [copy[swap], copy[index]];
-  }
-  return copy;
-}
 function setLogo() {
   for (const logo of document.querySelectorAll(".logo")) logo.innerHTML = '<img src="/static/logo.png" alt="PYNQ Process" width="138" height="46">';
 }
@@ -876,9 +863,9 @@ function renderMessages() {
     if (message.pending) {
       const skeleton = document.createElement("div");
       skeleton.className = "skeleton"; skeleton.dataset.index = index;
-      const names = ["Data", "Profile", "Model", status ? "PYNQ-Z2" : "This Mac", "Answer"];
+      const names = ["Data", "Profile", "Model", message.boardWork ? "PYNQ-Z2" : "This Mac", "Answer"];
       skeleton.innerHTML = '<div class="stg">' + names.map((name, stage) => '<span data-s="next" data-stage="' + stage + '">' + name + '</span>').join("") + '</div>' +
-        '<div class="thinking"><span class="phase"></span><span class="timer"></span></div>';
+        '<div class="thinking"><span class="phase" role="status"></span><span class="timer" role="timer" aria-label="Elapsed time"></span></div><small class="work-count" hidden></small>';
       bubble.append(skeleton);
       return bubble;
     }
@@ -921,8 +908,12 @@ function updateThinking() {
     const entry = messages[Number(node.dataset.index)];
     if (!entry?.start) continue;
     const now = Date.now(), stage = entry.stage || 0;
-    const group = STAGE_PHRASES[stage], order = entry.order[stage];
-    node.querySelector(".phase").textContent = group[order[Math.floor((now - (entry.stageStart || entry.start)) / 5000) % group.length]] + "\u2026";
+    const phase = node.querySelector(".phase");
+    const label = PROGRESS_LABELS[stage];
+    if (phase.textContent !== label) phase.textContent = label;
+    const count = node.querySelector(".work-count");
+    count.hidden = !(entry.projections > 0);
+    if (!count.hidden) count.textContent = entry.projections.toLocaleString() + " FPGA projections completed";
     const total = Math.floor((now - entry.start) / 1000);
     node.querySelector(".timer").textContent = Math.floor(total / 60) + ":" + String(total % 60).padStart(2, "0");
     for (const name of node.querySelectorAll(".stg span")) {
@@ -932,7 +923,7 @@ function updateThinking() {
   }
 }
 function pendingEntry() {
-  return {role:"answer", pending:true, styles:LOCAL_STYLES, readings:"", variants:{}, view:"short", picked:false, defaultStyle:answerStyle, start:Date.now(), stage:0, stageStart:Date.now(), order:STAGE_PHRASES.map(group => shuffled(group.map((_, index) => index)))};
+  return {role:"answer", pending:true, styles:LOCAL_STYLES, readings:"", variants:{}, view:"short", picked:false, defaultStyle:answerStyle, start:Date.now(), stage:0, boardWork:false, projections:0};
 }
 function setVariant(entry, style, variant) {
   entry.variants[style] = variant;
@@ -940,8 +931,13 @@ function setVariant(entry, style, variant) {
   renderMessages();
 }
 function entryStage(entry, stage) {
-  if (stage > (entry.stage || 0)) {entry.stage = stage; entry.stageStart = Date.now();}
+  if (stage > entry.stage) entry.stage = stage;
   pathAdvance(stage);
+}
+function boardProgress(entry, job) {
+  entry.projections = Math.max(entry.projections, job.accelerated_projections || 0);
+  entryStage(entry, job.partial_answer ? 4 : entry.projections ? 3 : 2);
+  updateThinking();
 }
 function suggestedModel() {
   return models?.find(model => !model.available && model.kind === "language") || models?.find(model => !model.available) || models?.[0] || null;
@@ -1055,6 +1051,7 @@ function failEntry(entry, asked, question, err) {
 function askLive(question, captured=null) {
   run(async () => {
     const entry = pendingEntry();
+    entry.boardWork = true;
     const asked = {role:"user", text:question};
     messages.push(asked, entry); renderMessages(); show("");
     pathBegin();
@@ -1068,8 +1065,7 @@ function askLive(question, captured=null) {
         entry.readings = measuredQueueHistory(snapshot); renderMessages();
         while (data.state === "running") {
           if (Date.now() > deadline) throw new Error("The board took too long to answer. Try again.");
-          const elapsed = Date.now() - entry.start;
-          entryStage(entry, data.partial_answer ? 4 : elapsed < 1500 ? 1 : elapsed < 3000 ? 2 : 3);
+          boardProgress(entry, data);
           if (data.partial_answer && data.partial_answer !== entry.partial) {
             if (entry.firstTextAt == null) entry.firstTextAt = Date.now();
             entry.partial = data.partial_answer;
@@ -1183,7 +1179,6 @@ async function localAnswer(entry, question, only) {
   const seen = new Set(), deadline = Date.now() + 120000;
   for (;;) {
     if (Date.now() > deadline) throw new Error("The analysis took too long. Try again.");
-    const elapsed = Date.now() - entry.start;
     for (const style of job.order) {
       const result = job.ready[style];
       if (!result || seen.has(style)) continue;
@@ -1193,8 +1188,8 @@ async function localAnswer(entry, question, only) {
       if (style === "short") entry.readings = result.readings + " Answered on " + job.where + ".";
     }
     if (job.state === "error") throw new Error(job.error);
-    if (only.includes("short")) entryStage(entry, seen.has("short") ? 4 : elapsed < 500 ? 2 : 3);
-    if (job.state !== "running" && elapsed > 1800) return job.timings;
+    if (only.includes("short")) entryStage(entry, seen.has("short") ? 4 : 3);
+    if (job.state !== "running") return job.timings;
     await sleep(300);
     if (job.state === "running") job = await request("data_ask_progress", {job_id:job.job_id});
   }
@@ -1210,8 +1205,7 @@ async function boardAnswer(entry, question) {
   const deadline = Date.now() + 120000;
   while (job.state === "running") {
     if (Date.now() > deadline) throw new Error("The board took too long to answer. Try again.");
-    const elapsed = Date.now() - entry.start;
-    entryStage(entry, job.partial_answer ? 4 : elapsed < 1500 ? 2 : 3);
+    boardProgress(entry, job);
     if (job.partial_answer && job.partial_answer !== entry.partial) {
       if (entry.firstTextAt == null) entry.firstTextAt = Date.now();
       entry.partial = job.partial_answer;
@@ -1235,13 +1229,16 @@ async function boardAnswer(entry, question) {
 function askData(question) {
   run(async () => {
     const entry = pendingEntry();
-    const board = await prepareBoardDataset();
-    if (board) entry.styles = STYLE_ORDER;
+    entry.boardWork = boardEligible() && !dataset.boardSkipped;
     const asked = {role:"user", text:question};
     messages.push(asked, entry); renderMessages(); show("");
     accepted = true;
     pathBegin();
     try {
+      const board = await prepareBoardDataset();
+      entry.boardWork = board;
+      if (board) entry.styles = STYLE_ORDER;
+      renderMessages();
       document.body.classList.add("working");
       const submittedAt = performance.now();
       const work = [localAnswer(entry, question, board ? ["transcript", "table"] : LOCAL_STYLES)];

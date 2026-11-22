@@ -1,0 +1,25 @@
+{
+  "method": "Chrome drove the installed Mac interface with the paired physical PYNQ-Z2. Both checks required a visible skeleton within 1.5 seconds of pressing Ask, an advancing board counter, a visible generating stage, and removal of the loader upon completion. The recovery check also required the table tab to be available while pending.",
+  "cases": {
+    "recovery": {
+      "first_counter": "11 FPGA projections completed",
+      "mid_generation": "Data\nProfile\nModel\nPYNQ-Z2\nAnswer\nGenerating the answer\n0:08\n178 FPGA projections completed",
+      "timing_in_ui": "First text 8,470 ms \u00b7 Complete answer 19,146 ms",
+      "fabric_projections": 802,
+      "calls": [
+        "dataset_ask"
+      ],
+      "board_status": "PYNQ-Z2 connected"
+    },
+    "live": {
+      "first_counter": "14 FPGA projections completed",
+      "mid_generation": "Data\nProfile\nModel\nPYNQ-Z2\nAnswer\nGenerating the answer\n0:10\n217 FPGA projections completed",
+      "timing_in_ui": "First text 10,125 ms \u00b7 Complete answer 18,388 ms",
+      "fabric_projections": 583,
+      "calls": [
+        "ask_begin"
+      ],
+      "board_status": "PYNQ-Z2 connected"
+    }
+  }
+}
