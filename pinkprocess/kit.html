@@ -35,12 +35,17 @@ code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{ove
 .workflow-status{color:var(--dim);font-size:.9rem}.workflow-status[data-error="true"]{color:var(--pink)}
 .workflow-tabs{display:flex;gap:5px;overflow-x:auto;border-bottom:1px solid var(--line);padding:4px 3px 9px}
 .workflow-tabs button{white-space:nowrap;font-size:.85rem}.workflow-tabs [aria-selected="true"]{background:var(--pink);border-color:var(--pink);color:#27161e}
+.workflow-tabs [data-state="ready"]:not([aria-selected="true"])::after,.workflow-tabs [data-state="running"]:not([aria-selected="true"])::after{content:"";display:inline-block;width:6px;height:6px;margin-left:6px;border-radius:50%;vertical-align:middle}
+.workflow-tabs [data-state="ready"]:not([aria-selected="true"])::after{background:var(--mint)}
+.workflow-tabs [data-state="running"]:not([aria-selected="true"])::after{border:1px solid var(--pink)}
 .workflow-result{min-height:125px;background:#14191a;border:1px solid var(--line);border-radius:8px;padding:16px}
 .workflow-output,.chat-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}
+.workflow-result[data-state="ready"] .workflow-output{animation:workflow-reveal 200ms ease-out both}
+@keyframes workflow-reveal{from{opacity:.48;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
 .stage-skeleton{display:grid;gap:9px;margin:13px 0;max-width:440px}.stage-skeleton i{height:9px;border-radius:4px;background:linear-gradient(90deg,#303639,#484046,#303639);background-size:200% 100%;animation:workflow-shimmer 1.4s ease-in-out infinite}
 .stage-skeleton i:nth-child(2){width:82%}.stage-skeleton i:nth-child(3){width:58%}
 @keyframes workflow-shimmer{0%{background-position:200% 0}100%{background-position:0 0}}
-@media(prefers-reduced-motion:reduce){.stage-skeleton i{animation:none}}
+@media(prefers-reduced-motion:reduce){.stage-skeleton i,.workflow-result[data-state="ready"] .workflow-output{animation:none}}
 table.workflow-table{font-variant-numeric:tabular-nums}
 .workflow-table caption{text-align:left;color:var(--dim);margin-bottom:6px}
 #workflow-chat-log{max-height:310px;overflow:auto;display:grid;gap:12px}
@@ -93,6 +98,7 @@ table.workflow-table{font-variant-numeric:tabular-nums}
     <label class="field capacity" for="workflow-capacity">Capacity for upload<input id="workflow-capacity" type="number" min="1" step="1" value="32" required></label>
   </div>
   <details><summary>CSV format</summary><p class="muted">Use integer columns <code>time_ms,busy,waiting</code> with 50 to 2,097 readings at 100 ms intervals.</p></details>
+  <small id="workflow-board-guidance" role="status">Connect an FPGA kit with the language model to upload a CSV.</small>
   <div class="workflow-model-control">
     <label class="field" for="workflow-model">Dataset model<select id="workflow-model" disabled></select></label>
     <button id="workflow-refresh-models" type="button" disabled>Refresh models</button>
@@ -114,7 +120,7 @@ table.workflow-table{font-variant-numeric:tabular-nums}
   <form id="workflow-ask-form" class="ask divider">
     <label class="field" for="workflow-question">Question<input id="workflow-question" maxlength="500" placeholder="What does this telemetry show?" required></label>
     <button id="workflow-dictate" type="button" hidden>Dictate</button>
-    <button id="workflow-ask" class="primary" type="submit" disabled>Ask with stages</button>
+    <button id="workflow-ask" class="primary" type="submit" disabled>Ask FPGA</button>
   </form>
   <small id="workflow-speech-status" role="status"></small>
   <p id="workflow-status" class="workflow-status" role="status">Upload a CSV to begin.</p>
@@ -129,9 +135,9 @@ table.workflow-table{font-variant-numeric:tabular-nums}
   </div>
   <div id="workflow-results">
     <section class="workflow-result stack" id="panel-transcript" role="tabpanel" aria-labelledby="tab-transcript" tabindex="0"><h3>Transcript</h3><p class="workflow-output muted">Your submitted question will appear here.</p></section>
-    <section class="workflow-result stack" id="panel-generalization" role="tabpanel" aria-labelledby="tab-generalization" tabindex="0" hidden><h3>Generalization</h3><p class="workflow-output muted">Waiting for a question.</p></section>
-    <section class="workflow-result stack" id="panel-short_answer" role="tabpanel" aria-labelledby="tab-short_answer" tabindex="0" hidden><h3>Short answer</h3><p class="workflow-output muted">Waiting for a question.</p></section>
-    <section class="workflow-result stack" id="panel-summary" role="tabpanel" aria-labelledby="tab-summary" tabindex="0" hidden><h3>Summary</h3><p class="workflow-output muted">Waiting for a question.</p></section>
+    <section class="workflow-result stack" id="panel-generalization" role="tabpanel" aria-labelledby="tab-generalization" tabindex="0" hidden><h3>Measured scope and observations</h3><p class="workflow-output muted">Upload a CSV to see what it measures.</p></section>
+    <section class="workflow-result stack" id="panel-short_answer" role="tabpanel" aria-labelledby="tab-short_answer" tabindex="0" hidden><h3>Opening sentence</h3><p class="workflow-output muted">Waiting for a question.</p></section>
+    <section class="workflow-result stack" id="panel-summary" role="tabpanel" aria-labelledby="tab-summary" tabindex="0" hidden><h3>Extractive summary</h3><p class="workflow-output muted">Waiting for a question.</p></section>
     <section class="workflow-result stack" id="panel-final" role="tabpanel" aria-labelledby="tab-final" tabindex="0" hidden><h3>Final answer</h3><p class="workflow-output muted">Waiting for a question.</p></section>
     <section class="workflow-result stack" id="panel-table" role="tabpanel" aria-labelledby="tab-table" tabindex="0" hidden>
       <table class="workflow-table"><caption id="workflow-table-caption">Upload a CSV to see its rows.</caption><thead><tr><th scope="col">Time (ms)</th><th scope="col">Busy</th><th scope="col">Waiting</th></tr></thead><tbody id="workflow-rows"></tbody></table>
@@ -707,13 +713,8 @@ el("csv-workspace").ontoggle = async event => {
   } catch (err) {show(err.message,true);}
 };
 const workflowTabs = [...document.querySelectorAll("#workflow-tabs [role=tab]")];
-const workflowStages = [
-  ["generalization", "Generalization"],
-  ["short_answer", "Short answer"],
-  ["summary", "Summary"],
-  ["final", "Final answer"],
-];
-let workflowDataset = null, workflowRows = [], workflowRowsShown = 0, workflowCalibrated = false;
+const workflowAnswerViews = ["short_answer", "summary", "final"];
+let workflowDataset = null, workflowHost = "", workflowRows = [], workflowRowsShown = 0, workflowCalibrated = false;
 let workflowVoiceState = "idle", voiceBefore = "";
 const speechInput = window.webkit?.messageHandlers?.speechInput;
 const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -727,11 +728,17 @@ function workflowNotice(message, isError=false) {
 function workflowControls() {
   const recording = ["requesting", "listening", "stopping"].includes(workflowVoiceState);
   const blocked = busy || recording;
-  const usable = !blocked && Boolean(workflowDataset?.selected_model);
-  el("workflow-upload").disabled = blocked;
+  const datasetConnected = status?.lm_supported && workflowDataset && workflowHost === address;
+  const usable = !blocked && datasetConnected && Boolean(workflowDataset?.selected_model);
+  const guidance = el("workflow-board-guidance");
+  const message = !status?.lm_supported ? "Connect an FPGA kit with the language model to upload a CSV." :
+    workflowDataset && !datasetConnected ? "This CSV belongs to another board. Reconnect that board or upload it again." : "";
+  if (guidance.textContent !== message) guidance.textContent = message;
+  guidance.hidden = !message;
+  el("workflow-upload").disabled = blocked || !status?.lm_supported;
   el("workflow-capacity").disabled = blocked;
-  el("workflow-model").disabled = blocked || !workflowDataset?.models?.length;
-  el("workflow-refresh-models").disabled = blocked || !workflowDataset;
+  el("workflow-model").disabled = blocked || !datasetConnected || !workflowDataset?.models?.length;
+  el("workflow-refresh-models").disabled = blocked || !datasetConnected;
   el("workflow-create").disabled = !usable;
   el("workflow-ask").disabled = !usable || !el("workflow-question").value.trim();
   el("workflow-synthesize").disabled = !usable ||
@@ -763,12 +770,20 @@ for (const [i, tab] of workflowTabs.entries()) {
 
 function displayWorkflowStage(stage, state, text="") {
   const panel = el("panel-" + stage), output = panel.querySelector(".workflow-output");
+  const tab = el("tab-" + stage);
+  const label = state === "complete" ? "ready" : state;
+  if (panel.dataset.state !== label) {
+    panel.dataset.state = tab.dataset.state = label;
+    tab.setAttribute("aria-label", tab.textContent + (label === "pending" ? "" : ", " + label));
+  }
   panel.setAttribute("aria-busy", String(state === "running"));
-  panel.querySelector(".stage-skeleton")?.remove();
+  const priorSkeleton = panel.querySelector(".stage-skeleton");
+  const showSkeleton = state === "running" && (!text || stage === "short_answer");
+  if (!showSkeleton) priorSkeleton?.remove();
   output.classList.toggle("muted", state !== "complete" && !text);
   output.textContent = text || ({pending:"Waiting for the preceding stage.", running:"Generating on the FPGA…",
                                 failed:"This stage did not finish."})[state] || "";
-  if (state === "running" && !text) {
+  if (showSkeleton && !priorSkeleton) {
     const skeleton = document.createElement("div");
     skeleton.className = "stage-skeleton";
     skeleton.setAttribute("aria-hidden", "true");
@@ -780,20 +795,43 @@ function displayWorkflowStage(stage, state, text="") {
 function resetWorkflowResults() {
   workflowCalibrated = false;
   displayWorkflowStage("transcript", "pending", "Your submitted question will appear here.");
-  for (const [stage] of workflowStages) displayWorkflowStage(stage, "pending", "Waiting for a question.");
+  for (const stage of workflowAnswerViews) displayWorkflowStage(stage, "pending", "Waiting for a question.");
   el("workflow-chat-log").replaceChildren();
   el("workflow-synthesis-status").textContent = "";
   el("workflow-calibration").hidden = true;
   el("workflow-calibration").textContent = "";
 }
 
+function workflowObservations(dataset) {
+  const snapshot = dataset.snapshot || {}, observed = snapshot.observations || dataset.summary || {};
+  const {latest, capacity} = snapshot;
+  const count = observed.sample_count ?? snapshot.sample_count;
+  const lines = [];
+  if (Number.isFinite(count)) {
+    const interval = Number.isFinite(observed.start_ms) && Number.isFinite(observed.end_ms)
+      ? " from " + observed.start_ms + " to " + observed.end_ms + " ms" : "";
+    lines.push(count.toLocaleString() + " readings" + interval + ".");
+  }
+  if (latest && Number.isFinite(capacity)) {
+    lines.push("Last reading: " + latest.busy + " of " + capacity + " connections busy; " + latest.waiting + " waiting.");
+  }
+  if (observed.peak_waiting) {
+    const peak = observed.peak_waiting;
+    lines.push("Peak queue: " + peak.waiting + " waiting at " + peak.time_ms + " ms.");
+  }
+  if (lines.length) lines.push("These measurements do not identify a cause or request-level latency.");
+  return lines.join("\n") || "This upload has no measured observations available.";
+}
+
 function applyWorkflowDataset(data) {
   workflowDataset = data;
+  workflowHost = address;
   const models = data.models || [];
   const select = el("workflow-model");
   select.replaceChildren(...models.map(model => new Option(model.name, model.name)));
   if (!models.length) select.replaceChildren(new Option("Connect an FPGA with a language model", ""));
   select.value = data.selected_model || "";
+  displayWorkflowStage("generalization", "complete", workflowObservations(data));
   workflowControls();
 }
 
@@ -838,7 +876,7 @@ el("workflow-upload").onchange = event => {
   const capacity = el("workflow-capacity");
   if (!capacity.reportValidity()) return;
   runWorkflow(async () => {
-    if (file.size > 1.9 * 1024 * 1024) throw new Error("Choose a CSV smaller than 1.9 MiB.");
+    if (file.size > 100 * 1024) throw new Error("Choose a CSV no larger than 100 KiB for a board upload.");
     workflowNotice("Validating the CSV…");
     const text = await file.text();
     const dataset = await request("dataset_upload", {csv:text, capacity:Number(capacity.value), name:file.name});
@@ -904,6 +942,30 @@ function appendWorkflowChat(role, text) {
   return content;
 }
 
+function completeSentences(text, finished) {
+  let prior = 0;
+  const segments = typeof Intl.Segmenter === "function"
+    ? [...new Intl.Segmenter("en", {granularity:"sentence"}).segment(text)]
+    : [...text.matchAll(/[.!?]+[”’"')\]]*(?:\s+|$)/g)].map(match => {
+      const index = prior;
+      prior = match.index + match[0].length;
+      return {segment:text.slice(index, prior), index};
+    });
+  return segments.filter(({segment, index}) => {
+    const trimmed = segment.trim();
+    return /[.!?][”’"')\]]*$/.test(trimmed) &&
+      (finished || index + segment.length < text.length || /\s$/.test(segment));
+  }).map(({segment}) => segment.trim());
+}
+
+function extractiveSummary(answer, sentences) {
+  if (sentences.length > 1) return sentences[0] + "\n" + sentences.at(-1);
+  if (sentences.length === 1) return sentences[0];
+  const clean = answer.trim();
+  const end = clean.length > 240 ? clean.lastIndexOf(" ", 240) : -1;
+  return end > 0 ? clean.slice(0, end) + "…" : clean;
+}
+
 el("workflow-ask-form").onsubmit = event => {
   event.preventDefault();
   if (el("workflow-ask").disabled) return;
@@ -913,25 +975,30 @@ el("workflow-ask-form").onsubmit = event => {
     el("workflow-chat-log").replaceChildren();
     el("workflow-synthesis-status").textContent = "";
     displayWorkflowStage("transcript", "complete", question);
-    for (const [stage] of workflowStages) displayWorkflowStage(stage, "pending");
+    displayWorkflowStage("short_answer", "running", "Waiting for the first complete sentence…");
+    displayWorkflowStage("summary", "pending", "Excerpts will come from the completed final answer.");
+    displayWorkflowStage("final", "running");
+    selectWorkflowTab("final");
+    workflowNotice("Generating one answer on the FPGA…");
     const startedAt = performance.now();
-    for (const [index, [stage, label]] of workflowStages.entries()) {
-      workflowNotice(label + " · " + (index + 1) + " of " + workflowStages.length + " FPGA requests");
-      displayWorkflowStage(stage, "running");
-      const selected = el("workflow-tabs").querySelector('[aria-selected="true"]').dataset.result;
-      if (index === 0 || selected === workflowStages[index - 1][0]) selectWorkflowTab(stage);
-      try {
-        const text = await askWorkflowStage(question, stage, value => displayWorkflowStage(stage, "running", value));
-        displayWorkflowStage(stage, "complete", text);
-        if (stage === "final") {
-          workflowCalibrated = true;
-          appendWorkflowChat("You", question);
-          appendWorkflowChat(workflowDataset.selected_model, text);
-        }
-      } catch (error) {
-        displayWorkflowStage(stage, "failed");
-        throw error;
-      }
+    try {
+      const text = await askWorkflowStage(question, "final", partial => {
+        displayWorkflowStage("final", "running", partial);
+        const opening = completeSentences(partial, false)[0];
+        if (opening) displayWorkflowStage("short_answer", "complete", opening);
+      });
+      const sentences = completeSentences(text, true);
+      displayWorkflowStage("short_answer", "complete", sentences[0] || "The final answer contains no complete sentence.");
+      displayWorkflowStage("summary", "complete", extractiveSummary(text, sentences));
+      displayWorkflowStage("final", "complete", text);
+      workflowCalibrated = true;
+      appendWorkflowChat("You", question);
+      appendWorkflowChat(workflowDataset.selected_model, text);
+    } catch (error) {
+      displayWorkflowStage("short_answer", "failed");
+      displayWorkflowStage("summary", "failed");
+      displayWorkflowStage("final", "failed");
+      throw error;
     }
     workflowNotice("Final answer completed in " + seconds(performance.now() - startedAt) + ".");
   });
