@@ -72,6 +72,7 @@ class Flan:
         self.first_output_activation = None
         self.first_output_max = None
         self.fabric_projections = 0
+        self.accelerated_projections = 0
         self.partial_answer = ""
 
     def restore_head(self):
@@ -111,11 +112,13 @@ class Flan:
             dots = q.astype("float32") @ w.astype("float32").T
         else:
             dots = self.query_projection.project(name, w, q) if self.query_projection is not None else None
-            if dots is None:
+            accelerated = dots is not None
+            if not accelerated:
                 project = getattr(self.fabric, "matmat_array", None) or self.fabric.matmat
                 dots = project(memoryview(w), q, w.shape[0])
             dots = np.asarray(dots, dtype="float32")
             self.fabric_projections += 1
+            self.accelerated_projections += accelerated
         row_scales = self.t[name + ".weight.scale"]
         if name == "lm_head" and self.first_output_max is None:
             self.first_output_max = float((dots[0] * row_scales).max())
@@ -180,6 +183,7 @@ class Flan:
         self.first_output_activation = None
         self.first_output_max = None
         self.fabric_projections = 0
+        self.accelerated_projections = 0
         self.partial_answer = ""
         ids = self.tokenizer.encode(prompt)
         if len(ids) > 512:

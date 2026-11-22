@@ -17,6 +17,7 @@ Y_ADDRESS = 0x1C
 CORE_ID = 0x20
 PROJECTION_ID = 0x50504A31
 BUSY, DONE, ERROR = 1, 2, 4
+MAX_SEGMENT_BUFFER_BYTES = 2 * 1024 * 1024
 QUERY_PROJECTIONS = frozenset({
     "encoder.block.0.layer.0.SelfAttention.q",
     "decoder.block.0.layer.0.SelfAttention.q",
@@ -121,28 +122,55 @@ def run_projection(mmio, allocate, a, w, decode, timeout, retain):
                     "device_roundtrip_ns": device_ns, "download_ns": download_ns}
 
 
-class QueryProjection:
-    """Offload the first self-attention query in each FLAN stack."""
+class OverlayProjection:
+    """Offload either the first self-attention queries or every learned projection."""
 
-    def __init__(self, mmio, allocate, *, timeout=2):
+    def __init__(self, mmio, allocate, *, scope="query", timeout=2):
+        if scope not in ("query", "all"):
+            raise ValueError("Projection scope must be query or all.")
         self.mmio = mmio
         self.allocate = allocate
+        self.scope = scope
         self.timeout = timeout
         self.lock = Lock()
         self.disabled = False
         self.pending = None
 
     def project(self, name, weights, activations):
-        if name not in QUERY_PROJECTIONS:
+        if self.scope == "query" and name not in QUERY_PROJECTIONS:
             return None
         with self.lock:
             if self.disabled:
+                if self.scope == "all":
+                    raise RuntimeError("The all-projection accelerator is unavailable.")
                 return None
-            batch = len(activations)
-            a, w = pack_projection(weights, activations)
-            scores, _ = run_projection(self.mmio, self.allocate, a, w, batch == 1,
-                                       self.timeout, self._retain)
-            return unpack_projection(scores, batch, len(weights))
+            if self.scope == "query":
+                return self._project_segment(weights, activations)
+
+            batch, depth = activations.shape
+            output_lanes = 64 if batch == 1 else 8
+            position_tiles = (batch + 7) // 8
+            # Keep each contiguous weight and score buffer bounded, including the padded lanes.
+            tiles = min(MAX_SEGMENT_BUFFER_BYTES // (depth * output_lanes),
+                        MAX_SEGMENT_BUFFER_BYTES // (position_tiles * 64 * 4), 65535)
+            if tiles == 0:
+                raise ValueError("One projection tile exceeds the CMA segment budget.")
+            rows_per_segment = tiles * output_lanes
+            if len(weights) <= rows_per_segment:
+                return self._project_segment(weights, activations)
+
+            result = np.empty((batch, len(weights)), dtype=np.int32)
+            for start in range(0, len(weights), rows_per_segment):
+                stop = min(start + rows_per_segment, len(weights))
+                result[:, start:stop] = self._project_segment(weights[start:stop], activations)
+            return result
+
+    def _project_segment(self, weights, activations):
+        batch = len(activations)
+        a, w = pack_projection(weights, activations)
+        scores, _ = run_projection(self.mmio, self.allocate, a, w, batch == 1,
+                                   self.timeout, self._retain)
+        return unpack_projection(scores, batch, len(weights))
 
     def _retain(self, buffers):
         # Called with the lock held when launch or completion cannot be confirmed.
@@ -175,3 +203,6 @@ class QueryProjection:
                 return self._wait_for_idle()
             except KeyboardInterrupt:
                 continue
+
+
+QueryProjection = OverlayProjection

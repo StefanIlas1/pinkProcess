@@ -552,14 +552,21 @@ python3 -m kit.benchmark_projection --bitstream OLD/pinkprocess.bit --capture CA
 python3 -m kit.benchmark_projection_overlay --bitstream NEW/pinkprocess.bit --capture CAPTURE.npz
 ```
 
-The live kit server accepts `--projection-overlay` with its normal language
-model arguments. The installed systemd service reads this opt-in from
-`PINKPROCESS_PROJECTION_ARGS=--projection-overlay` in
-`/etc/pinkprocess-kit/projection.conf` on restart. This enables the prototype
-for the first self-attention
-query projection in each FLAN stack on a compatible overlay. The other
-projections use the existing classifier. Compare complete answers and live
-telemetry separately from isolated projection times.
+On a kit with the matched overlay and resident language model, the systemd
+service reads `/etc/pinkprocess-kit/projection.conf` on restart. To route
+every learned matrix through the array, set the file to:
+
+```ini
+PINKPROCESS_PROJECTION_ARGS="--projection-overlay --projection-scope all"
+```
+
+This includes both attention stacks, feed-forward layers and the vocabulary
+projection. Large matrices run in segments to fit the board's contiguous
+memory. Each segment uses the currently selected weights. In this mode the
+service requires the projection core, and a completed answer reports both
+`accelerated_projections` and `fabric_projections`. They count learned matrix
+calls, including a segmented matrix as one call. For the initial two-projection
+benchmark configuration, set `PINKPROCESS_PROJECTION_ARGS=--projection-overlay`.
 
 ### Remote Vivado build on Western GAUL
 

@@ -101,7 +101,7 @@ class KitServer(ThreadingHTTPServer):
         return self.tls.wrap_socket(connection, server_side=True, do_handshake_on_connect=False), address
 
 
-def main():
+def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--identity", required=True, type=Path)
     parser.add_argument("--bitstream", required=True, type=Path)
@@ -111,12 +111,21 @@ def main():
     parser.add_argument("--language-model", type=Path)
     parser.add_argument("--manifest-sha256")
     parser.add_argument("--projection-overlay", action="store_true",
-                        help="Enable the experimental DDR accelerator for the first FLAN query projections.")
-    args = parser.parse_args()
+                        help="Enable the experimental FLAN DDR projection accelerator.")
+    parser.add_argument("--projection-scope", choices=("query", "all"), default="query",
+                        help="Offload the first self-attention queries (default) or all learned projections.")
+    args = parser.parse_args(argv)
     if bool(args.language_model) != bool(args.manifest_sha256):
         parser.error("Supply both the language model directory and its pinned manifest hash.")
     if args.projection_overlay and args.language_model is None:
         parser.error("Supply the language model when enabling the projection overlay.")
+    if args.projection_scope == "all" and not args.projection_overlay:
+        parser.error("--projection-scope all requires --projection-overlay.")
+    return args
+
+
+def main():
+    args = parse_args()
     token = (args.identity / "token").read_text().strip()
     if len(token) != 64:
         raise ValueError("Invalid kit token.")
@@ -140,13 +149,13 @@ def main():
                                                         manifest_sha256=args.manifest_sha256)
                 query_projection = None
                 if args.projection_overlay:
-                    from lm_reference.projection_overlay import QueryProjection, projection_mmio
+                    from lm_reference.projection_overlay import OverlayProjection, projection_mmio
 
-                    mmio = projection_mmio(model.classifier.overlay, required=False)
+                    mmio = projection_mmio(model.classifier.overlay, required=args.projection_scope == "all")
                     if mmio is not None:
                         from pynq import allocate
 
-                        query_projection = QueryProjection(mmio, allocate)
+                        query_projection = OverlayProjection(mmio, allocate, scope=args.projection_scope)
                         resources.callback(query_projection.close)
                 runtime = Flan(args.language_model, TiledMatvec(model.classifier, lock=server.model_lock),
                                query_projection=query_projection)

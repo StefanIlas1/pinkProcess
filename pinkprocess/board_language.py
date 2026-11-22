@@ -106,7 +106,8 @@ class BoardLanguage:
                 raise RuntimeError("The board language model generated an empty answer.")
             activation = self.runtime.first_output_activation
             activation_max = getattr(self.runtime, "first_output_max", None)
-            result = dict(state="complete", answer=answer, fabric_projections=self.runtime.fabric_projections)
+            result = dict(state="complete", answer=answer, fabric_projections=self.runtime.fabric_projections,
+                          accelerated_projections=getattr(self.runtime, "accelerated_projections", 0))
             if initial:
                 with self.lock:
                     job = self.jobs[job_id]
@@ -141,7 +142,8 @@ class BoardLanguage:
                     raise ValueError("Unknown inference job.")
                 if job["state"] == "running":
                     return {**job, "partial_answer": getattr(self.runtime, "partial_answer", ""),
-                            "fabric_projections": getattr(self.runtime, "fabric_projections", 0)}
+                            "fabric_projections": getattr(self.runtime, "fabric_projections", 0),
+                            "accelerated_projections": getattr(self.runtime, "accelerated_projections", 0)}
                 return {**job}
             if op == 'lm_captures':
                 return self.list_captures(command.get('before'))
