@@ -66,7 +66,11 @@ if [[ ! -d "$root/releases/$revision" ]]; then
         fi
     fi
     if command -v c++ >/dev/null; then
-        if ! c++ -std=c++11 -O3 -Wall -Wextra -shared -fPIC \
+        projection_flags=()
+        if [[ $(uname -m) == armv7l ]] && grep -qw neon /proc/cpuinfo; then
+            projection_flags+=(-mfpu=neon)
+        fi
+        if ! c++ "${projection_flags[@]}" -std=c++11 -O3 -Wall -Wextra -shared -fPIC \
             "$temporary/fpga/projection_native.cpp" -o "$temporary/fpga/projection_native.so"; then
             rm -f "$temporary/fpga/projection_native.so"
             echo "Using Python projection after the optional native helper failed to compile." >&2
