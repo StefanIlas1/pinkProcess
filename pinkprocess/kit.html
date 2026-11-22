@@ -5,135 +5,143 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>pinkProcess · FPGA workspace</title>
 <style>
-:root { color-scheme: light; --ink: #111; --line: #c9c9c9; --soft: #f4f4f4; --mute: #616161; --pink: #ff5fa2; }
-* { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; }
-body { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: #fff; color: var(--ink);
-       font: 15px/1.45 "Helvetica Neue", Helvetica, Arial, sans-serif; }
-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
-         gap: 8px 16px; padding: 10px 18px; border-bottom: 1px solid var(--ink); }
-.brand { display: flex; align-items: center; gap: 8px; }
-.brand span { color: var(--pink); font: 800 24px/1 ui-rounded, "Arial Rounded MT Bold", "Nunito", sans-serif;
-              letter-spacing: -.5px; }
-.status { display: flex; align-items: center; gap: 14px; font: 12px ui-monospace, Menlo, monospace; }
-.pill { display: flex; align-items: center; gap: 7px; }
-.pill:before { content: ""; width: 8px; height: 8px; border: 1px solid var(--ink); border-radius: 50%; }
-.pill[data-online="true"]:before { background: var(--ink); }
-main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; min-height: 0; }
-.work { overflow: auto; min-width: 0; padding: 28px 32px; }
-aside { overflow: auto; min-width: 0; padding: 18px; border-left: 1px solid var(--ink); }
-aside > section + section { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
-aside h2 { margin: 0; font: 700 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
-           letter-spacing: 1px; text-transform: uppercase; }
-h1, h2, h3, p { margin: 0; }
-h2 { font-size: 18px; }
-h3 { font-size: 16px; }
-button, input, select, textarea { font: inherit; }
-button, input, select, textarea, .file { min-width: 0; max-width: 100%; border: 1px solid var(--ink);
-                                      border-radius: 0; padding: 6px 10px; color: var(--ink); background: #fff; }
-button, .file { cursor: pointer; }
-button:enabled:hover, .file:hover { background: var(--ink); color: #fff; }
-button.primary { font-weight: 700; }
-button:disabled { cursor: default; color: var(--mute); background: var(--soft); border-color: var(--line); }
-:focus-visible, .file:focus-within { outline: 2px solid var(--ink); outline-offset: 3px; }
-.ask { display: flex; border: 2px solid var(--ink); }
-.ask input { flex: 1; border: 0; padding: 16px 18px; font-size: 20px; }
-.ask input:focus-visible { outline-offset: -4px; }
-.ask button { border: 0; border-left: 2px solid var(--ink); padding: 0 26px; font-size: 16px; }
-.ask button:disabled { border-left-color: var(--ink); }
-.examples { margin: 12px 0 24px; }
-.examples button { font-size: 13px; color: var(--mute); border-color: var(--line); padding: 4px 10px; }
-.examples:empty { display: none; }
-.row, .spread, .buttons { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.spread { justify-content: space-between; }
-.spread.end { align-items: flex-end; }
-.stack { display: grid; gap: 10px; min-width: 0; }
-label.field { display: grid; gap: 4px; color: var(--mute); font-size: 13px; }
-label.field > * { color: var(--ink); }
-.boardrow { display: grid; gap: 8px; }
-.boardrow button { justify-self: start; }
-.muted, small { color: var(--mute); }
-small { font-size: 12px; }
-#stream-state, #stream-meta, code, time, .num, #notice, #live-evidence, #answer-timing,
-#generation-timing { font-family: ui-monospace, Menlo, monospace; }
-#stream-state { font-size: 13px; font-weight: 600; }
-#stream-meta { font-size: 12px; }
-.live-reading { padding-top: 4px; }
-.divider { border-top: 1px solid var(--line); padding-top: 12px; }
-#notice { color: var(--mute); margin: 8px 0 16px; font-size: 13px; }
-#notice:empty { display: none; }
-#notice[data-error="true"] { color: #962944; }
-#live-answer { white-space: pre-line; font-size: 18px; line-height: 1.55; }
-#live-asked { font-size: 22px; line-height: 1.25; }
-#live-result { margin-top: 24px; }
-#answer-timing, #generation-timing, #live-evidence { font-size: 12px; }
-#prior-answer-text, #saved-answer-text { white-space: pre-line; }
-#lm-version, #version, #source, code { overflow-wrap: anywhere; }
-#lm-editor form { margin-top: 10px; }
-#lm-instruction { resize: vertical; }
-summary { cursor: pointer; }
-details p { margin-top: 5px; }
-.file { position: relative; display: inline-block; }
-.file input { width: 1px; height: 1px; opacity: 0; position: absolute; }
-.capacity input { width: 105px; }
-#trace { width: 100%; height: 76px; display: block; background: var(--soft); }
-.csv-workspace { margin-top: 24px; padding: 14px 0 0; border-top: 1px solid var(--line); }
-.csv-workspace > summary { font-weight: 600; }
-.csv-workspace h2 { margin-top: 12px; }
-.result { margin-top: 16px; }
-table { width: 100%; border-collapse: collapse; text-align: left; }
-th, td { padding: 7px 4px; border-bottom: 1px solid var(--line); font-size: 13px; }
-th { font-weight: 600; }
-footer { display: flex; border-top: 1px solid var(--ink); background: var(--soft); overflow-x: auto; }
-footer a { padding: 9px 20px; border-right: 1px solid var(--line); color: var(--ink); text-decoration: none; white-space: nowrap; }
-footer a:hover, footer a[aria-current="location"] { background: #fff; }
-footer a[aria-current="location"] { font-weight: 700; box-shadow: inset 0 3px 0 var(--ink); }
-footer a:focus-visible { outline-offset: -3px; }
-.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
-                   clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-[hidden] { display: none !important; }
-@media (max-width: 790px) {
-  main { display: block; overflow: auto; }
-  .work, aside { overflow: visible; }
-  .work { padding: 20px; }
-  aside { border-left: 0; border-top: 1px solid var(--ink); }
-}
-@media (max-width: 440px) {
-  .ask input { padding: 12px 9px; font-size: 16px; }
-  .ask button { padding: 0 13px; }
-  footer a { padding: 8px 11px; }
-}
+:root{color-scheme:dark;--bg:#111416;--panel:#191d20;--line:#373c3d;--ink:#eff1eb;--dim:#acb5b0;--pink:#ffadc9;--mint:#a3dec1;font:15px/1.5 "Inter",-apple-system,BlinkMacSystemFont,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}main{max-width:1060px;margin:auto;padding:24px 28px 64px}
+header,.row,.spread,.buttons{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.spread,header{justify-content:space-between}
+header{padding-bottom:18px;border-bottom:1px solid var(--line)}.brand{font-weight:750;font-size:1.18rem;letter-spacing:-.055em}.brand span{color:var(--pink)}
+h1,h2,h3,p{margin:0}h1{font-size:clamp(1.8rem,4vw,2.65rem);letter-spacing:-.055em;line-height:1.15;margin:27px 0 17px}h2{font-size:1.2rem;letter-spacing:-.025em}h3{font-size:.96rem}
+button,input,select,textarea{font:inherit}button,input,select,textarea,.file{border-radius:7px;border:1px solid #545d60;color:var(--ink);background:#252a2d;padding:8px 12px;max-width:100%}button,.file{cursor:pointer;font-weight:600}
+button.primary{background:var(--pink);border-color:var(--pink);color:#27161e}button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,.file:focus-within{outline:2px solid var(--mint);outline-offset:3px}
+input,select{min-width:0}label.field{display:grid;gap:5px;color:var(--dim);font-size:.9rem}label.field>*{color:var(--ink)}
+.panel{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:20px;min-width:0}.boardrow{display:flex;align-items:flex-end;flex-wrap:wrap;gap:10px;margin-top:10px}.boardrow label{flex:1;min-width:165px}
+.grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(204px,1fr);gap:16px;margin-top:16px;align-items:start}.stack{display:grid;gap:14px;min-width:0}.muted,small{color:var(--dim)}small{font-size:.82rem}
+.pill{display:flex;align-items:center;gap:7px;color:var(--dim);font-size:.88rem}.pill:before{content:"";width:8px;height:8px;border-radius:50%;background:#747b78}.pill[data-online="true"]{color:var(--mint)}.pill[data-online="true"]:before{background:var(--mint)}
+.divider{border-top:1px solid var(--line);padding-top:14px}.file{position:relative;display:inline-block;font-size:.94rem}.file input{width:1px;height:1px;opacity:0;position:absolute}
+#source{overflow-wrap:anywhere}.capacity input{width:105px}.spread.end{align-items:flex-end}
+#trace{width:100%;height:76px;display:block;background:#14191a;border-radius:6px}
+code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{overflow-wrap:anywhere;color:var(--mint)}summary{cursor:pointer;color:var(--dim)}details p{margin-top:6px}
+#notice{margin:9px 0;color:var(--mint)}#notice:empty{display:none}#notice[data-error="true"]{color:var(--pink)}
+.answer{font-size:1.42rem;line-height:1.3;letter-spacing:-.025em}.result{margin-top:16px}table{width:100%;border-collapse:collapse;text-align:left}th,td{padding:7px 4px;border-bottom:1px solid var(--line);font-size:.9rem}th{color:var(--dim);font-weight:500}
+#live-answer{white-space:pre-line;font-size:1.1rem;line-height:1.5} .live-reading{border-top:1px solid var(--line);padding-top:12px}.live-reading .answer{font-size:1.15rem}
+.ask{display:flex;align-items:end;gap:8px;flex-wrap:wrap}.ask .field{flex:1;min-width:185px}
+.examples{gap:6px}.examples button{font-size:.83rem;font-weight:500;padding:4px 8px}
+#lm-version{overflow-wrap:anywhere}#lm-editor form{margin-top:14px}#lm-instruction{resize:vertical}
+#prior-answer-text,#saved-answer-text{white-space:pre-line}
+.csv-workspace{margin-top:16px}.csv-workspace>summary{font-weight:600}.csv-workspace h2{margin:10px 0 0}
+
+.workflow{margin-top:16px}.workflow-inputs{display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,.45fr);gap:12px}
+.workflow-inputs .file{justify-self:start}.workflow-inputs .capacity{justify-self:end}
+.workflow-status{color:var(--dim);font-size:.9rem}.workflow-status[data-error="true"]{color:var(--pink)}
+.workflow-tabs{display:flex;gap:5px;overflow-x:auto;border-bottom:1px solid var(--line);padding:4px 3px 9px}
+.workflow-tabs button{white-space:nowrap;font-size:.85rem}.workflow-tabs [aria-selected="true"]{background:var(--pink);border-color:var(--pink);color:#27161e}
+.workflow-result{min-height:125px;background:#14191a;border:1px solid var(--line);border-radius:8px;padding:16px}
+.workflow-output,.chat-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}
+.stage-skeleton{display:grid;gap:9px;margin:13px 0;max-width:440px}.stage-skeleton i{height:9px;border-radius:4px;background:linear-gradient(90deg,#303639,#484046,#303639);background-size:200% 100%;animation:workflow-shimmer 1.4s ease-in-out infinite}
+.stage-skeleton i:nth-child(2){width:82%}.stage-skeleton i:nth-child(3){width:58%}
+@keyframes workflow-shimmer{0%{background-position:200% 0}100%{background-position:0 0}}
+@media(prefers-reduced-motion:reduce){.stage-skeleton i{animation:none}}
+table.workflow-table{font-variant-numeric:tabular-nums}
+.workflow-table caption{text-align:left;color:var(--dim);margin-bottom:6px}
+#workflow-chat-log{max-height:310px;overflow:auto;display:grid;gap:12px}
+.chat-turn{border-left:2px solid var(--line);padding-left:12px;min-width:0}
+.chat-turn[data-role="you"]{border-color:var(--pink)}.chat-role{display:block;font-size:.8rem;color:var(--dim);margin-bottom:3px}
+#workflow-synthesis-form textarea{width:100%;resize:vertical}
+.workflow-model-control{display:flex;align-items:end;gap:8px;flex-wrap:wrap}
+.workflow-model-control label{flex:1;min-width:180px}
+#workflow-speech-status:empty{display:none}
+[hidden]{display:none!important}@media(max-width:675px){main{padding:16px}.grid{grid-template-columns:1fr}.panel{padding:16px}.boardrow label{flex-basis:100%}}
 </style>
 </head>
-<body>
-<header>
-  <div class="brand" aria-label="pinkProcess">
-    <svg width="38" height="38" viewBox="0 0 40 40" aria-hidden="true">
-      <circle cx="20" cy="17" r="15" fill="#ff5fa2"/>
-      <circle cx="9" cy="6" r="4.5" fill="#ff5fa2"/><circle cx="31" cy="6" r="4.5" fill="#ff5fa2"/>
-      <circle cx="14.5" cy="16" r="1.9" fill="#111"/><circle cx="25.5" cy="16" r="1.9" fill="#111"/>
-      <path d="M17 21.5 q3 2.4 6 0" fill="none" stroke="#111" stroke-width="1.4" stroke-linecap="round"/>
-      <path d="M9 29 l11 4 l11 -4 l2 10 h-26 z" fill="#111"/>
-      <path d="M15 30.5 l5 3 l5 -3 l-5 -2 z" fill="#fff"/>
-      <path d="M20 32 l-1.8 2 l1.8 6 l1.8 -6 z" fill="#ff5fa2"/>
-    </svg>
-    <span>pink process</span>
+<body><main>
+<header><div class="brand"><span>pink</span>Process</div><div id="connection" class="pill">Disconnected</div></header>
+<h1>Live FPGA workspace</h1>
+<section class="panel" aria-labelledby="board-heading">
+  <div class="spread"><h2 id="board-heading">Board connection</h2><button id="refresh">Find boards</button></div>
+  <div class="boardrow">
+    <label class="field" for="host">Kit or network address
+      <input id="host" list="known" placeholder="pynq.local" autocomplete="off" autocapitalize="none" spellcheck="false">
+    </label><datalist id="known"></datalist>
+    <button id="connect" class="primary">Connect FPGA</button><button id="disconnect" hidden>Disconnect</button>
   </div>
-  <div class="status">
-    <span id="connection" class="pill">Disconnected</span>
-    <button id="full" type="button" hidden>Full screen</button>
+  <small id="discovery" role="status"></small>
+</section>
+<p id="notice" role="status" aria-live="polite"></p>
+<section class="panel stack workflow" aria-labelledby="workflow-heading">
+  <div>
+    <h2 id="workflow-heading">CSV synthesis</h2>
+    <p class="muted">Upload pool telemetry to ask questions, review the readings or create a named model version.</p>
   </div>
-</header>
-<main>
-<section id="questions-panel" class="work" aria-labelledby="questions-heading">
-  <h1 id="questions-heading" class="visually-hidden">Ask about board telemetry</h1>
+  <div class="workflow-inputs">
+    <div class="stack">
+      <label class="file">Upload CSV<input id="workflow-upload" type="file" accept=".csv,text/csv"></label>
+      <small id="workflow-filename">No CSV uploaded</small>
+    </div>
+    <label class="field capacity" for="workflow-capacity">Capacity for upload<input id="workflow-capacity" type="number" min="1" step="1" value="32" required></label>
+  </div>
+  <details><summary>CSV format</summary><p class="muted">Use integer columns <code>time_ms,busy,waiting</code> with 50 to 2,097 readings at 100 ms intervals.</p></details>
+  <div class="workflow-model-control">
+    <label class="field" for="workflow-model">Dataset model<select id="workflow-model" disabled></select></label>
+    <button id="workflow-refresh-models" type="button" disabled>Refresh models</button>
+    <button id="workflow-create" type="button" disabled>Create model…</button>
+  </div>
+  <details id="workflow-synthesis" class="divider">
+    <summary>Synthesize a new weight version</summary>
+    <form id="workflow-synthesis-form" class="stack">
+      <p class="muted">The FPGA calibrates on the uploaded readings if needed. Astra then proposes an INT8 output row and saves a named model for this dataset.</p>
+      <label class="field" for="workflow-name">Model name<input id="workflow-name" maxlength="80" required></label>
+      <label class="field" for="workflow-target">Target word or token ID<input id="workflow-target" maxlength="80" required></label>
+      <label class="field" for="workflow-instruction">Edit request<textarea id="workflow-instruction" maxlength="1000" rows="3" required></textarea></label>
+      <div><button id="workflow-synthesize" class="primary" type="submit" disabled>Synthesize model</button></div>
+      <small id="workflow-synthesis-status" class="workflow-status" role="status"></small>
+      <div id="workflow-synthesis-skeleton" class="stage-skeleton" aria-hidden="true" hidden><i></i><i></i><i></i></div>
+      <p id="workflow-calibration" class="workflow-output muted" hidden></p>
+    </form>
+  </details>
+  <form id="workflow-ask-form" class="ask divider">
+    <label class="field" for="workflow-question">Question<input id="workflow-question" maxlength="500" placeholder="What does this telemetry show?" required></label>
+    <button id="workflow-dictate" type="button" hidden>Dictate</button>
+    <button id="workflow-ask" class="primary" type="submit" disabled>Ask with stages</button>
+  </form>
+  <small id="workflow-speech-status" role="status"></small>
+  <p id="workflow-status" class="workflow-status" role="status">Upload a CSV to begin.</p>
+  <div id="workflow-tabs" class="workflow-tabs" role="tablist" aria-label="Synthesis results">
+    <button type="button" role="tab" id="tab-transcript" aria-selected="true" aria-controls="panel-transcript" data-result="transcript">Transcript</button>
+    <button type="button" role="tab" id="tab-generalization" aria-selected="false" aria-controls="panel-generalization" data-result="generalization" tabindex="-1">Generalization</button>
+    <button type="button" role="tab" id="tab-short_answer" aria-selected="false" aria-controls="panel-short_answer" data-result="short_answer" tabindex="-1">Short answer</button>
+    <button type="button" role="tab" id="tab-summary" aria-selected="false" aria-controls="panel-summary" data-result="summary" tabindex="-1">Summary</button>
+    <button type="button" role="tab" id="tab-final" aria-selected="false" aria-controls="panel-final" data-result="final" tabindex="-1">Final</button>
+    <button type="button" role="tab" id="tab-table" aria-selected="false" aria-controls="panel-table" data-result="table" tabindex="-1">CSV table</button>
+    <button type="button" role="tab" id="tab-chat" aria-selected="false" aria-controls="panel-chat" data-result="chat" tabindex="-1">Chat</button>
+  </div>
+  <div id="workflow-results">
+    <section class="workflow-result stack" id="panel-transcript" role="tabpanel" aria-labelledby="tab-transcript" tabindex="0"><h3>Transcript</h3><p class="workflow-output muted">Your submitted question will appear here.</p></section>
+    <section class="workflow-result stack" id="panel-generalization" role="tabpanel" aria-labelledby="tab-generalization" tabindex="0" hidden><h3>Generalization</h3><p class="workflow-output muted">Waiting for a question.</p></section>
+    <section class="workflow-result stack" id="panel-short_answer" role="tabpanel" aria-labelledby="tab-short_answer" tabindex="0" hidden><h3>Short answer</h3><p class="workflow-output muted">Waiting for a question.</p></section>
+    <section class="workflow-result stack" id="panel-summary" role="tabpanel" aria-labelledby="tab-summary" tabindex="0" hidden><h3>Summary</h3><p class="workflow-output muted">Waiting for a question.</p></section>
+    <section class="workflow-result stack" id="panel-final" role="tabpanel" aria-labelledby="tab-final" tabindex="0" hidden><h3>Final answer</h3><p class="workflow-output muted">Waiting for a question.</p></section>
+    <section class="workflow-result stack" id="panel-table" role="tabpanel" aria-labelledby="tab-table" tabindex="0" hidden>
+      <table class="workflow-table"><caption id="workflow-table-caption">Upload a CSV to see its rows.</caption><thead><tr><th scope="col">Time (ms)</th><th scope="col">Busy</th><th scope="col">Waiting</th></tr></thead><tbody id="workflow-rows"></tbody></table>
+      <button id="workflow-more-rows" type="button" hidden>Show more rows</button>
+    </section>
+    <section class="workflow-result stack" id="panel-chat" role="tabpanel" aria-labelledby="tab-chat" tabindex="0" hidden>
+      <div id="workflow-chat-log" aria-label="Dataset conversation" role="log"></div>
+      <form id="workflow-chat-form" class="ask">
+        <label class="field" for="workflow-followup">Follow-up question<input id="workflow-followup" maxlength="500" placeholder="Ask about the same CSV" required></label>
+        <button id="workflow-send" type="submit" disabled>Send</button>
+      </form>
+    </section>
+  </div>
+</section>
+<div class="grid">
+<section class="panel stack" aria-labelledby="live-heading">
+  <div><h2 id="live-heading">Board telemetry</h2><p class="muted" id="live-description">Ask about measurements and forecasts from the connected FPGA kit.</p></div>
+  <div class="live-reading"><p id="stream-state" class="answer">Connect to a board</p><p id="stream-meta" class="muted"></p></div>
   <form class="ask" id="ask-form">
-    <label for="live-question" class="visually-hidden">Question</label>
-    <input id="live-question" type="text" maxlength="500" autocomplete="off" placeholder="What is happening?" required>
+    <label class="field" for="live-question">Question<input id="live-question" type="text" maxlength="500" placeholder="What looks wrong with our system?" required></label>
     <button class="primary" id="ask-live" type="submit" disabled>Ask</button>
   </form>
   <div class="buttons examples" id="live-examples" aria-label="Example questions"></div>
-  <p id="notice" role="status" aria-live="polite"></p>
   <div id="saved-incidents" class="stack divider" hidden>
     <label class="field" for="saved-incident">Saved incident<select id="saved-incident"></select></label>
     <small id="saved-incident-meta"></small>
@@ -152,40 +160,8 @@ footer a:focus-visible { outline-offset: -3px; }
     <div><button id="replay-live" type="button" hidden>Replay captured evidence</button></div>
     <details id="prior-answer" hidden><summary id="prior-answer-title"></summary><p id="prior-answer-text"></p></details>
   </div>
-<details class="panel csv-workspace" id="csv-workspace">
-<summary>CSV analysis on this Mac</summary>
-<section class="stack" aria-labelledby="query-heading">
-  <h2 id="query-heading">Query a CSV dataset</h2>
-  <div class="spread end"><div><small>Dataset</small><p id="source">Loading sample…</p></div>
-    <label class="field capacity">Pool capacity<input id="capacity" type="number" min="1" step="1" required></label></div>
-  <div class="buttons"><label class="file">Import CSV<input id="upload" type="file" accept=".csv,text/csv" aria-label="Import telemetry CSV"></label><button id="demo">Use sample</button><button id="watch" hidden>Watch local CSV…</button><button id="unwatch" hidden>Stop watching</button></div>
-  <details><summary>CSV format</summary><p>Supply 50 to 2,097 readings at 100 ms intervals. Use integer columns <code>time_ms,busy,waiting</code> for the timestamp, occupied connections and queued requests.</p></details>
-  <div><canvas id="trace" aria-label="Busy connections over the dataset" role="img"></canvas>
-  <div class="spread"><small>Busy connections</small><small id="range"></small></div></div>
-  <label class="field divider" for="question">Question<select id="question"></select></label>
-  <div><button id="query" class="primary" disabled>Analyze CSV on FPGA</button></div>
 </section>
-<section id="result" class="panel result stack" aria-labelledby="result-heading" hidden>
-  <h2 id="result-heading">CSV analysis result</h2><p id="answer" class="answer"></p><p id="measure"></p>
-  <small id="provenance"></small><div id="window-list" hidden><table><thead><tr><th>Reading time</th><th>Model score</th><th>Forecast horizon</th></tr></thead><tbody id="values"></tbody></table>
-    <button id="more" hidden>Show more warnings</button></div>
-</section></details>
-</section>
-<aside aria-label="Board and weights">
-<section id="board-panel" class="stack" aria-labelledby="board-heading">
-  <div class="spread"><h2 id="board-heading">Board connection</h2><button id="refresh">Find boards</button></div>
-  <div class="boardrow">
-    <label class="field" for="host">Kit or network address
-      <input id="host" list="known" placeholder="pynq.local" autocomplete="off" autocapitalize="none" spellcheck="false">
-    </label><datalist id="known"></datalist>
-    <button id="connect" class="primary">Connect FPGA</button><button id="disconnect" hidden>Disconnect</button>
-  </div>
-  <small id="discovery" role="status"></small>
-</section>
-<section class="stack" aria-labelledby="live-heading">
-  <div><h2 id="live-heading">Board telemetry</h2><p class="muted" id="live-description">Ask about measurements and forecasts from the connected FPGA kit.</p></div>
-  <div class="live-reading"><p id="stream-state" class="answer">Connect to a board</p><p id="stream-meta" class="muted"></p></div>
-</section>
+<aside class="stack">
 <section id="lm-versions" class="panel stack" aria-labelledby="lm-versions-heading" hidden>
   <h2 id="lm-versions-heading">Language model weights</h2>
   <div><small>Active version</small><p id="lm-version" aria-live="polite"></p></div>
@@ -212,14 +188,26 @@ footer a:focus-visible { outline-offset: -3px; }
   <details><summary>Weight fingerprint</summary><code id="hash"></code></details>
   <label class="field divider" for="weight">Queue-onset weight profile<select id="weight"></select></label>
   <div class="buttons"><button id="apply">Apply weights</button><button id="rollback">Restore base</button></div></div>
+</section></aside></div>
+<details class="panel csv-workspace" id="csv-workspace">
+<summary>CSV analysis on this Mac</summary>
+<section class="stack" aria-labelledby="query-heading">
+  <h2 id="query-heading">Query a CSV dataset</h2>
+  <div class="spread end"><div><small>Dataset</small><p id="source">Loading sample…</p></div>
+    <label class="field capacity">Pool capacity<input id="capacity" type="number" min="1" step="1" required></label></div>
+  <div class="buttons"><label class="file">Import CSV<input id="upload" type="file" accept=".csv,text/csv" aria-label="Import telemetry CSV"></label><button id="demo">Use sample</button><button id="watch" hidden>Watch local CSV…</button><button id="unwatch" hidden>Stop watching</button></div>
+  <details><summary>CSV format</summary><p>Supply 50 to 2,097 readings at 100 ms intervals. Use integer columns <code>time_ms,busy,waiting</code> for the timestamp, occupied connections and queued requests.</p></details>
+  <div><canvas id="trace" aria-label="Busy connections over the dataset" role="img"></canvas>
+  <div class="spread"><small>Busy connections</small><small id="range"></small></div></div>
+  <label class="field divider" for="question">Question<select id="question"></select></label>
+  <div><button id="query" class="primary" disabled>Analyze CSV on FPGA</button></div>
 </section>
-</aside>
+<section id="result" class="panel result stack" aria-labelledby="result-heading" hidden>
+  <h2 id="result-heading">CSV analysis result</h2><p id="answer" class="answer"></p><p id="measure"></p>
+  <small id="provenance"></small><div id="window-list" hidden><table><thead><tr><th>Reading time</th><th>Model score</th><th>Forecast horizon</th></tr></thead><tbody id="values"></tbody></table>
+    <button id="more" hidden>Show more warnings</button></div>
+</section></details>
 </main>
-<footer aria-label="Workspace sections">
-  <a href="#questions-panel" aria-current="location">Ask</a>
-  <a href="#board-panel">Board</a>
-  <a href="#csv-workspace">CSV analysis</a>
-</footer>
 <script>
 "use strict";
 const el = id => document.getElementById(id);
@@ -231,29 +219,6 @@ let answerCapture = null, languageWeights = null;
 let savedCaptures = [], olderCaptures = null;
 let autoUsb = true;
 const watcher = window.webkit?.messageHandlers?.watchCSV;
-const fullscreen = window.webkit?.messageHandlers?.toggleFullscreen;
-if (fullscreen || document.fullscreenEnabled) {
-  const button = el("full");
-  button.hidden = false;
-  button.onclick = async () => {
-    if (fullscreen) { fullscreen.postMessage("toggle"); return; }
-    try {
-      if (document.fullscreenElement) await document.exitFullscreen();
-      else await document.documentElement.requestFullscreen();
-    } catch (error) { show(error.message, true); }
-  };
-}
-for (const link of document.querySelectorAll("footer a")) {
-  link.addEventListener("click", () => {
-    document.querySelector("footer [aria-current]")?.removeAttribute("aria-current");
-    link.setAttribute("aria-current", "location");
-    if (link.hash === "#questions-panel") {
-      el("questions-panel").scrollTop = 0;
-      el("live-question").focus();
-    }
-    if (link.hash === "#csv-workspace") el("csv-workspace").open = true;
-  });
-}
 let liveName = null, livePending = false;
 function stopWatching() {
   if (liveName !== null) watcher?.postMessage("stop");
@@ -311,6 +276,7 @@ function controls() {
   for (const id of ["demo","upload","capacity","watch"]) el(id).disabled = busy || !setup;
   el("weight").disabled = busy;
   el("question").disabled = busy;
+  workflowControls();
   const historical = el("question").querySelector('option[value="warnings"]');
   if (historical) historical.disabled = Boolean(liveName);
   el("watch").hidden = !watcher || liveName !== null;
@@ -492,7 +458,7 @@ function drawTrace() {
   el("range").textContent = valid ? seconds(points[0][0]) + " – " + seconds(points.at(-1)[0]) : "";
   if (!valid) return;
   const max = points.reduce((m,p) => Math.max(m,p[1]), Number(el("capacity").value) || 1);
-  ctx.strokeStyle="#111";ctx.lineWidth=1.7;ctx.beginPath();
+  ctx.strokeStyle="#a3dec1";ctx.lineWidth=1.7;ctx.beginPath();
   points.forEach((p,i) => {const x=4+(width-8)*i/Math.max(1,points.length-1),y=height-5-(height-10)*p[1]/max;i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);});
   ctx.stroke();
 }
@@ -727,6 +693,335 @@ el("csv-workspace").ontoggle = async event => {
     el("capacity").value = setup.capacity; setDataset(setup.csv,"Simulated pool telemetry");
   } catch (err) {show(err.message,true);}
 };
+const workflowTabs = [...document.querySelectorAll("#workflow-tabs [role=tab]")];
+const workflowStages = [
+  ["generalization", "Generalization"],
+  ["short_answer", "Short answer"],
+  ["summary", "Summary"],
+  ["final", "Final answer"],
+];
+let workflowDataset = null, workflowRows = [], workflowRowsShown = 0, workflowCalibrated = false;
+let workflowVoiceState = "idle", voiceBefore = "";
+const speechInput = window.webkit?.messageHandlers?.speechInput;
+const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
+
+function workflowNotice(message, isError=false) {
+  const node = el("workflow-status");
+  node.textContent = message;
+  node.dataset.error = String(isError);
+}
+
+function workflowControls() {
+  const recording = ["requesting", "listening", "stopping"].includes(workflowVoiceState);
+  const blocked = busy || recording;
+  const usable = !blocked && Boolean(workflowDataset?.selected_model);
+  el("workflow-upload").disabled = blocked;
+  el("workflow-capacity").disabled = blocked;
+  el("workflow-model").disabled = blocked || !workflowDataset?.models?.length;
+  el("workflow-refresh-models").disabled = blocked || !workflowDataset;
+  el("workflow-create").disabled = !usable;
+  el("workflow-ask").disabled = !usable || !el("workflow-question").value.trim();
+  el("workflow-synthesize").disabled = !usable ||
+    ["workflow-name", "workflow-target", "workflow-instruction"].some(id => !el(id).value.trim());
+  el("workflow-send").disabled = !usable || !workflowCalibrated || !el("workflow-followup").value.trim();
+  el("workflow-dictate").disabled = busy || ["requesting", "stopping"].includes(workflowVoiceState);
+  el("workflow-question").readOnly = recording;
+}
+
+function selectWorkflowTab(id, focus=false) {
+  for (const tab of workflowTabs) {
+    const selected = tab.dataset.result === id;
+    tab.setAttribute("aria-selected", String(selected));
+    tab.tabIndex = selected ? 0 : -1;
+    el(tab.getAttribute("aria-controls")).hidden = !selected;
+    if (selected && focus) tab.focus();
+  }
+}
+for (const [i, tab] of workflowTabs.entries()) {
+  tab.addEventListener("click", () => selectWorkflowTab(tab.dataset.result));
+  tab.addEventListener("keydown", event => {
+    const count = workflowTabs.length;
+    const indices = {ArrowLeft:(i + count - 1) % count, ArrowRight:(i + 1) % count, Home:0, End:count - 1};
+    if (!(event.key in indices)) return;
+    event.preventDefault();
+    selectWorkflowTab(workflowTabs[indices[event.key]].dataset.result, true);
+  });
+}
+
+function displayWorkflowStage(stage, state, text="") {
+  const panel = el("panel-" + stage), output = panel.querySelector(".workflow-output");
+  panel.setAttribute("aria-busy", String(state === "running"));
+  panel.querySelector(".stage-skeleton")?.remove();
+  output.classList.toggle("muted", state !== "complete" && !text);
+  output.textContent = text || ({pending:"Waiting for the preceding stage.", running:"Generating on the FPGA…",
+                                failed:"This stage did not finish."})[state] || "";
+  if (state === "running" && !text) {
+    const skeleton = document.createElement("div");
+    skeleton.className = "stage-skeleton";
+    skeleton.setAttribute("aria-hidden", "true");
+    for (let i = 0; i < 3; i++) skeleton.append(document.createElement("i"));
+    output.after(skeleton);
+  }
+}
+
+function resetWorkflowResults() {
+  workflowCalibrated = false;
+  displayWorkflowStage("transcript", "pending", "Your submitted question will appear here.");
+  for (const [stage] of workflowStages) displayWorkflowStage(stage, "pending", "Waiting for a question.");
+  el("workflow-chat-log").replaceChildren();
+  el("workflow-synthesis-status").textContent = "";
+  el("workflow-calibration").hidden = true;
+  el("workflow-calibration").textContent = "";
+}
+
+function applyWorkflowDataset(data) {
+  workflowDataset = data;
+  const models = data.models || [];
+  const select = el("workflow-model");
+  select.replaceChildren(...models.map(model => new Option(model.name, model.name)));
+  if (!models.length) select.replaceChildren(new Option("Connect an FPGA with a language model", ""));
+  select.value = data.selected_model || "";
+  workflowControls();
+}
+
+async function runWorkflow(task) {
+  if (busy) return;
+  interaction++;
+  busy = true;
+  controls();
+  try { await task(); }
+  catch (error) { workflowNotice(error.message, true); }
+  finally { busy = false; controls(); queueMicrotask(liveQuery); }
+}
+
+function readWorkflowRows(text) {
+  // The upload endpoint has already validated these three integer columns.
+  return text.trim().split(/\r\n|\n|\r/).slice(1).filter(line => line.trim()).map(line =>
+    line.split(",").map(value => value.trim().replace(/^"|"$/g, "")));
+}
+
+function renderWorkflowRows() {
+  const body = el("workflow-rows");
+  const stop = Math.min(workflowRowsShown + 30, workflowRows.length);
+  for (const row of workflowRows.slice(workflowRowsShown, stop)) {
+    const tr = document.createElement("tr");
+    for (const value of row) {
+      const td = document.createElement("td");
+      td.textContent = value;
+      tr.append(td);
+    }
+    body.append(tr);
+  }
+  workflowRowsShown = stop;
+  el("workflow-table-caption").textContent = workflowRows.length ?
+    workflowRowsShown + " of " + workflowRows.length + " readings" : "Upload a CSV to see its rows.";
+  el("workflow-more-rows").hidden = stop >= workflowRows.length;
+}
+el("workflow-more-rows").onclick = renderWorkflowRows;
+el("workflow-upload").onchange = event => {
+  const file = event.target.files[0];
+  event.target.value = "";
+  if (!file) return;
+  const capacity = el("workflow-capacity");
+  if (!capacity.reportValidity()) return;
+  runWorkflow(async () => {
+    if (file.size > 1.9 * 1024 * 1024) throw new Error("Choose a CSV smaller than 1.9 MiB.");
+    workflowNotice("Validating the CSV…");
+    const text = await file.text();
+    const dataset = await request("dataset_upload", {csv:text, capacity:Number(capacity.value), name:file.name});
+    workflowRows = readWorkflowRows(text);
+    workflowRowsShown = 0;
+    el("workflow-rows").replaceChildren();
+    renderWorkflowRows();
+    resetWorkflowResults();
+    applyWorkflowDataset(dataset);
+    el("workflow-filename").textContent = file.name + " · " + workflowRows.length + " readings";
+    workflowNotice(dataset.selected_model ? "CSV ready. Pick a model or ask a question." : "CSV ready. Connect the FPGA to load models.");
+    selectWorkflowTab("table");
+  });
+};
+el("workflow-model").onchange = event => {
+  const name = event.target.value;
+  if (!workflowDataset || !name || name === workflowDataset.selected_model) return;
+  runWorkflow(async () => {
+    try {
+      const next = await request("dataset_select", {dataset_id:workflowDataset.dataset_id, name});
+      resetWorkflowResults();
+      applyWorkflowDataset(next);
+      workflowNotice("Dataset model is " + next.selected_model + ".");
+    } catch (error) {
+      el("workflow-model").value = workflowDataset.selected_model;
+      throw error;
+    }
+  });
+};
+el("workflow-refresh-models").onclick = () => runWorkflow(async () => {
+  const next = await request("dataset_models", {dataset_id:workflowDataset.dataset_id});
+  if (next.selected_model !== workflowDataset.selected_model) resetWorkflowResults();
+  applyWorkflowDataset(next);
+  workflowNotice(next.selected_model ? "Dataset model is " + next.selected_model + "." : "No compatible board model is available.");
+});
+
+async function askWorkflowStage(question, stage, partial) {
+  let job = await request("dataset_ask", {dataset_id:workflowDataset.dataset_id, question, stage});
+  const jobId = job.job_id;
+  if (job.state === "running" && !jobId) throw new Error("The board did not provide a job ID.");
+  while (job.state === "running") {
+    if (job.partial_answer) partial(job.partial_answer);
+    await pause(1100);
+    job = await request("answer_progress", {job_id:jobId});
+  }
+  if (job.state !== "complete" || typeof job.answer !== "string" || !job.answer.trim())
+    throw new Error(job.error || "The board did not return an answer.");
+  return job.answer;
+}
+
+function appendWorkflowChat(role, text) {
+  const turn = document.createElement("article"), title = document.createElement("strong");
+  const content = document.createElement("p"), log = el("workflow-chat-log");
+  turn.className = "chat-turn";
+  turn.dataset.role = role === "You" ? "you" : "model";
+  title.className = "chat-role";
+  title.textContent = role;
+  content.className = "chat-text";
+  content.textContent = text;
+  turn.append(title, content);
+  log.append(turn);
+  log.scrollTop = log.scrollHeight;
+  return content;
+}
+
+el("workflow-ask-form").onsubmit = event => {
+  event.preventDefault();
+  if (el("workflow-ask").disabled) return;
+  const question = el("workflow-question").value.trim();
+  runWorkflow(async () => {
+    workflowCalibrated = false;
+    el("workflow-chat-log").replaceChildren();
+    el("workflow-synthesis-status").textContent = "";
+    displayWorkflowStage("transcript", "complete", question);
+    for (const [stage] of workflowStages) displayWorkflowStage(stage, "pending");
+    const startedAt = performance.now();
+    for (const [index, [stage, label]] of workflowStages.entries()) {
+      workflowNotice(label + " · " + (index + 1) + " of " + workflowStages.length + " FPGA requests");
+      displayWorkflowStage(stage, "running");
+      const selected = el("workflow-tabs").querySelector('[aria-selected="true"]').dataset.result;
+      if (index === 0 || selected === workflowStages[index - 1][0]) selectWorkflowTab(stage);
+      try {
+        const text = await askWorkflowStage(question, stage, value => displayWorkflowStage(stage, "running", value));
+        displayWorkflowStage(stage, "complete", text);
+        if (stage === "final") {
+          workflowCalibrated = true;
+          appendWorkflowChat("You", question);
+          appendWorkflowChat(workflowDataset.selected_model, text);
+        }
+      } catch (error) {
+        displayWorkflowStage(stage, "failed");
+        throw error;
+      }
+    }
+    workflowNotice("Final answer completed in " + seconds(performance.now() - startedAt) + ".");
+  });
+};
+
+el("workflow-chat-form").onsubmit = event => {
+  event.preventDefault();
+  if (el("workflow-send").disabled) return;
+  const input = el("workflow-followup");
+  const question = input.value.trim();
+  runWorkflow(async () => {
+    input.value = "";
+    appendWorkflowChat("You", question);
+    const content = appendWorkflowChat(workflowDataset.selected_model, "Generating on the FPGA…");
+    workflowNotice("Generating your follow-up…");
+    try {
+      content.textContent = await askWorkflowStage(question, "followup", partial => { content.textContent = partial; });
+      workflowNotice("Follow-up complete.");
+    } catch (error) {
+      content.textContent = "The follow-up did not complete.";
+      input.value = question;
+      throw error;
+    }
+  });
+};
+
+el("workflow-create").onclick = () => {
+  el("workflow-synthesis").open = true;
+  el("workflow-name").focus();
+};
+el("workflow-synthesis-form").onsubmit = event => {
+  event.preventDefault();
+  if (el("workflow-synthesize").disabled) return;
+  const name = el("workflow-name").value.trim();
+  const target = el("workflow-target").value.trim();
+  const target_row = /^\d+$/.test(target) ? Number(target) : target;
+  const instruction = el("workflow-instruction").value.trim();
+  runWorkflow(async () => {
+    const status = el("workflow-synthesis-status");
+    const calibration = el("workflow-calibration");
+    const skeleton = el("workflow-synthesis-skeleton");
+    calibration.hidden = true;
+    calibration.textContent = "";
+    status.textContent = "Starting model synthesis…";
+    try {
+      let job = await request("dataset_synthesize", {dataset_id:workflowDataset.dataset_id, name, target_row, instruction});
+      const id = job.synthesis_id;
+      if (job.state === "running" && !id) throw new Error("The server did not provide a synthesis ID.");
+      while (job.state === "running") {
+        skeleton.hidden = Boolean(job.partial_answer);
+        status.textContent = ({calibrating:"Calibrating on the FPGA with this CSV…",
+          authoring:"Astra is proposing the INT8 row…", saving:"Saving the named weight version…"})[job.stage] ||
+          "Waiting for synthesis progress…";
+        if (job.stage === "calibrating" && job.partial_answer) {
+          calibration.textContent = job.partial_answer;
+          calibration.hidden = false;
+        }
+        await pause(1100);
+        job = await request("dataset_synthesis_progress", {synthesis_id:id});
+      }
+      if (job.state !== "complete" || !job.dataset) throw new Error(job.error || "Model synthesis stopped.");
+      resetWorkflowResults();
+      applyWorkflowDataset(job.dataset);
+      status.textContent = "Saved and selected " + job.dataset.selected_model + ".";
+      workflowNotice("Ask a question with the new model.");
+      selectWorkflowTab("transcript");
+    } catch (error) {
+      status.textContent = "Synthesis did not complete.";
+      throw error;
+    } finally { skeleton.hidden = true; }
+  });
+};
+
+for (const id of ["workflow-question", "workflow-followup", "workflow-name", "workflow-target", "workflow-instruction"])
+  el(id).addEventListener("input", workflowControls);
+
+window.pinkprocessSpeechInput = event => {
+  if (!speechInput || !event || typeof event.state !== "string") return;
+  workflowVoiceState = event.state;
+  const button = el("workflow-dictate");
+  button.hidden = event.state === "unavailable";
+  button.textContent = event.state === "listening" ? "Stop dictation" : "Dictate";
+  const speechStatus = el("workflow-speech-status");
+  speechStatus.textContent = event.message || ({requesting:"Requesting microphone access…",
+    listening:"Listening…", stopping:"Transcribing…"})[event.state] || "";
+  if (typeof event.transcript === "string" && event.transcript.trim()) {
+    const input = el("workflow-question");
+    input.value = [voiceBefore, event.transcript.trim()].filter(Boolean).join(" ").slice(0, input.maxLength);
+    if (event.final) input.focus();
+  }
+  workflowControls();
+};
+if (speechInput) {
+  el("workflow-dictate").onclick = () => {
+    if (workflowVoiceState === "listening") speechInput.postMessage("stop");
+    else {
+      voiceBefore = el("workflow-question").value.trim();
+      speechInput.postMessage("start");
+    }
+  };
+  speechInput.postMessage("ready");
+}
+
 start();
 setInterval(async () => {
   if (busy || pollPending || document.hidden) return;
