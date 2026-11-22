@@ -1,6 +1,6 @@
 # Paper
 
-`main.pdf` is the 4-page report. Rebuild it with:
+`main.pdf` is the paper in IEEE conference format (`main.tex`, `refs.bib`). `analysis.py` writes `numbers.tex`, the row files in `tables/` and every figure in `figures/`. Rebuild it with:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/karpathy/llama2.c/350e04fe35433e6d2941dce5a1f53308f87058eb/run.c -o build/lm-inputs/run.c
@@ -10,7 +10,7 @@ python3 -m paper.experiments.lm001_extended $inputs --lm001 build/lm001 --out pa
 python3 -m paper.experiments.contrastive_fit $inputs --out paper/experiments/contrastive-fit.json
 python3 -m paper.experiments.contrastive_sweep $inputs paper/experiments/contrastive-sweep.json
 python3 paper/analysis.py
-cd paper && tectonic main.tex
+cd paper && tectonic -X compile main.tex
 ```
 
-The extended prompts were committed in d9b261d and the contrastive success criterion in 0891cf9, both before their runs.
+The extended prompts were committed in d9b261d before any run. The contrastive pass rule was committed in 0891cf9 before the contrastive run, in the same commit as the frozen rows' results on those prompts, so the rule and its negatives were written with those results known. `analysis.py` also needs `fontTools` to embed the body font in the figures.
