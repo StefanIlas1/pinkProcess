@@ -257,9 +257,22 @@ class OverlayProjection:
                 raise ValueError("One projection tile exceeds the CMA segment budget.")
 
             a = self._upload_activations(activations, position_tiles, depth)
-            packed = self._cached_weights(name, weights, decode, (output_tiles, depth, output_lanes))
             resident = (self.resident_budget and decode and name == "lm_head"
                         and self.model_weights.get("lm_head.weight") is weights)
+            shape = (output_tiles, depth, output_lanes)
+            if resident and not self.resident_blocked:
+                segment_bytes = min(tiles, output_tiles) * depth * output_lanes
+                segments, tail = divmod(prod(shape), segment_bytes)
+                pages = (segment_bytes + PAGESIZE - 1) // PAGESIZE * segments
+                pages += (tail + PAGESIZE - 1) // PAGESIZE
+                fully_resident = pages * PAGESIZE <= self.resident_budget
+            else:
+                fully_resident = False
+            if fully_resident:
+                packed = None
+                self.phases["resident_host_cache_bypasses"] += 1
+            else:
+                packed = self._cached_weights(name, weights, decode, shape)
             rows_per_segment = tiles * output_lanes
             result = np.empty((batch, len(weights)), dtype=np.int32) if head_scales is None else None
             best = None
@@ -486,7 +499,11 @@ class OverlayProjection:
             _buffer_address(buffer)
             self.phases["allocations"] += 1
             self.phases["allocate_ns"] += perf_counter_ns() - start
-            self._upload_weights(buffer, segment, packed, True)
+            if not packed:
+                staged = np.empty(shape, dtype=np.int8)
+                self._pack_weight_data(staged, segment, True)
+                segment = staged
+            self._upload_weights(buffer, segment, True, True)
             self.resident_head[key] = buffer, resources.pop_all()
         self.resident_bytes += capacity
         self.phases["resident_weight_uploads"] += 1

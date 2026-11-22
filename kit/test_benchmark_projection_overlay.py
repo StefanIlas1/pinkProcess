@@ -239,12 +239,15 @@ class ProjectionOverlayTest(unittest.TestCase):
         runner.bind_model({"lm_head.weight": weights})
         first = runner.project("lm_head", weights, activations)
         self.assertEqual(runner.profile()["resident_weight_uploads"], 8)
+        self.assertNotIn(("lm_head", True), runner.packed_weights)
         self.assertEqual(runner.profile()["resident_weight_bytes"], weights.nbytes)
         self.assertEqual(runner.profile()["weight_bytes"], weights.nbytes)
         addresses = {buffer.device_address for buffer, _ in runner.resident_head.values()}
         runner.start_generation()
         np.testing.assert_array_equal(runner.project("lm_head", weights, activations), first)
         self.assertEqual(runner.profile()["resident_weight_hits"], 8)
+        self.assertEqual(runner.profile()["resident_host_cache_bypasses"], 1)
+        self.assertEqual(runner.profile()["pack_weights_ns"], 0)
         self.assertEqual(runner.profile().get("weight_bytes", 0), 0)
         self.assertIn(overlay.registers[projection.W_ADDRESS], addresses)
         # A queued group can continue using its ordinary scratch alongside residents.
