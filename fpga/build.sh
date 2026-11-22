@@ -8,6 +8,7 @@ case "$#" in
   *) echo "Usage: $0 [new-build-directory | --check-only]" >&2; exit 2 ;;
 esac
 python3 "$root/fpga/check_classifier.py" "$root/build/pynq/fixed-reference-vectors.json"
+python3 "$root/fpga/check_projection.py"
 if [ "$out" = "--check-only" ]; then exit 0; fi
 if ! command -v vivado >/dev/null 2>&1; then
   echo "Source the Vivado settings script, then rerun this command." >&2
