@@ -25,6 +25,31 @@ Follow the [projection configuration](engineering.md#benchmark-the-flan-projecti
 
 Transfer the kit's pairing JSON privately. In the app choose **PYNQ Process, then Import Kit Pairing…**. The file grants access to query the kit and change its active profile, so treat it like a password.
 
+### Install the optional Queue history v2 checkpoint
+
+On a provisioned kit with the all-projection overlay, retain the installed
+original FLAN model and reconstruct the [queue-history checkpoint](../profiles/flan-queue-history-v2/README.md).
+Copy that export to the board. From the installed service directory on the
+board, use its Python environment to verify and install the export:
+
+```sh
+cd /opt/pinkprocess-kit/current
+hash=d8d97a3327aae96859b3ea5c165ccc860f06d55fe38a79d03c50da9203b22aeb
+sudo /usr/local/share/pynq-venv/bin/python3 -m lm_reference.model_assets /path/to/queue-history-v2 "$hash" /opt/pinkprocess-kit/models
+```
+
+Append `--history-model /opt/pinkprocess-kit/models/d8d97a3327aae96859b3ea5c165ccc860f06d55fe38a79d03c50da9203b22aeb --history-manifest-sha256 d8d97a3327aae96859b3ea5c165ccc860f06d55fe38a79d03c50da9203b22aeb` to the
+existing `PINKPROCESS_PROJECTION_ARGS` in `/etc/pinkprocess-kit/projection.conf`.
+Preserve the existing all-projection arguments and restart `pinkprocess-kit.service`.
+The board verifies the files before offering **Queue history v2** in the model selector.
+
+For a live question its selection persists across service restarts. For an
+uploaded dataset it applies only to that dataset. Fresh questions on this
+checkpoint receive the measured queue-history description. Replaying an older
+capture preserves its frozen question and evidence prompt. Select **original**
+to return to the original checkpoint. Its previously saved row edits remain
+selectable. Authoring a new row edit uses the original checkpoint.
+
 ## Connect
 
 - **Ethernet.** Put the Mac and the board on a reachable network. In the app press **Find boards**. One kit connects on its own. Otherwise use **Connect by address**. If the Mac is on Wi-Fi and the board is on wall Ethernet you need a network route between them.
