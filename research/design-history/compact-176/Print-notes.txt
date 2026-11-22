@@ -1,0 +1,18 @@
+pinkProcess compact face | Engineering fit prototype
+Assembled envelope 176 x 138 x 40 mm. Aperture 156 x 92 mm.
+Designed for bare Waveshare 7inch HDMI LCD (H) 14628 and TUL PYNQ-Z2.
+Rear tray provides PCB tracks, SD service opening and a retaining tab.
+Use the existing heatsink. Keep passive vents clear. No dedicated fan bay.
+The face comparison illustrates a charcoal top and rose sidewall finish.
+A filament change after the front skin can achieve the two-tone appearance.
+
+Print fit coupons first, in PETG at 100%. Print the front face down and
+rear tray with exterior face on the bed. Inspect snap shelves and bridges
+in slicer. Seat panel ears in front clips, never press on glass. Fit board
+in rear rails with heatsink facing the screen, SD toward service cutout.
+Bench-test HDMI and USB touch before closing. The narrow sides make
+connector shells and cable bend radii critical; excess lead can leave via
+the side gates. Check your actual LCD tab thickness, heatsink clearance
+and HDMI plug orientation. The side gates can be moved in model.py.
+The compact depth and passive cooling need loaded thermal testing.
+The STEP and STLs contain the enclosure only. No physical fit test performed.
