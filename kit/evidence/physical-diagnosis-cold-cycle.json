@@ -1,0 +1,126 @@
+{
+  "backend": "PYNQ-Z2",
+  "question": "What should the next on-call engineer know about this pool before investigating?",
+  "capture_id": "7d07fa35a7588339abb5cf7448ef58434c9187d7ea189476db388c96207368a7",
+  "measured_origin": "demo",
+  "operator_witnessed_cold_power_cycle": true,
+  "before_linux_boot_id": "0859feff-102c-44fd-ad37-bb4c5e9a3698",
+  "after_linux_boot_id": "c4785ced-dfb0-4406-9580-b38c8ef3922a",
+  "startup_recovery": "On this cold boot the factory boot.py overlay initialization raced the kit service. Service ordering was corrected and the kit service restarted within the same new Linux boot before replay. This run establishes persistence across power loss with that intervention. It does not establish unattended startup.",
+  "original_weights": {
+    "name": "original",
+    "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+    "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+    "target_row": null
+  },
+  "edited_weights": {
+    "name": "Astra Now 0f137b5e",
+    "checkpoint_sha256": "f999e7e8702926b53fac296b01db4bdcf0f5d7e5213015e159c04b7de67a2b3b",
+    "classifier_sha256": "e8a86ac9e3caa3cd0a1fbe21070f2b480a6470e02ec0ba70f657b4eca1ceeebf",
+    "target_row": 852
+  },
+  "saved_versions_after_rollback": [
+    {
+      "name": "original",
+      "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+      "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+      "target_row": null
+    },
+    {
+      "name": "Astra Now 0f137b5e",
+      "checkpoint_sha256": "f999e7e8702926b53fac296b01db4bdcf0f5d7e5213015e159c04b7de67a2b3b",
+      "classifier_sha256": "e8a86ac9e3caa3cd0a1fbe21070f2b480a6470e02ec0ba70f657b4eca1ceeebf",
+      "target_row": 852
+    }
+  ],
+  "astra": {
+    "model": "gpt-6.2-astra",
+    "instruction": "Change the first token on the captured question to Now. Use the smallest verified sufficient increase.",
+    "target_token": "Now",
+    "direction": "increase",
+    "strength": 10,
+    "modified_row_bytes": 380
+  },
+  "baseline_concurrent_telemetry": {
+    "same_session": true,
+    "first_timestamp_ms": 6500,
+    "last_timestamp_ms": 740600,
+    "first_fpga_submissions": 17,
+    "last_fpga_submissions": 5214
+  },
+  "inference": {
+    "baseline": {
+      "active_version": "original",
+      "answer": "The backlog is ongoing: 39 requests are waiting now. The peak was 39. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "answer_sha256": "639982c9ce44ad59634f69ca5c3649e5d6c9f8c500d507b1bd6b044fa0de90a1",
+      "elapsed_seconds": 739.1573388576508,
+      "fabric_projections": 3795,
+      "observed_during_inference": {
+        "polls": 17,
+        "first_elapsed_seconds": 220.0,
+        "last_elapsed_seconds": 723.9,
+        "first_stream_timestamp_ms": 225800,
+        "last_stream_timestamp_ms": 729900,
+        "any_mac_ollama_port_open": false
+      }
+    },
+    "edited": {
+      "active_version": "Astra Now 0f137b5e",
+      "answer": "Now 39 requests are waiting Now the peak was 39 Now the FPGA predicts the queue will remain nonempty over the next ten seconds. Now the cause is unknown. Measure request arrivals and connection hold times. Now are all over Now. Now are all over Now. Now are all over Now. Now",
+      "answer_sha256": "350df62795d9a44ab06e61938670e89ceed09b0bc7793e802846623666b79104",
+      "elapsed_seconds": 860.8387107849121,
+      "fabric_projections": 4744,
+      "observed_during_inference": {
+        "polls": 27,
+        "first_elapsed_seconds": 33.4,
+        "last_elapsed_seconds": 855.2,
+        "first_stream_timestamp_ms": 793700,
+        "last_stream_timestamp_ms": 1615500,
+        "any_mac_ollama_port_open": false
+      }
+    },
+    "reloaded": {
+      "active_version": "Astra Now 0f137b5e",
+      "answer": "Now 39 requests are waiting Now the peak was 39 Now the FPGA predicts the queue will remain nonempty over the next ten seconds. Now the cause is unknown. Measure request arrivals and connection hold times. Now are all over Now. Now are all over Now. Now are all over Now. Now",
+      "answer_sha256": "350df62795d9a44ab06e61938670e89ceed09b0bc7793e802846623666b79104",
+      "elapsed_seconds": 885.8856031894684,
+      "fabric_projections": 4744,
+      "observed_during_inference": {
+        "polls": 19,
+        "first_elapsed_seconds": 37,
+        "last_elapsed_seconds": 876,
+        "first_stream_timestamp_ms": 45400,
+        "last_stream_timestamp_ms": 884300,
+        "any_mac_ollama_port_open": false
+      }
+    },
+    "restored": {
+      "active_version": "original",
+      "answer": "The backlog is ongoing: 39 requests are waiting now. The peak was 39. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "answer_sha256": "639982c9ce44ad59634f69ca5c3649e5d6c9f8c500d507b1bd6b044fa0de90a1",
+      "elapsed_seconds": 745.7934672832489,
+      "fabric_projections": 3795,
+      "observed_during_inference": {
+        "polls": 16,
+        "first_elapsed_seconds": 34,
+        "last_elapsed_seconds": 731,
+        "first_stream_timestamp_ms": 930600,
+        "last_stream_timestamp_ms": 1627800,
+        "any_mac_ollama_port_open": false
+      }
+    }
+  },
+  "checks": {
+    "same_capture_and_snapshot_all_four_times": true,
+    "selected_weights_reloaded_after_cold_boot": true,
+    "reloaded_answer_matches_edited_utf8": true,
+    "original_weights_restored": true,
+    "restored_answer_matches_baseline_utf8": true,
+    "all_saved_versions_survived_rollback": true
+  },
+  "limits": [
+    "One captured board SQLite demo incident, one question and one edited output row.",
+    "The edited answer repeats Now and ends repetitively. The exact replay includes those errors.",
+    "Elapsed times include polling over the paired connection. Fabric projections count learned matrix projection calls, not physical tile submissions."
+  ]
+}
