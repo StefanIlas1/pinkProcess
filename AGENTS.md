@@ -15,6 +15,8 @@ If you are about to push to `main` and the remote already has a different implem
 
 - 2026-11-22: CSV questions are answered by **General FLAN-T5-small INT8 on the board** (`lm_data_start` in `board_language.py`, 1052a36). A Mac-side Qwen2.5-0.5B-Instruct Q8 writer via llama.cpp was tried on the same 20 questions over 5 CSVs and rejected: about half of its answers contradicted the findings (for example "everything is fine" during an incident), while FLAN copied the findings and rarely invented numbers.
 
+- 2026-11-22: Kept the board LLM for generated answers and show the Mac analyst's findings as soon as they are ready, including when the board connection drops. Both paths found the expected result on five matched questions across three recordings. The Mac gave more detail for the broad checkout diagnosis. The board answered focused questions more directly. See [the matched comparison](docs/demo.md#mac-analysis-and-board-answers).
+
 ## Naming
 
 The product is spelled **PYNQ Process** everywhere a user can see it: window title, page title, menus, copy, docs. The repository, the Python package (`pinkprocess`), the app bundle (`pinkProcess.app`) and the zip keep the older spelling. Do not rename those.

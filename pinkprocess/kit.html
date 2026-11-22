@@ -893,6 +893,9 @@ function renderMessages() {
       }
       bubble.append(tabs);
     }
+    const measured = message.readings?.split("\n")[0];
+    const evidenceLabel = [queueHistoryLabel, macAnalysisLabel].find(label => measured?.startsWith(label));
+    const hasMacAnalysis = evidenceLabel === macAnalysisLabel;
     const variant = message.variants[message.view];
     if (variant) {
       const body = document.createElement("div");
@@ -902,18 +905,19 @@ function renderMessages() {
         const wrap = document.createElement("div"); wrap.className = "tablewrap";
         wrap.append(tableElement(variant.table)); body.append(wrap);
       }
+      if (hasMacAnalysis && ["short", "summary", "final"].includes(message.view)) {
+        bubble.append(Object.assign(document.createElement("small"), {textContent:"PYNQ-Z2 answer"}));
+      }
       bubble.append(body);
     } else if (message.pending) {
       bubble.append(skeletonBars(3));
     }
-    const measured = message.readings?.split("\n")[0];
-    const hasHistory = measured?.startsWith(queueHistoryLabel);
-    if (hasHistory) {
+    if (evidenceLabel) {
       const note = document.createElement("p");
       note.className = "queue-history";
       const label = document.createElement("strong");
-      label.textContent = queueHistoryLabel;
-      note.append(label, measured.slice(queueHistoryLabel.length));
+      label.textContent = evidenceLabel;
+      note.append(label, measured.slice(evidenceLabel.length));
       bubble.append(note);
     }
     if (message.pending) {
@@ -931,7 +935,7 @@ function renderMessages() {
       const details = document.createElement("details");
       const summary = document.createElement("summary"); summary.textContent = "Readings behind this answer";
       const body = document.createElement("p");
-      body.textContent = hasHistory ? message.readings.slice(measured.length).trimStart() : message.readings;
+      body.textContent = evidenceLabel ? message.readings.slice(measured.length).trimStart() : message.readings;
       details.append(summary, body); bubble.append(details);
     }
     if (message.offTopic) {
@@ -1043,6 +1047,7 @@ async function persistSession(extra={}) {
   } catch (err) {show(err.message, true);}
 }
 const queueHistoryLabel = "Measured queue history · ";
+const macAnalysisLabel = "Mac analysis · ";
 function measuredQueueHistory(snapshot) {
   const obs = snapshot?.observations;
   const peak = obs?.peak_waiting?.waiting, first = obs?.first?.waiting, last = snapshot?.latest?.waiting;
@@ -1095,7 +1100,7 @@ function shapeLive(style, data) {
 const firstSentence = text => text.split(/(?<=[.!?])\s/)[0];
 function failEntry(entry, asked, question, err) {
   document.body.classList.remove("working");
-  if (Object.keys(entry.variants).length) {
+  if (Object.keys(entry.variants).length || entry.readings.startsWith(macAnalysisLabel)) {
     entry.pending = false; entry.error = "The answer stopped early: " + err.message;
     pathReset(); renderMessages();
     return;
@@ -1230,7 +1235,7 @@ el("capacity-form").onsubmit = event => {
   event.preventDefault();
   el("capacity-dialog").close("ok");
 };
-async function localAnswer(entry, question, only) {
+async function localAnswer(entry, question, only, showMacAnalysis) {
   let job = await request("data_ask_begin", {question, style:answerStyle, local_only:true});
   const seen = new Set(), deadline = Date.now() + 120000;
   for (;;) {
@@ -1239,6 +1244,11 @@ async function localAnswer(entry, question, only) {
       const result = job.ready[style];
       if (!result || seen.has(style)) continue;
       seen.add(style);
+      if (showMacAnalysis && style === "short") {
+        entry.readings = macAnalysisLabel + result.answer.replace(/\s+/g, " ").trim() +
+          "\n" + (entry.readings || result.readings);
+        renderMessages();
+      }
       if (!only.includes(style)) continue;
       setVariant(entry, style, {text:result.answer, table:result.table, mono:style === "transcript"});
       if (style === "short") entry.readings = result.readings + " Answered on " + job.where + ".";
@@ -1287,7 +1297,8 @@ async function boardAnswer(entry, question, fromFindings) {
   const done = Date.now(), took = at => fmtMs(at - startedAt);
   entry.genTiming = "First text " + took(entry.firstTextAt ?? done) + " \u00b7 Complete answer " + took(done);
   entry.readings = fromFindings
-    ? findings + "\nAnswered on PYNQ-Z2 with " + job.active.name + "."
+    ? [entry.readings.startsWith(macAnalysisLabel) ? entry.readings.split("\n")[0] : "",
+       findings, "Answered on PYNQ-Z2 with " + job.active.name + "."].filter(Boolean).join("\n")
     : boardObservations(boardDataset) + "\nAnswered on PYNQ-Z2 with " + boardDataset.selected_model + (stage === "followup" ? " using the previous exchange." : ".");
   return done - startedAt;
 }
@@ -1308,8 +1319,9 @@ function askData(question) {
       renderMessages();
       document.body.classList.add("working");
       const submittedAt = performance.now();
-      const work = [localAnswer(entry, question, board ? ["transcript", "table"] : LOCAL_STYLES)];
+      const work = [localAnswer(entry, question, board ? ["transcript", "table"] : LOCAL_STYLES, fromFindings)];
       if (board) work.push(boardAnswer(entry, question, fromFindings));
+      if (fromFindings) await Promise.allSettled(work);
       const [times, boardMs] = await Promise.all(work);
       const values = [dataset.timings?.data_ms ?? 0, dataset.timings?.profile_ms ?? 0, Math.max(times.model_ms, 0.5), board ? boardMs : times.fabric_ms, times.answer_ms];
       values.forEach((value, stage) => pathMark(stage, "done", value));

@@ -1,12 +1,12 @@
 # Judge demo
 
-Three files, one question each, about ten seconds per file on stage. Every file has 10,000 rows and one planted problem written down in [datasets/README.md](../datasets/README.md#planted-causes), so anyone can check the answer.
+Three synthetic files, one broad question each. Every file has 10,000 rows and one planted problem written down in [datasets/README.md](../datasets/README.md#planted-causes), so anyone can check the answer.
 
 ## Run it
 
 1. Open the app (or `PYNQ_SIM_BOARD=1 PYTHONPATH=$PWD python3 mac/kit_backend.py` and open the printed address).
 2. **Import data**, then pick one of the samples below.
-3. Ask **What's wrong with my system?** and open **Table**.
+3. Ask **What's wrong with my system?** and open **Table**. A provisioned board generates an answer above the separately labeled **Mac analysis** findings.
 
 Timing on the command line:
 
@@ -24,6 +24,20 @@ PYTHONPATH=$PWD python3 kit/demo_benchmark.py datasets/checkout-api-10k.csv data
 
 Times are parse, profile and all four answer styles on an M-series MacBook, measured with the command above.
 
+## Mac analysis and board answers
+
+Both paths used identical files and question text, with no prior question. Times are from submission to the final result after import. Board timings include one-second polling. These five checks test the facts listed below and are not a general language-model quality score.
+
+| Recording and question | Verified result | Mac analysis | PYNQ-Z2 |
+| --- | --- | ---: | ---: |
+| Checkout, what's wrong? | Latency spike on `/checkout` in `eu-west` | 27 ms | 33,671 ms |
+| Checkout, which region? | `eu-west` | 29 ms | 14,245 ms |
+| Checkout, what should I check next? | Database connection pool | 28 ms | 12,711 ms |
+| Cold chain, which truck? | T07 | 53 ms | 11,739 ms |
+| Store sales, which payment method? | Card | 28 ms | 9,357 ms |
+
+For the broad checkout question, the Mac gave the timing, likely cause and suggested check. The board gave the latency change, endpoint and window, and omitted the cause and next step. For the four focused questions the board gave the requested item directly. The Mac returned a fuller incident report containing the requested item. The app shows both contributions with their source labels.
+
 ## Against a cloud model
 
 We gave Claude Haiku 5.5 each raw file and the same question. It read all 10,000 rows in chunks with no code tools, the way someone would paste a file into a chatbot. A separate model (Claude Sonnet 5.5) then graded both answers blind against the planted truth, with the labels shuffled per file, on cause, location, time window, numbers, false claims and usefulness.
@@ -39,10 +53,10 @@ Both found the right cause, place and window on all three files, and neither fel
 
 ## What to say
 
-- "Every number you see was computed by code from the file. The model only explains measured facts, so it cannot make up a number."
+- "Mac analysis computes the numbers from the file. Use those findings and the table to check the generated board answer."
 - "This is 10,000 rows. It answered before I let go of the key."
 - "A chatbot needed up to a minute and almost 400,000 tokens to read the same file, and the file left the building."
-- "The language model runs on a $150 FPGA. On the board, first words show up in about 9 seconds and the full diagnosis in 14 to 18 seconds, with all 1,021 matrix projections on the fabric."
+- "The board generates the answer, and the FPGA runs the INT8 projections. For this checkout demo the full board answer took about 34 seconds. The Mac analysis appears while it runs."
 - "Models are weight files, not bitstreams. Here are three quantized checkpoints, and switching takes a second."
 
 ## Board answers without the board
