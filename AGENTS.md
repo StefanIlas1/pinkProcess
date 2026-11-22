@@ -2,6 +2,19 @@
 
 Read the [README](README.md) first for what the product is and what is real versus simulated. This file covers how the code is laid out and the rules to follow when changing it.
 
+## Before you push to main: hey, stop
+
+If you are about to push to `main` and the remote already has a different implementation of the same feature you built, **stop**. Do not push over it and do not merge both.
+
+1. Run both implementations on the same inputs (same files, same questions) and write down what each one gets right and wrong.
+2. Keep the one that is measurably better. Fluent but wrong loses to terse and correct, and anything running on the PYNQ-Z2 beats the same thing running on the Mac, because that is the product.
+3. Keep the losing version on a local branch, not on `main`, and add one line about the decision under "Decisions" below.
+4. If you cannot tell which is better, ask a person before pushing.
+
+### Decisions
+
+- 2026-11-22: CSV questions are answered by **General FLAN-T5-small INT8 on the board** (`lm_data_start` in `board_language.py`, 1052a36). A Mac-side Qwen2.5-0.5B-Instruct Q8 writer via llama.cpp was tried on the same 20 questions over 5 CSVs and rejected: about half of its answers contradicted the findings (for example "everything is fine" during an incident), while FLAN copied the findings and rarely invented numbers.
+
 ## Naming
 
 The product is spelled **PYNQ Process** everywhere a user can see it: window title, page title, menus, copy, docs. The repository, the Python package (`pinkprocess`), the app bundle (`pinkProcess.app`) and the zip keep the older spelling. Do not rename those.
