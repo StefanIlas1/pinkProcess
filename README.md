@@ -59,7 +59,8 @@ Mac app  →  profiles your file  →  picks a model  →  PYNQ-Z2 board  →  a
 
 - **Data:** connection-pool queues (our first and deepest domain), API latency, server heat, disk IO, packet loss, sales and logs. 14 sample files ship with the app.
 - **Answers:** Short, Summary, Transcript and Table views, plus follow-up questions.
-- **Models:** switch, replay and compare model versions on the board, and edit them safely with a one-click restore.
+- **Models:** three quantized FLAN-T5-small checkpoints ship today (Diagnosis, Queue history v2 and Telemetry v1). Switch, replay and compare them on the board, and edit them safely with a one-click restore.
+- **Board twin:** the Mac can run the exact board service and the same INT8 checkpoints in software, so every flow can be rehearsed without hardware. Answers take about a second. See the [developer guide](docs/developer-guide.md#board-twin-on-the-mac).
 - **Extras:** dictation, notes, history, export to Markdown, CSV or JSON, and an MCP connector so AI assistants can read your sessions.
 
 ## 📏 Honest numbers
