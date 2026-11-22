@@ -65,16 +65,33 @@ h3{font:600 26px/1.15 var(--round)}
 .window img{width:100%;aspect-ratio:16/10;object-fit:cover}
 
 
-.use-cases{margin-block:clamp(72px,9vw,132px) 0;display:grid;grid-template-columns:1fr 2fr;gap:clamp(24px,5vw,80px);align-items:start}
-.use-cases h2{font-size:clamp(38px,5vw,66px);line-height:1.05}
-.use-cases dl{display:grid;grid-template-columns:minmax(140px,.8fr) 1.6fr;border-bottom:1px solid var(--line)}
-.use-cases dt,.use-cases dd{padding:22px 0;border-top:1px solid var(--line)}
-.use-cases dt{font-weight:600;padding-right:22px}
-.use-cases dd{color:var(--dim);line-height:1.55}
+.use-cases{margin-top:clamp(82px,10vw,150px);display:grid;grid-template-columns:1fr minmax(0,1.35fr);align-items:center;gap:clamp(36px,7vw,110px)}
+.case-index h2{font-size:clamp(48px,6vw,84px);line-height:1;letter-spacing:-.045em}
+.case-index fieldset{margin-top:32px;padding:0;border:0;display:grid;max-width:330px}
+.case-index legend,.case-file,.case-slip figcaption,.case-axis{font:12px/1.4 var(--mono)}
+.case-index legend{margin-bottom:10px;color:var(--dim)}
+.case-index label{display:flex;align-items:center;gap:14px;padding:14px 2px;border-top:1px solid var(--line);cursor:pointer;font-size:20px}
+.case-index label:last-child{border-bottom:1px solid var(--line)}
+.case-index label:has(:checked){color:var(--pink)}
+.case-index input{accent-color:var(--bow);width:16px;height:16px}
+.case-printer{position:relative;padding:8px clamp(8px,2vw,26px) 0}
+.case-printer::before{content:"";position:absolute;inset:0 0 auto;height:15px;background:#100e12;border:1px solid #55404c;border-radius:12px;box-shadow:0 2px 0 #513b47}
+.case-slip{position:relative;display:none;background:linear-gradient(#e1b4bd,#ffe9e4 24px);color:#40252f;padding:32px clamp(20px,4vw,54px) 38px;clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),0 100%);border-radius:1px 1px 5px 2px}
+.use-cases:has(input[value="0"]:checked) #recording-0,.use-cases:has(input[value="1"]:checked) #recording-1,.use-cases:has(input[value="2"]:checked) #recording-2{display:block}
+.case-file{padding-bottom:12px;border-bottom:1px dashed #ba939d}
+.case-slip h3{margin:18px 0;font:600 clamp(28px,3.2vw,44px)/1.04 var(--round);letter-spacing:-.035em}
+.case-slip figure{margin:22px 0 16px}
+.case-slip figure svg{display:block;width:100%;height:84px;margin-top:8px;background:repeating-linear-gradient(to top,#d6b7bd 0 1px,transparent 1px 25%)}
+.case-slip polyline{fill:none;stroke:#a32451;stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.case-axis{display:flex;justify-content:space-between;margin-top:3px}
+.case-reading{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.case-reading strong{font:600 clamp(24px,2.6vw,36px)/1.1 var(--round)}
+.case-reading span{font:13px var(--mono)}
+.case-note{margin-top:12px;line-height:1.5;max-width:52ch}
 @media(max-width:760px){
-  .use-cases,.use-cases dl{grid-template-columns:1fr}
-  .use-cases dt{padding:18px 0 4px}
-  .use-cases dd{padding:0 0 20px;border-top:0}
+  .use-cases{grid-template-columns:1fr;gap:22px}
+  .case-index fieldset{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:20px;max-width:none}
+  .case-index label,.case-index label:last-child{padding:8px 0;border:0;font-size:16px;gap:6px}
 }
 
 section{position:relative}
