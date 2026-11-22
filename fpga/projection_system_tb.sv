@@ -267,20 +267,20 @@ module projection_system_tb;
         end
     endtask
 
-    task run_projection(input bit decode, fault, input integer positions, outputs);
+    task run_projection(input bit decode, fault, input integer positions, outputs, input integer depth = K);
         integer p, o, k, lane, length, output_word;
         reg signed [31:0] expected;
         begin
             length = decode ? 64 : 8;
             for (p = 0; p < positions; p = p + 1)
-                for (k = 0; k < K; k = k + 1)
+                for (k = 0; k < depth; k = k + 1)
                     for (lane = 0; lane < 8; lane = lane + 1)
-                        ddr[A/8 + p*K + k][8*lane +: 8] =
+                        ddr[A/8 + p*depth + k][8*lane +: 8] =
                             activation(p*(decode ? 1 : 8) + lane, k);
             for (o = 0; o < outputs; o = o + 1)
-                for (k = 0; k < K; k = k + 1)
+                for (k = 0; k < depth; k = k + 1)
                     for (lane = 0; lane < length; lane = lane + 1)
-                        ddr[W/8 + (o*K + k)*(length/8) + lane/8][8*(lane%8) +: 8] =
+                        ddr[W/8 + (o*depth + k)*(length/8) + lane/8][8*(lane%8) +: 8] =
                             weight(o*length + lane, k);
             prepare_output(positions*outputs*32);
 
@@ -288,14 +288,14 @@ module projection_system_tb;
                 for (o = 0; o < outputs; o = o + 1)
                     for (lane = 0; lane < 64; lane = lane + 1) begin
                         expected = 0;
-                        for (k = 0; k < K; k = k + 1)
+                        for (k = 0; k < depth; k = k + 1)
                             expected = expected +
                                 activation(p*(64/length) + lane/length, k) *
                                 weight(o*length + lane%length, k);
                         output_word = (p*outputs + o)*32 + lane/2;
                         oracle[output_word][32*(lane%2) +: 32] = expected;
                     end
-            execute(decode, fault, K, positions, outputs);
+            execute(decode, fault, depth, positions, outputs);
             compare_output(decode, fault, positions, outputs);
         end
     endtask
@@ -334,7 +334,7 @@ module projection_system_tb;
             control_read('h30, status);
             if (status !== jobs*2*K) $fatal(1, "Wrong useful MAC cycle count");
             control_read('h34, status);
-            if (status !== jobs*2*K*9) $fatal(1, "Wrong DDR read count");
+            if (status !== jobs*K*(1+2*8)) $fatal(1, "Wrong DDR read count");
             control_read('h38, status);
             if (status !== jobs*2*32) $fatal(1, "Wrong DDR write count");
         end
@@ -380,6 +380,8 @@ module projection_system_tb;
             control_write('h24, 0);
             check_queue(1);
             check_queue(0);
+            run_projection(0, 0, 2, 2, 1024);
+            run_projection(1, 0, 1, 2, 1025);
             $display("Verified descriptor batching, bounds, DMA failure and retry");
             if (read_crossing == 0 || write_crossing == 0 || full_read == 0 || full_write == 0 ||
                 read_stalls == 0 || write_stalls == 0 || early_write == 0)
