@@ -500,10 +500,14 @@ class OverlayProjection:
             self.phases["allocations"] += 1
             self.phases["allocate_ns"] += perf_counter_ns() - start
             if not packed:
-                staged = np.empty(shape, dtype=np.int8)
-                self._pack_weight_data(staged, segment, True)
-                segment = staged
-            self._upload_weights(buffer, segment, True, True)
+                try:
+                    staged = np.empty(shape, dtype=np.int8)
+                except MemoryError:
+                    self.phases["resident_direct_packs"] += 1
+                else:
+                    self._pack_weight_data(staged, segment, True)
+                    segment, packed = staged, True
+            self._upload_weights(buffer, segment, packed, True)
             self.resident_head[key] = buffer, resources.pop_all()
         self.resident_bytes += capacity
         self.phases["resident_weight_uploads"] += 1

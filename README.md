@@ -21,7 +21,7 @@ Not the same as it looks:
 - A file you import is always profiled on this Mac, and the Transcript and Table answers come from plain statistics computed here. Only queue CSVs can be sent to the board for the model answers.
 - The model recommendation is a rule-based guess from column names and types.
 - The marketplace is local. Online sharing does not exist.
-- With Queue history v2 active, the first generated text took 9.34–9.78 seconds and the full diagnosis took 17.57–18.16 seconds on three recorded incidents. Live data continued arriving on the board. [Measured results](docs/results.md).
+- With Queue history v2 active, four queries through the paired Mac backend took 8.40–10.45 seconds to first text and 14.30–16.16 seconds for the complete diagnosis. Live data continued arriving on the board. [Measured results](docs/results.md).
 
 ## Quick start
 
@@ -43,13 +43,13 @@ PYTHONPATH=$PWD python3 mac/kit_backend.py
 
 ## Using the app
 
-To check a physical kit, open **Samples**, choose **Pool, recovery**, and confirm a capacity of **12**. Under **Skills**, select **Queue history v2**. Ask “What's wrong with my system?” and open **Readings behind this answer**. This recording peaks at 87 waiting and ends at zero.
+To check a physical kit, choose **Import data**, open [pool-recovery.csv](datasets/pool-recovery.csv), and confirm a capacity of **12**. Under **Skills**, select **Queue history v2**. Ask “What's wrong with my system?” and open **Readings behind this answer**. This recording peaks at 87 waiting and ends at zero.
 
 1. **Connect.** Press **Find boards** on the start screen. The rest of the app opens once a board is connected.
-2. **Import data.** Press **Import data** and choose a CSV or JSON lines file, or pick one of the samples (the **Samples** menu, or the links on the empty chat). The app reads the columns, types, row count and time column and spots signals such as queue, latency, errors, temperature or sales.
+2. **Import data.** Press **Import data** and choose a CSV or JSON lines file. The app reads the columns, types, row count and time column and spots signals such as queue, latency, errors, temperature or sales.
 3. **Pick a model.** A recommended quantized model is applied when the data loads. **Search models** opens the library, which you can filter by task, maker and size. **Synthesize model** builds your own from a starting point, a name and a request. **Publish** adds a skill you trained to your library, stored in `~/Library/Application Support/PYNQ Process/models.json`.
 4. **Watch the hot path.** The strip on the left edge shows Data, Profile, Model, PYNQ-Z2 and Answer with the time each stage took. Hover it to open it. With no board the fabric stage reads **This Mac**.
-5. **Ask.** Type a question or use the microphone key and press Enter. Answers arrive style by style: **Short** first, then **Summary**, **Final** (board answers), **Transcript** and **Table**. Switch between the ready ones on the answer. The style row above the input picks which one opens first. A follow-up on a board dataset sees the previous exchange. **Readings behind this answer** shows the data the answer rests on.
+5. **Ask.** Type a question or use the microphone key and press Enter. The answer card shows a skeleton and elapsed time as soon as you ask. During board inference, its counter reports completed FPGA projections. The card stays visible as the first text arrives. You can open any ready view, including the transcript and table for an uploaded dataset, while the full answer is still generating. The style row above the input picks which one opens first. A follow-up on a board dataset sees the previous exchange. **Readings behind this answer** shows the data the answer rests on.
 6. **Notes.** The **Notes** tab keeps your own notes with the session.
 7. **History.** Logged-in users see past sessions in the left sidebar, with dataset, model and question count. Without logging in, everything works but nothing is saved.
 8. **Export.** **Export** saves the session as Markdown, CSV or JSON, with every answer style that was ready. In the Mac app it opens a dialog with a Copy button instead of downloading.

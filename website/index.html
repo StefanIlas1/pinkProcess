@@ -25,21 +25,21 @@
 </header>
 <main id="top">
 <section class="hero wrap">
+  <h1 class="wordmark"><img src="assets/wordmark.svg" alt="PYNQ Process" width="782" height="189"></h1>
   <div class="hero-row">
-    <h1 class="bubbly"><span class="line"><span>PYNQ</span></span><span class="line"><span class="outlined">Process</span></span></h1>
-    <div class="hero-side">
-      <p class="lede">Did the queue clear, or are requests still waiting? Open a recording on your Mac and ask your PYNQ-Z2. The board answers with readings from the file.</p>
-      <div class="hero-actions">
-        <a class="btn" href="downloads/pinkProcess-Mac-arm64.zip" download data-download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Get the app</a>
-        <a class="results-link" href="#board-results">See board results</a>
-      </div>
-      <p class="hero-meta">Mac app · Apple Silicon · <span data-size>8.3 MB</span></p>
-    </div>
+    <p class="hero-ask bubbly">Ask your data anything.</p>
+    <a class="btn" href="downloads/pinkProcess-Mac-arm64.zip" download data-download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Get the app</a>
   </div>
-  <div class="stage">
-    <span class="sticker s1"><i></i>PYNQ-Z2 connected</span>
-    <span class="sticker s2">first words · 9,780 ms</span>
-    <div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/summary.jpg" alt="PYNQ Process answering why a connection pool queue spiked" width="1920" height="1200"></div>
+  <div class="trace" data-series="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,2,4,3,3,4,6,5,12,15,20,21,21,24,27,32,31,35,37,36,37,39,39,42,42,47,48,49,49,49,51,52,52,57,58,55,55,54,53,53,52,54,54,53,50,49,48,48,48,47,47,45,39,37,37,37,33,30,28,26,26,23,20,21,21,20,17,14,13,11,10,9,8,7,5,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
+    <div class="trace-head"><span class="sticker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="15" height="15"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>pool-sudden-spike.csv</span><span class="trace-meta mono">waiting · 600 readings</span></div>
+    <svg class="trace-chart" preserveAspectRatio="none" aria-hidden="true">
+      <defs><linearGradient id="traceFade" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fb648d" stop-opacity=".35"/><stop offset="1" stop-color="#fb648d" stop-opacity="0"/></linearGradient><clipPath id="traceClip"><rect class="trace-reveal" x="0" y="0" height="100%" width="0"/></clipPath></defs>
+      <g clip-path="url(#traceClip)"><path class="trace-area" fill="url(#traceFade)"/><path class="trace-line"/></g>
+      <line class="trace-scan" y1="0" y2="100%"/>
+    </svg>
+    <div class="trace-peak"><i></i><span class="mono">peak 58 · 36.9 s</span></div>
+    <div class="trace-q">Why did the queue spike?</div>
+    <div class="trace-a"><span class="trace-a-text"></span></div>
   </div>
 </section>
 
@@ -56,7 +56,7 @@
     </div>
     <div class="road">
       <svg class="track" aria-hidden="true"><path class="lane"/><path class="lane-fill"/><path class="lane-dash"/></svg>
-      <div class="station"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg><span class="ms">1 ms</span><span class="nm">Data</span></div><div class="station"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-7"/></svg><span class="ms">0 ms</span><span class="nm">Profile</span></div><div class="station"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg><span class="ms">1 ms</span><span class="nm">Model</span></div><div class="station"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/></svg><span class="ms">9,780 ms</span><span class="nm">PYNQ-Z2</span></div><div class="station"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-5 4v-4H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg><span class="ms">17,570 ms</span><span class="nm">Answer</span></div>
+      <div class="station"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg><span class="ms">1 ms</span><span class="nm">Data</span></div><div class="station"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-7"/></svg><span class="ms">0 ms</span><span class="nm">Profile</span></div><div class="station"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg><span class="ms">1 ms</span><span class="nm">Model</span></div><div class="station"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/></svg><span class="ms">9,340 ms</span><span class="nm">PYNQ-Z2</span></div><div class="station"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-5 4v-4H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg><span class="ms">17,570 ms</span><span class="nm">Answer</span></div>
     </div>
   </div>
 </section>
@@ -65,8 +65,63 @@
   <p class="eyebrow" data-reveal>how it works</p>
   <h2 class="bubbly" data-reveal style="--i:1">five steps,<br><span class="outlined">no manual.</span></h2>
   <div class="steps">
-    <div class="steps-text"><div class="step"><span class="num">1</span><h3>Connect and import</h3><p>Press Find boards. Once the PYNQ-Z2 shows up, import a CSV or JSON lines file, or pick one of 14 samples.</p><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/start.jpg" alt="Connect and import" width="1920" height="1200" loading="lazy"></div></div><div class="step"><span class="num">2</span><h3>Pick a model</h3><p>A recommended quantized model is applied when the data loads. Search the library by task, maker and size, or synthesize your own.</p><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/library.jpg" alt="Pick a model" width="1920" height="1200" loading="lazy"></div></div><div class="step"><span class="num">3</span><h3>Ask</h3><p>Type or dictate a question. Short arrives first, then Summary, Final, Transcript and Table. Every answer shows the readings behind it.</p><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/summary.jpg" alt="Ask" width="1920" height="1200" loading="lazy"></div></div><div class="step"><span class="num">4</span><h3>Watch the hot path</h3><p>The strip on the left edge shows Data, Profile, Model, PYNQ-Z2 and Answer, each with its time in ms.</p><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/peek.jpg" alt="Watch the hot path" width="1920" height="1200" loading="lazy"></div></div><div class="step"><span class="num">5</span><h3>Teach it</h3><p>Named edits change one INT8 row of a checkpoint. The board stores, verifies, switches and rolls them back exactly.</p><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/weights.jpg" alt="Teach it" width="1920" height="1200" loading="lazy"></div></div></div>
-    <div class="steps-media"><div class="window on"><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/start.jpg" alt="Connect and import" width="1920" height="1200" loading="lazy"></div><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/library.jpg" alt="Pick a model" width="1920" height="1200" loading="lazy"></div><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/summary.jpg" alt="Ask" width="1920" height="1200" loading="lazy"></div><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/peek.jpg" alt="Watch the hot path" width="1920" height="1200" loading="lazy"></div><div class="window "><div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div><img src="assets/shots/weights.jpg" alt="Teach it" width="1920" height="1200" loading="lazy"></div></div>
+    <div class="steps-text"><div class="step"><span class="num">1</span><h3>Connect and import</h3><p>Press Find boards. Once the PYNQ-Z2 shows up, import a CSV or JSON lines file, or pick one of 14 samples.</p></div><div class="step"><span class="num">2</span><h3>Pick a model</h3><p>A recommended quantized model is applied when the data loads. Search the library by task, maker and size, or synthesize your own.</p></div><div class="step"><span class="num">3</span><h3>Ask</h3><p>Type or dictate a question and press Return. Short arrives first, then Summary, Final, Transcript and Table.</p></div><div class="step"><span class="num">4</span><h3>Watch the hot path</h3><p>Hover the strip on the left edge. Data, Profile, Model, PYNQ-Z2 and Answer light up, each with its time in ms.</p></div><div class="step"><span class="num">5</span><h3>Teach it</h3><p>Switch the answer skill to a new checkpoint and publish it. The board verifies every version and rolls back exactly.</p></div></div>
+    <div class="steps-media">
+<div class="mock-fit"><div class="mock" aria-hidden="true">
+  <div class="window-bar"><b></b><b></b><b></b><span>PYNQ Process</span></div>
+  <div class="m-top">
+    <img src="assets/logo.png" alt="" width="1045" height="314">
+    <div class="m-status"><i></i><span>Not connected</span></div>
+    <div class="m-avatar">G</div>
+  </div>
+  <div class="m-body">
+    <div class="m-strip"><div class="m-path-row"><i></i><span>Data</span><b data-ms="1">0 ms</b></div><div class="m-path-row"><i></i><span>Profile</span><b data-ms="0">0 ms</b></div><div class="m-path-row"><i></i><span>Model</span><b data-ms="1">0 ms</b></div><div class="m-path-row"><i></i><span>PYNQ-Z2</span><b data-ms="9340">0 ms</b></div><div class="m-path-row"><i></i><span>Answer</span><b data-ms="17570">0 ms</b></div></div>
+    <div class="m-side"><div class="m-new">+ New session</div><div class="m-session"><b>pool-sudden-spike.csv</b><small>Queue-onset logistic</small></div></div>
+    <div class="m-main">
+      <div class="m-toolbar"><span class="m-file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>pool-sudden-spike.csv</span><span class="m-select">Samples</span><span class="m-import">Import data</span></div>
+      <div class="m-chat">
+        <div class="m-empty">
+          <h4>welcome back!</h4>
+          <p>Bring your data. Get a quantized model for it. Ask it anything.</p>
+          <span class="m-find">Find boards</span>
+          <div class="m-samples"><small>or try a sample:</small><span class="m-chip">Calm connection pool</span><span class="m-chip">Pool, slow build</span><span class="m-chip m-target-sample">Pool, sudden spike</span><span class="m-chip">Pool, recovery</span><span class="m-chip">API latency</span><span class="m-chip">Server thermal throttle</span><span class="m-chip">Disk IO</span><span class="m-chip">Network packet loss</span></div>
+        </div>
+        <div class="m-thread">
+          <div class="m-q">Why did the queue spike?</div>
+          <div class="m-a">
+            <div class="m-tabs"><span data-tab="Short">Short</span><span data-tab="Summary">Summary</span><span data-tab="Transcript">Transcript</span><span data-tab="Table">Table</span></div>
+            <div class="m-skel"><i></i><i></i><i></i></div>
+            <div class="m-text"></div>
+            <div class="m-readings">Readings behind this answer</div>
+          </div>
+        </div>
+      </div>
+      <div class="m-input"><span class="m-typed"></span><span class="m-caret"></span><span class="m-placeholder">Ask about your data</span><span class="m-return"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5v7a3 3 0 0 1-3 3H6M10 11l-4 4 4 4"/></svg></span></div>
+    </div>
+    <div class="m-rail">
+      <h5>Model</h5>
+      <div class="m-model"><span class="m-model-name">FLAN-T5-small INT8</span><span class="m-rec">Recommended</span></div>
+      <small class="m-by">by PYNQ team · Runs on the board</small>
+      <div class="m-buttons"><span class="m-search">Search models</span><span>Synthesize model</span></div>
+      <div class="m-rail-tabs"><span class="on" data-rtab="notes">Notes</span><span>Replay</span><span data-rtab="skills">Skills</span><span>Train</span></div>
+      <div class="m-notes">Write what you notice about this data</div>
+      <div class="m-skills">
+        <small>Early-warning skill</small><span class="m-field">pool-logistic-v1</span>
+        <small>Answer skill</small><span class="m-field m-answer-skill"><em>original</em></span>
+        <div class="m-options"><span>original</span><span class="m-v2">Queue history v2</span></div>
+        <span class="m-publish">Publish answer skill</span>
+      </div>
+    </div>
+  </div>
+  <div class="m-dialog">
+    <div class="m-dialog-head"><b>Model library</b><span class="m-close">Close</span></div>
+    <div class="m-search-field"><span class="m-search-typed"></span><span class="m-caret"></span></div>
+    <div class="m-row m-row-1"><div><b>Queue-onset logistic</b><small>by Stefan Ilas · Runs on the board · 1 KB</small><p>Best for: spotting queue build-up in connection pools</p></div><span class="m-pill">Active</span></div>
+    <div class="m-row m-row-2"><div><b>FLAN-T5-small INT8</b><small>by PYNQ team · Runs on the board · 64 MB</small><p>Best for: explaining what went wrong in plain words</p></div><span class="m-pill">Switch</span></div>
+  </div>
+  <div class="m-toast">Published to your library</div>
+  <svg class="m-cursor" viewBox="0 0 24 24"><path d="M4 2l16 10-7 1.6L9.5 21z" fill="#fff" stroke="#1d1a20" stroke-width="1.6" stroke-linejoin="round"/></svg>
+</div></div></div>
   </div>
 </section>
 
@@ -76,48 +131,9 @@
   <div class="stack-row"><svg aria-hidden="true"><path/></svg><div class="layer" data-reveal style="--i:0"><div class="orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M2 19h20"/></svg></div><b>Mac app</b><span>Native window, dictation on device</span><code>Swift</code></div><div class="layer" data-reveal style="--i:1"><div class="orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="7" rx="2"/><rect x="4" y="13" width="16" height="7" rx="2"/><path d="M8 7.5h.01M8 16.5h.01"/></svg></div><b>Local server</b><span>Profiles files and runs the page</span><code>127.0.0.1:53530</code></div><div class="layer" data-reveal style="--i:2"><div class="orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4"/></svg></div><b>PYNQ-Z2</b><span>ARM core drives generation and keeps history</span><code>FLAN-T5-small</code></div><div class="layer" data-reveal style="--i:3"><div class="orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16M4 15h16M10 4v16M15 4v16"/></svg></div><b>FPGA fabric</b><span>Learned INT8 matrix projections</span><code>INT8</code></div></div>
 </section>
 
-<section class="wrap" aria-labelledby="board-results">
-  <div class="section-head">
-    <p class="eyebrow">research · queue history v2</p>
-    <h2 class="bubbly" id="board-results" tabindex="-1">On the test bench.</h2>
-    <p class="lede">We asked one physical PYNQ-Z2 the same question on three recorded queues. The board kept scoring live data while it answered.</p>
-  </div>
-  <div class="bench">
-    <table>
-      <caption>One run per recording. Times rounded to the nearest 10 ms.</caption>
-      <thead><tr><th scope="col">Recorded queue</th><th scope="col">First words</th><th scope="col">Full answer</th></tr></thead>
-      <tbody>
-        <tr><th scope="row">Cleared after peaking at 12</th><td>9,780 ms</td><td>17,570 ms</td></tr>
-        <tr><th scope="row">Grew to 19 waiting</th><td>9,340 ms</td><td>18,160 ms</td></tr>
-        <tr><th scope="row">Stayed at zero</th><td>9,380 ms</td><td>18,130 ms</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="truth">
-    <div class="truth-card real" data-reveal>
-      <h3>On the board</h3>
-      <ul>
-        <li>Answers about a queue CSV or the live feed are generated on the PYNQ-Z2.</li>
-        <li>The kit keeps its own rolling history and scores new windows with the Mac closed.</li>
-        <li>Board uploads, staged answers, follow-ups and model synthesis run on the board.</li>
-        <li>Weight edits are stored, verified and rolled back exactly.</li>
-      </ul>
-    </div>
-    <div class="truth-card" data-reveal style="--i:1">
-      <h3>On your Mac</h3>
-      <ul>
-        <li>Imported files are profiled here. Transcript and Table come from plain statistics.</li>
-        <li>The model pick is a rule-based guess from column names and types.</li>
-        <li>The board's built-in SQLite workload is generated traffic, marked Simulated.</li>
-        <li>History, notes, export and the model library stay local.</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
 <section class="cta">
   <img class="cta-bear" src="assets/bear.png" alt="" width="206" height="246">
-  <h2 class="bubbly outlined" data-reveal>take it home.</h2>
+  <h2 class="bubbly outlined" data-reveal>go ask it something.</h2>
   <p class="lede" data-reveal style="--i:1">One zip. Unzip it, open it, find your board.</p>
   <div data-reveal style="--i:2"><a class="btn huge" href="downloads/pinkProcess-Mac-arm64.zip" download data-download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Get the app</a></div>
   <p class="cta-note" data-reveal style="--i:3">If macOS won't open it, go to System Settings, Privacy &amp; Security and press Open Anyway.</p>
@@ -125,10 +141,10 @@
 </main>
 <footer>
   <div class="wrap">
-    <span>Made at Hack Western 13 with love by Mohsen Sarrafan Chaharsoughi</span>
-    <span>and Stefan Ilas</span>
+    <img src="assets/logo.png" alt="PYNQ Process" width="1045" height="314">
+    <span>Made at Hack Western 13 with love by Mohsen Sarrafan Chaharsoughi and Stefan Ilas</span>
   </div>
 </footer>
-<div class="toast" role="status">Downloading. Unzip it, then open PYNQ Process.</div>
+<div class="toast" role="status">Downloading. Unzip it, then open pinkProcess.</div>
 </body>
 </html>
