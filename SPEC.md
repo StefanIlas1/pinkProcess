@@ -9,7 +9,7 @@ To reproduce the cartridge study from this checkout, run
 original interface on localhost.
 
 
-Everything about the cartridge system in one file: the problem, the design, the file map, what is measured, what is not done and what to do next. Agents picking up this repo should read all of it before changing code. Track and demo notes for Hack Western are in [docs/hack-western.md](docs/hack-western.md).
+This document records the prototype design, file map, measurements and open research questions. Track and demo notes for Hack Western are in [docs/hack-western.md](docs/hack-western.md).
 
 ## Run it
 
