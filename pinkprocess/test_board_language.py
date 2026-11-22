@@ -117,8 +117,8 @@ class BoardLanguageTest(unittest.TestCase):
         base, history = FakeRuntime(), FakeRuntime()
         alternate_bytes = b"weights:" + bytes(reversed(range(12)))
         layout = replace(self.layout, checkpoint_sha256=sha256(alternate_bytes).hexdigest())
-        alternate = WeightVersionStore(self.state_dir / "alt.sqlite", alternate_bytes, layout=layout).original
-        history.installed = alternate
+        alternate = WeightVersionStore(self.state_dir / "alt.sqlite", alternate_bytes, layout=layout)
+        history.installed = alternate.original
         bound = []
         base.query_projection = history.query_projection = SimpleNamespace(bind_model=bound.append)
 
@@ -143,8 +143,25 @@ class BoardLanguageTest(unittest.TestCase):
         fresh = self.finish(service, self.start(service))
         self.assertEqual(fresh["prompt_variant"], "queue_history")
         self.assertNotEqual(history.prompts[-1], original_prompt)
-        with self.assertRaisesRegex(ValueError, "original checkpoint"):
-            self.save(service, "invalid source")
+        # The same row bytes define distinct classifiers under the two base models.
+        context = service.handle(dict(op="lm_row", target_row=1))
+        self.assertEqual(context["base_sha256"], layout.checkpoint_sha256)
+        self.assertEqual(context["row"], list(alternate_bytes[-8:-4]))
+        named = "History row test"
+        with self.assertRaisesRegex(ValueError, "SHA-256"):
+            self.save(service, named)
+        service.handle(dict(op="lm_save", name=named, target_row=1, base_sha256=context["base_sha256"],
+                            response={"row": [-127, 0, 127, 22]}))
+        result = service.handle(dict(op="lm_select", name=named))
+        self.assertEqual(result["active"]["base_name"], HISTORY_MODEL)
+        self.assertNotEqual(result["active"]["classifier_sha256"], selected["active"]["classifier_sha256"])
+        service = open_service()
+        self.assertEqual(service.active.name, named)
+        self.assertIs(service.runtime, history)
+        self.assertEqual(self.finish(service, self.start(service))["prompt_variant"], "queue_history")
+        with self.assertRaisesRegex(ValueError, "different base|another base"):
+            service.handle(dict(op="lm_save", name="wrong source", target_row=1,
+                                base_sha256=self.layout.checkpoint_sha256, response={"row": [1]*4}))
         service.handle(dict(op="lm_select", name="Astra attempt"))
         dataset_id = service.handle(dict(op="lm_dataset_upload", csv=demo_csv(), capacity=DEMO_CAPACITY))["dataset_id"]
         service.handle(dict(op="lm_dataset_select", dataset_id=dataset_id, name=HISTORY_MODEL))
@@ -154,8 +171,22 @@ class BoardLanguageTest(unittest.TestCase):
         self.assertIs(service.runtime, base)
         self.assertEqual(service.active.name, "Astra attempt")
         self.assertTrue(bound)
+        context = service.handle(dict(op="lm_dataset_calibration", dataset_id=dataset_id, target_row=1))
+        self.assertEqual((context["ready"], context["base_sha256"]), (True, layout.checkpoint_sha256))
+        with self.assertRaisesRegex(ValueError, "another base"):
+            service.handle(dict(op="lm_dataset_save", dataset_id=dataset_id, selected_model=HISTORY_MODEL,
+                                name="wrong", target_row=1, response={"row": [1]*4},
+                                base_sha256=self.layout.checkpoint_sha256))
+        dataset_saved = service.handle(dict(op="lm_dataset_save", dataset_id=dataset_id, selected_model=HISTORY_MODEL,
+                                            name="History dataset edit", target_row=1,
+                                            response={"row": [6, 7, 8, 9]}, base_sha256=context["base_sha256"]))
+        self.assertEqual(dataset_saved["selected_model"], "History dataset edit")
+        rerun = self.finish(service, service.handle(dict(op="lm_dataset_ask", dataset_id=dataset_id, question=QUESTION)))
+        self.assertEqual((rerun["active"]["name"], rerun["active"]["base_name"], rerun["prompt_variant"]),
+                         ("History dataset edit", HISTORY_MODEL, "queue_history"))
+        self.assertEqual(service.runtime.installed.name, "Astra attempt")
         service.jobs.pop(service.activation_job_id)
-        with self.assertRaisesRegex(ValueError, "original checkpoint"):
+        with self.assertRaisesRegex(ValueError, "selected base checkpoint"):
             service.handle(dict(op="lm_row", target_row=1))
         service.handle(dict(op="lm_restore"))
         replay = self.finish(service, self.start(service, capture_id=fresh["capture_id"]))
@@ -164,7 +195,7 @@ class BoardLanguageTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "full checkpoint"):
             self.save(service, HISTORY_MODEL)
         with self.assertRaisesRegex(ValueError, "different checkpoint"):
-            self.store().register_checkpoint(HISTORY_MODEL, self.store().original)
+            self.store().register_checkpoint(HISTORY_MODEL, self.store())
 
     def test_dataset_selection_is_scoped_and_followup_uses_prior_answer(self):
         runtime = FakeRuntime()

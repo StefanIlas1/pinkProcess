@@ -201,7 +201,7 @@ def main():
                     verify_model(args.history_model, args.history_manifest_sha256)
                     alternate = WeightVersionStore.from_flan(state_dir / "lm-history-v2.sqlite", args.history_model,
                                                              manifest_sha256=args.history_manifest_sha256)
-                    versions.register_checkpoint(HISTORY_MODEL, alternate.original)
+                    versions.register_checkpoint(HISTORY_MODEL, alternate)
                     # Defer FPGA cache binding until the operator selects this checkpoint.
                     history_runtime = Flan(args.history_model, runtime.fabric)
                     history_runtime.query_projection = query_projection
