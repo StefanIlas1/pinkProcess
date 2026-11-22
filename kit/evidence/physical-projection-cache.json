@@ -835,7 +835,13 @@
             4
           ]
         ]
-      }
+      },
+      "initial_lexical_rubric": {
+        "recognizes_cause_uncertainty": false,
+        "mentions_current_four": true,
+        "proposes_distinguishing_measurement": true
+      },
+      "cause_uncertainty_review": "The response explicitly says \u201cThe cause is unknown.\u201d The lexical matcher missed that phrasing."
     }
   ],
   "rubric_method": "Predefined case criteria checked against the generated text and captured evidence. The original uncertainty matcher omitted the valid phrasing 'the cause is unknown'; the final review credits that explicit statement."
