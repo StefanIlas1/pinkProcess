@@ -1,6 +1,6 @@
 # PYNQ Process website
 
-The public site where people download the Mac app. Three static pages (home, how it works, download), one stylesheet, one script, no build tools.
+The public site where people download the Mac app. One static page, one stylesheet, one script, no build tools. Every "Get the app" button downloads the zip directly.
 
 ## Run it
 

@@ -3,27 +3,88 @@ const clamp = (value, low = 0, high = 1) => Math.min(high, Math.max(low, value))
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
+let scrollSpeed = 0;
+
+function setupFabric() {
+  const canvas = $(".fabric");
+  if (!canvas) return;
+  const context = canvas.getContext("2d");
+  const cell = 26;
+  let columns = 0;
+  let rows = 0;
+  let ratio = 1;
+  let glow = new Float32Array(0);
+  let pulses = [];
+
+  const spawnPulse = (anywhere) => ({
+    row: Math.floor(Math.random() * rows),
+    x: anywhere ? Math.random() * columns : -2,
+    speed: 0.06 + Math.random() * 0.12,
+    hot: Math.random() < 0.25
+  });
+
+  const resize = () => {
+    ratio = Math.min(2, devicePixelRatio || 1);
+    canvas.width = innerWidth * ratio;
+    canvas.height = innerHeight * ratio;
+    columns = Math.ceil(innerWidth / cell) + 1;
+    rows = Math.ceil(innerHeight / cell) + 1;
+    glow = new Float32Array(columns * rows);
+    pulses = Array.from({ length: Math.round((columns * rows) / 260) }, () => spawnPulse(true));
+  };
+
+  const draw = () => {
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    context.clearRect(0, 0, innerWidth, innerHeight);
+    const boost = 1 + Math.min(6, scrollSpeed * 0.08);
+    pulses.forEach((pulse, index) => {
+      pulse.x += pulse.speed * boost;
+      if (pulse.x > columns + 2) pulses[index] = spawnPulse(false);
+      const column = Math.floor(pulse.x);
+      if (column >= 0 && column < columns) {
+        const slot = pulse.row * columns + column;
+        glow[slot] = Math.max(glow[slot], pulse.hot ? 1 : 0.6);
+      }
+    });
+    for (let row = 0; row < rows; row++) {
+      for (let column = 0; column < columns; column++) {
+        const slot = row * columns + column;
+        const level = glow[slot];
+        const x = column * cell + 9;
+        const y = row * cell + 9;
+        if (level > 0.02) {
+          context.fillStyle = `rgba(251,100,141,${(level * 0.4).toFixed(3)})`;
+          context.beginPath();
+          context.roundRect(x - 1, y - 1, 8, 8, 2.5);
+          context.fill();
+          glow[slot] = level * 0.94;
+        } else {
+          context.fillStyle = "rgba(253,206,223,0.055)";
+          context.fillRect(x + 2, y + 2, 2, 2);
+        }
+      }
+    }
+    scrollSpeed *= 0.9;
+  };
+
+  resize();
+  addEventListener("resize", resize);
+  if (reducedMotion) { draw(); return; }
+  let lastTime = 0;
+  const loop = (time) => {
+    if (time - lastTime > 33 && !document.hidden) { lastTime = time; draw(); }
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+
 function setupNav() {
   const nav = $(".nav");
   if (!nav) return;
-  const links = $(".nav-links", nav);
-  const blob = $(".nav-blob", nav);
-  const current = $("a[aria-current]", links);
-  const moveBlob = (target) => {
-    if (!target) { blob.style.opacity = 0; return; }
-    blob.style.opacity = 1;
-    blob.style.left = target.offsetLeft + "px";
-    blob.style.width = target.offsetWidth + "px";
-  };
-  moveBlob(current);
-  $$("a", links).forEach((link) => link.addEventListener("pointerenter", () => moveBlob(link)));
-  links.addEventListener("pointerleave", () => moveBlob(current));
-  addEventListener("resize", () => moveBlob(current));
-  $(".nav-toggle", nav).addEventListener("click", () => nav.classList.toggle("open"));
   let lastY = scrollY;
   addEventListener("scroll", () => {
-    const goingDown = scrollY > lastY && scrollY > 240;
-    nav.classList.toggle("tuck", goingDown && !nav.classList.contains("open"));
+    scrollSpeed = Math.max(scrollSpeed, Math.abs(scrollY - lastY));
+    nav.classList.toggle("tuck", scrollY > lastY && scrollY > 240);
     lastY = scrollY;
   }, { passive: true });
 }
@@ -72,75 +133,32 @@ function startScrubLoop() {
   runScrubbers();
 }
 
-function scatterBubbles(container, count, seed) {
-  if (!container) return;
-  let state = seed;
-  const random = () => ((state = (state * 9301 + 49297) % 233280) / 233280);
-  const kinds = ["", "", "bow", "hollow", "hollow"];
-  for (let index = 0; index < count; index++) {
-    const bubble = document.createElement("i");
-    const size = 10 + random() * 46;
-    bubble.className = kinds[Math.floor(random() * kinds.length)];
-    bubble.style.width = bubble.style.height = size + "px";
-    const edge = random() * 20;
-    bubble.style.left = (random() < 0.5 ? edge : 80 + edge) + "%";
-    bubble.style.top = random() * 100 + "%";
-    bubble.dataset.depth = (0.2 + random()).toFixed(2);
-    container.appendChild(bubble);
-  }
-  if (reducedMotion) return;
-  const bubbles = $$("i", container);
-  addEventListener("pointermove", (event) => {
-    const offsetX = event.clientX / innerWidth - 0.5;
-    const offsetY = event.clientY / innerHeight - 0.5;
-    bubbles.forEach((bubble) => {
-      const depth = +bubble.dataset.depth;
-      bubble.style.setProperty("--mx", (offsetX * 40 * depth).toFixed(1) + "px");
-      bubble.style.setProperty("--my", (offsetY * 40 * depth).toFixed(1) + "px");
-    });
-  }, { passive: true });
-  addScrubber(container, passingProgress, (progress) => {
-    bubbles.forEach((bubble) => bubble.style.setProperty("--sy", (-(progress - 0.5) * 260 * +bubble.dataset.depth).toFixed(1) + "px"));
-  });
-}
-
 function setupHero() {
   const hero = $(".hero");
-  if (!hero) return;
-  addScrubber(hero, () => clamp(scrollY / (innerHeight * 0.55)));
-  scatterBubbles($(".bubbles", hero), 18, 7);
-  if (reducedMotion) return;
-  const floats = $$(".float", hero);
-  addEventListener("pointermove", (event) => {
-    const offsetX = event.clientX / innerWidth - 0.5;
-    const offsetY = event.clientY / innerHeight - 0.5;
-    floats.forEach((float, index) => {
-      const depth = 14 + index * 8;
-      float.style.transform = `translate(${(offsetX * depth).toFixed(1)}px, ${(offsetY * depth).toFixed(1)}px)`;
-    });
-  }, { passive: true });
+  if (hero) addScrubber(hero, () => clamp(scrollY / (innerHeight * 0.55)));
 }
 
 function setupMarquee() {
   const track = $(".marquee-track");
   if (!track) return;
   track.innerHTML += track.innerHTML;
-  let index = 0;
   const chips = $$("span", track);
+  const half = chips.length / 2;
+  let index = 0;
   setInterval(() => {
     chips.forEach((chip) => chip.classList.remove("on"));
-    index = (index + 3) % (chips.length / 2);
+    index = (index + 3) % half;
     chips[index].classList.add("on");
-    chips[index + chips.length / 2].classList.add("on");
+    chips[index + half].classList.add("on");
   }, 1400);
 }
 
 const hotPathStages = [
-  { name: "Data", time: "1 ms", note: "Your CSV or JSON lines file is read on your Mac. Columns, types and the time column get spotted." },
-  { name: "Profile", time: "0 ms", note: "Signals like queue, latency, errors or temperature are found, so the app knows what it is looking at." },
-  { name: "Model", time: "1 ms", note: "A small quantized model that fits the data is picked for you. Swap it any time from the library." },
-  { name: "PYNQ-Z2", time: "9,340 ms", note: "On the board, the FPGA runs the INT8 matrix math and the ARM core drives generation." },
-  { name: "Answer", time: "17,570 ms", note: "Short lands first, then Summary and Final. Every answer shows the readings it rests on." }
+  { name: "Data", note: "Your CSV or JSON lines file is read on your Mac. Columns, types and the time column get spotted." },
+  { name: "Profile", note: "Signals like queue, latency, errors or temperature are found, so the app knows what it is looking at." },
+  { name: "Model", note: "A small quantized model that fits the data is picked for you. Swap it any time from the library." },
+  { name: "PYNQ-Z2", note: "On the board, the FPGA runs the INT8 matrix math and the ARM core drives generation." },
+  { name: "Answer", note: "Short lands first, then Summary and Final. Every answer shows the readings it rests on." }
 ];
 
 function setupHotPath() {
@@ -152,10 +170,8 @@ function setupHotPath() {
   const laneDash = $(".lane-dash", svg);
   const laneFill = $(".lane-fill", svg);
   const stations = $$(".station", road);
-  const rider = $(".rider", road);
   const nowName = $(".path-now strong", path);
   const nowNote = $(".path-now span", path);
-  const counter = $(".path-count", path);
   const stops = [0.01, 0.255, 0.5, 0.745, 0.99];
   let length = 0;
   let activeIndex = -1;
@@ -185,123 +201,27 @@ function setupHotPath() {
     const travel = clamp((progress - 0.06) / 0.84);
     const along = stops[0] + travel * (stops[stops.length - 1] - stops[0]);
     laneFill.style.strokeDashoffset = length * (1 - along);
-    const point = lane.getPointAtLength(length * along);
-    rider.style.left = point.x + "px";
-    rider.style.top = point.y + "px";
     let reached = -1;
     stops.forEach((stop, index) => {
       const lit = along >= stop - 0.001;
       if (lit) reached = index;
       stations[index].classList.toggle("lit", lit);
     });
-    if (reached !== activeIndex) {
-      if (reached > activeIndex && reached >= 0) {
-        stations[reached].classList.remove("pop");
-        void stations[reached].offsetWidth;
-        stations[reached].classList.add("pop");
-      }
-      activeIndex = reached;
-      const stage = hotPathStages[Math.max(0, reached)];
-      nowName.textContent = reached < 0 ? "Ready" : stage.name;
-      nowNote.textContent = reached < 0 ? "Scroll to send a question down the path." : stage.note;
-      counter.textContent = `${Math.max(0, reached + 1)} / 5`;
+    if (reached === activeIndex) return;
+    if (reached > activeIndex && reached >= 0) {
+      stations[reached].classList.remove("pop");
+      void stations[reached].offsetWidth;
+      stations[reached].classList.add("pop");
     }
+    activeIndex = reached;
+    const stage = hotPathStages[Math.max(0, reached)];
+    nowName.textContent = reached < 0 ? "Ready" : stage.name;
+    nowNote.textContent = reached < 0 ? "Scroll to send a question down the path." : stage.note;
   };
 
   layout();
   addEventListener("resize", () => { layout(); show(pinnedProgress(path)); });
   addScrubber(path, pinnedProgress, show);
-}
-
-function setupGallery() {
-  const gallery = $(".gallery");
-  if (!gallery) return;
-  const row = $(".gallery-row", gallery);
-  const measure = () => gallery.style.setProperty("--travel", Math.max(0, row.scrollWidth - innerWidth) + "px");
-  measure();
-  addEventListener("resize", measure);
-  addEventListener("load", measure);
-  addScrubber(gallery, pinnedProgress);
-}
-
-const answerStyles = {
-  Short: "waiting is steady and now 0; it peaked at 58 at 36.9 s. It spiked 1 time.",
-  Summary: "waiting is steady and now 0; it peaked at 58 at 36.9 s. It spiked 1 time.\nThe file has 600 rows covering 0.0 s to 59.9 s.\nTypical waiting is 7.90. Over the most recent readings it is steady.\n1 unusual stretch stood out.",
-  Transcript: "0.0 s   START  waiting 0\n34.6 s  SPIKE  waiting jumps to 41\n36.9 s  PEAK   highest waiting, 58\n40.3 s  CALM   waiting eases to 39\n59.9 s  NOW    waiting 0, steady",
-  Table: "Time     Event   waiting\n0.0 s    start   waiting 0\n34.6 s   spike   jumps to 41\n36.9 s   peak    highest, 58\n59.9 s   now     0, steady"
-};
-
-function setupAnswerDemo() {
-  const answer = $(".answer");
-  if (!answer) return;
-  const tabs = $$(".tabs button", answer);
-  const body = $(".body", answer);
-  const order = Object.keys(answerStyles);
-  let ready = 0;
-  let typingTimer = 0;
-  let cycleTimer = 0;
-  let userPicked = false;
-
-  const type = (text, onDone) => {
-    clearInterval(typingTimer);
-    const monospaced = text.includes("  ");
-    body.style.fontFamily = monospaced ? "var(--mono)" : "";
-    body.style.fontSize = monospaced ? "14px" : "";
-    if (reducedMotion) { body.textContent = text; onDone && onDone(); return; }
-    let shown = 0;
-    typingTimer = setInterval(() => {
-      shown = Math.min(text.length, shown + 3);
-      body.innerHTML = "";
-      body.append(text.slice(0, shown));
-      if (shown < text.length) {
-        const caret = document.createElement("span");
-        caret.className = "caret";
-        body.append(caret);
-      } else {
-        clearInterval(typingTimer);
-        onDone && onDone();
-      }
-    }, 18);
-  };
-
-  const select = (name) => {
-    tabs.forEach((tab) => tab.classList.toggle("on", tab.dataset.style === name));
-    type(answerStyles[name]);
-  };
-
-  const skeleton = () => {
-    body.innerHTML = '<div class="skel"><i style="width:94%"></i><i style="width:81%"></i><i style="width:58%"></i></div>';
-  };
-
-  const play = () => {
-    ready = 0;
-    tabs.forEach((tab) => tab.classList.add("wait"));
-    tabs.forEach((tab) => tab.classList.remove("on"));
-    skeleton();
-    setTimeout(() => {
-      const unlock = () => {
-        if (ready >= order.length) return;
-        tabs[ready].classList.remove("wait");
-        if (!userPicked) select(order[ready]);
-        ready++;
-        cycleTimer = setTimeout(unlock, 2600);
-      };
-      unlock();
-    }, 1100);
-  };
-
-  tabs.forEach((tab) => tab.addEventListener("click", () => {
-    if (tab.classList.contains("wait")) return;
-    userPicked = true;
-    select(tab.dataset.style);
-  }));
-
-  const observer = new IntersectionObserver((entries) => {
-    if (!entries[0].isIntersecting) return;
-    observer.disconnect();
-    play();
-  }, { threshold: 0.4 });
-  observer.observe(answer);
 }
 
 function setupSteps() {
@@ -322,12 +242,11 @@ function setupSteps() {
 function setupStack() {
   const row = $(".stack-row");
   if (!row) return;
-  const line = $("path", row);
-  const svg = $("svg", row);
+  const svg = $(":scope > svg", row);
+  const line = $("path", svg);
   const layers = $$(".layer", row);
   const draw = () => {
-    const width = row.clientWidth;
-    svg.setAttribute("viewBox", `0 0 ${width} 20`);
+    svg.setAttribute("viewBox", `0 0 ${row.clientWidth} 20`);
     const first = layers[0].offsetLeft + layers[0].offsetWidth / 2;
     const last = layers[layers.length - 1].offsetLeft + layers[layers.length - 1].offsetWidth / 2;
     line.setAttribute("d", `M ${first} 2 L ${last} 2`);
@@ -340,15 +259,8 @@ function setupStack() {
   });
 }
 
-function setupCtaBear() {
-  $$(".cta").forEach((cta) => {
-    addScrubber(cta, passingProgress);
-    scatterBubbles($(".bubbles", cta), 14, 31);
-  });
-}
-
-function formatSize(bytes) {
-  return (bytes / 1048576).toFixed(1) + " MB";
+function setupCta() {
+  $$(".cta").forEach((cta) => addScrubber(cta, passingProgress));
 }
 
 function burst(originX, originY) {
@@ -359,7 +271,7 @@ function burst(originX, originY) {
   const colors = ["#fdcedf", "#fb648d", "#fdcedf", "#ffffff"];
   const pieces = Array.from({ length: 34 }, (_, index) => {
     const piece = document.createElement("i");
-    const size = 8 + Math.random() * 18;
+    const size = 8 + Math.random() * 14;
     piece.style.width = piece.style.height = size + "px";
     piece.style.background = colors[index % colors.length];
     piece.style.left = originX + "px";
@@ -367,7 +279,7 @@ function burst(originX, originY) {
     layer.appendChild(piece);
     const angle = Math.random() * Math.PI * 2;
     const speed = 5 + Math.random() * 9;
-    return { piece, x: 0, y: 0, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 7, life: 0 };
+    return { piece, x: 0, y: 0, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 7, life: 0, spin: Math.random() * 360 };
   });
   const step = () => {
     let alive = false;
@@ -379,7 +291,7 @@ function burst(originX, originY) {
       item.y += item.vy;
       const fade = Math.max(0, 1 - item.life / 80);
       if (fade > 0) alive = true;
-      item.piece.style.transform = `translate(${item.x}px, ${item.y}px) scale(${0.4 + fade * 0.6})`;
+      item.piece.style.transform = `translate(${item.x}px, ${item.y}px) rotate(${item.spin + item.life * 6}deg) scale(${0.4 + fade * 0.6})`;
       item.piece.style.opacity = fade;
     });
     if (alive) requestAnimationFrame(step);
@@ -391,45 +303,28 @@ function burst(originX, originY) {
 function setupDownload() {
   const buttons = $$("[data-download]");
   if (!buttons.length) return;
-  const sizeLabels = $$("[data-size]");
   fetch(buttons[0].getAttribute("href"), { method: "HEAD" }).then((response) => {
     const bytes = +response.headers.get("content-length");
-    if (response.ok && bytes > 100000) sizeLabels.forEach((label) => (label.textContent = formatSize(bytes)));
+    if (response.ok && bytes > 100000) $$("[data-size]").forEach((label) => (label.textContent = (bytes / 1048576).toFixed(1) + " MB"));
   }).catch(() => {});
   const toast = $(".toast");
   buttons.forEach((button) => button.addEventListener("click", () => {
     const box = button.getBoundingClientRect();
     burst(box.left + box.width / 2, box.top + box.height / 2);
-    if (!toast) return;
     toast.classList.add("show");
     clearTimeout(toast.timer);
     toast.timer = setTimeout(() => toast.classList.remove("show"), 4200);
   }));
 }
 
-function setupMagnets() {
-  if (reducedMotion || matchMedia("(hover: none)").matches) return;
-  $$(".btn.huge, [data-magnet]").forEach((element) => {
-    element.addEventListener("pointermove", (event) => {
-      const box = element.getBoundingClientRect();
-      const offsetX = (event.clientX - box.left - box.width / 2) * 0.18;
-      const offsetY = (event.clientY - box.top - box.height / 2) * 0.25;
-      element.style.translate = `${offsetX.toFixed(1)}px ${offsetY.toFixed(1)}px`;
-    });
-    element.addEventListener("pointerleave", () => (element.style.translate = ""));
-  });
-}
-
+setupFabric();
 setupNav();
 setupReveal();
 setupHero();
 setupMarquee();
 setupHotPath();
-setupGallery();
-setupAnswerDemo();
 setupSteps();
 setupStack();
-setupCtaBear();
+setupCta();
 setupDownload();
-setupMagnets();
 startScrubLoop();
