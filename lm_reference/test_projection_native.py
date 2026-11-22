@@ -69,7 +69,7 @@ class ProjectionNativeTest(unittest.TestCase):
 
     def test_pack_and_unpack_match_numpy_with_signed_padding(self):
         random = np.random.default_rng(912)
-        for batch, rows, depth in ((1, 65, 37), (9, 15, 33), (16, 16, 1), (1, 32128, 512)):
+        for batch, rows, depth in ((1, 65, 37), (9, 15, 33), (17, 23, 48), (16, 16, 1), (1, 32128, 512)):
             with self.subTest(batch=batch, rows=rows, depth=depth):
                 source_activations = random.integers(-128, 128, (batch, depth * 2), dtype=np.int8)[:, ::-2]
                 source_weights = random.integers(-128, 128, (rows, depth), dtype=np.int8)[::-1]

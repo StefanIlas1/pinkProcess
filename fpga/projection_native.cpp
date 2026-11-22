@@ -9,9 +9,31 @@
 #include <cstring>
 #include <time.h>
 
+#if defined(__ARM_NEON)
+#include <arm_neon.h>
+#endif
+
 namespace {
 constexpr std::uint32_t busy = 1;
 constexpr std::uint32_t done_or_error = 6;
+
+#if defined(__ARM_NEON)
+void pack_eight_rows(std::int8_t *out, const std::int8_t *in,
+                     std::size_t depth, std::ptrdiff_t stride)
+{
+    for (std::size_t column = 0; column < depth; column += 16) {
+        int8x16x4_t lower, upper;
+        for (int row = 0; row < 4; ++row) {
+            const auto *first = in + row * stride + column;
+            const auto pair = vzipq_s8(vld1q_s8(first), vld1q_s8(first + 4 * stride));
+            lower.val[row] = pair.val[0];
+            upper.val[row] = pair.val[1];
+        }
+        vst4q_s8(out + 8 * column, lower);
+        vst4q_s8(out + 8 * column + 64, upper);
+    }
+}
+#endif
 
 void mmio_barrier()
 {
@@ -68,6 +90,14 @@ void pp_projection_pack(std::int8_t *destination, const std::int8_t *source,
 {
     for (std::size_t tile = 0; tile < rows; tile += lanes) {
         const auto live = std::min(lanes, rows - tile);
+#if defined(__ARM_NEON)
+        if (lanes == 8 && live == 8 && col_stride == 1 && depth % 16 == 0) {
+            pack_eight_rows(destination, source + static_cast<std::ptrdiff_t>(tile) * row_stride,
+                            depth, row_stride);
+            destination += depth * lanes;
+            continue;
+        }
+#endif
         if (live < lanes) {
             std::memset(destination, 0, depth * lanes);
         }
