@@ -105,3 +105,31 @@ class DraftTests(unittest.TestCase):
                     self.assertEqual((model.first_output_activation, model.first_output_max), calibration)
                 if edited:
                     model.restore_head()
+
+    @unittest.skipUnless(os.getenv("PINKPROCESS_HISTORY_MODEL") and os.getenv("PINKPROCESS_HISTORY_TOKEN_DRAFT"),
+                         "The released history checkpoint and proposal table are required.")
+    def test_frozen_prompt_copy_counts_and_calibration(self):
+        import gzip
+        from unittest.mock import patch
+        from lm_reference.flan import Flan
+        from lm_reference.flan_prompt import telemetry_prompt
+
+        evidence = Path(__file__).resolve().parents[1] / "kit/evidence"
+        study = json.loads((evidence / "history-prompt-copy-parity.json").read_bytes())
+        cases = json.loads(gzip.decompress((evidence / study["inputs"]).read_bytes()))["cases"]
+        model = Flan(os.environ["PINKPROCESS_HISTORY_MODEL"], None, reference=True)
+        model.token_draft = TokenDraft.load_history(os.environ["PINKPROCESS_HISTORY_TOKEN_DRAFT"])
+        self.assertEqual(len(cases), len(study["cases"]))
+        for case, observed in zip(cases, study["cases"]):
+            with self.subTest(case=case["case_id"]):
+                self.assertEqual(case["case_id"], observed["id"])
+                prompt = telemetry_prompt(case["question"], case["evidence"], history=True)
+                outputs = []
+                for width, key in ((None, "existing_width_8"), (16, "prompt_copy_width_16")):
+                    model.prompt_draft_positions = width
+                    with patch.object(model.tokenizer, "decode", wraps=model.tokenizer.decode) as decode:
+                        answer = model.generate(prompt)
+                        tokens = tuple(decode.call_args.args[0])
+                    outputs.append((answer, tokens, tuple(model.first_output_activation), model.first_output_max))
+                    self.assertEqual(model.generation_timing["verification_blocks"], observed[key])
+                self.assertEqual(*outputs)
