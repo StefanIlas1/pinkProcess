@@ -11,6 +11,7 @@ module projection_engine (
     input  wire [31:0]  w_base,
     input  wire [31:0]  y_base,
     output wire         busy,
+    output wire         mac_feed,
     output reg          done,
 
     output wire         rd_cmd_valid,
@@ -53,6 +54,8 @@ module projection_engine (
     reg [4:0] feed_index;
     reg [3:0] flush_index;
     reg [4:0] write_index;
+
+    assign mac_feed = state == FEED;
 
     wire [8:0] a_beats = {3'b0, load_length};
     wire [8:0] w_beats = mode_decode ? {load_length, 3'b0} : a_beats;

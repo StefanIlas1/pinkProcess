@@ -47,7 +47,8 @@ module pinkprocess_projection (
     reg start, completed, invalid, decode;
     reg [15:0] k, pos_tiles, out_tiles;
     reg [31:0] a_base, w_base, y_base;
-    wire busy, done, dma_error;
+    wire busy, done, dma_error, mac_feed;
+    reg [31:0] elapsed_cycles, feed_cycles, read_beats, write_beats;
     // Descriptors are staged while idle; one doorbell runs up to eight in order.
     // Keep the legacy configuration readable throughout execution.
     reg [144:0] descriptors [0:7];
@@ -64,6 +65,18 @@ module pinkprocess_projection (
     wire valid_config = k != 0 && pos_tiles != 0 && out_tiles != 0 &&
                         (!decode || pos_tiles == 1) &&
                         (a_base[2:0] | w_base[2:0] | y_base[2:0]) == 0;
+    // Counters span the whole batch and remain readable until the next launch.
+    wire first_launch = start && (!queue_active || queue_index == 0);
+    always @(posedge clk) begin
+        if (rst || first_launch) begin
+            elapsed_cycles <= 0; feed_cycles <= 0; read_beats <= 0; write_beats <= 0;
+        end else if (running) begin
+            elapsed_cycles <= elapsed_cycles + 1'b1;
+            if (mac_feed) feed_cycles <= feed_cycles + 1'b1;
+            if (m_axi_rvalid && m_axi_rready) read_beats <= read_beats + 1'b1;
+            if (m_axi_wvalid && m_axi_wready) write_beats <= write_beats + 1'b1;
+        end
+    end
     always @(posedge clk) begin
         if (rst) begin
             start <= 0; completed <= 0; invalid <= 0;
@@ -147,6 +160,10 @@ module pinkprocess_projection (
                     32: s_axi_rdata <= 32'h50504a31;
                     36: s_axi_rdata <= {24'b0, queue_index, queued};
                     40: s_axi_rdata <= 32'h51554538; // QUE8 capability
+                    44: s_axi_rdata <= elapsed_cycles;
+                    48: s_axi_rdata <= feed_cycles;
+                    52: s_axi_rdata <= read_beats;
+                    56: s_axi_rdata <= write_beats;
                     default: begin s_axi_rdata <= 0; s_axi_rresp <= 2; end
                 endcase
             end
@@ -162,7 +179,7 @@ module pinkprocess_projection (
         .clk(clk), .rst(rst), .start(start),
         .decode(engine_decode), .k(engine_k), .pos_tiles(engine_positions),
         .out_tiles(engine_outputs), .a_base(engine_a), .w_base(engine_w),
-        .y_base(engine_y), .busy(busy), .done(done),
+        .y_base(engine_y), .busy(busy), .mac_feed(mac_feed), .done(done),
         .rd_cmd_valid(rd_cmd_valid), .rd_cmd_ready(rd_cmd_ready), .rd_cmd_addr(rd_cmd_addr),
         .rd_cmd_beats(rd_cmd_beats), .rd_data_valid(rd_data_valid), .rd_data_ready(rd_data_ready),
         .rd_data(rd_data), .wr_cmd_valid(wr_cmd_valid), .wr_cmd_ready(wr_cmd_ready),

@@ -304,8 +304,9 @@ module projection_system_tb;
     // a failed first descriptor suppressing its successor, and retry after error.
     task check_queue(input bit fault);
         reg [31:0] status;
-        integer i;
+        integer i, jobs;
         begin
+            jobs = fault ? 1 : 2;
             inject_write_error = fault;
             injected_error = 0;
             for (i = 0; i < 64; i = i + 1) begin
@@ -328,6 +329,14 @@ module projection_system_tb;
             end
             control_read('h24, status);
             if (status[7:0] !== (fault ? 0 : 16)) $fatal(1, "Wrong terminal index");
+            control_read('h2c, status);
+            if (status <= jobs*2*K) $fatal(1, "Invalid elapsed cycle count");
+            control_read('h30, status);
+            if (status !== jobs*2*K) $fatal(1, "Wrong useful MAC cycle count");
+            control_read('h34, status);
+            if (status !== jobs*2*K*9) $fatal(1, "Wrong DDR read count");
+            control_read('h38, status);
+            if (status !== jobs*2*32) $fatal(1, "Wrong DDR write count");
         end
     endtask
 
