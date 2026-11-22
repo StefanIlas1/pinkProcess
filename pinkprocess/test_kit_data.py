@@ -52,6 +52,17 @@ class AnalystTest(unittest.TestCase):
         self.assertEqual(lines[-1], "Next step: check the database connection pool behind /checkout in eu-west.")
         self.assertLessEqual(len(lines), 5)
 
+    def test_interpretation_questions_explain_the_incident_and_keep_explicit_average(self):
+        table = parse_table(sample_csv("checkout-api-10k"), "checkout.csv")
+        for question in ("what does this mean", "what does that mean for the system,", "yes what does that mean though"):
+            with self.subTest(question=question):
+                answer = answer_question(table, question, "short")["answer"]
+                self.assertIn("The overall average hides", answer)
+                self.assertIn("/checkout in eu-west", answer)
+                self.assertIn("cannot establish the cause", answer)
+        average = answer_question(table, "What's the mean latency?", "short")["answer"]
+        self.assertIn("averages 88.29", average)
+
     def test_cold_chain_failure_is_truck_t07_and_the_doors_are_second(self):
         rows = top_row("cold-chain-10k")
         start, end, _, signal, peak, _, moved, top = rows[0]

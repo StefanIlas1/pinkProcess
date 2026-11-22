@@ -1017,6 +1017,9 @@ def pick_measure(analysis, question):
 
 
 def question_mode(lowered):
+    # In these questions "mean" asks for interpretation rather than arithmetic.
+    if re.search(r"\bwhat\s+(?:does|do|did|would)\b[^?!.]*\bmean\b", lowered):
+        return "interpret"
     for mode, words in DIRECTION_WORDS:
         if any(re.search(r"\b" + re.escape(word), lowered) for word in words):
             return mode
@@ -1128,7 +1131,7 @@ def build_answer(table, question, style):
     mode = question_mode(lowered)
     events = analysis["events"]
     focus_events = events if measure is None else [event for event in events if measure["name"] in event["members"]]
-    story_mode = mode == "story" or (mode == "trend" and focus_events)
+    story_mode = mode in ("story", "interpret") or (mode == "trend" and focus_events)
     if measure is None:
         measure = analysis["measures_by_name"][focus_events[0]["measure"]] if focus_events and focus_events[0]["measure"] in analysis["measures_by_name"] \
             else analysis["frame"]["measures"][0]
@@ -1142,6 +1145,11 @@ def build_answer(table, question, style):
         lines = list(lead["sentences"])
         step = "Next step: " + lead["next_step"]
         short = " ".join(lines[:2] + [step])
+        if mode == "interpret" and lead["kind"] == "incident":
+            explanation = "The overall average hides a change during part of the recording."
+            caution = "The CSV alone cannot establish the cause."
+            short = " ".join([explanation, lines[0], caution, step])
+            lines[0] = f"{explanation} {lines[0]} {caution}"
         rest = focus_events[1:]
         comparable = [event for event in rest if event["score"] >= COMPARABLE_SHARE * lead["score"]]
         extra = []
