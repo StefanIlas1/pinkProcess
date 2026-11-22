@@ -16,6 +16,8 @@ The faster path generated the exact same text in each case. A separate unfamilia
 
 A separate W8A8 checkpoint, **Queue history v2**, was trained to use the captured queue history. A software evaluation on frozen incidents found it classified 15 of 15 histories correctly, reported the change in all nine active queues correctly, and answered three targeted questions. It also preserved the current state, historical peak and primary forecast on 12 archived cases. Five of those answers described recovery without explicitly giving the current count of zero. [Paired evaluation](../kit/evidence/grounded-history-independent-review.json)
 
+The installed Mac app also submitted the healthy CSV to the physical kit with Queue history v2 selected. Its answer correctly reported a zero peak, described the warning as a forecast and recommended measuring arrivals and connection hold times. First text appeared at 11.76 s and the final answer at 25.42 s with the shared proposal table. All 1,021 projections ran on the FPGA. [Installed app recording](../kit/evidence/installed-queue-history-v2.json)
+
 ## Current status
 
 The FPGA scores live telemetry. A provisioned language-model

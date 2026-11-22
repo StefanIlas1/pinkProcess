@@ -53,6 +53,16 @@ cp build/flan/diagnostic.safetensors "$trial/source/model.safetensors"
 
 Seed 4227 selects 360 optimizer steps, eight examples per step, rank-16 additive adapters on query, value and feed-forward output projections, AdamW with learning rate 0.002, and a gradient-norm limit of 1. The task sampler gives diagnosis 16 of 26 slots. Each of the ten targeted question types gets one slot. The generator selects balanced legacy examples with probability 0.18. Otherwise it generates queue-free, pulsed, rising, steady or falling synthetic traces and scores their final windows with the kit's fixed-point reference forecaster. The trainer reads only the model inputs and two forecast profiles. The recipe test checks the exact prompt and target bytes across all 2,880 examples and compares their prompt hashes against the independent evaluation corpus. A full repeat of the 360-step training and export from the pinned floating-point parent on the same Mac reproduced all three release files byte for byte. Training on a different platform can change floating-point results. Use the release delta for the qualified model bytes.
 
+## Optional verified token proposals
+
+The [release](https://github.com/StefanIlas1/pinkProcess/releases/tag/queue-history-v2) includes `queue-history-v2-token-draft.tsv.gz` (SHA-256 `e84e9244b04623ea7924bf1cc027738f5a6b48d5a305a1a4e8f0e49a3da948d2`). To reproduce it, run the following command from the checkout using the training environment.
+
+```sh
+python -m lm_reference.flan_draft build/flan/int8/tokenizer.json queue-history-v2-token-draft.tsv.gz --queue-history
+```
+
+Install the table in a root-owned location readable by the kit service. Add `--history-token-draft /absolute/path/to/queue-history-v2-token-draft.tsv.gz` alongside `--verified-draft` and `--history-model` in the service command. The table proposes tokens from synthetic development examples. The active quantized model verifies each emitted token. The runtime checks the table digest before loading it.
+
 ## Evaluation and limits
 
 On the independent W8A8 software evaluation, the model distinguished all 15 queue histories, cited the correct peak and primary forecast in all 15, and described net change in all nine active histories. It also answered the three targeted occupancy, count and root-cause questions appropriately. Four of the 15 general answers conveyed a zero current queue without explicitly citing the numeric current count. On the twelve archived incidents it correctly identified state, peak and primary forecast throughout, but omitted an explicit current count on five recoveries. Its broad diagnoses generally omit the separate forecast of end-of-horizon queue magnitude. These synthetic tests do not establish accuracy on production incidents. [Frozen inputs](../../kit/evidence/frozen-queue-history-18.json.gz) · [Paired original and candidate answers](../../kit/evidence/grounded-history-independent-review.json)
