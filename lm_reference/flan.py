@@ -261,13 +261,16 @@ class Flan:
         tokens = []
         previous = 0
         draft = getattr(self, "token_draft", None)
+        draft_positions = getattr(self, "prompt_draft_positions", None)
+        if draft is not None and draft_positions is not None:
+            draft = draft.for_prompt(self.tokenizer, prompt)
         if draft is not None:
             self.generation_timing.update(verification_blocks=0, proposed_tokens=0, accepted_proposals=0)
         consecutive_misses = 0
         retry_at = 1
         while len(tokens) < max_tokens:
             step = len(tokens)
-            remaining = min(7, max_tokens - step - 1)
+            remaining = min((draft_positions or 8) - 1, max_tokens - step - 1)
             # Always run the first position alone to preserve row-edit calibration.
             guesses = draft.propose(tokens, remaining) if draft is not None and step >= retry_at else []
             if draft is not None:

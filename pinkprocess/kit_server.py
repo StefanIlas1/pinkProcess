@@ -124,6 +124,8 @@ def parse_args(argv=None):
                         help="Offload the first self-attention queries (default) or all learned projections.")
     parser.add_argument("--verified-draft", action="store_true",
                         help="Verify short token proposals with causal FPGA decoder blocks.")
+    parser.add_argument("--prompt-draft-positions", type=int, choices=(8, 16),
+                        help="Also propose continuations from this prompt and verify up to this many positions per pass.")
     parser.add_argument("--projection-queue", action="store_true",
                         help="Use a projection overlay explicitly known to have the command queue.")
     parser.add_argument("--projection-argmax", action="store_true",
@@ -145,6 +147,8 @@ def parse_args(argv=None):
         parser.error("--projection-scope all requires --projection-overlay.")
     if args.verified_draft and (not args.projection_overlay or args.projection_scope != "all"):
         parser.error("--verified-draft requires --projection-overlay --projection-scope all.")
+    if args.prompt_draft_positions and not args.verified_draft:
+        parser.error("--prompt-draft-positions requires --verified-draft.")
     if args.projection_queue and (not args.projection_overlay or args.projection_scope != "all"):
         parser.error("--projection-queue requires --projection-overlay --projection-scope all.")
     if args.projection_argmax and (not args.projection_overlay or args.projection_scope != "all"):
@@ -196,6 +200,7 @@ def main():
                 if args.verified_draft:
                     from lm_reference.flan_draft import TokenDraft
                     runtime.token_draft = TokenDraft.load()
+                    runtime.prompt_draft_positions = args.prompt_draft_positions
 
                 history_runtime = None
                 if args.history_model:
@@ -208,6 +213,7 @@ def main():
                     # Defer FPGA cache binding until the operator selects this checkpoint.
                     history_runtime = Flan(args.history_model, runtime.fabric)
                     history_runtime.query_projection = query_projection
+                    history_runtime.prompt_draft_positions = args.prompt_draft_positions
                     history_runtime.token_draft = (TokenDraft.load_history(args.history_token_draft)
                                                    if args.history_token_draft else getattr(runtime, "token_draft", None))
 

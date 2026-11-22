@@ -7,11 +7,13 @@ from hashlib import sha256
 from io import BytesIO
 from pathlib import Path
 from random import Random
+import re
 
 
 class TokenDraft:
-    def __init__(self, transitions):
+    def __init__(self, transitions, prompt_transitions=None):
         self.transitions = transitions
+        self.prompt_transitions = prompt_transitions or {}
 
     @classmethod
     def load(cls, path=None):
@@ -33,18 +35,32 @@ class TokenDraft:
             raise ValueError("Queue history proposal table SHA-256 mismatch.")
         return cls.load(BytesIO(compressed))
 
+    def for_prompt(self, tokenizer, prompt):
+        """Index short continuations within each sentence of this input only."""
+        continuations = {}
+        for sentence in re.split(r"\.\s+|\n", prompt):
+            ids = tokenizer.encode(sentence.rstrip(".") + ".")[:-1]
+            for pos, token in enumerate(ids):
+                for size in range(2, min(5, pos) + 1):
+                    continuations[tuple(ids[pos-size:pos])] = token
+        return TokenDraft(self.transitions, continuations)
+
     def propose(self, tokens, limit):
         # The initial decoder symbol is zero. Only five preceding IDs matter.
         history = (tokens[-5:] if len(tokens) >= 5 else [0, *tokens])
         guesses = []
         for _ in range(limit):
-            for size in range(min(5, len(history)), 0, -1):
-                token = self.transitions.get(tuple(history[-size:]))
+            token = None
+            for table, minimum in ((self.prompt_transitions, 2), (self.transitions, 1)):
+                if not table:
+                    continue
+                for size in range(min(5, len(history)), minimum - 1, -1):
+                    token = table.get(tuple(history[-size:]))
+                    if token is not None:
+                        break
                 if token is not None:
                     break
-            else:
-                break
-            if token == 1:
+            if token is None or token == 1:
                 break
             guesses.append(token)
             history.append(token)
