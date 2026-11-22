@@ -10,16 +10,26 @@ from time import time_ns
 from uuid import uuid4
 
 from lm_reference.flan_prompt import telemetry_prompt
+from .kit_dataset import dataset_snapshot
 from .kit_evidence import analyst_evidence
+
+DATASET_STAGES = {
+    'generalization': 'Distinguish observations from explanations and forecasts.',
+    'short_answer': 'Answer briefly using the reported measurements.',
+    'summary': 'Summarize the key observations and the forecast.',
+    'final': '',
+    'followup': '',
+}
 
 
 class BoardLanguage:
-    def __init__(self, runtime, versions, state_dir, snapshot):
+    def __init__(self, runtime, versions, state_dir, snapshot, dataset_score=None):
         self.runtime = runtime
         self.versions = versions
         self.capture_db = Path(state_dir) / 'lm-captures.sqlite'
         self.capture_db.parent.mkdir(parents=True, exist_ok=True)
         self.snapshot = snapshot
+        self.dataset_score = dataset_score
         self.lock = Lock()
         self.jobs = {}
         boot_file = Path("/proc/sys/kernel/random/boot_id")
@@ -32,6 +42,7 @@ class BoardLanguage:
         with self.open_captures() as db:
             db.execute('CREATE TABLE IF NOT EXISTS captures (id TEXT PRIMARY KEY, body BLOB NOT NULL)')
             db.execute('CREATE TABLE IF NOT EXISTS capture_baselines (id TEXT PRIMARY KEY, body BLOB NOT NULL)')
+            db.execute('CREATE TABLE IF NOT EXISTS datasets (id TEXT PRIMARY KEY, body BLOB NOT NULL)')
 
     @contextmanager
     def open_captures(self):
@@ -42,12 +53,12 @@ class BoardLanguage:
         except sqlite3.Error as exc:
             raise RuntimeError(f"Evidence capture database failed: {exc}") from exc
 
-    def _install(self, version):
+    def _install(self, version, previous=None):
         self.runtime.install_weight_version(version)
         fabric = getattr(self.runtime, "fabric", None)
         if fabric is None:
             return
-        target = version.patch or self.active.patch
+        target = version.patch or (previous or self.active).patch
         index = target.row if target else 0
         payload = self.runtime.t["lm_head.weight"][index].tobytes()
         fabric.verify_row_bytes(payload)
@@ -99,7 +110,7 @@ class BoardLanguage:
                                  baseline=json.loads(baseline) if baseline else None))
         return dict(ok=True, captures=captures, before=rows[page_size - 1][0] if len(rows) > page_size else None)
 
-    def run(self, job_id, prompt, initial):
+    def run(self, job_id, prompt, initial, selected=None):
         try:
             answer = self.runtime.generate(prompt)
             if not answer.strip():
@@ -124,11 +135,143 @@ class BoardLanguage:
         except Exception as exc:
             result = dict(state="failed", error=str(exc))
         with self.lock:
+            job = self.jobs[job_id]
+            if selected is not None:
+                try:
+                    self._install(self.active, previous=selected)
+                except Exception:
+                    self.weight_state_ok = False
+                    result = dict(state="failed", error="Could not restore the live language-model weights.")
             if result["state"] == "complete":
                 self.activation = activation
                 self.activation_job_id = job_id
                 self.activation_max = activation_max
-            self.jobs[job_id].update(result)
+                if job.get("stage") in ("final", "followup"):
+                    try:
+                        with self.open_captures() as db:
+                            dataset = self.dataset(db, job["dataset_id"])
+                            dataset["last_chat"] = [job["question"], answer]
+                            self.store_dataset(db, dataset)
+                    except RuntimeError as exc:
+                        result = dict(state="failed", error=str(exc))
+            job.update(result)
+
+    def start_job(self, job, prompt, initial=False, selected=None):
+        job_id = uuid4().hex
+        job.update(ok=True, job_id=job_id, state="running", model="flan-t5-small")
+        if len(self.jobs) == 32:
+            del self.jobs[next(iter(self.jobs))]
+        self.jobs[job_id] = job
+        try:
+            Thread(target=self.run, args=(job_id, prompt, initial, selected), daemon=True).start()
+        except RuntimeError:
+            del self.jobs[job_id]
+            raise
+        return job.copy()
+
+    def dataset(self, db, dataset_id):
+        if not isinstance(dataset_id, str) or not re.fullmatch("[0-9a-f]{32}", dataset_id):
+            raise ValueError("Invalid dataset ID.")
+        row = db.execute("SELECT body FROM datasets WHERE id=?", (dataset_id,)).fetchone()
+        if row is None:
+            raise ValueError("This dataset is unavailable on the paired board.")
+        return json.loads(row[0])
+
+    def store_dataset(self, db, dataset):
+        db.execute("INSERT OR REPLACE INTO datasets VALUES (?,?)",
+                   (dataset["dataset_id"], json.dumps(dataset, allow_nan=False)))
+
+    def dataset_metadata(self, dataset):
+        return dict(ok=True, **{k: dataset[k] for k in ("dataset_id", "name", "snapshot", "selected_model")},
+                    summary=dataset["snapshot"]["observations"], models=self.versions.list())
+
+    def handle_dataset(self, command):
+        if self.dataset_score is None:
+            raise ValueError("This board does not support uploaded datasets.")
+        op = command["op"]
+        with self.open_captures() as db:
+            if op == "lm_dataset_upload":
+                name = command.get("name", "Uploaded CSV")
+                if not isinstance(name, str) or not 0 < len(name.strip()) <= 160:
+                    raise ValueError("Supply a dataset name of up to 160 characters.")
+                dataset_id = uuid4().hex
+                snapshot = dataset_snapshot(dataset_id, name.strip(), command.get("csv"),
+                                            command.get("capacity"), self.dataset_score)
+                dataset = dict(dataset_id=dataset_id, name=name.strip(), snapshot=snapshot, csv=command["csv"],
+                               selected_model=self.active.name)
+                self.store_dataset(db, dataset)
+                return self.dataset_metadata(dataset)
+            dataset = self.dataset(db, command.get("dataset_id"))
+            if op == "lm_dataset_models":
+                return self.dataset_metadata(dataset)
+            if op == "lm_dataset_select":
+                dataset["selected_model"] = self.versions.get(command.get("name")).name
+                self.store_dataset(db, dataset)
+                return self.dataset_metadata(dataset)
+            if op == "lm_dataset_calibration":
+                job = self.jobs.get(self.activation_job_id)
+                if (not job or job.get("state") != "complete" or job.get("dataset_id") != dataset["dataset_id"]
+                        or job["active"]["name"] != "original" or not self.activation):
+                    return dict(ok=True, ready=False)
+                return dict(ok=True, ready=True, **self.row_context(command.get("target_row")),
+                            selected_model=dataset["selected_model"])
+            if op == "lm_dataset_save":
+                if command.get("selected_model") != dataset["selected_model"]:
+                    raise ValueError("The dataset model changed during synthesis.")
+                if command.get("base_sha256") != self.versions.layout.checkpoint_sha256:
+                    raise ValueError("Weight edit belongs to another base checkpoint.")
+                version = self.versions.save_astra(command.get("name"), command.get("target_row"),
+                                                   command.get("response"))
+                dataset["selected_model"] = version.name
+                self.store_dataset(db, dataset)
+                return self.dataset_metadata(dataset)
+        if op not in ("lm_dataset_ask", "lm_dataset_calibrate"):
+            raise ValueError("Unsupported dataset operation.")
+        if any(job["state"] == "running" for job in self.jobs.values()):
+            raise ValueError("A board answer is in progress.")
+        calibration = op == "lm_dataset_calibrate"
+        question = ("Summarize the observed connection pool readings." if calibration else command.get("question"))
+        if not isinstance(question, str) or not 0 < len(question.strip()) <= 500:
+            raise ValueError("Supply a question of up to 500 characters.")
+        stage = command.get("stage", "final")
+        if stage not in DATASET_STAGES:
+            raise ValueError("Unsupported dataset answer stage.")
+        snapshot = dataset["snapshot"]
+        prompt = telemetry_prompt(question, analyst_evidence(snapshot))
+        if DATASET_STAGES[stage]:
+            prompt = DATASET_STAGES[stage] + " " + prompt
+        if stage == "followup" and dataset.get("last_chat"):
+            previous_question, previous_answer = dataset["last_chat"]
+            prompt = (f"Previous question: {previous_question[:160]}\n"
+                      f"Previous answer: {previous_answer[:200]}\n" + prompt)
+        version = self.versions.get("original" if calibration else dataset["selected_model"])
+        selected = version if version.name != self.active.name else None
+        try:
+            if selected is not None:
+                self._install(selected)
+            job = dict(dataset_id=dataset["dataset_id"], question=question.strip(),
+                       stage="calibration" if calibration else stage,
+                       active=version.metadata())
+            return {**self.start_job(job, prompt, selected=selected), "snapshot": snapshot}
+        except Exception:
+            if selected is not None:
+                try:
+                    self._install(self.active, previous=selected)
+                except Exception:
+                    self.weight_state_ok = False
+            raise
+
+    def row_context(self, target):
+        index = self.token_id(target)
+        layout = self.versions.layout
+        if type(index) is not int or not 0 <= index < layout.rows:
+            raise ValueError("Output row outside model vocabulary.")
+        start = index * layout.width
+        raw = self.versions.classifier[start:start + layout.width]
+        return dict(row=list(raw.cast('b')), target_row=index, token=self.runtime.tokenizer.decode([index]),
+                    activation=self.activation, calibration_job_id=self.activation_job_id,
+                    base_sha256=layout.checkpoint_sha256, max_score=self.activation_max,
+                    row_scale=self.runtime.head_row_scale(index) if self.activation_max is not None else None)
 
     def token_id(self, target):
         if isinstance(target, str) and 0 < len(target.strip()) <= 80:
@@ -154,6 +297,8 @@ class BoardLanguage:
                 return self.list_captures(command.get('before'))
             if not self.weight_state_ok:
                 raise RuntimeError("Language-model weights require recovery. Restart the board service.")
+            if op.startswith("lm_dataset_"):
+                return self.handle_dataset(command)
             if op == 'lm_versions':
                 return self.status()
             if op == 'lm_save':
@@ -162,18 +307,7 @@ class BoardLanguage:
                 self.versions.save_astra(command.get("name"), self.token_id(command.get("target_row")), command.get("response"))
                 return self.status()
             if op == 'lm_row':
-                index = self.token_id(command.get('target_row'))
-                layout = self.versions.layout
-                if type(index) is not int or not 0 <= index < layout.rows:
-                    raise ValueError("Output row outside model vocabulary.")
-                start = index * layout.width
-                raw = self.versions.classifier[start:start + layout.width]
-                return dict(ok=True, row=list(raw.cast('b')), target_row=index,
-                            token=self.runtime.tokenizer.decode([index]), activation=self.activation,
-                            calibration_job_id=self.activation_job_id,
-                            base_sha256=layout.checkpoint_sha256,
-                            max_score=getattr(self, "activation_max", None),
-                            row_scale=self.runtime.head_row_scale(index) if getattr(self, "activation_max", None) is not None else None)
+                return dict(ok=True, **self.row_context(command.get('target_row')))
             if any(job["state"] == "running" for job in self.jobs.values()):
                 raise ValueError("A board answer is in progress.")
             if op in ('lm_select', 'lm_restore'):
@@ -202,20 +336,12 @@ class BoardLanguage:
                 raise ValueError("Supply a question of up to 500 characters.")
             replay_id = command.get('capture_id')
             capture_id, record, baseline = self.capture(question, replay_id)
-            job_id = uuid4().hex
-            job = dict(ok=True, job_id=job_id, state="running", capture_id=capture_id,
-                       active=self.active.metadata(), model="flan-t5-small", baseline=baseline,
+            job = dict(capture_id=capture_id, active=self.active.metadata(), baseline=baseline,
                        captured_at_ms=record.get("captured_at_ms"))
-            if len(self.jobs) == 32:
-                del self.jobs[next(iter(self.jobs))]
-            self.jobs[job_id] = job
-            try:
-                Thread(target=self.run, args=(job_id, record["prompt"], replay_id is None), daemon=True).start()
-            except RuntimeError:
-                del self.jobs[job_id]
-                raise
-            return {**job, "snapshot": record["snapshot"]}
+            return {**self.start_job(job, record["prompt"], initial=replay_id is None),
+                    "snapshot": record["snapshot"]}
 
     def status(self):
         return dict(ok=True, model="flan-t5-small", boot_id=self.boot_id, active=self.active.metadata(),
-                    versions=self.versions.list(), capture_listing_supported=True)
+                    versions=self.versions.list(), capture_listing_supported=True,
+                    datasets_supported=self.dataset_score is not None)

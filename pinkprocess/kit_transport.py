@@ -90,6 +90,10 @@ def lan_hosts(kits):
     return found
 
 
+class BoardOperationError(RuntimeError):
+    """A paired board replied to the request but rejected the operation."""
+
+
 def exchange(host, kit, request, timeout, *, path="/v1/query"):
     context = ssl.create_default_context(cadata=kit["certificate"])
     # Each kit has its own self-signed certificate. It follows the board across DHCP addresses.
@@ -106,7 +110,7 @@ def exchange(host, kit, request, timeout, *, path="/v1/query"):
         if not isinstance(result, dict) or "ok" not in result:
             raise ValueError("Invalid board response.")
         if response.status != 200 or not result["ok"]:
-            raise RuntimeError(result.get("error", "The board rejected the request."))
+            raise BoardOperationError(result.get("error", "The board rejected the request."))
         return result
     finally:
         conn.close()

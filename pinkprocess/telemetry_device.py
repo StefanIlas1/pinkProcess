@@ -182,13 +182,13 @@ class TelemetryDevice:
             self.stream.invalidate_forecast()
             raise
 
-    def _score_stream_window(self, window, capacity):
+    def _score_stream_window(self, window, capacity, *, stream=True):
         if window[-1].waiting:
             return {**self.handle({"op": "backlog", "features": backlog_features(window, capacity)},
-                                  stream=True),
+                                  stream=stream),
                     "time_ms": window[-1].time_ms, "targets": list(TARGETS)}
         return self.handle({"op": "query", "capacity": capacity,
-                            "readings": [asdict(reading) for reading in window]}, stream=True)
+                            "readings": [asdict(reading) for reading in window]}, stream=stream)
 
     def _submit(self, encoded, stream):
         self.classifier.submit(encoded)

@@ -5,7 +5,7 @@ def live_answer(snapshot, intent, metrics):
     latest = snapshot.get("latest")
     if latest is None:
         return "The board has no telemetry readings for this stream."
-    if not snapshot["fresh"]:
+    if not snapshot["fresh"] and snapshot.get("origin") != "dataset":
         return "The board's telemetry is stale. It last saw {} busy and {} waiting.".format(
             latest["busy"], latest["waiting"])
     if intent == "stream_status":
