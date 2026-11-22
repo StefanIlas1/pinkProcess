@@ -60,6 +60,19 @@ class KitTest(unittest.TestCase):
         self.transport = MockBoard()
         self.kit = Kit(self.transport)
 
+    def test_general_csv_question_sends_findings_to_the_paired_board(self):
+        self.kit.action({"action": "load_sample", "id": "checkout-api-10k"})
+        with patch.object(self.kit, "board", return_value={"job_id": "board-job", "state": "running"}) as board:
+            reply = self.kit.action({"action": "board_data_ask_begin", "question": "Which region had the slowdown?"})
+        op, = board.call_args.args
+        fields = board.call_args.kwargs
+        self.assertEqual(op, "lm_data_start")
+        self.assertEqual(fields["question"], "Which region had the slowdown?")
+        self.assertIn("eu-west", fields["findings"])
+        self.assertLessEqual(len(fields["findings"]), 1000)
+        self.assertEqual(reply["job_id"], "board-job")
+        self.assertIn("10,000 rows", reply["findings"])
+
     def test_language_model_version_commands_are_forwarded(self):
         self.kit.action({"action": "connect", "host": "pynq.local"})
         active = {"name": "original", "checkpoint_sha256": "0" * 64}

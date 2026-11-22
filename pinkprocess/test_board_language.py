@@ -8,7 +8,7 @@ from time import monotonic, sleep
 import unittest
 
 from lm_reference.weight_versions import ORIGINAL, WeightLayout, WeightVersionStore
-from .board_language import BoardLanguage, HISTORY_MODEL
+from .board_language import BoardLanguage, GENERAL_MODEL, HISTORY_MODEL
 from .kit_dataset import POOL_SAMPLE_CAPACITY, pool_sample_csv
 
 
@@ -196,6 +196,21 @@ class BoardLanguageTest(unittest.TestCase):
             self.save(service, HISTORY_MODEL)
         with self.assertRaisesRegex(ValueError, "different checkpoint"):
             self.store().register_checkpoint(HISTORY_MODEL, self.store())
+
+    def test_general_csv_answer_uses_distinct_checkpoint_and_restores_live_selection(self):
+        base, general = FakeRuntime(), FakeRuntime()
+        store = self.store()
+        store.register_checkpoint(GENERAL_MODEL, store)
+        service = BoardLanguage(base, store, self.state_dir, lambda: self.observation,
+                                general_runtime=general)
+        self.assertEqual(service.status()["data_model"], GENERAL_MODEL)
+        result = self.finish(service, service.handle(dict(op="lm_data_start", question="Which endpoint slowed?",
+                                                           findings="Latency rose on /checkout.")))
+        self.assertEqual(result["active"]["name"], GENERAL_MODEL)
+        self.assertIn("Latency rose on /checkout.", result["answer"])
+        self.assertIn("Question: Which endpoint slowed?", result["answer"])
+        self.assertEqual(service.status()["active"]["name"], ORIGINAL)
+        self.assertIs(service.runtime, base)
 
     def test_dataset_selection_is_scoped_and_followup_uses_prior_answer(self):
         runtime = FakeRuntime()

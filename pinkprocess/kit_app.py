@@ -113,6 +113,25 @@ class Kit:
         return dict(result, where=where, model=profile["recommendation"]["model_id"],
                     timings=dict(data_ms=0.0, profile_ms=0.0, model_ms=0.0, fabric_ms=fabric_ms, answer_ms=answer_ms))
 
+    def begin_board_data_answer(self, data):
+        if set(data) - {"action", "question", "previous_question"}:
+            raise ValueError("CSV inference accepts a question and optional previous question.")
+        question = data.get("question")
+        prior = data.get("previous_question", "")
+        if not isinstance(question, str) or not 0 < len(question.strip()) <= 500:
+            raise ValueError("Enter a question of up to 500 characters.")
+        if not isinstance(prior, str) or len(prior) > 160:
+            raise ValueError("Supply at most 160 characters of prior question context.")
+        with self.data_lock:
+            table = self.table
+        if table is None:
+            raise ValueError("Import data first.")
+        report = answer_question(table, question.strip(), "summary")
+        findings = report["answer"][:1000].strip()
+        with self.lock:
+            job = self.board("lm_data_start", question=question.strip(), findings=findings, previous_question=prior)
+            return dict(job, host=self.host, findings=report["readings"])
+
     def begin_data_job(self, data):
         if set(data) - {"action", "question", "style", "local_only"}:
             raise ValueError("Data questions accept only a question and an answer style.")
@@ -444,6 +463,8 @@ class Kit:
             if result["profile"].get("queue_ready"):
                 result["queue_csv"] = text
             return result
+        if action == "board_data_ask_begin":
+            return self.begin_board_data_answer(data)
         if action == "data_ask_begin":
             return self.begin_data_job(data)
         if action == "data_ask_progress":

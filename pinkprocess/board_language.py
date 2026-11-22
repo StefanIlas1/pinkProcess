@@ -14,6 +14,7 @@ from .kit_dataset import dataset_snapshot
 from .kit_evidence import analyst_evidence
 
 HISTORY_MODEL = "Queue history v2"
+GENERAL_MODEL = "General FLAN-T5-small INT8"
 
 
 DATASET_STAGES = {
@@ -26,10 +27,11 @@ DATASET_STAGES = {
 
 
 class BoardLanguage:
-    def __init__(self, runtime, versions, state_dir, snapshot, dataset_score=None, history_runtime=None):
+    def __init__(self, runtime, versions, state_dir, snapshot, dataset_score=None, history_runtime=None, general_runtime=None):
         self.base_runtime = runtime
         self.runtime = runtime
         self.history_runtime = history_runtime
+        self.general_runtime = general_runtime
         self.versions = versions
         self.capture_db = Path(state_dir) / 'lm-captures.sqlite'
         self.capture_db.parent.mkdir(parents=True, exist_ok=True)
@@ -60,8 +62,15 @@ class BoardLanguage:
         except sqlite3.Error as exc:
             raise RuntimeError(f"Evidence capture database failed: {exc}") from exc
 
+    def runtime_for(self, base_name):
+        if self.is_history(base_name):
+            return self.history_runtime
+        if self.general_runtime is not None and base_name == GENERAL_MODEL:
+            return self.general_runtime
+        return self.base_runtime
+
     def _install(self, version, previous=None):
-        target_runtime = self.history_runtime if self.is_history(version.base_name) else self.base_runtime
+        target_runtime = self.runtime_for(version.base_name)
         if target_runtime is not self.runtime:
             self.runtime = target_runtime
             runner = getattr(self.runtime, "query_projection", None)
@@ -288,7 +297,7 @@ class BoardLanguage:
 
     def row_context(self, target, base_name):
         store = self.versions.checkpoint_store(base_name)
-        runtime = self.history_runtime if self.is_history(base_name) else self.base_runtime
+        runtime = self.runtime_for(base_name)
         index = self.token_id(target, runtime)
         layout = store.layout
         if type(index) is not int or not 0 <= index < layout.rows:
@@ -308,6 +317,36 @@ class BoardLanguage:
                 raise ValueError("Choose a word encoded as one token, such as Warning, or enter its token ID.")
             return ids[0]
         return target
+
+    def start_data_answer(self, command):
+        if self.general_runtime is None:
+            raise ValueError("The board does not have the general INT8 checkpoint.")
+        question = command.get("question")
+        findings = command.get("findings")
+        previous_question = command.get("previous_question", "")
+        if not isinstance(question, str) or not 0 < len(question.strip()) <= 500:
+            raise ValueError("Supply a question of up to 500 characters.")
+        if not isinstance(findings, str) or not 0 < len(findings.strip()) <= 1000:
+            raise ValueError("Supply dataset findings of up to 1,000 characters.")
+        if not isinstance(previous_question, str) or len(previous_question) > 160:
+            raise ValueError("Supply at most 160 characters of prior question context.")
+        version = self.active if self.active.base_name == GENERAL_MODEL else self.versions.get(GENERAL_MODEL)
+        context = f"Previous topic: {previous_question}\n" if previous_question else ""
+        prompt = (f"{context}Answer the question based on the following incident report.\n"
+                  f"{findings}\nQuestion: {question.strip()}\nAnswer:")
+        selected = version if version.name != self.active.name else None
+        try:
+            if selected is not None:
+                self._install(selected)
+            return self.start_job(dict(active=version.metadata(), prompt_variant="csv_findings"),
+                                  prompt, selected=selected)
+        except Exception:
+            if selected is not None:
+                try:
+                    self._install(self.active, previous=selected)
+                except Exception:
+                    self.weight_state_ok = False
+            raise
 
     def handle(self, command):
         op = command["op"]
@@ -339,7 +378,7 @@ class BoardLanguage:
                     raise ValueError("Supply the alternate base checkpoint SHA-256 with this row edit.")
                 if base_hash is not None and base_hash != store.layout.checkpoint_sha256:
                     raise ValueError("Weight edit belongs to another base checkpoint.")
-                runtime = self.history_runtime if self.is_history(root) else self.base_runtime
+                runtime = self.runtime_for(root)
                 self.versions.save_astra(command.get("name"), self.token_id(command.get("target_row"), runtime),
                                          command.get("response"), base_name=root)
                 return self.status()
@@ -350,6 +389,8 @@ class BoardLanguage:
                 return dict(ok=True, **self.row_context(command.get('target_row'), root))
             if any(job["state"] == "running" for job in self.jobs.values()):
                 raise ValueError("A board answer is in progress.")
+            if op == "lm_data_start":
+                return self.start_data_answer(command)
             if op in ('lm_select', 'lm_restore'):
                 selected = self.versions.get("original" if op == 'lm_restore' else command.get("name"))
                 try:
@@ -388,4 +429,5 @@ class BoardLanguage:
     def status(self):
         return dict(ok=True, model="flan-t5-small", boot_id=self.boot_id, active=self.active.metadata(),
                     versions=self.versions.list(), capture_listing_supported=True,
-                    datasets_supported=self.dataset_score is not None)
+                    datasets_supported=self.dataset_score is not None,
+                    data_model=GENERAL_MODEL if self.general_runtime is not None else None)

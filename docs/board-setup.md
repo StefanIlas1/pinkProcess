@@ -102,3 +102,11 @@ The app contacts Ollama on loopback. On a Homebrew installation it starts the in
 ## Physical board check
 
 On one kit the 201-reading sample contained 103 eligible forecast windows. The base profile warned on 103 and the alternate profile warned on nine. All 309 scores from the base, alternate and restored runs matched the Mac fixed-point reference, and the restored board weight hash matched the initial hash. These counts measure how the profiles differ, not forecast quality. The recorded responses are in `build/pynq/telemetry-kit-physical.json`.
+
+## General CSV answers on the FPGA
+
+A board with the general checkpoint configured can answer questions about non-queue CSVs. The Mac analyzes the file and sends a bounded incident report and the question. The FPGA runs the general checkpoint's INT8 projections and the answer identifies the checkpoint under **Readings behind this answer**. The generated text can still be incomplete. Use the measured findings and table to check it.
+
+Export the pinned upstream FLAN-T5-small snapshot from [install-checkpoints.sh](../kit/install-checkpoints.sh) with `lm_reference.export_flan`. Verify the general INT8 manifest has SHA-256 `db67e13d7cd977f2a16da0ac02a06ad55f7cf3f132c5a41f7236191fbe25ce03`. On the board, install the bundle with `python3 -m lm_reference.model_assets CHECKPOINT_DIR MANIFEST_SHA256 /opt/pinkprocess-kit/models`. Update the board service code, then append `--general-model /opt/pinkprocess-kit/models/MANIFEST_SHA256 --general-manifest-sha256 MANIFEST_SHA256` to its existing projection arguments and restart it. The flag requires the all-projection overlay.
+
+For general CSVs, the app uses **General FLAN-T5-small INT8** unless a saved edit of that checkpoint is active. Queue inference keeps using the existing dataset-specific checkpoint controls. A kit without the general checkpoint shows **Mac data analyst** for those CSVs.

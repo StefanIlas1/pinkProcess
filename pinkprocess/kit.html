@@ -635,14 +635,16 @@ function renderModel() {
   const active = boardDataset?.selected_model || languageWeights?.active?.name;
   const label = active === "original" ? (models?.find(model => model.id === "flan-t5-small-int8")?.name || "FLAN-T5-small INT8") : active;
   const header = el("model-toggle");
-  const macAnalysis = dataset && !boardDataset && (dataset.boardSkipped || !boardEligible());
-  header.textContent = macAnalysis ? "Mac data analyst" : label || (status?.lm_supported ? "Checking model…" : friendlyVersion(status?.version) || "No active model");
+  const csvModel = dataset && !boardDataset && (dataset.boardSkipped || !boardEligible()) && languageWeights?.data_model;
+  const macAnalysis = dataset && !boardDataset && !csvModel && (dataset.boardSkipped || !boardEligible());
+  const csvLabel = csvModel && (languageWeights.active?.base_name === csvModel ? active : csvModel);
+  header.textContent = csvLabel || (macAnalysis ? "Mac data analyst" : label || (status?.lm_supported ? "Checking model…" : friendlyVersion(status?.version) || "No active model"));
   header.title = header.textContent;
-  if (macAnalysis) el("model-name").textContent = "Mac data analyst";
+  if (csvLabel || macAnalysis) el("model-name").textContent = csvLabel || "Mac data analyst";
   el("model-name").title = el("model-name").textContent;
-  el("model-meta").textContent = macAnalysis ? "Runs on this Mac" : shown ? makerLabel(shown) + " \u00b7 Runs on the board" : "";
-  el("model-use").textContent = macAnalysis ? "Finds incidents and trends in the imported file." : shown ? bestFor(shown) : "Import data to get a recommendation.";
-  const info = shown && !macAnalysis ? rankInfo(shown) : null;
+  el("model-meta").textContent = csvLabel ? "Runs on the board" : macAnalysis ? "Runs on this Mac" : shown ? makerLabel(shown) + " \u00b7 Runs on the board" : "";
+  el("model-use").textContent = csvLabel ? "Answers questions using the measured findings from your file." : macAnalysis ? "Finds incidents and trends in the imported file." : shown ? bestFor(shown) : "Import data to get a recommendation.";
+  const info = shown && !macAnalysis && !csvLabel ? rankInfo(shown) : null;
   el("model-star").hidden = !(info && info.rank === 1);
   el("model-star").dataset.tip = info ? info.tip : "";
   if (status) {
@@ -1248,11 +1250,18 @@ async function localAnswer(entry, question, only) {
     if (job.state === "running") job = await request("data_ask_progress", {job_id:job.job_id});
   }
 }
-async function boardAnswer(entry, question) {
-  entry.readings = measuredQueueHistory(boardDataset.snapshot); renderMessages();
+async function boardAnswer(entry, question, fromFindings) {
+  if (!fromFindings) {
+    entry.readings = measuredQueueHistory(boardDataset.snapshot);
+    renderMessages();
+  }
   const stage = boardCalibrated ? "followup" : "final";
   const startedAt = Date.now();
-  let job = await request("dataset_ask", {dataset_id:boardDataset.dataset_id, question, stage});
+  const previous = messages.slice(0, -2).findLast(message => message.role === "user");
+  let job = fromFindings
+    ? await request("board_data_ask_begin", {question, previous_question:previous?.text.slice(0, 160) || ""})
+    : await request("dataset_ask", {dataset_id:boardDataset.dataset_id, question, stage});
+  const findings = job.findings;
   const jobId = job.job_id;
   if (job.state === "running" && !jobId) throw new Error("The board did not provide a job ID.");
   entryStage(entry, 2);
@@ -1274,29 +1283,33 @@ async function boardAnswer(entry, question) {
   setVariant(entry, "short", {text:sentences[0] || text});
   setVariant(entry, "summary", {text:extractiveSummary(text, sentences)});
   setVariant(entry, "final", {text});
-  boardCalibrated = true;
+  if (!fromFindings) boardCalibrated = true;
   const done = Date.now(), took = at => fmtMs(at - startedAt);
   entry.genTiming = "First text " + took(entry.firstTextAt ?? done) + " \u00b7 Complete answer " + took(done);
-  entry.readings = boardObservations(boardDataset) + "\nAnswered on PYNQ-Z2 with " + boardDataset.selected_model + (stage === "followup" ? " using the previous exchange." : ".");
+  entry.readings = fromFindings
+    ? findings + "\nAnswered on PYNQ-Z2 with " + job.active.name + "."
+    : boardObservations(boardDataset) + "\nAnswered on PYNQ-Z2 with " + boardDataset.selected_model + (stage === "followup" ? " using the previous exchange." : ".");
   return done - startedAt;
 }
 function askData(question) {
   run(async () => {
     const entry = pendingEntry();
-    entry.boardWork = boardEligible() && !dataset.boardSkipped;
+    entry.boardWork = (boardEligible() && !dataset.boardSkipped) || Boolean(languageWeights?.data_model);
     const asked = {role:"user", text:question};
     messages.push(asked, entry); renderMessages(); show("");
     accepted = true;
     pathBegin();
     try {
-      const board = await prepareBoardDataset();
+      const queueBoard = await prepareBoardDataset();
+      const fromFindings = !queueBoard && Boolean(languageWeights?.data_model);
+      const board = queueBoard || fromFindings;
       entry.boardWork = board;
       if (board) entry.styles = STYLE_ORDER;
       renderMessages();
       document.body.classList.add("working");
       const submittedAt = performance.now();
       const work = [localAnswer(entry, question, board ? ["transcript", "table"] : LOCAL_STYLES)];
-      if (board) work.push(boardAnswer(entry, question));
+      if (board) work.push(boardAnswer(entry, question, fromFindings));
       const [times, boardMs] = await Promise.all(work);
       const values = [dataset.timings?.data_ms ?? 0, dataset.timings?.profile_ms ?? 0, Math.max(times.model_ms, 0.5), board ? boardMs : times.fabric_ms, times.answer_ms];
       values.forEach((value, stage) => pathMark(stage, "done", value));
