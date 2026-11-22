@@ -119,6 +119,8 @@ def parse_args(argv=None):
                         help="Enable the experimental FLAN DDR projection accelerator.")
     parser.add_argument("--projection-scope", choices=("query", "all"), default="query",
                         help="Offload the first self-attention queries (default) or all learned projections.")
+    parser.add_argument("--verified-draft", action="store_true",
+                        help="Verify short token proposals with causal FPGA decoder blocks.")
     parser.add_argument("--projection-queue", action="store_true",
                         help="Use a projection overlay explicitly known to have the command queue.")
     parser.add_argument("--projection-argmax", action="store_true",
@@ -132,6 +134,8 @@ def parse_args(argv=None):
         parser.error("Supply the language model when enabling the projection overlay.")
     if args.projection_scope == "all" and not args.projection_overlay:
         parser.error("--projection-scope all requires --projection-overlay.")
+    if args.verified_draft and (not args.projection_overlay or args.projection_scope != "all"):
+        parser.error("--verified-draft requires --projection-overlay --projection-scope all.")
     if args.projection_queue and (not args.projection_overlay or args.projection_scope != "all"):
         parser.error("--projection-queue requires --projection-overlay --projection-scope all.")
     if args.projection_argmax and (not args.projection_overlay or args.projection_scope != "all"):
@@ -180,6 +184,9 @@ def main():
                         resources.callback(query_projection.close)
                 runtime = Flan(args.language_model, TiledMatvec(model.classifier, lock=server.model_lock),
                                query_projection=query_projection)
+                if args.verified_draft:
+                    from lm_reference.flan_draft import TokenDraft
+                    runtime.token_draft = TokenDraft.load()
 
                 def snapshot():
                     with server.model_lock:

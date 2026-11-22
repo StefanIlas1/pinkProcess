@@ -29,10 +29,12 @@ def make_bundle(destination, overlay, *, language_model=None, manifest_sha256=No
             if not file.name.startswith("test_"):
                 shutil.copyfile(file, staging / "pinkprocess" / file.name)
         for path in ("fpga/check_classifier.py", "fpga/mmio_words.c", "fpga/projection_native.cpp", *("lm_reference/" + name + ".py" for name in (
-            "fabric", "flan", "flan_prompt", "live_demo", "model_assets", "patch_operator", "quantize",
+            "fabric", "flan", "flan_prompt", "flan_draft", "live_demo", "model_assets", "patch_operator", "quantize",
             "reference", "weight_versions", "projection_overlay", "projection_native", "projection_argmax",
         ))):
             shutil.copyfile(ROOT / path, staging / path)
+        shutil.copyfile(ROOT / "lm_reference/telemetry-token-draft.tsv.gz",
+                        staging / "lm_reference/telemetry-token-draft.tsv.gz")
         (staging / "profiles").mkdir()
         for name in ("pool-logistic-v1", "service-b-astra-v1", "queue-outlook-v2"):
             path = Path("profiles") / (name + ".json")
