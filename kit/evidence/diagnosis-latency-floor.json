@@ -1,0 +1,12 @@
+{
+  "case": "ambiguous-cause",
+  "capture_id": "7dfc0370bb5392b79015aa3d065052e74e2daa0b4b5266f612252569ea3ae702",
+  "input_tokens": 186,
+  "decoder_steps_including_eos": 50,
+  "first_token_submissions": 197682,
+  "total_submissions": 276082,
+  "first_token_compute_floor_s": 64.776,
+  "full_answer_compute_floor_s": 90.467,
+  "physical_first_observed_text_s": 334.864,
+  "physical_complete_answer_s": 797.536
+}
