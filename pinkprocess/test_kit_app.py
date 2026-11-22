@@ -286,7 +286,7 @@ class KitTest(unittest.TestCase):
                 server.shutdown()
 
     def test_data_ask_uses_the_board_for_queue_data_and_falls_back(self):
-        self.kit.action({"action": "load_sample", "id": "pool"})
+        self.kit.action({"action": "load_sample", "id": "pool-recovery"})
         local = self.kit.action({"action": "data_ask", "question": "now?", "style": "short"})
         self.assertEqual(local["where"], "this Mac")
         self.kit.action({"action": "connect", "host": "pynq.local"})

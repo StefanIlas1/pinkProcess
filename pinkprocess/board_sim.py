@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import io
+import os
 from time import monotonic
 import uuid
 
@@ -12,7 +13,7 @@ from .simulator import SAMPLE_MS, simulate
 HOST = "simulated.pynq"
 CHECKPOINT = "0" * 64
 FRESH_MS = 1500
-ANSWER_SECONDS = 6.0
+ANSWER_SECONDS = float(os.environ.get("PYNQ_SIM_ANSWER_SECONDS", "6"))
 
 
 class SimulatedBoard:
@@ -60,18 +61,19 @@ class SimulatedBoard:
         return dict(ok=True, active=dict(name=self.active, checkpoint_sha256=CHECKPOINT),
                     versions=[dict(name=name) for name in self.versions], capture_listing_supported=True)
 
-    def answer_text(self, snapshot, followup):
+    def answer_text(self, snapshot, followup, question=""):
         latest, peak = snapshot["latest"], snapshot["observations"]["peak_waiting"]
         lead = "Following on from that, " if followup else ""
-        return (f"{lead}the pool has {latest['waiting']} requests waiting and {latest['busy']} of {snapshot['capacity']} "
+        text = (f"{lead}the pool has {latest['waiting']} requests waiting and {latest['busy']} of {snapshot['capacity']} "
                 f"connections busy. The recent peak was {peak['waiting']} waiting. The FPGA forecast does not show the "
                 "queue clearing in the next ten seconds. Measure how fast requests arrive and how long connections "
-                "are held to find the cause.")
+                "are held to find the cause." + (" " + " ".join(["Check the arrival rate against the connection hold time, then compare the peak with the pool capacity before changing anything."] * 6) if "long" in question.lower() else ""))
+        return text[0].upper() + text[1:]
 
-    def start_job(self, followup=False):
+    def start_job(self, question="", followup=False):
         job_id = uuid.uuid4().hex
         snapshot = self.snapshot()
-        self.jobs[job_id] = dict(started=monotonic(), snapshot=snapshot, text=self.answer_text(snapshot, followup))
+        self.jobs[job_id] = dict(started=monotonic(), snapshot=snapshot, text=self.answer_text(snapshot, followup, question))
         return dict(ok=True, job_id=job_id, state="running", snapshot=snapshot, partial_answer="")
 
     def job_result(self, job_id):
@@ -121,7 +123,7 @@ class SimulatedBoard:
             self.active = params.get("name", "original") if action == "lm_select" else "original"
             return self.language_versions()
         if action == "lm_start":
-            return self.start_job()
+            return self.start_job(params.get("question", ""))
         if action == "lm_result":
             return self.job_result(params.get("job_id"))
         if action == "lm_dataset_upload":
@@ -136,5 +138,5 @@ class SimulatedBoard:
         if action == "lm_dataset_ask":
             if params.get("dataset_id") not in self.datasets:
                 return dict(ok=False, error="This dataset is unavailable on the paired board.")
-            return self.start_job(followup=params.get("stage") == "followup")
+            return self.start_job(params.get("question", ""), followup=params.get("stage") == "followup")
         return dict(ok=False, error="The simulated board does not support this action.")

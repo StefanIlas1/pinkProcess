@@ -433,7 +433,7 @@ class Kit:
             sample = next((item for item in SAMPLES if item["id"] == data.get("id")), None)
             if sample is None:
                 raise ValueError("Unknown sample.")
-            return self.import_data(sample["name"] + ".csv", sample_csv(sample["id"]), remember=False)
+            return self.import_data(sample["file"], sample_csv(sample["id"]), remember=False)
         if action == "data_ask_begin":
             return self.begin_data_job(data)
         if action == "data_ask_progress":

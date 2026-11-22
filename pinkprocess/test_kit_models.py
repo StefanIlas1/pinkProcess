@@ -62,7 +62,7 @@ class ModelStoreTest(unittest.TestCase):
 class ProgressiveAnswerTest(unittest.TestCase):
     def test_styles_arrive_in_order_and_export_keeps_them(self):
         kit = Kit(NoBoard())
-        kit.action({"action": "load_sample", "id": SAMPLES[1]["id"]})
+        kit.action({"action": "load_sample", "id": "api-latency"})
         job = kit.action({"action": "data_ask_begin", "question": "what happened?", "style": "table"})
         self.assertEqual(job["order"], ["short", "summary", "transcript", "table"])
         for _ in range(100):

@@ -44,7 +44,7 @@ PYTHONPATH=$PWD python3 mac/kit_backend.py
 ## Using the app
 
 1. **Connect.** Press **Find boards** on the start screen. The rest of the app opens once a board is connected.
-2. **Import data.** Press **Import data** and choose a CSV or JSON lines file, or start from a sample. The app reads the columns, types, row count and time column and spots signals such as queue, latency, errors, temperature or sales.
+2. **Import data.** Press **Import data** and choose a CSV or JSON lines file, or pick one of the samples (the **Samples** menu, or the links on the empty chat). The app reads the columns, types, row count and time column and spots signals such as queue, latency, errors, temperature or sales.
 3. **Pick a model.** A recommended quantized model is applied when the data loads. **Search models** opens the library, which you can filter by task, maker and size. **Synthesize model** builds your own from a starting point, a name and a request. **Publish** adds a skill you trained to your library, stored in `~/Library/Application Support/PYNQ Process/models.json`.
 4. **Watch the hot path.** The strip on the left edge shows Data, Profile, Model, PYNQ-Z2 and Answer with the time each stage took. Hover it to open it. With no board the fabric stage reads **This Mac**.
 5. **Ask.** Type a question or use the microphone key and press Enter. Answers arrive style by style: **Short** first, then **Summary**, **Final** (board answers), **Transcript** and **Table**. Switch between the ready ones on the answer. The style row above the input picks which one opens first. A follow-up on a board dataset sees the previous exchange. **Readings behind this answer** shows the data the answer rests on.
@@ -104,6 +104,7 @@ The export endpoint is `POST /api/action` with `{"action":"export","session_id":
 | `pinkprocess/kit_transport.py`, `kit_server.py`, `board_language.py`, `telemetry_device.py` | Paired transport and the board service |
 | `pinkprocess/static/` | Logo and static assets served by the backend |
 | `pinkprocess/` (other) | Telemetry simulator, baseline, fixed-point profile and scoring code |
+| `datasets/` | Fourteen deterministic test files (queues, latency, thermal, sales, JSON lines, a malformed file, a 50,000 row file) and the script that makes them, see [datasets/README.md](datasets/README.md) |
 | `kit/` | Board provisioning, relays, verification scripts, evidence and examples |
 | `lm_reference/` | Quantized FLAN-T5 reference, fabric driver and weight versions |
 | `profiles/` | Checkpoint deltas and manifests for the resident models |

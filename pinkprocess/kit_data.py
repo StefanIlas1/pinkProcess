@@ -321,38 +321,26 @@ def answer_question(table, question, style):
     return result
 
 
+DATASETS_DIR = Path(__file__).resolve().parent.parent / "datasets"
+
+
+def load_samples():
+    try:
+        entries = json.loads((DATASETS_DIR / "manifest.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return ()
+    return tuple(dict(id=entry["id"], name=entry["name"], description=entry["description"], file=entry["file"])
+                 for entry in entries if (DATASETS_DIR / entry["file"]).is_file())
+
+
+SAMPLES = load_samples()
+
+
 def sample_csv(sample_id):
-    if sample_id == "pool":
-        return pool_sample_csv()
-    if sample_id == "latency":
-        rows = ["time_ms,latency_ms,errors"]
-        for index in range(240):
-            surge = 1 if 150 <= index < 175 else 0
-            latency = 120 + 18 * math.sin(index / 9) + surge * (300 + (index - 150) * 9)
-            rows.append(f"{index * 1000},{latency:.1f},{surge * (2 + (index - 150) // 5)}")
-        return "\n".join(rows) + "\n"
-    if sample_id == "temperature":
-        rows = ["timestamp,temp_c"]
-        for index in range(180):
-            heat = 9 if 110 <= index < 140 else 0
-            rows.append(f"2026-11-01 08:{index // 60:02d}:{index % 60:02d},{21 + 1.5 * math.sin(index / 14) + heat:.2f}")
-        return "\n".join(rows) + "\n"
-    if sample_id == "sales":
-        rows = ["date,orders,revenue"]
-        for day in range(60):
-            promo = 2.4 if day in (24, 25, 26) else 1
-            orders = round((80 + 12 * math.sin(day / 3.5)) * promo)
-            rows.append(f"2026-09-{day % 30 + 1:02d}T00:00:00,{orders},{orders * 18.5:.2f}" if day < 30 else f"2026-10-{day % 30 + 1:02d}T00:00:00,{orders},{orders * 18.5:.2f}")
-        return "\n".join(rows) + "\n"
-    raise ValueError("Unknown sample.")
-
-
-SAMPLES = (
-    dict(id="pool", name="Connection pool", description="Busy and waiting connections, 100 ms apart"),
-    dict(id="latency", name="Checkout latency", description="Response times and errors with one surge"),
-    dict(id="temperature", name="Room temperature", description="Sensor readings with a heat spike"),
-    dict(id="sales", name="Store sales", description="Daily orders and revenue with a promotion"),
-)
+    sample = next((item for item in SAMPLES if item["id"] == sample_id), None)
+    if sample is None:
+        raise ValueError("Unknown sample.")
+    return (DATASETS_DIR / sample["file"]).read_text(encoding="utf-8")
 
 
 def timed(function, *args):

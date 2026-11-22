@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import patch
 
 from .kit_accounts import Accounts
-from .kit_data import DatasetStore
+from .kit_data import SAMPLES, DatasetStore
 from .mcp_server import Connector, interpreter_ok, mcp_config, pick_python, serve
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -66,14 +66,14 @@ class McpTest(unittest.TestCase):
         replies = run_lines(self.connector, [
             tool(1, "list_sessions"), tool(2, "list_sessions", user="Ana"), tool(3, "get_session", id=self.chat),
             tool(4, "list_datasets"), tool(5, "profile_dataset", name="mine.csv"),
-            tool(6, "ask_data", dataset="Checkout latency", question="What was the peak?", style="short"),
+            tool(6, "ask_data", dataset="API latency", question="What was the peak?", style="short"),
             tool(7, "ask_data", dataset="mine.csv", question="average?", style="summary")])
         self.assertEqual(payload(replies[0])["sessions"][0]["id"], self.chat)
         self.assertEqual(payload(replies[1])["sessions"][0]["questions"], 1)
         self.assertEqual(payload(replies[2])["messages"][1]["text"], "19")
         listing = payload(replies[3])
         self.assertEqual(listing["imported"], ["mine.csv"])
-        self.assertEqual(len(listing["samples"]), 4)
+        self.assertEqual(len(listing["samples"]), len(SAMPLES))
         self.assertEqual(payload(replies[4])["rows"], 3)
         self.assertIn("peaked", payload(replies[5])["answer"])
         self.assertEqual(payload(replies[5])["where"], "this Mac")

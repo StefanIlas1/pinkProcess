@@ -134,8 +134,8 @@ class Connector:
             raise ValueError("Give the name of a dataset. Use list_datasets to see the choices.")
         name = name.strip()
         for sample in SAMPLES:
-            if name.lower() in (sample["id"], sample["name"].lower(), sample["name"].lower() + ".csv"):
-                return sample["name"] + ".csv", sample_csv(sample["id"])
+            if name.lower() in (sample["id"], sample["file"].lower(), sample["name"].lower()):
+                return sample["file"], sample_csv(sample["id"])
         return name, self.store.read(name)
 
     def profile_dataset(self, args):

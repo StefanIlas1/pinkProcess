@@ -1,0 +1,86 @@
+[
+  {
+    "file": "pool-calm.csv",
+    "id": "pool-calm",
+    "name": "Calm connection pool",
+    "description": "A pool that never queues. Checks that a quiet system reads as quiet."
+  },
+  {
+    "file": "pool-slow-build.csv",
+    "id": "pool-slow-build",
+    "name": "Pool, slow build",
+    "description": "Arrivals creep up until the queue starts to grow late in the run."
+  },
+  {
+    "file": "pool-sudden-spike.csv",
+    "id": "pool-sudden-spike",
+    "name": "Pool, sudden spike",
+    "description": "A short burst of traffic fills the pool and queues requests."
+  },
+  {
+    "file": "pool-recovery.csv",
+    "id": "pool-recovery",
+    "name": "Pool, recovery",
+    "description": "A long backlog that drains to zero before the end."
+  },
+  {
+    "file": "pool-oscillating.csv",
+    "id": "pool-oscillating",
+    "name": "Pool, oscillating",
+    "description": "Load rises and falls in waves, so the queue comes and goes."
+  },
+  {
+    "file": "api-latency.csv",
+    "id": "api-latency",
+    "name": "API latency",
+    "description": "p50 and p95 latency, request counts and two error bursts."
+  },
+  {
+    "file": "server-thermal.csv",
+    "id": "server-thermal",
+    "name": "Server thermal throttle",
+    "description": "CPU, memory and temperature with a heat event that triggers throttling."
+  },
+  {
+    "file": "disk-io.csv",
+    "id": "disk-io",
+    "name": "Disk IO",
+    "description": "Read and write throughput with a backup window that deepens the queue."
+  },
+  {
+    "file": "network-loss.csv",
+    "id": "network-loss",
+    "name": "Network packet loss",
+    "description": "Packet loss and round trip time with two bad stretches."
+  },
+  {
+    "file": "sales-seasonal.csv",
+    "id": "sales-seasonal",
+    "name": "Sales with seasonality",
+    "description": "A year of daily orders and revenue with weekly and yearly cycles and a sale."
+  },
+  {
+    "file": "iot-drift.csv",
+    "id": "iot-drift",
+    "name": "IoT sensor drift",
+    "description": "Two temperature sensors, one of which drifts away from the other."
+  },
+  {
+    "file": "log-events.jsonl",
+    "id": "log-events",
+    "name": "Log events (JSON lines)",
+    "description": "Request log events with status, latency and an incident window."
+  },
+  {
+    "file": "malformed.csv",
+    "id": "malformed",
+    "name": "Malformed file",
+    "description": "Rows with missing and extra columns. Importing it should fail with a clear message."
+  },
+  {
+    "file": "large-50k.csv",
+    "id": "large-50k",
+    "name": "Large file (50,000 rows)",
+    "description": "A long load series at the import row limit, for checking speed."
+  }
+]

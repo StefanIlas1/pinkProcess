@@ -17,18 +17,18 @@ class DataTest(unittest.TestCase):
         return profile_table(parse_table(sample_csv(sample_id), sample_id + ".csv"), sample_id)
 
     def test_pool_data_recommends_the_queue_model(self):
-        profile = self.profile("pool")
+        profile = self.profile("pool-recovery")
         self.assertTrue(profile["queue_ready"])
         self.assertEqual(profile["time_column"], "time_ms")
         self.assertEqual(profile["recommendation"]["model_id"], "queue-onset-logistic")
         self.assertIn("Queue-onset INT8", profile["recommendation"]["reason"])
 
     def test_other_signals_are_detected(self):
-        self.assertIn("latency", self.profile("latency")["signals"])
-        self.assertIn("temperature", self.profile("temperature")["signals"])
-        self.assertIn("sales", self.profile("sales")["signals"])
-        self.assertEqual(self.profile("sales")["recommendation"]["model_id"], "flan-t5-small-int8")
-        self.assertEqual(self.profile("temperature")["time_column"], "timestamp")
+        self.assertIn("latency", self.profile("api-latency")["signals"])
+        self.assertIn("temperature", self.profile("server-thermal")["signals"])
+        self.assertIn("sales", self.profile("sales-seasonal")["signals"])
+        self.assertEqual(self.profile("sales-seasonal")["recommendation"]["model_id"], "flan-t5-small-int8")
+        self.assertEqual(self.profile("server-thermal")["time_column"], "timestamp")
 
     def test_json_lines_are_read(self):
         table = parse_table('{"time": 1, "value": 2}\n{"time": 2, "value": 9}\n{"time": 3, "value": 3}\n', "a.jsonl")
@@ -42,9 +42,9 @@ class DataTest(unittest.TestCase):
                 parse_table(text, "x.csv")
 
     def test_every_answer_style(self):
-        table = parse_table(sample_csv("latency"), "latency.csv")
+        table = parse_table(sample_csv("api-latency"), "api-latency.csv")
         short = answer_question(table, "what is the peak?", "short")
-        self.assertIn("peaked at 644.4", short["answer"])
+        self.assertIn("peaked at 586.3", short["answer"])
         self.assertGreater(len(answer_question(table, "summary", "summary")["answer"].splitlines()), 2)
         transcript = answer_question(table, "what happened", "transcript")
         self.assertIn("PEAK", transcript["answer"])
@@ -59,8 +59,8 @@ class DataTest(unittest.TestCase):
         kit = Kit(NoBoard())
         with self.assertRaises(ValueError):
             kit.action({"action": "data_ask", "question": "hi", "style": "short"})
-        loaded = kit.action({"action": "load_sample", "id": SAMPLES[1]["id"]})
-        self.assertEqual(loaded["profile"]["rows"], 240)
+        loaded = kit.action({"action": "load_sample", "id": "api-latency"})
+        self.assertEqual(loaded["profile"]["rows"], 720)
         self.assertIn("data_ms", loaded["timings"])
         answer = kit.action({"action": "data_ask", "question": "is it growing?", "style": "summary"})
         self.assertEqual(answer["where"], "this Mac")
@@ -121,7 +121,7 @@ class DataTest(unittest.TestCase):
         rows = "time_ms,busy,waiting\n" + "".join(f"{i * 100},{i % 5},{'' if i == 7 else 1}\n" for i in range(80))
         table = parse_table(rows, "pool.csv")
         self.assertFalse(queue_ready(table))
-        self.assertTrue(queue_ready(parse_table(sample_csv("pool"), "pool.csv")))
+        self.assertTrue(queue_ready(parse_table(sample_csv("pool-recovery"), "pool-recovery.csv")))
 
     def test_import_store_keeps_recent_files_and_blocks_traversal(self):
         with TemporaryDirectory() as directory:
@@ -136,9 +136,9 @@ class DataTest(unittest.TestCase):
             self.assertEqual(list(Path(directory).glob("*.csv")), [])
             kit = Kit(NoBoard(), store=store)
             kit.action({"action": "import_data", "name": "kept.csv", "text": "t,v\n1,2\n2,3\n"})
-            kit.action({"action": "load_sample", "id": "pool"})
+            kit.action({"action": "load_sample", "id": "pool-recovery"})
             self.assertIn("kept.csv", store.names())
-            self.assertNotIn("Connection pool.csv", store.names())
+            self.assertNotIn("pool-recovery.csv", store.names())
 
 
 if __name__ == "__main__":
