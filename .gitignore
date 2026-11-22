@@ -8,3 +8,6 @@ dist/
 .env
 *.env
 !.env.example
+paper/main.log
+paper/main.blg
+paper/__pycache__/
