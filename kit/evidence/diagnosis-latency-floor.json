@@ -7,6 +7,14 @@
   "total_submissions": 276082,
   "first_token_compute_floor_s": 64.776,
   "full_answer_compute_floor_s": 90.467,
+  "projection_array": {
+    "clock_hz": 50000000,
+    "mac_lanes": 64,
+    "first_token_padded_macs": 4266328064,
+    "full_answer_padded_macs": 6151340032,
+    "first_token_mac_only_floor_s": 1.33322752,
+    "full_answer_mac_only_floor_s": 1.92229376
+  },
   "physical_first_observed_text_s": 334.864,
   "physical_complete_answer_s": 797.536
 }

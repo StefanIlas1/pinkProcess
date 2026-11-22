@@ -100,8 +100,9 @@ After=network.target bootpy.service clear_pl_statefile.service
 [Service]
 WorkingDirectory=/opt/pinkprocess-kit/current
 EnvironmentFile=-/etc/pinkprocess-kit/source.conf
+EnvironmentFile=-/etc/pinkprocess-kit/projection.conf
 EnvironmentFile=-/opt/pinkprocess-kit/current/language.conf
-ExecStart=/bin/bash -lc 'exec /usr/local/share/pynq-venv/bin/python3 -E -m pinkprocess.kit_server --identity /etc/pinkprocess-kit --profiles profiles --bitstream overlay/pinkprocess.bit --state-file /var/lib/pinkprocess-kit/active.json $${PINKPROCESS_SOURCE_ARGS:-} $${PINKPROCESS_LANGUAGE_ARGS:-}'
+ExecStart=/bin/bash -lc 'exec /usr/local/share/pynq-venv/bin/python3 -E -m pinkprocess.kit_server --identity /etc/pinkprocess-kit --profiles profiles --bitstream overlay/pinkprocess.bit --state-file /var/lib/pinkprocess-kit/active.json $${PINKPROCESS_SOURCE_ARGS:-} $${PINKPROCESS_LANGUAGE_ARGS:-} $${PINKPROCESS_PROJECTION_ARGS:-}'
 Restart=on-failure
 RestartSec=5
 UMask=0077

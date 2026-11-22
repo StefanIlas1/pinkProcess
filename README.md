@@ -70,7 +70,13 @@ found the frozen diagnostic weights answered 12 of 12 synthetic incidents
 correctly. The physical PYNQ-Z2 also reproduced the reference answers on three
 scripted incidents. It distinguished a cleared queue from an active backlog
 and recommended measuring arrival rates and connection hold times when the cause
-was uncertain. Two timed answers took about 13 minutes each. The installed Mac
+was uncertain. The first FPGA design took about 13 minutes per answer. On the
+same saved ambiguous incident, the installed DDR projection array produced
+first text in 18.1 seconds and the complete answer in 132.1 seconds. All 3,722
+learned projections used the array, the answer matched byte for byte, and the
+Mac received fresh board telemetry during generation.
+[Physical replay and weight checks](kit/evidence/physical-systolic-diagnosis.json).
+The installed Mac
 app also answered an unfamiliar question while new readings arrived. After a witnessed power cycle and recovery from a startup
 overlay conflict, the kit reproduced the edited answer exactly. Restoring the
 original weights reproduced the baseline and preserved the named edit. With the
@@ -552,6 +558,32 @@ demo feeds the same raw scores into token selection.
 
 ### Benchmark the FLAN projection accelerator
 
+On the PYNQ-Z2, the first encoder query projection went from 2,100.19 ms
+to 81.48 ms (25.8×) and the single-position decoder query projection went
+from 43.14 ms to 12.13 ms (3.56×). These are medians of five complete calls
+per backend. Both matched the signed integer reference. In a separate
+concurrency run, 13 telemetry submissions started while the projection core
+was busy and all forecasts matched the sequential run. The routed design
+met timing at 50 MHz and implemented the array with LUTs. [Physical measurements](kit/evidence/physical-systolic-projection.json)
+· [Matched bitstream and hardware handoff](build/projection-qualified)
+
+The recorded diagnosis had 186 input tokens and 50 decoding steps. The
+following are single physical replays with the same saved incident, question
+and original weights. The historical baseline used the paired connection.
+Both new runs used the same board-local request and one-second result polling.
+
+| Installed configuration | First observed text | Complete answer |
+| --- | ---: | ---: |
+| Historical classifier | 334.9 s | 797.5 s |
+| Array for block-zero queries | 342.1 s | 830.2 s |
+| Array for every learned matrix | 18.1 s | 132.1 s |
+
+The board also matched 842,752 signed reference scores during two separate
+shape checks covering attention, feed-forward layers and the original and both
+edited output heads. One isolated output-head call took about 0.6 seconds,
+including eight weight segments. The current full path packs and transfers the
+selected weights again on every call. [Replay evidence](kit/evidence/physical-systolic-diagnosis.json)
+
 The overlay source includes the existing telemetry classifier and an 8 × 8
 signed INT8 projection engine. One command reads packed activations and
 weights from board DDR through the Zynq HP0 port and writes INT32 scores back.
@@ -587,11 +619,21 @@ python3 -m kit.benchmark_projection --bitstream OLD/pinkprocess.bit --capture CA
 python3 -m kit.benchmark_projection_overlay --bitstream NEW/pinkprocess.bit --capture CAPTURE.npz
 ```
 
-The live kit server accepts `--projection-overlay` with its normal language
-model arguments. This enables the prototype for the first self-attention
-query projection in each FLAN stack on a compatible overlay. The other
-projections use the existing classifier. Compare complete answers and live
-telemetry separately from isolated projection times.
+On a kit with the matched overlay and resident language model, the systemd
+service reads `/etc/pinkprocess-kit/projection.conf` on restart. To route
+every learned matrix through the array, set the file to:
+
+```ini
+PINKPROCESS_PROJECTION_ARGS="--projection-overlay --projection-scope all"
+```
+
+This includes both attention stacks, feed-forward layers and the vocabulary
+projection. Large matrices run in segments to fit the board's contiguous
+memory. Each segment uses the currently selected weights. In this mode the
+service requires the projection core, and a completed answer reports both
+`accelerated_projections` and `fabric_projections`. They count learned matrix
+calls, including a segmented matrix as one call. For the initial two-projection
+benchmark configuration, set `PINKPROCESS_PROJECTION_ARGS=--projection-overlay`.
 
 ### Remote Vivado build on Western GAUL
 

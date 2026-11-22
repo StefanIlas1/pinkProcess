@@ -23,6 +23,7 @@ class FlanProjectionTests(unittest.TestCase):
         self.model.first_output_activation = None
         self.model.first_output_max = None
         self.model.fabric_projections = 0
+        self.model.accelerated_projections = 0
 
     def test_signed_activations_and_patched_matrix_reach_the_fabric(self):
         model = self.model
@@ -81,3 +82,4 @@ class FlanProjectionTests(unittest.TestCase):
         self.assertEqual(overlay.events.count(("launch",)), 2)
         self.assertEqual(model.fabric.calls, 6)
         self.assertEqual(model.fabric_projections, 8)
+        self.assertEqual(model.accelerated_projections, 2)
