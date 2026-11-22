@@ -78,13 +78,10 @@ function setupFabric() {
   requestAnimationFrame(loop);
 }
 
-function setupNav() {
-  const nav = $(".nav");
-  if (!nav) return;
+function trackScrollSpeed() {
   let lastY = scrollY;
   addEventListener("scroll", () => {
     scrollSpeed = Math.max(scrollSpeed, Math.abs(scrollY - lastY));
-    nav.classList.toggle("tuck", scrollY > lastY && scrollY > 240);
     lastY = scrollY;
   }, { passive: true });
 }
@@ -131,21 +128,6 @@ function startScrubLoop() {
   addEventListener("scroll", request, { passive: true });
   addEventListener("resize", () => { scrubbers.forEach((scrubber) => (scrubber.last = -1)); request(); });
   runScrubbers();
-}
-
-function setupMarquee() {
-  const track = $(".marquee-track");
-  if (!track) return;
-  track.innerHTML += track.innerHTML;
-  const chips = $$("span", track);
-  const half = chips.length / 2;
-  let index = 0;
-  setInterval(() => {
-    chips.forEach((chip) => chip.classList.remove("on"));
-    index = (index + 3) % half;
-    chips[index].classList.add("on");
-    chips[index + half].classList.add("on");
-  }, 1400);
 }
 
 const hotPathStages = [
@@ -624,10 +606,9 @@ function setupDownload() {
 }
 
 setupFabric();
-setupNav();
+trackScrollSpeed();
 setupReveal();
 setupTrace();
-setupMarquee();
 setupHotPath();
 setupSteps();
 setupStack();

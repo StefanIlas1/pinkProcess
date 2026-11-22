@@ -10,9 +10,10 @@ from pathlib import Path
 import re
 import tempfile
 from threading import Lock
-from statistics import fmean, pstdev
+from statistics import fmean
 from time import perf_counter
 
+from .kit_analyst import build_answer
 from .kit_dataset import pool_sample_csv
 
 MAX_ROWS = 50000
@@ -166,27 +167,6 @@ def monotonic(values):
     return len(present) > 1 and all(b >= a for a, b in zip(present, present[1:]))
 
 
-def stamp_label(value):
-    if value is None:
-        return "?"
-    try:
-        return datetime.fromtimestamp(value).strftime("%Y-%m-%d %H:%M:%S")
-    except (ValueError, OverflowError, OSError):
-        return f"{value:g}"
-
-
-def time_labels(table):
-    column = table["time"]
-    if column is None:
-        return [str(index + 1) for index in range(table["rows"])]
-    values = table["data"][column]
-    if table["types"][column] == "time":
-        return [stamp_label(value) for value in values]
-    if column.lower().endswith("ms"):
-        return [f"{value / 1000:.1f} s" if value is not None else "?" for value in values]
-    return [f"{value:g}" if value is not None else "?" for value in values]
-
-
 def signals_for(table):
     found = {}
     for column in table["columns"]:
@@ -236,89 +216,10 @@ def profile_table(table, name):
     return result
 
 
-def focus_column(table, question):
-    lowered = question.lower()
-    numeric = [column for column in table["columns"] if table["types"][column] == "number" and column != table["time"]]
-    if not numeric:
-        raise ValueError("This file has no numeric columns to analyze.")
-    for column in numeric:
-        if column.lower() in lowered:
-            return column
-    found = signals_for(table)
-    for signal in FOCUS_ORDER:
-        if signal in found:
-            return found[signal]
-    return numeric[0]
-
-
-def episodes(values, threshold):
-    spans, start = [], None
-    for index, value in enumerate(values):
-        high = value is not None and value > threshold
-        if high and start is None:
-            start = index
-        if not high and start is not None:
-            spans.append((start, index - 1))
-            start = None
-    if start is not None:
-        spans.append((start, len(values) - 1))
-    return spans
-
-
 def answer_question(table, question, style):
     if style not in STYLES:
         raise ValueError("Choose a short answer, summary, transcript or table.")
-    column = focus_column(table, question)
-    values = [value for value in table["data"][column]]
-    labels = time_labels(table)
-    present = [value for value in values if value is not None]
-    if not present:
-        raise ValueError(f"The {column} column has no numbers.")
-    mean, spread = fmean(present), pstdev(present)
-    top = max(range(len(values)), key=lambda index: -math.inf if values[index] is None else values[index])
-    last = max(index for index, value in enumerate(values) if value is not None)
-    recent = max(1, len(present) // 10)
-    change = fmean(present[-recent:]) - fmean(present[-2 * recent:-recent] or present[:recent])
-    direction = "rising" if change > spread * 0.25 else "falling" if change < -spread * 0.25 else "steady"
-    threshold = mean + 2 * spread if spread else math.inf
-    spans = episodes(values, threshold)
-    events = [(0, "start", f"{column} {values[0]:g}" if values[0] is not None else column)]
-    for first, end in spans[:12]:
-        events.append((first, "spike", f"{column} jumps to {values[first]:g}"))
-        if end != first:
-            events.append((end, "calm", f"{column} back to {values[end]:g}" if end + 1 >= len(values) else f"{column} eases to {values[end + 1] or 0:g}"))
-    events.append((top, "peak", f"highest {column}, {values[top]:g}"))
-    events.append((last, "now", f"{column} {values[last]:g}, {direction}"))
-    events.sort(key=lambda event: event[0])
-    events = [(labels[index], kind, note) for index, kind, note in events]
-    asked = question.lower()
-    if any(word in asked for word in ("average", "mean", "typical")):
-        short = f"{column} averages {mean:.2f} over {len(present):,} readings."
-    elif any(word in asked for word in ("peak", "max", "highest", "worst")):
-        short = f"{column} peaked at {values[top]:g} at {labels[top]}."
-    elif any(word in asked for word in ("now", "latest", "current", "right now")):
-        short = f"{column} is {values[last]:g} at {labels[last]}, {direction}."
-    else:
-        short = f"{column} is {direction} and now {values[last]:g}; it peaked at {values[top]:g} at {labels[top]}." + (
-            f" It spiked {len(spans)} time{'s' if len(spans) != 1 else ''}." if spans else "")
-    readings = f"{len(present):,} readings of {column}, from {labels[0]} to {labels[-1]}. Average {mean:.2f}, highest {values[top]:g}, latest {values[last]:g}."
-    result = dict(style=style, focus=column, readings=readings, table=None)
-    if style == "short":
-        result["answer"] = short
-    elif style == "summary":
-        lines = [short, f"The file has {table['rows']:,} rows covering {labels[0]} to {labels[-1]}.",
-                 f"Typical {column} is {mean:.2f}. Over the most recent readings it is {direction}."]
-        lines.append(f"{len(spans)} unusual stretch{'es' if len(spans) != 1 else ''} stood out." if spans else "Nothing stood out as unusual.")
-        result["answer"] = "\n".join(lines)
-    elif style == "transcript":
-        width = max(len(label) for label, _, _ in events)
-        result["answer"] = "\n".join(f"{label.ljust(width)}  {kind.upper().ljust(5)}  {note}" for label, kind, note in events)
-    else:
-        result["answer"] = short
-        result["table"] = dict(columns=["Time", "Event", column.replace("_", " ")],
-                               rows=[[label, kind, note] for label, kind, note in events])
-    result["events"] = [dict(time=label, kind=kind, note=note) for label, kind, note in events]
-    return result
+    return build_answer(table, question, style)
 
 
 DATASETS_DIR = Path(__file__).resolve().parent.parent / "datasets"

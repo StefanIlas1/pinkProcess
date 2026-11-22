@@ -5,6 +5,9 @@ __pycache__/
 build/
 dist/
 .DS_Store
+.env
+*.env
+!.env.example
 paper/main.log
 paper/main.blg
 paper/__pycache__/

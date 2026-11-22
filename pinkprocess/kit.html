@@ -49,6 +49,9 @@ body[data-boot] .app{visibility:hidden}
 #board-menu-details:not(:empty){padding:4px 8px}
 @keyframes blink{from{opacity:.25}to{opacity:1}}
 .conn{position:relative}
+#connection-name{display:inline-flex;align-items:center;gap:7px}
+#connection-name::before{content:"";width:8px;height:8px;flex:none;border-radius:50%;background:var(--pink-bow)}
+#connection.off #connection-name::before{background:var(--dim)}
 button.pill{display:flex;align-items:center;gap:8px;font:.8rem var(--mono);font-weight:400;border:0;padding:6px 8px;color:var(--ink)}
 .profile{position:relative}.avatar{width:32px;height:32px;padding:0;border-radius:50%;background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .menu{--r:12px;--p:8px;--rc:max(0px,calc(var(--r) - var(--p)));position:absolute;right:0;top:40px;z-index:5;min-width:180px;background:var(--panel);border:1px solid #463a4a;border-radius:var(--r);padding:var(--p);display:grid;gap:6px;box-shadow:0 10px 24px rgba(0,0,0,.4)}.menu button{text-align:left;border:0}.menu span{padding:6px 10px;color:var(--dim);font-size:.85rem}
@@ -57,18 +60,18 @@ button.pill{display:flex;align-items:center;gap:8px;font:.8rem var(--mono);font-
 .chat-item{display:grid;gap:2px;text-align:left;border:0;border-radius:8px;padding:10px 12px;font-weight:400}.chat-item:hover:not(:disabled){background:var(--panel);border:0}.chat-item[aria-current="true"]{background:var(--panel)}
 .chat-item span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.chat-item small{font-size:.72rem}
 .peek{position:relative;z-index:4;border-right:1px solid var(--line);background:rgba(253,206,223,.02)}
-.peek:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(47,191,113,.16),transparent);opacity:.5;animation:breathe 4s ease-in-out infinite}
-.peek.pulse:before{animation:pulseglow .9s ease-out 2}
+.peek-panel:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(253,206,223,.21),transparent);opacity:.5;animation:breathe 4s ease-in-out infinite}
+.peek.pulse .peek-panel:before{animation:pulseglow .9s ease-out 2}
 @keyframes breathe{0%,100%{opacity:.25}50%{opacity:.8}}
-@keyframes pulseglow{0%{opacity:1;background:linear-gradient(90deg,rgba(47,191,113,.7),transparent)}100%{opacity:.4}}
+@keyframes pulseglow{0%{opacity:1}100%{opacity:.4}}
 .peek-chev{position:absolute;top:14px;left:50%;margin-left:-5px;color:#c9bfc7;animation:nudge 2.4s ease-in-out infinite}
 @keyframes nudge{0%,100%{transform:translateX(-1px);opacity:.5}50%{transform:translateX(2px);opacity:1}}
-.peek-panel{position:absolute;inset:0 auto 0 0;width:25px;overflow:hidden;display:flex;flex-direction:column;justify-content:center;padding:0 0 var(--topbar);transition:width .22s ease}
-.peek:is(:hover,:focus-within,.open) .peek-panel{width:var(--peek-w);background:var(--panel);border-right:1px solid var(--line);box-shadow:12px 0 32px rgba(0,0,0,.4)}
+.peek-panel{position:absolute;inset:0 auto 0 0;width:25px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;padding:clamp(0px,var(--stage-offset,18vh),max(0px,100vh - var(--topbar) - 180px)) 0 0;transition:width .22s ease}
+.peek:is(:hover,:focus-within,.open) .peek-panel{width:var(--peek-w);background:linear-gradient(150deg,#382731,#261e26 58%,#2f222d);border-right:1px solid rgba(253,206,223,.2);box-shadow:6px 0 24px rgba(253,206,223,.09)}
 .node{display:grid;grid-template-columns:12px 1fr auto;column-gap:10px;align-items:baseline;padding:8px 0;font:.82rem/1.4 var(--mono);color:var(--dim)}
 .node .led{align-self:center}.node .nm{white-space:nowrap}.node .t{text-align:right}.node .sub{grid-column:2/4;font-size:.72rem;opacity:.75;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.node[data-state=done]{color:var(--ink)}.node[data-state=done] .led{background:var(--green)}
-.node[data-state=active]{color:var(--ink);font-weight:600}.node[data-state=active] .led{background:var(--green);animation:blink .6s infinite alternate}
+.node[data-state=done]{color:var(--ink)}.node[data-state=done] .led{background:var(--pink)}
+.node[data-state=active]{color:var(--ink);font-weight:600}.node[data-state=active] .led{background:var(--pink);box-shadow:0 0 8px rgba(253,206,223,.65);animation:blink .6s infinite alternate}
 .center{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto auto auto;min-height:0;min-width:0;padding:0 0 18px}
 .toolbar{display:flex;align-items:center;gap:10px;padding:10px 28px;border-bottom:1px solid var(--line)}
 .dchip{position:relative;display:inline-flex;align-items:center;gap:8px;font:.82rem var(--mono);color:var(--ink);padding:5px 12px;border:1px solid var(--line);border-radius:999px;flex:0 1 auto;min-width:0;max-width:60%;white-space:nowrap}.dchip span{overflow:hidden;text-overflow:ellipsis}.dchip svg{flex:none;color:var(--dim)}
@@ -83,7 +86,7 @@ button.icon{width:32px;height:32px;padding:0;border-radius:50%;font-size:1.1rem;
 .msg details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.msg summary{cursor:pointer;color:var(--dim);font-size:.85rem}.msg details p{margin-top:8px;font:.8rem/1.5 var(--mono);color:#cfc5cd}
 .msg .replay{margin-top:8px;padding:2px 0;font-size:.85rem}
 .msg .suggest{margin-top:12px;color:var(--dim)}
-.msg table{border-collapse:collapse;margin-top:6px;font:.8rem var(--mono);white-space:normal}.msg th,.msg td{text-align:left;padding:6px 14px 6px 0;border-bottom:1px solid var(--line)}.msg th{color:var(--dim)}
+.msg table{border-collapse:collapse;margin-top:6px;font:.8rem var(--mono);white-space:normal}.msg th,.msg td{text-align:left;padding:6px 14px 6px 0;border-bottom:1px solid var(--line);overflow-wrap:normal;word-break:normal;vertical-align:top}.msg th{white-space:nowrap}.msg td{min-width:6ch}.msg.answer:has(table){max-width:100%}.msg th{color:var(--dim)}
 .msg.answer{min-width:min(100%,420px)}
 .msg.answer:has(.skeleton){width:min(100%,600px)}
 .vtabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
@@ -156,7 +159,7 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
 .queue-history{margin:10px 0 0;padding:8px 12px;border-left:2px solid var(--pink);font-size:13px}.queue-history strong{font-weight:600}
 .gen-timing{display:block;margin-top:6px;color:var(--dim);font-family:ui-monospace,Menlo,monospace;font-size:12px}
 
-:root{--topbar:72px;--gutter:32px;--side:224px;--rail:312px;--logo-h:52px;--col:960px;--peek-w:144px}
+:root{--topbar:72px;--gutter:32px;--side:224px;--rail:312px;--logo-h:52px;--peek-w:144px}
 @media(max-width:899px){:root{--gutter:24px;--side:152px;--rail:232px;--logo-h:40px}}
 @media(min-width:1300px){:root{--gutter:48px;--side:264px;--rail:368px;--logo-h:56px}}
 @media(max-height:640px){:root{--topbar:56px;--logo-h:40px}}
@@ -168,11 +171,13 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
 button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .avatar{width:40px;height:40px;font-size:1rem}
 .menu{top:48px}.menu span{display:block;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.top-right{gap:24px}
-.toolbar{padding:16px max(var(--gutter),calc((100% - var(--col))/2))}
-#messages{padding:24px max(var(--gutter),calc((100% - var(--col))/2));gap:16px}
-.empty{padding:clamp(24px,9vh,96px) max(var(--gutter),calc((100% - var(--col))/2)) 0}
-#ask-form,#notice,#login-note{width:min(var(--col),calc(100% - 2*var(--gutter)));margin-left:auto;margin-right:auto}
+.top-right{--control-gap:1rem;gap:var(--control-gap)}
+.top-right #connection{gap:var(--control-gap);padding-inline-end:0}
+.top-right #login{padding-inline-start:0}
+.toolbar{padding:16px var(--gutter)}
+#messages{padding:24px var(--gutter);gap:clamp(16px,2.4vh,26px)}
+.empty{padding:clamp(24px,8vh,84px) var(--gutter) 0;gap:clamp(16px,2.6vh,28px)}
+
 .center{padding-bottom:24px}
 .section{padding:24px}
 @media(max-width:899px){.section{padding:16px}.center{padding-bottom:16px}}
@@ -186,13 +191,50 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
 @media(max-height:620px){#empty-sub{display:none}.empty{gap:12px}}
 .tablewrap{max-height:280px;overflow:auto;margin-top:8px;max-width:100%}
 .msg-error{margin-top:12px;color:var(--pink-bow);font-size:.9rem}
-.peek-panel .node{width:var(--peek-w);padding:8px 8px 8px 9px;align-items:center}
+.peek-panel .node{position:relative;width:var(--peek-w);padding:8px 8px 8px 9px;align-items:center}
 .peek:not(:hover,:focus-within,.open) .node :is(.nm,.t){visibility:hidden}
-@media(prefers-reduced-motion:reduce){.peek-panel{transition:none}}
+@media(prefers-reduced-motion:reduce){.peek-panel{transition:none}.peek .peek-panel:before{animation:none}}
 .peek-panel .sub{display:none}
 .peek-panel .node{grid-template-columns:12px 1fr auto;column-gap:8px;font-size:.74rem}
+.peek-panel .nm,#empty-sub{font-size:1rem}
 #data-chip{max-width:min(60%,420px)}
 #chat-list .chat-item{min-width:0}
+
+.app,.app.nosidebar{--toolbar-h:56px;--footer-h:44px;--bottom:12px;--rail-track:var(--rail);grid-template-columns:26px var(--side) minmax(0,1fr) var(--rail-track);transition:grid-template-columns .22s ease}
+.app.nosidebar{--side:0px}
+.app.model-collapsed{--rail-track:0px}
+.center{grid-template-rows:var(--toolbar-h) minmax(0,1fr) auto auto var(--footer-h);padding-bottom:var(--bottom)}
+.toolbar{grid-row:1;height:var(--toolbar-h);padding-block:0;border-bottom:0;box-shadow:inset 0 -1px var(--line);padding-right:max(44px,var(--gutter))}
+.toolbar .lbl{display:inline}
+#import-more{padding-inline-start:0;display:inline-flex;align-items:center;gap:6px}
+#import-more svg{margin:0}
+.stage{grid-row:2}
+#notice{grid-row:3}
+#ask-form{grid-row:4}
+#ask-form,.composer-footer,#notice{width:auto;margin-inline:var(--gutter)}
+.askmeta{padding-inline:0}
+.bar{align-items:center}
+.bar .mic,.bar .send{display:grid;place-items:center;width:44px;height:44px;padding:0}
+.composer-footer{grid-row:5;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.composer-footer #login-note{margin:0;width:auto}
+.xport{margin-left:auto}
+#export-btn{padding-right:0}
+.side{display:grid;grid-template-rows:var(--toolbar-h) minmax(0,1fr) var(--footer-h);gap:0;padding-block:0 var(--bottom)}
+#new-chat,#history-hint{align-self:center}
+.peek-chev{top:calc(var(--toolbar-h)/2 - 7px)}
+.top-right #model-toggle{padding-inline:0;max-width:min(26vw,30ch);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.model-tab{grid-area:2 / 3;align-self:start;justify-self:end;margin-top:calc(var(--toolbar-h)/2 - 18px);z-index:3;display:grid;place-items:center;width:40px;height:36px;padding:0;border:1px solid #765467;border-right:0;border-radius:10px 0 0 10px;color:var(--pink);background:#382731}
+.model-tab:is(:hover,:focus-visible){background:#503443;color:#ffdae8;border-color:#bf859c}
+.model-tab[aria-expanded=true] svg{transform:rotate(180deg)}
+.bar{background:color-mix(in srgb,var(--field) 55%,transparent)}
+#live-question::placeholder{color:rgba(220,207,218,.64);opacity:1}
+.rail-viewport{grid-area:2 / 4;min-width:0;min-height:0;overflow:hidden}
+.rail{width:var(--rail);height:100%;background:var(--panel);overflow:auto}
+@media(max-width:899px){.rail .tabs button[role=tab]{padding-inline:4px;font-size:.82rem}}
+.rail .section.fill{flex:1 0 auto;overflow:visible}
+.drawer-heading{height:var(--toolbar-h);display:flex;align-items:center;justify-content:space-between}
+.rail .section:first-child{padding-top:0}
+@media(prefers-reduced-motion:reduce){.app{transition:none}}
 </style>
 </head>
 <body data-boot>
@@ -215,6 +257,7 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
       <div id="board-tip" role="tooltip"></div>
       <div class="menu" id="conn-menu" hidden><div id="board-menu-details"></div><button id="disconnect" hidden>Disconnect</button></div>
     </div>
+    <button class="text" id="model-toggle" type="button" aria-expanded="true" aria-controls="model-drawer">Checking model…</button>
     <button id="login" class="text">Log in</button>
     <div class="profile" id="profile" hidden>
       <button id="profile-button" class="avatar" aria-label="Profile"></button>
@@ -239,8 +282,8 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
 </aside>
 <section class="center">
   <div class="toolbar" id="toolbar">
-    <span class="dchip" id="data-chip" tabindex="0" hidden><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1h5l3 3v9H3z" fill="none" stroke="currentColor"/><path d="M8 1v3h3" fill="none" stroke="currentColor"/></svg><span id="data-name"></span></span>
     <button id="import-more" class="text"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 10V2M4 5l3-3 3 3M2 12h10" fill="none" stroke="currentColor" stroke-width="1.4"/></svg><span class="lbl">Import data</span></button>
+    <span class="dchip" id="data-chip" tabindex="0" hidden><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1h5l3 3v9H3z" fill="none" stroke="currentColor"/><path d="M8 1v3h3" fill="none" stroke="currentColor"/></svg><span id="data-name"></span></span>
   </div>
   <div class="stage">
     <div id="messages" aria-live="polite"></div>
@@ -253,23 +296,26 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
   <form id="ask-form">
     <div class="askmeta">
       <div class="styles" id="styles" role="group" aria-label="Answer style"><button type="button" data-style="short" title="Short answer" aria-pressed="true">Short</button><button type="button" data-style="summary" aria-pressed="false">Summary</button><button type="button" data-style="transcript" aria-pressed="false">Transcript</button><button type="button" data-style="table" aria-pressed="false">Table</button></div>
-      <span class="grow"></span>
-      <div class="xport">
-        <button id="export-btn" class="pillbtn" type="button" aria-haspopup="true"><svg width="12" height="12" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 2v7M4 6l3 3 3-3M2 12h10" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>Export</button>
-        <div class="menu up" id="export-menu" hidden><button type="button" data-export="md">Markdown</button><button type="button" data-export="csv">CSV</button><button type="button" data-export="json">JSON</button><hr><button type="button" id="mcp-open">Connect to Claude</button></div>
-      </div>
+
     </div>
     <div class="bar">
-      <textarea id="live-question" rows="1" maxlength="500" placeholder="Ask about your data" aria-label="Your question" autocomplete="off"></textarea>
+      <textarea id="live-question" rows="1" maxlength="500" placeholder="Ask about your data..." aria-label="Your question" autocomplete="off"></textarea>
       <button class="mic" id="mic" type="button" aria-label="Dictate" title="Dictate" hidden><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="1.5" width="5" height="8" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5v2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
       <button class="send" id="ask-live" type="submit" aria-label="Send" title="Send" disabled><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M15 3v6a2 2 0 0 1-2 2H4M7 7.5L3.5 11 7 14.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
   </form>
+  <footer class="composer-footer">
   <p id="login-note" hidden>Not logged in, so this won't be saved. <button id="note-login" class="link" type="button">Log in</button></p>
+      <div class="xport">
+        <button id="export-btn" class="pillbtn" type="button" aria-haspopup="true"><svg width="12" height="12" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 2v7M4 6l3 3 3-3M2 12h10" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>Export</button>
+        <div class="menu up" id="export-menu" hidden><button type="button" data-export="md">Markdown</button><button type="button" data-export="csv">CSV</button><button type="button" data-export="json">JSON</button><hr><button type="button" id="mcp-open">Connect to Claude</button></div>
+      </div>
+  </footer>
 </section>
-<aside class="rail">
+<button id="model-tab" class="model-tab" type="button" aria-label="Close model settings" aria-controls="model-drawer" aria-expanded="true"><svg width="24" height="14" viewBox="0 0 24 14" aria-hidden="true"><path d="M7 3l-4 4 4 4m7-8-4 4 4 4m7-8-4 4 4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+<div class="rail-viewport"><aside class="rail" id="model-drawer" aria-label="Model settings">
   <section class="section">
-    <h2>Model</h2>
+    <div class="drawer-heading"><h2>Model</h2></div>
     <div class="mname"><span id="model-name" class="mono"></span><span id="model-star" class="rectag" tabindex="0" hidden>Recommended</span></div>
     <p id="model-meta" class="mono dim"></p>
     <p id="model-use" class="dim"></p>
@@ -307,7 +353,7 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
       <input id="lm-artifact" type="file" accept=".json,application/json" hidden>
     </form>
   </section>
-</aside>
+</aside></div>
 </div>
 
 <dialog id="login-dialog">
@@ -546,7 +592,7 @@ function controls() {
   el("lm-selection").disabled = !languageAvailable && !(boardDataset && !busy);
   el("rollback").disabled = busy || !online || status.version === "pool-logistic-v1";
   el("lm-restore").hidden = !status?.lm_supported;
-  el("lm-restore").disabled = !languageAvailable || languageWeights?.active.name === "original";
+  el("lm-restore").disabled = busy || (boardDataset ? boardDataset.selected_model === "original" : !languageAvailable || languageWeights?.active.name === "original");
   const versionNamed = el("lm-name").value.trim() && el("lm-row").value !== "" && el("lm-row").validity.valid;
   for (const id of ["lm-name", "lm-row", "lm-instruction"]) el(id).disabled = !languageAvailable;
   el("lm-author").disabled = !languageAvailable || !versionNamed || !el("lm-instruction").value.trim();
@@ -586,6 +632,11 @@ function renderModel() {
   if (recommendation && !chosenModel && models) chosenModel = models.find(model => model.id === recommendation.model_id) || null;
   const shown = chosenModel || (status ? models?.find(model => model.id === "queue-onset-logistic") : null);
   el("model-name").textContent = shown ? shown.name : status ? friendlyVersion(status.version) : "No model yet";
+  const active = boardDataset?.selected_model || languageWeights?.active?.name;
+  const label = active === "original" ? (models?.find(model => model.id === "flan-t5-small-int8")?.name || "FLAN-T5-small INT8") : active;
+  const header = el("model-toggle");
+  header.textContent = label || (status?.lm_supported ? "Checking model…" : friendlyVersion(status?.version) || "No active model");
+  header.title = header.textContent;
   el("model-name").title = el("model-name").textContent;
   el("model-meta").textContent = shown ? makerLabel(shown) + " \u00b7 Runs on the board" : "";
   el("model-use").textContent = shown ? bestFor(shown) : "Import data to get a recommendation.";
@@ -1167,8 +1218,8 @@ async function prepareBoardDataset() {
     renderLanguageSelect(); controls(); show("Uploaded to the board."); peekPulse();
     return true;
   } catch (err) {
-    boardDataset = null; show(err.message, true);
-    return false;
+    boardDataset = null;
+    throw err;
   }
 }
 el("capacity-form").onsubmit = event => {
@@ -1176,7 +1227,7 @@ el("capacity-form").onsubmit = event => {
   el("capacity-dialog").close("ok");
 };
 async function localAnswer(entry, question, only) {
-  let job = await request("data_ask_begin", {question, style:answerStyle});
+  let job = await request("data_ask_begin", {question, style:answerStyle, local_only:true});
   const seen = new Set(), deadline = Date.now() + 120000;
   for (;;) {
     if (Date.now() > deadline) throw new Error("The analysis took too long. Try again.");
@@ -1308,6 +1359,10 @@ function renderLibrary() {
     text.append(name, meta, task);
     const acts = document.createElement("div"); acts.className = "acts";
     const activeId = chosenModel?.id || (status ? "queue-onset-logistic" : "");
+    const versionName = model.id === "flan-t5-small-int8" ? "original" : model.name;
+    const active = model.kind === "language"
+      ? versionName === (boardDataset?.selected_model || languageWeights?.active?.name)
+      : model.id === activeId;
     if (model.published) {
       const remove = document.createElement("button"); remove.className = "text"; remove.type = "button"; remove.textContent = "Unpublish";
       remove.onclick = async () => {
@@ -1318,7 +1373,7 @@ function renderLibrary() {
       };
       acts.append(remove);
     }
-    if (model.available && model.id === activeId) {
+    if (model.available && active) {
       acts.append(Object.assign(document.createElement("span"), {className:"tag", textContent:"Active"}));
     } else {
       const action = document.createElement("button"); action.textContent = "Switch"; action.dataset.model = model.id;
@@ -1328,9 +1383,14 @@ function renderLibrary() {
         controls();
         if (status && model.kind === "queue") run(() => changeQueueWeights("rollback"));
         else if (status?.lm_supported && model.kind === "language") {
-          if (model.id === "flan-t5-small-int8") run(() => changeLanguageWeights("restore"));
-          else if (languageWeights?.versions?.some(version => version.name === model.name)) run(() => changeLanguageWeights("select", model.name));
-          else show("That skill is not on this board.", true);
+          const versions = boardDataset?.models || languageWeights?.versions;
+          if (!versions?.some(version => version.name === versionName)) {
+            show("That skill is not on this board.", true);
+          } else if (boardDataset) {
+            run(() => selectDatasetModel(versionName));
+          } else {
+            run(() => changeLanguageWeights("select", versionName));
+          }
         }
       };
       acts.append(action);
@@ -1376,6 +1436,7 @@ function renderStarts() {
   }));
 }
 function openPlan() {
+  if (!busy) delete el("synth-status").dataset.live;
   const shown = chosenModel || (status ? models?.find(model => model.id === "queue-onset-logistic") : null);
   el("synth-current").textContent = shown ? "Current model: " + shown.name + ", " + shown.task.charAt(0).toLowerCase() + shown.task.slice(1) : "Current model: none yet";
   const picked = boardDataset?.selected_model;
@@ -1525,7 +1586,11 @@ el("live-question").addEventListener("keydown", event => {
 });
 el("ask-form").onsubmit = event => {
   event.preventDefault();
-  const question = el("live-question").value.trim();
+  const pasted = el("live-question").value.trim();
+  // Strip list and quotation formatting that can come with a copied question.
+  const question = pasted.replace(/^[-*•][ \t]+/, "")
+    .replace(/^(?:"([^\n]+\?)"|“([^\n]+\?)”)$/, (_, straight, curly) => straight || curly)
+    .trim();
   if (el("ask-live").disabled || !question) return;
   if (["requesting", "listening"].includes(voiceState)) speechInput?.postMessage("stop");
   voiceIgnore = true;
@@ -1602,7 +1667,7 @@ el("synth-form").onsubmit = event => {
     } catch (err) {
       note.textContent = "Synthesis did not complete."; pathReset();
       throw err;
-    } finally {document.body.classList.remove("working"); delete note.dataset.live;}
+    } finally {document.body.classList.remove("working");}
   });
 };
 window.pinkprocessSpeechInput = event => {
@@ -1657,19 +1722,24 @@ el("lm-artifact").onchange = () => run(async () => {
   el("lm-artifact").value = "";
   show("Saved weight version " + draft.name + ".");
 });
-el("lm-selection").onchange = () => {
-  if (boardDataset) {
-    const name = el("lm-selection").value;
-    if (!name || name === boardDataset.selected_model) return;
-    return run(async () => {
-      try {
-        boardDataset = await request("dataset_select", {dataset_id:boardDataset.dataset_id, name});
-        boardCalibrated = false; renderLanguageSelect();
-        show("Dataset model is " + boardDataset.selected_model + "."); peekPulse();
-      } catch (err) {renderLanguageSelect(); throw err;}
-    });
+async function selectDatasetModel(name) {
+  try {
+    boardDataset = await request("dataset_select", {dataset_id:boardDataset.dataset_id, name});
+    boardCalibrated = false;
+    show("Dataset model is " + boardDataset.selected_model + ".");
+    peekPulse();
+  } finally {
+    renderLanguageSelect();
   }
-  if (el("lm-selection").value && el("lm-selection").value !== languageWeights?.active.name) run(() => changeLanguageWeights("select", el("lm-selection").value));
+}
+el("lm-selection").onchange = () => {
+  const name = el("lm-selection").value;
+  if (!name) return;
+  if (boardDataset) {
+    if (name !== boardDataset.selected_model) run(() => selectDatasetModel(name));
+  } else if (name !== languageWeights?.active.name) {
+    run(() => changeLanguageWeights("select", name));
+  }
 };
 el("weight").onchange = () => {
   const version = el("weight").value;
@@ -1679,12 +1749,31 @@ el("rollback").onclick = () => {
   run(() => changeQueueWeights("rollback"));
 };
 el("lm-restore").onclick = () => {
-  run(() => changeLanguageWeights("restore"));
+  run(() => boardDataset ? selectDatasetModel("original") : changeLanguageWeights("restore"));
 };
 el("login").onclick = startLogin;
 el("note-login").onclick = startLogin;
 el("google").onclick = continueWithGoogle;
 el("profile-button").onclick = () => {el("profile-menu").hidden = !el("profile-menu").hidden;};
+let modelDrawerTrigger;
+function setModelDrawer(open, returnFocus=false) {
+  const drawer = el("model-drawer");
+  drawer.inert = !open;
+  el("app").classList.toggle("model-collapsed", !open);
+  el("model-toggle").setAttribute("aria-expanded", String(open));
+  el("model-tab").setAttribute("aria-expanded", String(open));
+  el("model-tab").setAttribute("aria-label", open ? "Close model settings" : "Open model settings");
+  if (returnFocus) (modelDrawerTrigger || el("model-toggle")).focus();
+}
+for (const trigger of [el("model-toggle"), el("model-tab")]) {
+  trigger.onclick = () => {
+    modelDrawerTrigger = trigger;
+    setModelDrawer(el("model-drawer").inert);
+  };
+}
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !el("model-drawer").inert && !document.querySelector("dialog[open]")) setModelDrawer(false, true);
+});
 el("connection").onclick = () => toggleBoardMenu(el("conn-menu").hidden);
 el("connection").onkeydown = event => {if (event.key === "Escape") toggleBoardMenu(false);};
 document.addEventListener("click", event => {
@@ -1721,13 +1810,26 @@ loadModels().then(controls, () => {});
 function layoutPeek() {
   const mark = document.querySelector(".top .logo img");
   if (mark?.offsetWidth) el("path").style.setProperty("--peek-w", Math.max(144, mark.offsetWidth) + "px");
+  const rail = el("path"), subtitle = el("empty-sub"), heading = el("greeting");
+  if (!heading.offsetHeight) return;
+  let center = heading.getBoundingClientRect().bottom + 12;
+  if (subtitle.offsetHeight) {
+    const firstLetter = document.createRange();
+    firstLetter.setStart(subtitle.firstChild, 0);
+    firstLetter.setEnd(subtitle.firstChild, 1);
+    const line = firstLetter.getBoundingClientRect();
+    center = line.top + line.height / 2;
+  }
+  const row = rail.querySelector(".node").getBoundingClientRect();
+  rail.style.setProperty("--stage-offset", (center - rail.getBoundingClientRect().top - row.height / 2) + "px");
 }
-new ResizeObserver(layoutPeek).observe(document.querySelector(".top .logo"));
+const peekLayout = new ResizeObserver(layoutPeek);
+for (const item of [".top .logo", ".toolbar", "#empty-sub", "#greeting", "#path"]) peekLayout.observe(document.querySelector(item));
 async function devStart() {
   await start();
   if (query.has("logout")) applySession(await account("logout"));
   if (query.has("login")) await continueWithGoogle();
-  if (query.get("tab")) selectTab(query.get("tab"));
+  if (query.get("tab")) {setModelDrawer(true); selectTab(query.get("tab"));}
   if (query.has("peek")) el("path").classList.add("open");
   if (query.get("dialog") === "library") openLibrary();
   if (query.get("dialog") === "mcp") openMcp();

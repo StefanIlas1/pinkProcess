@@ -1,5 +1,7 @@
 import json
 from pathlib import Path
+from random import Random
+from time import perf_counter
 from tempfile import TemporaryDirectory
 import unittest
 
@@ -10,6 +12,115 @@ from .kit_data import SAMPLES, STYLES, DatasetStore, answer_question, parse_tabl
 class NoBoard:
     def close(self):
         pass
+
+
+WRONG = "What's wrong with my system?"
+
+
+def top_row(sample_id):
+    table = parse_table(sample_csv(sample_id), sample_id)
+    return answer_question(table, WRONG, "table")["table"]["rows"]
+
+
+class AnalystTest(unittest.TestCase):
+    def test_every_style_keeps_the_same_keys(self):
+        table = parse_table(sample_csv("api-latency"), "api-latency.csv")
+        for style in STYLES:
+            result = answer_question(table, WRONG, style)
+            self.assertEqual(set(result), {"style", "focus", "readings", "table", "answer", "events"})
+            self.assertEqual(result["style"], style)
+            self.assertTrue(result["events"])
+            self.assertEqual(result["table"] is not None, style == "table")
+        lines = answer_question(table, WRONG, "summary")["answer"].splitlines()
+        self.assertTrue(3 <= len(lines) <= 5)
+
+    def test_checkout_slowdown_is_traced_to_the_endpoint_region_and_pool(self):
+        row = top_row("checkout-api-10k")[0]
+        start, end, _, signal, _, _, moved, top = row
+        self.assertEqual(signal, "latency")
+        self.assertTrue("14:08" <= start <= "14:14", start)
+        self.assertTrue("14:30" <= end <= "14:36", end)
+        self.assertEqual(top.split(" (")[0], "/checkout in eu-west")
+        self.assertIn("DB pool wait", moved)
+        self.assertIn("errors", moved)
+        answer = answer_question(parse_table(sample_csv("checkout-api-10k"), "x"), WRONG, "short")["answer"]
+        self.assertTrue(answer.startswith("Latency hit"))
+        self.assertIn("/checkout in eu-west", answer)
+
+    def test_cold_chain_failure_is_truck_t07_and_the_doors_are_second(self):
+        rows = top_row("cold-chain-10k")
+        start, end, _, signal, peak, _, moved, top = rows[0]
+        self.assertEqual(signal, "temperature")
+        self.assertTrue("Nov 19 13:30" <= start <= "Nov 19 14:30", start)
+        self.assertTrue("Nov 19 19:00" <= end <= "Nov 19 21:30", end)
+        self.assertIn("T07", top)
+        self.assertIn("compressor", moved)
+        self.assertGreater(float(peak.split()[0]), 8)
+        self.assertIn("T03", rows[1][7])
+        self.assertIn("door open", rows[1][6])
+        self.assertLess(float(rows[1][4].split()[0]), 7)
+
+    def test_card_outage_is_found_in_one_region_and_cash_is_left_alone(self):
+        rows = top_row("store-sales-10k")
+        start, end, _, signal, _, _, _, top = rows[0]
+        self.assertIn(signal, ("orders", "revenue"))
+        self.assertTrue("Oct 30 10:00" <= start <= "Oct 30 12:30", start)
+        self.assertTrue("Oct 30 16:30" <= end <= "Oct 30 18:30", end)
+        self.assertEqual(top.split(" (")[0], "card in north")
+        self.assertNotIn("cash", " ".join(row[7] for row in rows))
+
+    def test_errors_move_with_the_api_latency_bursts(self):
+        rows = top_row("api-latency")
+        self.assertEqual(rows[0][3], "p95 latency")
+        self.assertTrue("12:58" <= rows[0][0] <= "13:04", rows[0][0])
+        self.assertIn("errors", rows[0][6])
+        self.assertEqual(len(rows), 2)
+
+    def test_the_drifting_sensor_is_named_with_the_gap(self):
+        table = parse_table(sample_csv("iot-drift"), "iot-drift.csv")
+        result = answer_question(table, WRONG, "short")
+        self.assertIn("sensor_b_c is drifting away from sensor_a_c", result["answer"])
+        row = answer_question(table, WRONG, "table")["table"]["rows"][0]
+        self.assertTrue("11:10" <= row[0] <= "11:30", row[0])
+        self.assertIn("4.", row[4])
+
+    def test_epoch_and_relative_times_read_as_clock_and_offsets(self):
+        logs = answer_question(parse_table(sample_csv("log-events"), "log-events.jsonl"), WRONG, "table")["table"]["rows"][0]
+        self.assertTrue("t+11:30" <= logs[0] <= "t+11:50", logs[0])
+        self.assertIn("errors", logs[6])
+        epoch = "\n".join(["ts,value"] + [f"{1_700_000_000_000 + index * 60_000},{10 if not 40 <= index < 60 else 90}" for index in range(120)])
+        rows = answer_question(parse_table(epoch, "epoch.csv"), WRONG, "table")["table"]["rows"]
+        self.assertRegex(rows[0][0], r"^\d\d:\d\d$")
+        self.assertEqual(rows[0][2], "20 min")
+
+    def test_a_flat_series_with_one_spike_is_not_hidden_by_the_spike(self):
+        text = "t,v\n" + "".join(f"{index},{50 + (index % 3)}\n" for index in range(300)) + "".join(f"{300 + index},400\n" for index in range(6)) + "".join(f"{306 + index},{50 + index % 3}\n" for index in range(100))
+        rows = answer_question(parse_table(text, "spike.csv"), WRONG, "table")["table"]["rows"]
+        self.assertEqual(len(rows), 1)
+        self.assertIn("400", rows[0][4])
+
+    def test_quiet_data_reads_as_quiet(self):
+        text = "t,v\n" + "".join(f"{index},{50 + (index % 3)}\n" for index in range(200))
+        result = answer_question(parse_table(text, "quiet.csv"), WRONG, "short")
+        self.assertTrue(result["answer"].startswith("Nothing unusual"))
+
+    def test_fifty_thousand_rows_answer_fast_and_repeat_calls_reuse_the_work(self):
+        rng = Random(5)
+        lines = ["timestamp,endpoint,region,status,latency_ms,cpu_pct"]
+        for index in range(50_000):
+            slow = 30_000 <= index < 31_500 and index % 3 == 0
+            lines.append(f"2026-01-01 {index // 3600 % 24:02d}:{index // 60 % 60:02d}:{index % 60:02d},/e{rng.randint(1, 8)},r{rng.randint(1, 4)},"
+                         f"{rng.choice([200, 200, 200, 500])},{rng.uniform(20, 90) + (900 if slow else 0):.1f},{rng.uniform(10, 60):.1f}")
+        table = parse_table("\n".join(lines), "big.csv")
+        started = perf_counter()
+        first = answer_question(table, WRONG, "summary")
+        first_seconds = perf_counter() - started
+        started = perf_counter()
+        for style in STYLES:
+            answer_question(table, WRONG, style)
+        self.assertLess(first_seconds, 1.0)
+        self.assertLess(perf_counter() - started, 0.2)
+        self.assertEqual(first["focus"], "latency_ms")
 
 
 class DataTest(unittest.TestCase):
@@ -50,7 +161,7 @@ class DataTest(unittest.TestCase):
         self.assertIn("PEAK", transcript["answer"])
         self.assertTrue(transcript["events"])
         grid = answer_question(table, "events", "table")["table"]
-        self.assertEqual(len(grid["columns"]), 3)
+        self.assertEqual(grid["columns"], ["Start", "End", "Duration", "Signal", "Peak", "Normal", "Moved with it", "Top category"])
         with self.assertRaises(ValueError):
             answer_question(table, "x", "poem")
         self.assertEqual(STYLES, ("short", "summary", "transcript", "table"))

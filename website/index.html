@@ -28,7 +28,6 @@
   <h1 class="wordmark"><img src="assets/wordmark.svg" alt="PYNQ Process" width="782" height="189"></h1>
   <div class="hero-row">
     <p class="hero-ask bubbly">Ask your data anything.</p>
-    <a class="btn" href="downloads/pinkProcess-Mac-arm64.zip" download data-download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Get the app</a>
   </div>
   <div class="trace" data-series="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,2,4,3,3,4,6,5,12,15,20,21,21,24,27,32,31,35,37,36,37,39,39,42,42,47,48,49,49,49,51,52,52,57,58,55,55,54,53,53,52,54,54,53,50,49,48,48,48,47,47,45,39,37,37,37,33,30,28,26,26,23,20,21,21,20,17,14,13,11,10,9,8,7,5,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
     <div class="trace-head"><span class="sticker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="15" height="15"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>pool-sudden-spike.csv</span><span class="trace-meta mono">waiting · 600 readings</span></div>
@@ -43,7 +42,52 @@
   </div>
 </section>
 
-<div class="marquee" aria-hidden="true"><div class="marquee-track"><span>Calm connection pool</span><span>Pool, slow build</span><span>Pool, sudden spike</span><span>Pool, recovery</span><span>Pool, oscillating</span><span>API latency</span><span>Server thermal throttle</span><span>Disk IO</span><span>Network packet loss</span><span>Sales with seasonality</span><span>IoT sensor drift</span><span>Log events (JSON lines)</span><span>Malformed file</span><span>Large file (50,000 rows)</span></div></div>
+<section class="use-cases wrap" aria-labelledby="use-cases-title">
+  <div class="case-index">
+    <h2 class="bubbly" id="use-cases-title">Use cases</h2>
+    <fieldset><legend>Pick a recording</legend>
+      <label><input type="radio" name="recording" value="0" aria-controls="recording-0" checked><span>Backlog</span></label>
+      <label><input type="radio" name="recording" value="1" aria-controls="recording-1"><span>Latency</span></label>
+      <label><input type="radio" name="recording" value="2" aria-controls="recording-2"><span>Model replay</span></label>
+    </fieldset>
+  </div>
+  <div class="case-printer">
+    <article id="recording-0" class="case-slip">
+      <p class="case-file mono">pool-recovery.csv</p>
+      <h3>Did the queue clear?</h3>
+      <figure>
+        <figcaption>Requests waiting</figcaption>
+        <svg viewBox="0 0 500 86" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,82 4,82 8,80 13,79 17,74 21,73 25,75 29,72 34,68 38,65 42,65 46,69 50,71 55,72 59,66 63,65 67,62 71,59 76,58 80,58 84,58 88,53 92,51 97,45 101,42 105,37 109,39 113,39 118,39 122,38 126,37 130,33 134,36 139,34 143,27 147,18 151,16 155,15 160,9 164,9 168,11 172,7 176,7 181,6 185,6 189,6 193,8 197,7 202,12 206,13 210,15 214,16 218,16 223,17 227,20 231,23 235,28 239,31 244,32 248,35 252,37 256,44 261,50 265,49 269,50 273,51 277,52 282,58 286,58 290,60 294,61 298,65 303,70 307,71 311,74 315,77 319,82 324,82 328,82 332,82 336,82 340,82 345,82 349,82 353,82 357,82 361,82 366,82 370,82 374,82 378,82 382,82 387,82 391,82 395,82 399,82 403,82 408,82 412,82 416,82 420,82 424,82 429,82 433,82 437,82 441,82 445,82 450,82 454,82 458,82 462,82 466,82 471,82 475,82 479,82 483,82 487,82 492,82 496,82 500,82"/></svg>
+        <div class="case-axis"><span>0 s</span><span>59.9 s</span></div>
+      </figure>
+      <p class="case-reading"><strong>87 at the peak</strong> <span>0 at the end</span></p>
+      <p class="case-note">At 21.7 seconds, 87 requests were waiting for a connection. By the last reading, every waiting request had left the queue.</p>
+    </article>
+    <article id="recording-1" class="case-slip">
+      <p class="case-file mono">api-latency.csv</p>
+      <h3>When did the API slow down?</h3>
+      <figure>
+        <figcaption>95th percentile latency</figcaption>
+        <svg viewBox="0 0 500 86" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,53 3,53 7,53 10,51 14,49 17,51 21,53 24,51 28,50 31,48 35,49 38,50 42,48 45,50 49,51 52,50 56,50 59,50 63,49 66,51 70,51 73,54 77,52 80,54 84,51 87,52 91,55 94,56 98,53 101,53 105,56 108,57 112,54 115,58 119,59 122,56 126,55 129,57 133,58 136,57 140,58 143,56 147,54 150,56 154,55 157,56 161,56 164,54 168,55 171,52 175,52 178,52 182,52 185,51 189,52 192,52 196,50 199,49 203,49 206,49 210,7 213,6 217,9 220,8 224,7 227,10 231,7 234,11 238,48 241,50 245,51 248,52 252,53 255,52 259,54 262,53 266,53 269,55 273,54 276,56 280,55 283,54 287,57 290,57 294,56 297,56 301,55 304,58 308,58 311,58 315,55 318,56 322,56 325,56 329,57 332,58 336,55 339,53 343,53 346,54 350,53 353,51 357,53 360,50 364,51 367,51 371,50 374,49 378,50 381,51 385,48 388,49 392,11 395,12 399,9 402,50 406,50 409,50 413,53 416,50 420,51 423,49 427,51 430,52 434,54 437,52 441,55 444,52 448,54 451,55 455,55 458,55 462,56 465,56 469,58 472,57 476,57 479,57 483,57 486,56 490,57 493,57 497,56 500,55"/></svg>
+        <div class="case-axis"><span>08:00</span><span>19:59</span></div>
+      </figure>
+      <p class="case-reading"><strong>586.3 ms</strong> <span>at 13:08</span></p>
+      <p class="case-note">At the slowest minute, the API handled 847 requests and logged 49 errors. That minute is a good place to start reading the logs.</p>
+    </article>
+    <article id="recording-2" class="case-slip">
+      <p class="case-file mono">pool-sudden-spike.csv</p>
+      <h3>Would another model catch it?</h3>
+      <figure>
+        <figcaption>Requests waiting</figcaption>
+        <svg viewBox="0 0 500 86" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,82 4,82 8,82 13,82 17,82 21,82 25,82 29,82 34,82 38,82 42,82 46,82 50,82 55,82 59,82 63,82 67,82 71,82 76,82 80,82 84,82 88,82 92,82 97,82 101,82 105,82 109,82 113,82 118,82 122,82 126,82 130,82 134,82 139,82 143,82 147,82 151,82 155,82 160,82 164,82 168,82 172,82 176,82 181,82 185,82 189,82 193,82 197,82 202,82 206,82 210,82 214,82 218,82 223,82 227,81 231,82 235,82 239,82 244,82 248,82 252,79 256,77 261,74 265,62 269,54 273,47 277,39 282,34 286,31 290,27 294,18 298,18 303,14 307,6 311,10 315,13 319,11 324,11 328,18 332,19 336,20 340,31 345,34 349,43 353,48 357,54 361,56 366,65 370,69 374,72 378,78 382,82 387,82 391,82 395,82 399,82 403,82 408,82 412,82 416,82 420,82 424,82 429,82 433,82 437,82 441,82 445,82 450,82 454,82 458,82 462,82 466,82 471,82 475,82 479,82 483,82 487,82 492,82 496,82 500,82"/></svg>
+        <div class="case-axis"><span>0 s</span><span>59.9 s</span></div>
+      </figure>
+      <p class="case-reading"><strong>58 waiting</strong> <span>at 36.9 s</span></p>
+      <p class="case-note">Replay this spike with two saved weight versions. Ask each when the queue peaked, then check both answers against the recording.</p>
+    </article>
+  </div>
+</section>
+
 
 <section class="path">
   <div class="path-pin wrap">
@@ -133,7 +177,7 @@
 
 <section class="cta">
   <img class="cta-bear" src="assets/bear.png" alt="" width="206" height="246">
-  <h2 class="bubbly outlined" data-reveal>go ask it something.</h2>
+  <h2 class="bubbly outlined" data-reveal>think with<br>pynq</h2>
   <p class="lede" data-reveal style="--i:1">One zip. Unzip it, open it, find your board.</p>
   <div data-reveal style="--i:2"><a class="btn huge" href="downloads/pinkProcess-Mac-arm64.zip" download data-download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Get the app</a></div>
   <p class="cta-note" data-reveal style="--i:3">If macOS won't open it, go to System Settings, Privacy &amp; Security and press Open Anyway.</p>
