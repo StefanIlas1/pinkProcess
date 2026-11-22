@@ -313,14 +313,10 @@ class OverlayProjection:
                 raise RuntimeError("Projection accelerator is already busy.")
             a = self._upload_activations(activations, positions, depth)
             self.phases["shared_activation_uploads_saved"] += len(matrices) - 1
-            # Decoder tiles carry 64 output rows. Concatenating complete tiles
-            # makes one ordinary hardware projection with exactly the same dots.
-            # Keep padded tails and unbound (possibly mutable) inputs on the
-            # independent descriptor path.
-            if (queued and decode and sum(weight_sizes) <= MAX_PACKED_WEIGHT_BYTES
+            if (queued and sum(tiles) <= 65535 and sum(weight_sizes) <= MAX_PACKED_WEIGHT_BYTES
                     and all(len(w) % lanes == 0 for _, w in matrices)
                     and all(self.model_weights.get(name + ".weight") is w for name, w in matrices)):
-                return self._project_fused_decoder(matrices, tiles, depth, a)
+                return self._project_fused(matrices, tiles, batch, depth, a)
             if queued:
                 w_space = self._buffer("w", (sum(weight_spans),), np.int8)
                 y_space = self._buffer("y", (sum(score_sizes),), np.dtype("<i4"))
@@ -366,26 +362,28 @@ class OverlayProjection:
                     self._consume_scores(y, result)
             return [result for _, result in commands]
 
-    def _project_fused_decoder(self, matrices, tiles, depth, a):
+    def _project_fused(self, matrices, tiles, batch, depth, a):
+        decode = batch == 1
         names = tuple(name for name, _ in matrices)
-        key = names, True
-        shape = (sum(tiles), depth, 64)
+        key = names, decode
+        shape = (sum(tiles), depth, 64 if decode else 8)
         packed = self.packed_weights.get(key)
         if packed is None:
             self.phases["weight_cache_misses"] += 1
             packed = np.empty(shape, dtype=np.int8)
             offset = 0
             for (_, weights), count in zip(matrices, tiles):
-                self._pack_weight_data(packed[offset:offset + count], weights, True)
+                self._pack_weight_data(packed[offset:offset + count], weights, decode)
                 offset += count
             self._remember_weights(key, packed)
         else:
             self.packed_weights.move_to_end(key)
             self.phases["weight_cache_hits"] += 1
-        result = np.empty((1, sum(len(w) for _, w in matrices)), dtype=np.int32)
-        self._project_segment(a, packed, True, shape, result, True, timeout=self.timeout * len(matrices))
-        self.phases["fused_decoder_groups"] += 1
-        self.phases["fused_decoder_commands_saved"] += len(matrices) - 1
+        result = np.empty((batch, sum(len(w) for _, w in matrices)), dtype=np.int32)
+        self._project_segment(a, packed, True, shape, result, decode, timeout=self.timeout * len(matrices))
+        phase = "fused_decoder" if decode else "fused_batch"
+        self.phases[phase + "_groups"] += 1
+        self.phases[phase + "_commands_saved"] += len(matrices) - 1
         offset = 0
         outputs = []
         for _, w in matrices:

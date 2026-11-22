@@ -384,6 +384,24 @@ class ProjectionOverlayTest(unittest.TestCase):
         self.assertEqual(phases["weight_cache_hits"], 1)
         self.assertEqual(phases["weight_cache_misses"], 2)
 
+    def test_fused_prefill_and_verification_use_their_own_packed_layout(self):
+        overlay = FakeOverlay(queue=True)
+        runner = projection.OverlayProjection(overlay, overlay.allocate, scope="all", queue=True)
+        self.addCleanup(runner.close)
+        rng = np.random.default_rng(39)
+        matrices = [(name, rng.integers(-127, 128, size=(rows, 48), dtype=np.int8))
+                    for name, rows in (("q", 64), ("k", 128), ("v", 64))]
+        runner.bind_model({name + ".weight": w for name, w in matrices})
+        for batch in (1, 5, 8, 19, 1):
+            a = rng.integers(-127, 128, size=(batch, 48), dtype=np.int8)
+            for (_, w), result in zip(matrices, runner.project_many(matrices, a)):
+                np.testing.assert_array_equal(result, a.astype(np.int32) @ w.astype(np.int32).T)
+        self.assertEqual(runner.profile()["commands"], 5)
+        self.assertEqual(runner.profile()["fused_batch_commands_saved"], 6)
+        self.assertEqual(runner.profile()["weight_cache_misses"], 2)
+        runner.invalidate_weights("q")
+        self.assertFalse(runner.packed_weights)
+
     def test_queue_timeout_retains_all_regions(self):
         overlay = FakeOverlay(queue=True, stalled=True)
         runner = projection.OverlayProjection(overlay, overlay.allocate, scope="all", queue=True, timeout=0)
@@ -441,11 +459,12 @@ class ProjectionOverlayTest(unittest.TestCase):
                 self.assertEqual(actual["accelerated_projections"], result["fabric_projections"])
                 self.assertEqual(len(overlay.buffers), 3)
                 phases = actual["projection_phases"]
-                self.assertGreaterEqual(phases["commands"] + phases.get("fused_decoder_commands_saved", 0),
+                self.assertGreaterEqual(phases["commands"] + phases.get("fused_decoder_commands_saved", 0)
+                                        + phases.get("fused_batch_commands_saved", 0),
                                         actual["accelerated_projections"])
                 if queue:
                     self.assertGreater(phases["fused_decoder_commands_saved"], 0)
-                    self.assertGreater(actual["projection_phases"]["queue_runs"], 0)
+                    self.assertGreater(phases["fused_batch_commands_saved"], 0)
                 return actual["capture_id"]
 
             capture_id = run(expected)
