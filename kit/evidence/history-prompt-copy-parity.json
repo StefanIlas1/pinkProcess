@@ -1,0 +1,102 @@
+{
+  "execution": "W8A8 software reference. Both arms use the released Queue history v2 weights and pinned history proposal table. The first uses the existing 8-position verifier. The second also proposes from the current input and verifies up to 16 positions. Each query starts a fresh encoder and decoder cache.",
+  "inputs": "frozen-queue-history-18.json.gz",
+  "model_weights_sha256": "4ab0bbf9e8c249bf20d08fbe1a1d03321d0819164c5571c13f6ac42df2289f9d",
+  "history_proposal_table_sha256": "e84e9244b04623ea7924bf1cc027738f5a6b48d5a305a1a4e8f0e49a3da948d2",
+  "equality": "All 18 answers, emitted token IDs, 512 first activation values and first output-calibration maxima were exactly equal between the arms.",
+  "baseline_blocks": 138,
+  "prompt_copy_blocks": 82,
+  "reproduce": "Set PINKPROCESS_HISTORY_MODEL to the released quantized checkpoint directory and PINKPROCESS_HISTORY_TOKEN_DRAFT to the downloaded queue-history-v2-token-draft.tsv.gz. Run python -m unittest lm_reference.test_flan_draft.DraftTests.test_frozen_prompt_copy_counts_and_calibration.",
+  "cases": [
+    {
+      "id": 0,
+      "existing_width_8": 6,
+      "prompt_copy_width_16": 4
+    },
+    {
+      "id": 1,
+      "existing_width_8": 8,
+      "prompt_copy_width_16": 4
+    },
+    {
+      "id": 2,
+      "existing_width_8": 8,
+      "prompt_copy_width_16": 4
+    },
+    {
+      "id": 3,
+      "existing_width_8": 9,
+      "prompt_copy_width_16": 4
+    },
+    {
+      "id": 4,
+      "existing_width_8": 8,
+      "prompt_copy_width_16": 5
+    },
+    {
+      "id": 5,
+      "existing_width_8": 8,
+      "prompt_copy_width_16": 6
+    },
+    {
+      "id": 6,
+      "existing_width_8": 7,
+      "prompt_copy_width_16": 4
+    },
+    {
+      "id": 7,
+      "existing_width_8": 8,
+      "prompt_copy_width_16": 4
+    },
+    {
+      "id": 8,
+      "existing_width_8": 9,
+      "prompt_copy_width_16": 4
+    },
+    {
+      "id": 9,
+      "existing_width_8": 8,
+      "prompt_copy_width_16": 5
+    },
+    {
+      "id": 10,
+      "existing_width_8": 8,
+      "prompt_copy_width_16": 6
+    },
+    {
+      "id": 11,
+      "existing_width_8": 8,
+      "prompt_copy_width_16": 4
+    },
+    {
+      "id": 12,
+      "existing_width_8": 8,
+      "prompt_copy_width_16": 4
+    },
+    {
+      "id": 13,
+      "existing_width_8": 10,
+      "prompt_copy_width_16": 4
+    },
+    {
+      "id": 14,
+      "existing_width_8": 8,
+      "prompt_copy_width_16": 5
+    },
+    {
+      "id": 15,
+      "existing_width_8": 7,
+      "prompt_copy_width_16": 4
+    },
+    {
+      "id": 16,
+      "existing_width_8": 6,
+      "prompt_copy_width_16": 6
+    },
+    {
+      "id": 17,
+      "existing_width_8": 4,
+      "prompt_copy_width_16": 5
+    }
+  ]
+}

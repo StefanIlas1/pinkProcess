@@ -60,3 +60,76 @@ class DraftTests(unittest.TestCase):
                 model.token_draft = draft
                 self.assertEqual(model.generate(case["prompt"]), expected)
                 self.assertEqual((model.first_output_activation, model.first_output_max), calibration)
+
+    def test_prompt_copy_is_local_limited_and_ends_at_sentence_boundaries(self):
+        class Tokenizer:
+            def encode(self, sentence):
+                return [int(token) for token in sentence.rstrip(".").split()] + [9, 1]
+
+        base = TokenDraft({(4, 5): 8, (9,): 7})
+        first = base.for_prompt(Tokenizer(), "3 4 5 6. 2 3 8")
+        second = base.for_prompt(Tokenizer(), "3 4 5 7.")
+        self.assertEqual(first.propose([4, 5], 3), [6, 9, 7])
+        self.assertEqual(second.propose([4, 5], 1), [7])
+        self.assertEqual(base.propose([4, 5], 1), [8])
+
+    @unittest.skipUnless(os.getenv("PINKPROCESS_HISTORY_MODEL"), "A quantized history checkpoint is required.")
+    def test_wide_prompt_copy_matches_token_ids_and_row_calibration(self):
+        import gzip
+        from unittest.mock import patch
+        from .flan import Flan
+        from .flan_prompt import telemetry_prompt
+
+        model = Flan(os.environ["PINKPROCESS_HISTORY_MODEL"], None, reference=True)
+        evidence = Path(__file__).resolve().parents[1] / "kit/evidence/frozen-queue-history-18.json.gz"
+        cases = json.loads(gzip.decompress(evidence.read_bytes()))["cases"]
+        draft = TokenDraft.load()
+        for i in (0, 3, 6, 12, 15):
+            case = cases[i]
+            prompt = telemetry_prompt(case["question"], case["evidence"], history=True)
+            for edited in (False, True):
+                if edited:
+                    model.select_head_row(852, bytes([13]) * 512)
+                with self.subTest(i=i, edited=edited):
+                    limit = 46 if not edited else 23
+                    model.token_draft = None
+                    with patch.object(model.tokenizer, "decode", wraps=model.tokenizer.decode) as decode:
+                        expected = model.generate(prompt, limit)
+                        tokens = tuple(decode.call_args.args[0])
+                    calibration = (model.first_output_activation, model.first_output_max)
+                    model.token_draft = draft
+                    model.prompt_draft_positions = 16
+                    with patch.object(model.tokenizer, "decode", wraps=model.tokenizer.decode) as decode:
+                        self.assertEqual(model.generate(prompt, limit), expected)
+                        self.assertEqual(tuple(decode.call_args.args[0]), tokens)
+                    self.assertEqual((model.first_output_activation, model.first_output_max), calibration)
+                if edited:
+                    model.restore_head()
+
+    @unittest.skipUnless(os.getenv("PINKPROCESS_HISTORY_MODEL") and os.getenv("PINKPROCESS_HISTORY_TOKEN_DRAFT"),
+                         "The released history checkpoint and proposal table are required.")
+    def test_frozen_prompt_copy_counts_and_calibration(self):
+        import gzip
+        from unittest.mock import patch
+        from .flan import Flan
+        from .flan_prompt import telemetry_prompt
+
+        evidence = Path(__file__).resolve().parents[1] / "kit/evidence"
+        study = json.loads((evidence / "history-prompt-copy-parity.json").read_bytes())
+        cases = json.loads(gzip.decompress((evidence / study["inputs"]).read_bytes()))["cases"]
+        model = Flan(os.environ["PINKPROCESS_HISTORY_MODEL"], None, reference=True)
+        model.token_draft = TokenDraft.load_history(os.environ["PINKPROCESS_HISTORY_TOKEN_DRAFT"])
+        self.assertEqual(len(cases), len(study["cases"]))
+        for case, observed in zip(cases, study["cases"]):
+            with self.subTest(case=case["case_id"]):
+                self.assertEqual(case["case_id"], observed["id"])
+                prompt = telemetry_prompt(case["question"], case["evidence"], history=True)
+                outputs = []
+                for width, key in ((None, "existing_width_8"), (16, "prompt_copy_width_16")):
+                    model.prompt_draft_positions = width
+                    with patch.object(model.tokenizer, "decode", wraps=model.tokenizer.decode) as decode:
+                        answer = model.generate(prompt)
+                        tokens = tuple(decode.call_args.args[0])
+                    outputs.append((answer, tokens, tuple(model.first_output_activation), model.first_output_max))
+                    self.assertEqual(model.generation_timing["verification_blocks"], observed[key])
+                self.assertEqual(*outputs)
