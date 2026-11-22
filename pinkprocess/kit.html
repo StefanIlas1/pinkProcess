@@ -199,6 +199,35 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
 .peek-panel .nm,#empty-sub{font-size:1rem}
 #data-chip{max-width:min(60%,420px)}
 #chat-list .chat-item{min-width:0}
+
+.app,.app.nosidebar{--toolbar-h:56px;--footer-h:44px;--bottom:12px;grid-template-columns:26px var(--side) minmax(0,1fr)}
+.app.nosidebar{grid-template-columns:26px 0 minmax(0,1fr)}
+.center{--content-width:min(var(--col),calc(100% - 2 * var(--gutter)));grid-template-rows:var(--toolbar-h) minmax(0,1fr) auto auto var(--footer-h);padding-bottom:var(--bottom)}
+.toolbar{grid-row:1;height:var(--toolbar-h);padding-block:0;border-bottom:0;box-shadow:inset 0 -1px var(--line)}
+.toolbar .lbl{display:inline}
+#import-more{padding-inline-start:0;display:inline-flex;align-items:center;gap:6px}
+#import-more svg{margin:0}
+.stage{grid-row:2}
+#notice{grid-row:3}
+#ask-form{grid-row:4}
+#ask-form,.composer-footer,#notice{width:var(--content-width);margin-inline:auto}
+.askmeta{padding-inline:0}
+.bar{align-items:center}
+.bar .mic,.bar .send{display:grid;place-items:center;width:44px;height:44px;padding:0}
+.composer-footer{grid-row:5;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.composer-footer #login-note{margin:0;width:auto}
+.xport{margin-left:auto}
+#export-btn{padding-right:0}
+.side{display:grid;grid-template-rows:var(--toolbar-h) minmax(0,1fr) var(--footer-h);gap:0;padding-block:0 var(--bottom)}
+#new-chat,#history-hint{align-self:center}
+.peek-chev{top:calc(var(--toolbar-h)/2 - 7px)}
+.top-right #model-toggle{padding-inline:0}
+.rail{grid-area:auto;position:absolute;z-index:5;right:0;top:var(--topbar);bottom:0;width:min(max(var(--rail),320px),90vw);background:var(--panel);overflow:auto;visibility:hidden;transform:translateX(100%);transition:transform .2s ease,visibility .2s}
+.rail.open{visibility:visible;transform:none;box-shadow:-8px 4px 28px rgba(0,0,0,.24)}
+.rail .section.fill{flex:1 0 auto;overflow:visible}
+.drawer-heading{height:var(--toolbar-h);display:flex;align-items:center;justify-content:space-between}
+.rail .section:first-child{padding-top:0}
+@media(prefers-reduced-motion:reduce){.rail{transition:none}}
 </style>
 </head>
 <body data-boot>
@@ -221,6 +250,7 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
       <div id="board-tip" role="tooltip"></div>
       <div class="menu" id="conn-menu" hidden><div id="board-menu-details"></div><button id="disconnect" hidden>Disconnect</button></div>
     </div>
+    <button class="text" id="model-toggle" type="button" aria-expanded="false" aria-controls="model-drawer">Model</button>
     <button id="login" class="text">Log in</button>
     <div class="profile" id="profile" hidden>
       <button id="profile-button" class="avatar" aria-label="Profile"></button>
@@ -245,8 +275,8 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
 </aside>
 <section class="center">
   <div class="toolbar" id="toolbar">
-    <span class="dchip" id="data-chip" tabindex="0" hidden><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1h5l3 3v9H3z" fill="none" stroke="currentColor"/><path d="M8 1v3h3" fill="none" stroke="currentColor"/></svg><span id="data-name"></span></span>
     <button id="import-more" class="text"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 10V2M4 5l3-3 3 3M2 12h10" fill="none" stroke="currentColor" stroke-width="1.4"/></svg><span class="lbl">Import data</span></button>
+    <span class="dchip" id="data-chip" tabindex="0" hidden><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1h5l3 3v9H3z" fill="none" stroke="currentColor"/><path d="M8 1v3h3" fill="none" stroke="currentColor"/></svg><span id="data-name"></span></span>
   </div>
   <div class="stage">
     <div id="messages" aria-live="polite"></div>
@@ -259,11 +289,7 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
   <form id="ask-form">
     <div class="askmeta">
       <div class="styles" id="styles" role="group" aria-label="Answer style"><button type="button" data-style="short" title="Short answer" aria-pressed="true">Short</button><button type="button" data-style="summary" aria-pressed="false">Summary</button><button type="button" data-style="transcript" aria-pressed="false">Transcript</button><button type="button" data-style="table" aria-pressed="false">Table</button></div>
-      <span class="grow"></span>
-      <div class="xport">
-        <button id="export-btn" class="pillbtn" type="button" aria-haspopup="true"><svg width="12" height="12" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 2v7M4 6l3 3 3-3M2 12h10" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>Export</button>
-        <div class="menu up" id="export-menu" hidden><button type="button" data-export="md">Markdown</button><button type="button" data-export="csv">CSV</button><button type="button" data-export="json">JSON</button><hr><button type="button" id="mcp-open">Connect to Claude</button></div>
-      </div>
+
     </div>
     <div class="bar">
       <textarea id="live-question" rows="1" maxlength="500" placeholder="Ask about your data" aria-label="Your question" autocomplete="off"></textarea>
@@ -271,11 +297,17 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
       <button class="send" id="ask-live" type="submit" aria-label="Send" title="Send" disabled><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M15 3v6a2 2 0 0 1-2 2H4M7 7.5L3.5 11 7 14.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
   </form>
+  <footer class="composer-footer">
   <p id="login-note" hidden>Not logged in, so this won't be saved. <button id="note-login" class="link" type="button">Log in</button></p>
+      <div class="xport">
+        <button id="export-btn" class="pillbtn" type="button" aria-haspopup="true"><svg width="12" height="12" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 2v7M4 6l3 3 3-3M2 12h10" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>Export</button>
+        <div class="menu up" id="export-menu" hidden><button type="button" data-export="md">Markdown</button><button type="button" data-export="csv">CSV</button><button type="button" data-export="json">JSON</button><hr><button type="button" id="mcp-open">Connect to Claude</button></div>
+      </div>
+  </footer>
 </section>
-<aside class="rail">
+<aside class="rail" id="model-drawer" aria-label="Model settings" inert>
   <section class="section">
-    <h2>Model</h2>
+    <div class="drawer-heading"><h2>Model</h2><button type="button" class="text" id="model-close" aria-label="Close model settings">Close</button></div>
     <div class="mname"><span id="model-name" class="mono"></span><span id="model-star" class="rectag" tabindex="0" hidden>Recommended</span></div>
     <p id="model-meta" class="mono dim"></p>
     <p id="model-use" class="dim"></p>
@@ -1691,9 +1723,22 @@ el("login").onclick = startLogin;
 el("note-login").onclick = startLogin;
 el("google").onclick = continueWithGoogle;
 el("profile-button").onclick = () => {el("profile-menu").hidden = !el("profile-menu").hidden;};
+function setModelDrawer(open, returnFocus=false) {
+  const drawer = el("model-drawer");
+  drawer.inert = !open;
+  drawer.classList.toggle("open", open);
+  el("model-toggle").setAttribute("aria-expanded", String(open));
+  if (returnFocus) el("model-toggle").focus();
+}
+el("model-toggle").onclick = () => setModelDrawer(el("model-drawer").inert);
+el("model-close").onclick = () => setModelDrawer(false, true);
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !el("model-drawer").inert && !document.querySelector("dialog[open]")) setModelDrawer(false, true);
+});
 el("connection").onclick = () => toggleBoardMenu(el("conn-menu").hidden);
 el("connection").onkeydown = event => {if (event.key === "Escape") toggleBoardMenu(false);};
 document.addEventListener("click", event => {
+  if (!event.target.closest("#model-drawer,#model-toggle,dialog") && !document.querySelector("dialog[open]")) setModelDrawer(false);
   if (!event.target.closest(".conn")) toggleBoardMenu(false);
   if (!event.target.closest(".xport")) el("export-menu").hidden = true;
   if (!event.target.closest(".pop")) closeHelp();
@@ -1746,7 +1791,7 @@ async function devStart() {
   await start();
   if (query.has("logout")) applySession(await account("logout"));
   if (query.has("login")) await continueWithGoogle();
-  if (query.get("tab")) selectTab(query.get("tab"));
+  if (query.get("tab")) {setModelDrawer(true); selectTab(query.get("tab"));}
   if (query.has("peek")) el("path").classList.add("open");
   if (query.get("dialog") === "library") openLibrary();
   if (query.get("dialog") === "mcp") openMcp();

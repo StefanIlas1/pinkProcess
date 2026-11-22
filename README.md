@@ -43,7 +43,7 @@ PYTHONPATH=$PWD python3 mac/kit_backend.py
 
 ## Using the app
 
-To check a physical kit, choose **Import data**, open [pool-recovery.csv](datasets/pool-recovery.csv), and confirm a capacity of **12**. Under **Skills**, select **Queue history v2**. Ask “What's wrong with my system?” and open **Readings behind this answer**. This recording peaks at 87 waiting and ends at zero.
+To check a physical kit, choose **Import data**, open [pool-recovery.csv](datasets/pool-recovery.csv), and confirm a capacity of **12**. Open **Model → Skills** and select **Queue history v2**. Ask “What's wrong with my system?” and open **Readings behind this answer**. This recording peaks at 87 waiting and ends at zero.
 
 1. **Connect.** Press **Find boards** on the start screen. The rest of the app opens once a board is connected.
 2. **Import data.** Press **Import data** and choose a CSV or JSON lines file. The app reads the columns, types, row count and time column and spots signals such as queue, latency, errors, temperature or sales.
@@ -55,7 +55,7 @@ To check a physical kit, choose **Import data**, open [pool-recovery.csv](datase
 8. **Export.** **Export** saves the session as Markdown, CSV or JSON, with every answer style that was ready. In the Mac app it opens a dialog with a Copy button instead of downloading.
 9. **Connect to Claude.** The same menu shows the config for the MCP connector (below).
 
-The **Skills**, **Train** and **Replay** tabs change and compare the board's language-model versions. See [board setup](docs/board-setup.md).
+Open **Model** beside the board connection to access the model settings. The **Skills**, **Train** and **Replay** tabs change and compare the board's language-model versions. See [board setup](docs/board-setup.md).
 
 ## Board setup
 
