@@ -1455,19 +1455,19 @@ function applyProfile(data) {
 async function importData(name, text) {
   show("Reading " + name + "…");
   const data = await request("import_data", {name, text});
+  await finishImport(data, text);
+}
+async function importSample(id) {
+  const data = await request("load_sample", {id});
+  await finishImport(data, data.queue_csv || "");
+}
+async function finishImport(data, text) {
   applyProfile(data);
   lastCsvText = text;
   show("");
   await pathPlay(data.timings, [0, 1]);
   pathMark(2, "done", 1);
   await prepareBoardDataset();
-  await persistSession();
-}
-async function importSample(id) {
-  const data = await request("load_sample", {id});
-  applyProfile(data);
-  show("");
-  await pathPlay(data.timings, [0, 1]);
   await persistSession();
 }
 const HELP = {

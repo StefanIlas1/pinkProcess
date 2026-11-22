@@ -43,6 +43,8 @@ PYTHONPATH=$PWD python3 mac/kit_backend.py
 
 ## Using the app
 
+To check a physical kit, open **Samples**, choose **Pool, recovery**, and confirm a capacity of **12**. Under **Skills**, select **Queue history v2**. Ask “What's wrong with my system?” and open **Readings behind this answer**. This recording peaks at 87 waiting and ends at zero.
+
 1. **Connect.** Press **Find boards** on the start screen. The rest of the app opens once a board is connected.
 2. **Import data.** Press **Import data** and choose a CSV or JSON lines file, or pick one of the samples (the **Samples** menu, or the links on the empty chat). The app reads the columns, types, row count and time column and spots signals such as queue, latency, errors, temperature or sales.
 3. **Pick a model.** A recommended quantized model is applied when the data loads. **Search models** opens the library, which you can filter by task, maker and size. **Synthesize model** builds your own from a starting point, a name and a request. **Publish** adds a skill you trained to your library, stored in `~/Library/Application Support/PYNQ Process/models.json`.

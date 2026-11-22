@@ -285,6 +285,14 @@ class KitTest(unittest.TestCase):
             finally:
                 server.shutdown()
 
+    def test_queue_sample_carries_source_for_board_upload(self):
+        from .kit_data import sample_csv
+
+        queue = self.kit.action({"action": "load_sample", "id": "pool-recovery"})
+        self.assertEqual(queue["queue_csv"], sample_csv("pool-recovery"))
+        local = self.kit.action({"action": "load_sample", "id": "api-latency"})
+        self.assertNotIn("queue_csv", local)
+
     def test_data_ask_uses_the_board_for_queue_data_and_falls_back(self):
         self.kit.action({"action": "load_sample", "id": "pool-recovery"})
         local = self.kit.action({"action": "data_ask", "question": "now?", "style": "short"})
