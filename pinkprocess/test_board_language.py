@@ -8,7 +8,7 @@ from time import monotonic, sleep
 import unittest
 
 from lm_reference.weight_versions import ORIGINAL, WeightLayout, WeightVersionStore
-from .board_language import BoardLanguage
+from .board_language import BoardLanguage, HISTORY_MODEL
 from .kit_dataset import DEMO_CAPACITY, demo_csv
 
 
@@ -108,6 +108,60 @@ class BoardLanguageTest(unittest.TestCase):
     def save(self, coordinator, name="Astra attempt"):
         return coordinator.handle({"op": "lm_save", "name": name, "target_row": 1,
                                    "response": {"row": [-127, 0, 127, 22]}})
+
+    def test_full_checkpoint_switch_replay_and_dataset_isolation(self):
+        from dataclasses import replace
+        from types import SimpleNamespace
+
+        self.observation["observations"]["first"] = {"time_ms": 0, "busy": 10, "waiting": 3}
+        base, history = FakeRuntime(), FakeRuntime()
+        alternate_bytes = b"weights:" + bytes(reversed(range(12)))
+        layout = replace(self.layout, checkpoint_sha256=sha256(alternate_bytes).hexdigest())
+        alternate = WeightVersionStore(self.state_dir / "alt.sqlite", alternate_bytes, layout=layout).original
+        history.installed = alternate
+        bound = []
+        base.query_projection = history.query_projection = SimpleNamespace(bind_model=bound.append)
+
+        def open_service():
+            versions = self.store()
+            versions.register_checkpoint(HISTORY_MODEL, alternate)
+            return BoardLanguage(base, versions, self.state_dir, lambda: self.observation,
+                                 dataset_score=lambda *_: None, history_runtime=history)
+        service = open_service()
+        self.save(service)
+        original_job = self.finish(service, self.start(service))
+        original_prompt = base.prompts[-1]
+        selected = service.handle(dict(op="lm_select", name=HISTORY_MODEL))
+        self.assertEqual(selected["active"]["checkpoint_sha256"], layout.checkpoint_sha256)
+        self.assertIs(service.runtime, history)
+        service = open_service()
+        self.assertIs(service.runtime, history)
+        self.assertEqual(service.active.name, HISTORY_MODEL)
+        old = self.finish(service, self.start(service, capture_id=original_job["capture_id"]))
+        self.assertEqual(old["prompt_variant"], "original")
+        self.assertEqual(history.prompts[-1], original_prompt)
+        fresh = self.finish(service, self.start(service))
+        self.assertEqual(fresh["prompt_variant"], "queue_history")
+        self.assertNotEqual(history.prompts[-1], original_prompt)
+        with self.assertRaisesRegex(ValueError, "original checkpoint"):
+            self.save(service, "invalid source")
+        service.handle(dict(op="lm_select", name="Astra attempt"))
+        dataset_id = service.handle(dict(op="lm_dataset_upload", csv=demo_csv(), capacity=DEMO_CAPACITY))["dataset_id"]
+        service.handle(dict(op="lm_dataset_select", dataset_id=dataset_id, name=HISTORY_MODEL))
+        result = self.finish(service, service.handle(dict(op="lm_dataset_ask", dataset_id=dataset_id, question=QUESTION)))
+        self.assertEqual((result["active"]["checkpoint_sha256"], result["prompt_variant"]),
+                         (layout.checkpoint_sha256, "queue_history"))
+        self.assertIs(service.runtime, base)
+        self.assertEqual(service.active.name, "Astra attempt")
+        self.assertTrue(bound)
+        service.handle(dict(op="lm_restore"))
+        replay = self.finish(service, self.start(service, capture_id=fresh["capture_id"]))
+        self.assertEqual(replay["prompt_variant"], "original")
+        self.assertEqual(base.prompts[-1], original_prompt)
+        with self.assertRaisesRegex(ValueError, "full checkpoint"):
+            self.save(service, HISTORY_MODEL)
+        with self.assertRaisesRegex(ValueError, "different checkpoint"):
+            self.store().register_checkpoint(HISTORY_MODEL, self.store().original)
 
     def test_dataset_selection_is_scoped_and_followup_uses_prior_answer(self):
         runtime = FakeRuntime()

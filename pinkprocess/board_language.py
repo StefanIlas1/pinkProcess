@@ -13,6 +13,9 @@ from lm_reference.flan_prompt import telemetry_prompt
 from .kit_dataset import dataset_snapshot
 from .kit_evidence import analyst_evidence
 
+HISTORY_MODEL = "Queue history v2"
+
+
 DATASET_STAGES = {
     'generalization': 'Distinguish observations from explanations and forecasts.',
     'short_answer': 'Answer briefly using the reported measurements.',
@@ -23,8 +26,10 @@ DATASET_STAGES = {
 
 
 class BoardLanguage:
-    def __init__(self, runtime, versions, state_dir, snapshot, dataset_score=None):
+    def __init__(self, runtime, versions, state_dir, snapshot, dataset_score=None, history_runtime=None):
+        self.base_runtime = runtime
         self.runtime = runtime
+        self.history_runtime = history_runtime
         self.versions = versions
         self.capture_db = Path(state_dir) / 'lm-captures.sqlite'
         self.capture_db.parent.mkdir(parents=True, exist_ok=True)
@@ -54,6 +59,13 @@ class BoardLanguage:
             raise RuntimeError(f"Evidence capture database failed: {exc}") from exc
 
     def _install(self, version, previous=None):
+        target_runtime = self.history_runtime if self.is_history(version.name) else self.base_runtime
+        if target_runtime is not self.runtime:
+            self.runtime = target_runtime
+            runner = getattr(self.runtime, "query_projection", None)
+            if runner is not None:
+                # Packed layouts and resident DMA buffers belong to one set of tensors.
+                runner.bind_model(self.runtime.t)
         self.runtime.install_weight_version(version)
         fabric = getattr(self.runtime, "fabric", None)
         if fabric is None:
@@ -62,6 +74,9 @@ class BoardLanguage:
         index = target.row if target else 0
         payload = self.runtime.t["lm_head.weight"][index].tobytes()
         fabric.verify_row_bytes(payload)
+
+    def is_history(self, name):
+        return self.history_runtime is not None and name == HISTORY_MODEL
 
     def capture(self, question, capture_id):
         baseline = None
@@ -84,6 +99,8 @@ class BoardLanguage:
                     raise ValueError("A fresh reading is required to capture a new incident.")
                 record = dict(question=question, captured_at_ms=time_ns() // 1_000_000, snapshot=snapshot,
                               prompt=telemetry_prompt(question, analyst_evidence(snapshot)))
+                if self.is_history(self.active.name):
+                    record["history_prompt"] = telemetry_prompt(question, analyst_evidence(snapshot), history=True)
                 body = json.dumps(record, allow_nan=False, sort_keys=True, separators=(',', ':')).encode()
                 capture_id = hashlib.sha256(body).hexdigest()
                 db.execute('INSERT OR IGNORE INTO captures VALUES (?,?)', (capture_id, body))
@@ -208,6 +225,8 @@ class BoardLanguage:
                 dataset["selected_model"] = self.versions.get(command.get("name")).name
                 self.store_dataset(db, dataset)
                 return self.dataset_metadata(dataset)
+            if op in ("lm_dataset_calibration", "lm_dataset_calibrate", "lm_dataset_save") and self.is_history(dataset["selected_model"]):
+                raise ValueError("Select the original checkpoint to create an output-row edit.")
             if op == "lm_dataset_calibration":
                 job = self.jobs.get(self.activation_job_id)
                 if (not job or job.get("state") != "complete" or job.get("dataset_id") != dataset["dataset_id"]
@@ -237,21 +256,25 @@ class BoardLanguage:
         if stage not in DATASET_STAGES:
             raise ValueError("Unsupported dataset answer stage.")
         snapshot = dataset["snapshot"]
-        prompt = telemetry_prompt(question, analyst_evidence(snapshot))
+        version = self.versions.get("original" if calibration else dataset["selected_model"])
+        evidence = analyst_evidence(snapshot)
+        if self.is_history(version.name):
+            prompt = telemetry_prompt(question, evidence, history=True)
+        else:
+            prompt = telemetry_prompt(question, evidence)
         if DATASET_STAGES[stage]:
             prompt = DATASET_STAGES[stage] + " " + prompt
         if stage == "followup" and dataset.get("last_chat"):
             previous_question, previous_answer = dataset["last_chat"]
             prompt = (f"Previous question: {previous_question[:160]}\n"
                       f"Previous answer: {previous_answer[:200]}\n" + prompt)
-        version = self.versions.get("original" if calibration else dataset["selected_model"])
         selected = version if version.name != self.active.name else None
         try:
             if selected is not None:
                 self._install(selected)
             job = dict(dataset_id=dataset["dataset_id"], question=question.strip(),
                        stage="calibration" if calibration else stage,
-                       active=version.metadata())
+                       active=version.metadata(), prompt_variant="queue_history" if self.is_history(version.name) else "original")
             return {**self.start_job(job, prompt, selected=selected), "snapshot": snapshot}
         except Exception:
             if selected is not None:
@@ -268,14 +291,14 @@ class BoardLanguage:
             raise ValueError("Output row outside model vocabulary.")
         start = index * layout.width
         raw = self.versions.classifier[start:start + layout.width]
-        return dict(row=list(raw.cast('b')), target_row=index, token=self.runtime.tokenizer.decode([index]),
+        return dict(row=list(raw.cast('b')), target_row=index, token=self.base_runtime.tokenizer.decode([index]),
                     activation=self.activation, calibration_job_id=self.activation_job_id,
                     base_sha256=layout.checkpoint_sha256, max_score=self.activation_max,
-                    row_scale=self.runtime.head_row_scale(index) if self.activation_max is not None else None)
+                    row_scale=self.base_runtime.head_row_scale(index) if self.activation_max is not None else None)
 
     def token_id(self, target):
         if isinstance(target, str) and 0 < len(target.strip()) <= 80:
-            ids = self.runtime.tokenizer.encode(target.strip())
+            ids = self.base_runtime.tokenizer.encode(target.strip())
             if len(ids) != 2 or ids[0] <= 2:
                 raise ValueError("Choose a word encoded as one token, such as Warning, or enter its token ID.")
             return ids[0]
@@ -301,12 +324,17 @@ class BoardLanguage:
                 return self.handle_dataset(command)
             if op == 'lm_versions':
                 return self.status()
+            if op in ('lm_row', 'lm_save') and self.is_history(self.active.name):
+                raise ValueError("Select the original checkpoint to create an output-row edit.")
             if op == 'lm_save':
                 if command.get("base_sha256", self.versions.layout.checkpoint_sha256) != self.versions.layout.checkpoint_sha256:
                     raise ValueError("Weight edit belongs to another base checkpoint.")
                 self.versions.save_astra(command.get("name"), self.token_id(command.get("target_row")), command.get("response"))
                 return self.status()
             if op == 'lm_row':
+                last = self.jobs.get(self.activation_job_id)
+                if last and self.is_history(last["active"]["name"]):
+                    raise ValueError("Generate calibration with the original checkpoint before editing.")
                 return dict(ok=True, **self.row_context(command.get('target_row')))
             if any(job["state"] == "running" for job in self.jobs.values()):
                 raise ValueError("A board answer is in progress.")
@@ -336,9 +364,12 @@ class BoardLanguage:
                 raise ValueError("Supply a question of up to 500 characters.")
             replay_id = command.get('capture_id')
             capture_id, record, baseline = self.capture(question, replay_id)
+            use_history_prompt = self.is_history(self.active.name) and "history_prompt" in record
+            prompt = record["history_prompt"] if use_history_prompt else record["prompt"]
             job = dict(capture_id=capture_id, active=self.active.metadata(), baseline=baseline,
+                       prompt_variant="queue_history" if use_history_prompt else "original",
                        captured_at_ms=record.get("captured_at_ms"))
-            return {**self.start_job(job, record["prompt"], initial=replay_id is None),
+            return {**self.start_job(job, prompt, initial=replay_id is None),
                     "snapshot": record["snapshot"]}
 
     def status(self):

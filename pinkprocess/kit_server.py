@@ -115,6 +115,8 @@ def parse_args(argv=None):
     parser.add_argument("--demo-source", choices=("sqlite",))
     parser.add_argument("--language-model", type=Path)
     parser.add_argument("--manifest-sha256")
+    parser.add_argument("--history-model", type=Path, help="Verified Queue history v2 checkpoint directory.")
+    parser.add_argument("--history-manifest-sha256")
     parser.add_argument("--projection-overlay", action="store_true",
                         help="Enable the experimental FLAN DDR projection accelerator.")
     parser.add_argument("--projection-scope", choices=("query", "all"), default="query",
@@ -130,6 +132,10 @@ def parse_args(argv=None):
     args = parser.parse_args(argv)
     if bool(args.language_model) != bool(args.manifest_sha256):
         parser.error("Supply both the language model directory and its pinned manifest hash.")
+    if bool(args.history_model) != bool(args.history_manifest_sha256):
+        parser.error("Supply both the history-model directory and its pinned manifest hash.")
+    if args.history_model and (not args.language_model or not args.projection_overlay or args.projection_scope != "all"):
+        parser.error("--history-model requires the original language model and the all-projection overlay.")
     if args.projection_overlay and args.language_model is None:
         parser.error("Supply the language model when enabling the projection overlay.")
     if args.projection_scope == "all" and not args.projection_overlay:
@@ -163,7 +169,7 @@ def main():
                 from lm_reference.fabric import TiledMatvec
                 from lm_reference.flan import Flan
                 from lm_reference.weight_versions import WeightVersionStore
-                from .board_language import BoardLanguage
+                from .board_language import BoardLanguage, HISTORY_MODEL
 
                 state_dir = args.state_file.parent
                 versions = WeightVersionStore.from_flan(state_dir / "lm-versions.sqlite", args.language_model,
@@ -188,6 +194,19 @@ def main():
                     from lm_reference.flan_draft import TokenDraft
                     runtime.token_draft = TokenDraft.load()
 
+                history_runtime = None
+                if args.history_model:
+                    from lm_reference.model_assets import verify_model
+
+                    verify_model(args.history_model, args.history_manifest_sha256)
+                    alternate = WeightVersionStore.from_flan(state_dir / "lm-history-v2.sqlite", args.history_model,
+                                                             manifest_sha256=args.history_manifest_sha256)
+                    versions.register_checkpoint(HISTORY_MODEL, alternate.original)
+                    # Defer FPGA cache binding until the operator selects this checkpoint.
+                    history_runtime = Flan(args.history_model, runtime.fabric)
+                    history_runtime.query_projection = query_projection
+                    history_runtime.token_draft = getattr(runtime, "token_draft", None)
+
                 def snapshot():
                     with server.model_lock:
                         return model.handle(dict(op="stream_evidence", window_ms=60000))
@@ -196,7 +215,8 @@ def main():
                     with server.model_lock:
                         return model._score_stream_window(window, capacity, stream=False)
 
-                server.language = BoardLanguage(runtime, versions, state_dir, snapshot, dataset_score=dataset_score)
+                server.language = BoardLanguage(runtime, versions, state_dir, snapshot, dataset_score=dataset_score,
+                                                history_runtime=history_runtime)
             server.authorization = ("Bearer " + token).encode()
             discovery = Thread(target=advertise, args=(token, stopped), daemon=True)
             discovery.start()

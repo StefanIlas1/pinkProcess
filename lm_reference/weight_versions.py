@@ -1,7 +1,7 @@
 """Persist named INT8 output-row edits and verify their exact inference weights."""
 
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from hashlib import sha256
 import json
 import mmap
@@ -104,6 +104,7 @@ class WeightVersionStore:
         return cls(database, mapped, layout=layout)
 
     def __init__(self, database, base_checkpoint, *, layout=TINYSTORIES):
+        self.checkpoints = {}
         self.database = Path(database)
         self.base = (base_checkpoint if isinstance(base_checkpoint, memoryview) and base_checkpoint.readonly
                      and isinstance(base_checkpoint.obj, mmap.mmap) else bytes(base_checkpoint))
@@ -153,7 +154,27 @@ class WeightVersionStore:
                 "INSERT OR IGNORE INTO model_state VALUES (1, ?, ?, ?, ?, ?, ?, ?)",
                 (*self.identity, ORIGINAL),
             )
+            connection.execute("""CREATE TABLE IF NOT EXISTS full_checkpoints (
+                name TEXT PRIMARY KEY, checkpoint_sha256 TEXT NOT NULL, manifest_sha256 TEXT NOT NULL
+            )""")
             self._selected(connection)
+
+    def register_checkpoint(self, name, source):
+        """Expose a verified model while pinning this public name across restarts."""
+        name = _name(name)
+        if name.casefold() == ORIGINAL or source.patch is not None:
+            raise ValueError("Expected a named, complete checkpoint.")
+        identity = (source.checkpoint_sha256, source._layout.model_sha256)
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            self._selected(connection)
+            if connection.execute("SELECT 1 FROM versions WHERE name=?", (name,)).fetchone():
+                raise ValueError(f"A saved row edit already uses the name {name!r}.")
+            connection.execute("INSERT OR IGNORE INTO full_checkpoints VALUES(?,?,?)", (name, *identity))
+            if connection.execute("SELECT checkpoint_sha256,manifest_sha256 FROM full_checkpoints WHERE name=?",
+                                  (name,)).fetchone() != identity:
+                raise ValueError(f"A different checkpoint is pinned to {name!r}.")
+        self.checkpoints[name] = replace(source, name=name)
 
     @contextmanager
     def _connect(self):
@@ -206,6 +227,8 @@ class WeightVersionStore:
     def _get(self, connection, name):
         if name == ORIGINAL:
             return self.original
+        if name in self.checkpoints:
+            return self.checkpoints[name]
         record = connection.execute(
             """SELECT target_row, payload, payload_sha256, checkpoint_sha256, classifier_sha256
                  FROM versions WHERE name = ?""", (name,),
@@ -240,7 +263,8 @@ class WeightVersionStore:
                 "SELECT name, checkpoint_sha256, classifier_sha256, target_row FROM versions ORDER BY name"
             ).fetchall()
         keys = ("name", "checkpoint_sha256", "classifier_sha256", "target_row")
-        return [self.original.metadata(), *(dict(zip(keys, row)) for row in records)]
+        return [self.original.metadata(), *(version.metadata() for version in self.checkpoints.values()),
+                *(dict(zip(keys, row)) for row in records)]
 
     def save(self, name, patch):
         """Save an immutable version. Repeating the same save is safe."""
@@ -253,6 +277,8 @@ class WeightVersionStore:
         with self._connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
             self._selected(connection)
+            if connection.execute("SELECT 1 FROM full_checkpoints WHERE name=?", (name,)).fetchone():
+                raise ValueError(f"The name {name!r} belongs to a full checkpoint.")
             existing = connection.execute("SELECT 1 FROM versions WHERE name = ?", (name,)).fetchone()
             if existing:
                 if self._get(connection, name) != version:
