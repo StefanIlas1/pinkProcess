@@ -56,3 +56,23 @@ sudo systemctl unmask serial-getty@ttyPS0.service
 sudo systemctl daemon-reload
 sudo reboot
 ```
+
+## Verify board generation over the Mac USB path
+
+Run the frozen replay and three synthetic diagnosis cases while the app is
+paired over USB and the board's SQLite demo is running. The board must have
+the original FLAN checkpoint selected, the saved ambiguous-cause capture,
+and all-projection inference with phase counters enabled. Use the running
+Mac app's loopback HTTP port for `MAC_APP_PORT` and a local copy of the
+pinned FLAN deployment export for the reference.
+
+```sh
+python3 -m kit.verify_projection_mac --port "$MAC_APP_PORT" \
+  --model /path/to/pinned/flan-export --out projection-mac-results.json
+```
+
+Each synthetic fixture replaces only the observed SQLite demo session and
+releases it immediately after that diagnosis captures its evidence. The report
+records exact-answer checks, first observed text and completion, projection
+counters, and sampled telemetry. The first and repeat labels record run order.
+Use the phase counters to identify how much cache work each run performed.
