@@ -344,7 +344,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const STAGE_PHRASES = [
   ["Reading the last 30 seconds of the queue","Pulling the newest reading off the wire","Counting requests in the queue","Checking how many connections are busy","Reading the saved readings back","Measuring how long requests wait","Looking at busy versus waiting","Sending the question to the board"],
   ["Looking for the start of the pile-up","Comparing against the quiet baseline","Looking at the trend over ten seconds","Spotting where the queue began to grow","Packing readings into 8-bit numbers","Lining up the data for the logic fabric","Checking nothing has changed mid-question","Finding what changed first"],
-  ["Loading INT8 weights onto the board","Checking the weights fingerprint","Handing readings to the model","Waking the FPGA","Warming up the clock at 100 MHz","Reading the board's memory","Balancing speed and accuracy on the chip","Checking the board clock"],
+  ["Loading INT8 weights onto the board","Checking the weights fingerprint","Handing readings to the model","Waking the FPGA","Waiting for the FPGA","Reading the board's memory","Balancing speed and accuracy on the chip","Checking the board clock"],
   ["Streaming 64 KB to fabric","Running the encoder on the board","Multiplying matrices in hardware","Crunching numbers in parallel","Scoring the last few readings","Checking the forecast","Reading the queue forecast","Double-checking the warning threshold"],
   ["Running the decoder, one word at a time","Picking the most likely next word","Tying the readings to a likely cause","Trimming the answer to the point","Writing the answer in plain words","Almost there, the board is still working","Hang tight, this runs on the board itself","Checking the board is still healthy"]
 ];
@@ -478,8 +478,12 @@ function pathLabels() {
   nodes[1].querySelector(".sub").textContent = dataset ? dataset.rows.toLocaleString() + " rows, " + dataset.columns.length + " cols" : "";
   nodes[2].querySelector(".sub").textContent = chosenModel ? chosenModel.name : online ? "INT8 weights" : "";
   document.querySelector(".fabric-name").textContent = online ? "PYNQ-Z2" : "This Mac";
-  nodes[3].querySelector(".sub").textContent = online ? "100 MHz" : "no board";
+  nodes[3].querySelector(".sub").textContent = online ? (boardClock() || "connected") : "no board";
   nodes[4].querySelector(".sub").textContent = "plain words";
+}
+
+function boardClock() {
+  return Number.isFinite(status?.clock_mhz) ? status.clock_mhz + " MHz" : "";
 }
 
 function controls() {
@@ -488,8 +492,8 @@ function controls() {
   document.body.classList.toggle("offline", !online && !hasData);
   el("app").classList.toggle("nosidebar", !user);
   el("chip").classList.toggle("online", online);
-  el("chip").dataset.tip = online ? "Board clock: 100 MHz\nBoard temperature: " + (status.temp_c != null ? status.temp_c + " °C" : "not reported") + "\nLast answer latency: " + (lastLatency !== null ? fmtMs(lastLatency) : "none yet") + "\nLEDs: link, activity, answering" : "No board connected";
-  el("chip-text").textContent = online ? "100 MHz · " + (status.temp_c != null ? status.temp_c + " °C" : "-- °C") + (lastLatency !== null ? " · latency " + fmtMs(lastLatency) : "") : "no board";
+  el("chip").dataset.tip = online ? "Board clock: " + (boardClock() || "not reported") + "\nBoard temperature: " + (status.temp_c != null ? status.temp_c + " °C" : "not reported") + "\nLast answer latency: " + (lastLatency !== null ? fmtMs(lastLatency) : "none yet") + "\nLEDs: link, activity, answering" : "No board connected";
+  el("chip-text").textContent = online ? (boardClock() || "PYNQ-Z2") + " · " + (status.temp_c != null ? status.temp_c + " °C" : "-- °C") + (lastLatency !== null ? " · latency " + fmtMs(lastLatency) : "") : "no board";
   el("connection").textContent = online ? (status.board_name || status.board || "PYNQ-Z2") + " connected" : "No board · this Mac";
   el("connection").classList.toggle("off", !online);
   el("disconnect").hidden = !online;
@@ -1180,13 +1184,14 @@ function askData(question) {
     pathBegin();
     try {
       document.body.classList.add("working");
+      const submittedAt = performance.now();
       const work = [localAnswer(entry, question, board ? ["transcript", "table"] : LOCAL_STYLES)];
       if (board) work.push(boardAnswer(entry, question));
       const [times, boardMs] = await Promise.all(work);
       const values = [dataset.timings?.data_ms ?? 0, dataset.timings?.profile_ms ?? 0, Math.max(times.model_ms, 0.5), board ? boardMs : times.fabric_ms, times.answer_ms];
       values.forEach((value, stage) => pathMark(stage, "done", value));
       document.body.classList.remove("working");
-      lastLatency = Math.round(values.reduce((total, value) => total + value, 0));
+      lastLatency = Math.round(performance.now() - submittedAt);
       entry.pending = false;
       entry.offTopic = !ON_TOPIC.test(question);
       entry.style = entry.defaultStyle; entry.timings = lastTimings = timingsFromPath();
