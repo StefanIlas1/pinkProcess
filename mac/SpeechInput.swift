@@ -47,16 +47,21 @@ final class SpeechInput {
             AVCaptureDevice.authorizationStatus(for: .audio) == .restricted {
             return "Allow pinkProcess to use the microphone in System Settings to dictate."
         }
-        if SFSpeechRecognizer.authorizationStatus() == .denied ||
-            SFSpeechRecognizer.authorizationStatus() == .restricted {
+        let status = SFSpeechRecognizer.authorizationStatus()
+        if status == .denied || status == .restricted {
             return "Allow pinkProcess to use Speech Recognition in System Settings to dictate."
         }
         if recognizer == nil { recognizer = SFSpeechRecognizer() }
-        guard let recognizer, recognizer.supportsOnDeviceRecognition else {
+        guard let recognizer else {
             return "On-device dictation is unavailable for the current speech language."
         }
-        guard recognizer.isAvailable else {
-            return "Speech Recognition is currently unavailable. Try again or type your question."
+        if status == .authorized {
+            guard recognizer.supportsOnDeviceRecognition else {
+                return "On-device dictation is unavailable for the current speech language."
+            }
+            guard recognizer.isAvailable else {
+                return "Speech Recognition is currently unavailable. Try again or type your question."
+            }
         }
         return nil
     }
@@ -92,6 +97,10 @@ final class SpeechInput {
     }
 
     private func requestMicrophone(for id: UUID) {
+        if let message = unavailableReason() {
+            finish("unavailable", message: message)
+            return
+        }
         switch AVCaptureDevice.authorizationStatus(for: .audio) {
         case .authorized:
             beginRecording(id)
