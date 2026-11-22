@@ -133,11 +133,6 @@ function startScrubLoop() {
   runScrubbers();
 }
 
-function setupHero() {
-  const hero = $(".hero");
-  if (hero) addScrubber(hero, () => clamp(scrollY / (innerHeight * 0.55)));
-}
-
 function setupMarquee() {
   const track = $(".marquee-track");
   if (!track) return;
@@ -227,16 +222,327 @@ function setupHotPath() {
 function setupSteps() {
   const steps = $$(".step");
   if (!steps.length) return;
-  const windows = $$(".steps-media .window");
+  const mock = createMock();
+  let current = -1;
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
       const index = steps.indexOf(entry.target);
+      if (index === current) return;
+      current = index;
       steps.forEach((step, stepIndex) => step.classList.toggle("on", stepIndex === index));
-      windows.forEach((window, windowIndex) => window.classList.toggle("on", windowIndex === index));
+      if (mock) mock.play(index);
     });
   }, { rootMargin: "-45% 0px -45% 0px" });
   steps.forEach((step) => observer.observe(step));
+}
+
+const shortAnswer = "waiting is steady and now 0; it peaked at 58 at 36.9 s. It spiked 1 time.";
+const summaryAnswer = shortAnswer + "\nThe file has 600 rows covering 0.0 s to 59.9 s.\nTypical waiting is 7.90. Over the most recent readings it is steady.";
+
+function createMock() {
+  const mock = $(".mock");
+  if (!mock) return null;
+  const fit = mock.parentElement;
+  const cursor = $(".m-cursor", mock);
+  const pick = (selector) => $(selector, mock);
+  let scale = 1;
+  let runId = 0;
+  const resize = () => {
+    scale = fit.clientWidth / 760;
+    mock.style.setProperty("--s", scale.toFixed(4));
+  };
+  new ResizeObserver(resize).observe(fit);
+  resize();
+
+  const stopped = () => { const error = new Error("stopped"); error.stopped = true; return error; };
+  const pointOf = (element, offsetX = 0.5, offsetY = 0.5) => {
+    const box = element.getBoundingClientRect();
+    const frame = mock.getBoundingClientRect();
+    return { x: (box.left - frame.left + box.width * offsetX) / scale, y: (box.top - frame.top + box.height * offsetY) / scale };
+  };
+  const setCursor = (point, instant) => {
+    cursor.style.transition = instant ? "none" : "";
+    cursor.style.setProperty("--x", point.x - 4 + "px");
+    cursor.style.setProperty("--y", point.y - 3 + "px");
+  };
+
+  function scene(id) {
+    const alive = () => id === runId;
+    const wait = (ms) => new Promise((resolve, reject) => setTimeout(() => (alive() ? resolve() : reject(stopped())), reducedMotion ? 0 : ms));
+    const moveTo = async (selector, offsetX, offsetY) => {
+      const target = typeof selector === "string" ? pick(selector) : selector;
+      setCursor(pointOf(target, offsetX, offsetY));
+      await wait(800);
+      return target;
+    };
+    const click = async (selector, offsetX, offsetY) => {
+      const target = await moveTo(selector, offsetX, offsetY);
+      const point = pointOf(target, offsetX, offsetY);
+      const ripple = document.createElement("span");
+      ripple.className = "m-ripple";
+      ripple.style.left = point.x + "px";
+      ripple.style.top = point.y + "px";
+      mock.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+      target.classList.add("m-press");
+      await wait(140);
+      target.classList.remove("m-press");
+      return target;
+    };
+    const type = async (element, text, speed = 55) => {
+      for (let index = 1; index <= text.length; index++) {
+        element.textContent = text.slice(0, index);
+        await wait(speed + (text[index - 1] === " " ? 40 : Math.random() * 40));
+      }
+    };
+    return { alive, wait, moveTo, click, type };
+  }
+
+  const states = [
+    { classes: [], model: "FLAN-T5-small INT8", by: "by PYNQ team · Runs on the board" },
+    { classes: ["connected", "imported", "recommended"], model: "Queue-onset logistic", by: "by Stefan Ilas · Runs on the board" },
+    { classes: ["connected", "imported", "recommended"], model: "Queue-onset logistic", by: "by Stefan Ilas · Runs on the board" },
+    { classes: ["connected", "imported", "recommended", "asked", "answered"], model: "Queue-onset logistic", by: "by Stefan Ilas · Runs on the board" },
+    { classes: ["connected", "imported", "recommended", "asked", "answered"], model: "Queue-onset logistic", by: "by Stefan Ilas · Runs on the board" }
+  ];
+  const tabs = $$(".m-tabs span", mock);
+  const pathRows = $$(".m-path-row", mock);
+  const setTab = (name) => tabs.forEach((tab) => tab.classList.toggle("on", tab.dataset.tab === name));
+
+  const reset = (index) => {
+    const state = states[index];
+    mock.className = ["mock", ...state.classes].join(" ");
+    pick(".m-status span").textContent = state.classes.includes("connected") ? "PYNQ-Z2 connected" : "Not connected";
+    pick(".m-model-name").textContent = state.model;
+    pick(".m-by").textContent = state.by;
+    pick(".m-typed").textContent = "";
+    pick(".m-search-typed").textContent = "";
+    pick(".m-answer-skill em").textContent = "original";
+    $$(".m-row", mock).forEach((row) => row.classList.remove("gone", "hover"));
+    $$(".m-rail-tabs span", mock).forEach((tab) => tab.classList.toggle("on", tab.dataset.rtab === "notes"));
+    $$(".m-hover", mock).forEach((element) => element.classList.remove("m-hover"));
+    $$(".pressed, .m-press, .hover", mock).forEach((element) => element.classList.remove("pressed", "m-press", "hover"));
+    $$(".m-ripple", mock).forEach((element) => element.remove());
+    const answered = state.classes.includes("answered");
+    tabs.forEach((tab) => tab.classList.toggle("wait", !answered));
+    setTab(answered ? "Short" : "");
+    pick(".m-text").textContent = answered ? shortAnswer : "";
+    pathRows.forEach((row) => {
+      row.classList.toggle("lit", answered);
+      $("b", row).textContent = answered ? Number(row.querySelector("b").dataset.ms).toLocaleString("en-US") + " ms" : "0 ms";
+    });
+  };
+
+  const scenes = [
+    async ({ wait, click, moveTo }) => {
+      await wait(300);
+      await click(".m-find");
+      mock.classList.add("searching");
+      pick(".m-status span").textContent = "Searching";
+      await wait(1200);
+      mock.classList.remove("searching");
+      mock.classList.add("connected");
+      pick(".m-status span").textContent = "PYNQ-Z2 connected";
+      await wait(700);
+      const sample = await moveTo(".m-target-sample");
+      sample.classList.add("m-hover");
+      await click(".m-target-sample");
+      mock.classList.add("imported");
+      await wait(500);
+      pick(".m-model-name").textContent = "Queue-onset logistic";
+      pick(".m-by").textContent = "by Stefan Ilas · Runs on the board";
+      mock.classList.add("recommended");
+      await wait(1400);
+      await moveTo(".m-rec");
+      await wait(1600);
+    },
+    async ({ wait, click, moveTo, type }) => {
+      await wait(300);
+      await click(".m-search");
+      mock.classList.add("library");
+      await wait(500);
+      await click(".m-search-field", 0.2);
+      mock.classList.add("searchfocus");
+      await type(pick(".m-search-typed"), "queue", 90);
+      pick(".m-row-2").classList.add("gone");
+      await wait(400);
+      const row = await moveTo(".m-row-1", 0.4);
+      row.classList.add("hover");
+      await wait(1100);
+      await click(".m-close");
+      mock.classList.remove("library", "searchfocus");
+      await wait(1400);
+    },
+    async ({ wait, click, moveTo, type }) => {
+      await wait(300);
+      await click(".m-input", 0.3);
+      mock.classList.add("focus", "typing");
+      await type(pick(".m-typed"), "Why did the queue spike?");
+      await wait(300);
+      const enter = await moveTo(".m-return");
+      enter.classList.add("pressed");
+      await click(".m-return");
+      await wait(120);
+      enter.classList.remove("pressed");
+      pick(".m-typed").textContent = "";
+      mock.classList.remove("typing");
+      mock.classList.add("asked", "thinking");
+      tabs.forEach((tab) => tab.classList.add("wait"));
+      await moveTo(".m-chat", 0.75, 0.75);
+      for (const row of pathRows) {
+        row.classList.add("lit");
+        await wait(320);
+      }
+      mock.classList.remove("thinking");
+      tabs[0].classList.remove("wait");
+      setTab("Short");
+      await type(pick(".m-text"), shortAnswer, 12);
+      tabs[1].classList.remove("wait");
+      await wait(600);
+      await click(".m-tabs [data-tab=Summary]");
+      setTab("Summary");
+      pick(".m-text").textContent = summaryAnswer;
+      tabs[2].classList.remove("wait");
+      tabs[3].classList.remove("wait");
+      await wait(2000);
+    },
+    async ({ wait, moveTo }) => {
+      pathRows.forEach((row) => { row.classList.remove("lit"); $("b", row).textContent = "0 ms"; });
+      await wait(300);
+      await moveTo(".m-strip", 0.5, 0.55);
+      mock.classList.add("peek");
+      await wait(450);
+      for (const row of pathRows) {
+        await moveTo(row, 0.55);
+        row.classList.add("lit");
+        const label = $("b", row);
+        const target = Number(label.dataset.ms);
+        const frames = target > 10 ? 18 : 2;
+        for (let frame = 1; frame <= frames; frame++) {
+          label.textContent = Math.round((target * frame) / frames).toLocaleString("en-US") + " ms";
+          await wait(28);
+        }
+      }
+      await wait(1400);
+      await moveTo(".m-chat", 0.6, 0.5);
+      mock.classList.remove("peek");
+      await wait(1200);
+    },
+    async ({ wait, click, moveTo }) => {
+      await wait(300);
+      await click(".m-rail-tabs [data-rtab=skills]");
+      $$(".m-rail-tabs span", mock).forEach((tab) => tab.classList.toggle("on", tab.dataset.rtab === "skills"));
+      mock.classList.add("skills");
+      await wait(500);
+      await click(".m-answer-skill");
+      mock.classList.add("options");
+      await wait(300);
+      const option = await moveTo(".m-v2");
+      option.classList.add("hover");
+      await click(".m-v2");
+      option.classList.remove("hover");
+      mock.classList.remove("options");
+      pick(".m-answer-skill em").textContent = "Queue history v2";
+      mock.classList.add("publishable");
+      await wait(500);
+      await click(".m-publish");
+      mock.classList.add("toasted");
+      await wait(1800);
+      mock.classList.remove("toasted");
+      await wait(1000);
+    }
+  ];
+
+  return {
+    async play(index) {
+      const id = ++runId;
+      const tools = scene(id);
+      while (tools.alive()) {
+        reset(index);
+        if (!tools.alive()) return;
+        try {
+          await scenes[index](tools);
+          await tools.wait(900);
+        } catch (error) {
+          if (!error.stopped) throw error;
+          return;
+        }
+      }
+    }
+  };
+}
+
+function setupTrace() {
+  const trace = $(".trace");
+  if (!trace) return;
+  const values = trace.dataset.series.split(",").map(Number);
+  const svg = $(".trace-chart", trace);
+  const line = $(".trace-line", svg);
+  const area = $(".trace-area", svg);
+  const reveal = $(".trace-reveal", svg);
+  const scan = $(".trace-scan", svg);
+  const peak = $(".trace-peak", trace);
+  const question = $(".trace-q", trace);
+  const answer = $(".trace-a", trace);
+  const answerText = $(".trace-a-text", trace);
+  const width = values.length - 1;
+  const top = Math.max(...values);
+  const peakIndex = values.indexOf(top);
+  const yOf = (value) => 96 - (value / top) * 78;
+  const points = values.map((value, index) => `${index} ${yOf(value).toFixed(2)}`);
+  svg.setAttribute("viewBox", `0 0 ${width} 100`);
+  line.setAttribute("d", "M" + points.join(" L"));
+  area.setAttribute("d", `M0 100 L${points.join(" L")} L${width} 100 Z`);
+
+  const placePeak = () => {
+    const box = svg.getBoundingClientRect();
+    const frame = trace.getBoundingClientRect();
+    peak.style.left = box.left - frame.left + (peakIndex / width) * box.width + "px";
+    peak.style.top = box.top - frame.top + (yOf(top) / 100) * box.height + "px";
+  };
+  placePeak();
+  addEventListener("resize", placePeak);
+
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, reducedMotion ? 0 : ms));
+  const draw = (duration) => new Promise((resolve) => {
+    const start = performance.now();
+    const step = (now) => {
+      const progress = reducedMotion ? 1 : Math.min(1, (now - start) / duration);
+      const x = progress * width;
+      reveal.setAttribute("width", x);
+      scan.setAttribute("x1", x);
+      scan.setAttribute("x2", x);
+      if (x >= peakIndex) peak.classList.add("on");
+      if (progress < 1) requestAnimationFrame(step);
+      else resolve();
+    };
+    requestAnimationFrame(step);
+  });
+
+  const loop = async () => {
+    while (true) {
+      peak.classList.remove("on");
+      question.classList.remove("on");
+      answer.classList.remove("on");
+      answerText.textContent = "";
+      reveal.setAttribute("width", 0);
+      scan.style.opacity = "";
+      await sleep(500);
+      question.classList.add("on");
+      await sleep(600);
+      await draw(3000);
+      scan.style.opacity = "0";
+      answer.classList.add("on");
+      for (let index = 1; index <= shortAnswer.length; index++) {
+        answerText.textContent = shortAnswer.slice(0, index);
+        await sleep(24);
+      }
+      await sleep(5200);
+      if (reducedMotion) return;
+    }
+  };
+  loop();
 }
 
 function setupStack() {
@@ -320,7 +626,7 @@ function setupDownload() {
 setupFabric();
 setupNav();
 setupReveal();
-setupHero();
+setupTrace();
 setupMarquee();
 setupHotPath();
 setupSteps();
