@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from time import monotonic, sleep
 
-from kit.verify_projection_mac import MacBackend
+from kit.mac_backend_client import MacBackend
 
 BASELINE = Path(__file__).parent / "evidence/open-question-three-physical.json"
 

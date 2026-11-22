@@ -7,12 +7,12 @@ import json
 import re
 from pathlib import Path
 from time import monotonic, sleep
-import urllib.request
 from uuid import uuid4
 
 from lm_reference.flan import Flan
 from lm_reference.flan_prompt import telemetry_prompt
 from lm_reference.model_assets import file_digest, verify_model
+from kit.mac_backend_client import MacBackend
 from kit.verify_diagnosis_board import record_progress, release
 from kit.verify_diagnosis_traces import make_forecaster
 from pinkprocess.kit_evidence import analyst_evidence
@@ -78,32 +78,6 @@ def review_rubric(name, answer, forecast):
         reviewed["persistence_forecast_matches"] = (
             "remain nonempty" in answer.casefold() and forecast["scores"][0] >= 0)
     return lexical, reviewed, note
-
-class MacBackend:
-    def __init__(self, port):
-        self.origin = f"http://127.0.0.1:{port}"
-        self.client = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-
-    def action(self, action_name, **fields):
-        request = urllib.request.Request(
-            self.origin + "/api/action", data=json.dumps({"action": action_name, **fields}).encode(),
-            headers={"Content-Type": "application/json", "Origin": self.origin},
-        )
-        with self.client.open(request, timeout=20) as response:
-            result = json.load(response)
-        if result.get("host") != "127.0.0.1":
-            raise RuntimeError("The Mac backend is not paired through the USB loopback.")
-        return result
-
-    def ready_stream(self):
-        deadline = monotonic() + 30
-        while monotonic() < deadline:
-            snapshot = self.action("stream_status")["snapshot"]
-            if snapshot["state"] == "ready" and snapshot["fresh"]:
-                return snapshot
-            sleep(0.3)
-        raise RuntimeError("The Mac app did not see a fresh forecasting window.")
-
 
 def small_stream(snapshot):
     return {key: snapshot[key] for key in ("state", "fresh", "source", "origin", "fpga_submissions",
