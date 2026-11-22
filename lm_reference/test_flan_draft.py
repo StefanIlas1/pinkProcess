@@ -1,5 +1,7 @@
 """The target model alone decides which proposed tokens reach the answer."""
+import json
 import os
+from pathlib import Path
 import unittest
 
 from .flan_draft import TokenDraft
@@ -35,3 +37,18 @@ class DraftTests(unittest.TestCase):
                 if edit:
                     self.assertLess(phases["accepted_proposals"], phases["proposed_tokens"])
                     model.restore_head()
+
+    @unittest.skipUnless(os.getenv("PINKPROCESS_FLAN_MODEL"), "A quantized FLAN checkpoint is required.")
+    def test_frozen_heldout_questions_match_scalar_greedy_decoding(self):
+        from .flan import Flan
+        model = Flan(os.environ["PINKPROCESS_FLAN_MODEL"], None, reference=True)
+        draft = TokenDraft.load()
+        evidence = Path(__file__).resolve().parents[1] / "kit/evidence/blind-diagnosis-replacement-w8a8.json"
+        for case in json.loads(evidence.read_bytes())["cases"]:
+            with self.subTest(question=case["prompt"]):
+                model.token_draft = None
+                expected = model.generate(case["prompt"])
+                calibration = (model.first_output_activation, model.first_output_max)
+                model.token_draft = draft
+                self.assertEqual(model.generate(case["prompt"]), expected)
+                self.assertEqual((model.first_output_activation, model.first_output_max), calibration)
