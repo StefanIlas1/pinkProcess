@@ -105,7 +105,11 @@ button.icon{width:32px;height:32px;padding:0;border-radius:50%;font-size:1.1rem;
 #samples{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-start;align-items:center}
 .offline-view{position:relative;z-index:1;display:none;height:100vh;align-content:center;justify-items:center;gap:16px;text-align:center;padding:24px}
 .offline-view p{color:var(--dim);max-width:520px}
-.offline-top .logo{margin:0}.manual input{width:min(280px,80vw)}.offline-top{position:absolute;left:0;right:0;top:0;height:var(--topbar);display:flex;align-items:center;padding:0 28px;border-bottom:1px solid var(--line)}
+.offline-top .logo{margin:0}.offline-top{position:absolute;left:0;right:0;top:0;height:var(--topbar);display:flex;align-items:center;padding:0 28px;border-bottom:1px solid var(--line)}
+.offline-result{height:72px;display:grid;align-content:start;justify-items:center;gap:8px}.offline-result p:empty{display:none}.board-picks{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:520px}.board-picks[hidden]{display:none}
+.searching{position:fixed;inset:0;z-index:5;display:grid;place-items:center;background:rgba(29,26,32,.45);backdrop-filter:blur(6px) saturate(.7);-webkit-backdrop-filter:blur(6px) saturate(.7);animation:fade .2s ease}.searching[hidden]{display:none}
+.spinner{width:28px;height:28px;border-radius:50%;border:2px solid rgba(176,165,174,.25);border-top-color:#b0a5ae;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes fade{from{opacity:0}}
 body.offline .app{display:none}body.offline .offline-view{display:grid}
 @media(max-width:699px),(max-height:479px){body.offline .offline-view{display:none}}
 #notice{margin:0 auto;width:min(960px,90%);font-size:.9rem;color:var(--dim)}#notice:empty{display:none}#notice[data-error="true"]{color:var(--ink);font-weight:600}
@@ -201,10 +205,9 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
 <div class="offline-view" id="offline">
   <div class="offline-top"><div class="logo"></div></div>
   <h2>No board connected</h2>
-  <p id="discovery" role="status">Plug your PYNQ Process kit into this Mac, then find it here.</p>
   <div class="row" style="justify-content:center"><button id="find" class="solid">Find boards</button><button id="login-offline">Log in</button><div class="profile" id="profile-offline" hidden><button id="profile-offline-button" class="avatar" aria-label="Profile"></button><div class="menu" id="profile-offline-menu" hidden><span id="profile-offline-name"></span><button id="logout-offline">Log out</button></div></div></div>
-  <div class="row manual" id="manual" hidden><input id="host" list="known" placeholder="Board address" aria-label="Board address" autocomplete="off" autocapitalize="none" spellcheck="false"><datalist id="known"></datalist><button id="connect" class="solid">Connect</button></div>
-  <p id="offline-notice" role="status"></p>
+  <div class="offline-result"><p id="discovery" role="status"></p><div class="board-picks" id="board-picks" hidden></div><p id="offline-notice" role="status"></p></div>
+  <div class="searching" id="searching" hidden aria-hidden="true"><i class="spinner"></i></div>
 </div>
 <div class="app" id="app">
 <header class="top">
@@ -532,7 +535,6 @@ function controls() {
   el("profile-offline").hidden = !user;
   el("profile-offline-button").textContent = user ? user.name.trim().charAt(0).toUpperCase() : "";
   el("profile-offline-name").textContent = user ? user.name : "";
-  el("connect").disabled = busy || !el("host").value.trim();
   el("data-chip").hidden = !hasData;
   el("data-name").textContent = dataset?.name || datasetLabel;
   el("data-chip").title = dataset?.name || datasetLabel;
@@ -630,7 +632,6 @@ function setState(data) {
     displaySavedCaptures();
   }
   status = data.status; address = data.host || "";
-  if (address) el("host").value = address;
   if (!status?.stream_supported) displayStream(null);
   controls();
 }
@@ -716,18 +717,30 @@ async function run(task) {
     }
   } finally {busy = false; controls();}
 }
-async function discover(connectSingle=false) {
-  el("discovery").textContent = "Looking for kits…";
-  const data = await request("discover");
-  el("known").replaceChildren(...data.boards.map(board => new Option(board.name, board.host)));
-  if (!el("host").value || data.boards.length === 1) el("host").value = data.boards[0]?.host || "";
-  el("discovery").textContent = data.boards.length === 1 ? "One kit found." : data.boards.length ? data.boards.length + " kits found. Enter its address below." : "No kits found. Connect a provisioned USB kit or check Ethernet and macOS Local Network access. For a new kit, choose PYNQ Process, then Import Kit Pairing…";
-  el("manual").hidden = data.boards.length === 1;
-  if (connectSingle && data.boards.length === 1) await connectBoard(data.boards[0].host);
+function showBoardPicks(boards) {
+  el("board-picks").replaceChildren(...boards.map(board => {
+    const pick = document.createElement("button");
+    pick.type = "button"; pick.textContent = board.name || board.host; pick.title = board.host;
+    pick.onclick = () => run(() => connectBoard(board.host));
+    return pick;
+  }));
+  el("board-picks").hidden = !boards.length;
+}
+async function discover(quiet=false) {
+  const shown = Date.now();
+  if (!quiet) {el("discovery").textContent = ""; showBoardPicks([]); show(""); el("searching").hidden = false;}
+  try {
+    const data = await request("discover").catch(err => quiet ? {boards: []} : Promise.reject(err));
+    if (!quiet) await new Promise(done => setTimeout(done, Math.max(0, 2000 - (Date.now() - shown))));
+    if (data.boards.length === 1) {await connectBoard(data.boards[0].host); return;}
+    if (quiet) return;
+    el("discovery").textContent = data.boards.length ? "Choose a board." : "No boards found.";
+    showBoardPicks(data.boards);
+  } finally {el("searching").hidden = true;}
 }
 async function connectBoard(host) {
-  show("Connecting to the board…");
   setState(await request("connect", {host}));
+  showBoardPicks([]);
   autoUsb = address === "127.0.0.1";
   el("discovery").textContent = "";
   await refreshStream(); await refreshWeightVersions(); show("");
@@ -1518,11 +1531,7 @@ el("file").onchange = async event => {
 };
 el("make-own").onclick = openPlan;
 el("open-library").onclick = openLibrary;
-el("find").onclick = () => run(() => discover(true));
-el("host").oninput = controls;
-el("connect").onclick = () => {
-  run(() => connectBoard(el("host").value.trim()));
-};
+el("find").onclick = () => run(() => discover());
 el("disconnect").onclick = () => run(async () => {
   autoUsb = false;
   setState(await request("disconnect"));
@@ -1721,7 +1730,7 @@ async function start() {
     applySession(await account("session"));
     setState(await request("status"));
     if (status) {await refreshStream(); await refreshWeightVersions();}
-    else await discover();
+    else await discover(true);
   } catch (err) {show(err.message, true);}
   finally {busy = false; delete document.body.dataset.boot; controls();}
 }
