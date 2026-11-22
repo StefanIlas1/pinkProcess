@@ -13,6 +13,8 @@
 | Does the queue-history checkpoint improve diagnosis? | Its software reference identified 15 of 15 independent queue states and nine of nine active endpoint trends. On three board traces, the globally selected checkpoint and tuned proposal table completed in 17.57–18.16 seconds. | Broad answers sometimes omitted secondary forecasts or an explicit zero. The physical comparison covers three recorded histories and a combined workflow change. [Independent review](../kit/evidence/grounded-history-independent-review.json) · [Physical timings](../kit/evidence/physical-history-verifier-tuned.json) |
 | Can a named weight edit be reversed? | The physical kit saved a one-row edit. Reselecting the unmodified checkpoint restored its earlier answer byte for byte. | The edited answer repeated its target word. The v2 run covered restart while powered. [Edit and rollback](../kit/evidence/physical-history-named-edit-rollback.json) |
 
+On the 18 frozen queue-history inputs, a later software-reference trial added prompt-derived token proposals and verified up to 16 positions per pass. Verifier blocks fell from 138 to 82. All 18 answers, emitted token IDs and first calibration readings matched the baseline. This trial measured software parity and pass counts. Physical latency for the new mode requires a board run. [Prompt-copy parity record](../kit/evidence/history-prompt-copy-parity.json)
+
 ## Find the supporting records
 
 - [Measured results](../docs/results.md) and [engineering reference](../docs/engineering.md) cover the workload, hardware configuration and reproduction procedures.
