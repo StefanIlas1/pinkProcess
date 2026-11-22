@@ -1,4 +1,4 @@
-# pinkProcess product acceptance
+# Forecast acceptance study
 
 A Mac user can discover the paired PYNQ-Z2, query a resident quantized analytical model on imported or live data, inspect its answer and model version, and change or restore its weights. A usable queue warning reaches the Mac at least one second before the first subsequent queue episode, within the ten-second prediction horizon.
 

@@ -444,7 +444,7 @@ All five answers reproduced their references. Switching versions forced the sele
 
 For the 50-step saved replay, the projection engine reads 2.452 GB of weights. Block-RAM activation reuse reduces calculated activation traffic from 769 MB to 24.9 MB. At one 64-bit read per clock and 50 MHz, weight and activation reads alone require at least 6.19 s under perfect utilization. This excludes score writes, any secondary vocabulary scan, processor work, and transport. The 1.92 s arithmetic-only and 6.19 s read-only bounds can overlap. Reaching two seconds on this workload would require changing the memory path or the work itself. [Reproducible traffic calculation](https://github.com/StefanIlas1/pinkProcess/blob/2a06251/kit/evidence/diagnosis-latency-floor.json)
 
-**Frontend integration history.** Commit `ddb1969` imported the expert-cartridge study and briefly shipped its interface in the Mac bundle. The current product uses the dark native kit workspace recovered from main at `13bc182`. The cartridge study retains its separate card-based evaluation and kernel vectors. [Historical study](SPEC.md) · [Dark workspace source](https://github.com/StefanIlas1/pinkProcess/blob/13bc182/pinkprocess/kit.html)
+**Frontend integration history.** Commit `ddb1969` imported the expert-cartridge study and briefly shipped its interface in the Mac bundle. The current product is the PYNQ Process Mac app, whose interface is `pinkprocess/kit.html`. The cartridge study keeps its own card-based evaluation and kernel vectors. [Earlier prototype](docs/earlier-prototype.md)
 
 ### Timing closure and physical comparison of the command queue
 

@@ -1,4 +1,6 @@
-# Reproduce the pinkProcess PYNQ-Z2 demo
+# Reproduce the TinyStories PYNQ-Z2 demo (historical)
+
+This is the reproduction kit for the earlier TinyStories research build, which came before the telemetry diagnosis model. It is kept so that work can be repeated. For the current product see the [README](../README.md).
 
 This kit contains the integer TinyStories checkpoint, pinned C runtime and
 tokenizer, 50 MHz PYNQ-Z2 overlay, and the scripts for the Mac and board
@@ -13,7 +15,7 @@ your browser. It runs the quantized model on your Mac using Python 3.10
 or newer and a C compiler such as `cc` from Xcode Command Line Tools.
 
 Enter a line to start a story and click **Generate story**. The default
-prompt is the Lily → Tim → Lily demonstration. Apply the included patch
+prompt is the Lily, then Tim, then Lily demonstration. Apply the included patch
 and run it again to see Tim, then roll back to restore Lily.
 
 From this repository, start the same Mac browser app with these commands.
@@ -36,7 +38,7 @@ python3 -m lm_reference.reproduce \
   --tokenizer inputs/tok512.bin --out results/mac
 ```
 
-The reference should replay 17,920 RTL scores and reproduce Lily → Tim →
+The reference should replay 17,920 RTL scores and reproduce Lily, then Tim, then
 Lily in the six-prompt live socket test. Check `results/mac/suite.json`
 and `results/mac/live.json`.
 
