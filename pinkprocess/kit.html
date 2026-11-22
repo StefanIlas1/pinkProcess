@@ -66,6 +66,7 @@ code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{ove
   </div>
   <div id="live-result" class="stack divider" role="status" hidden>
     <h3 id="live-asked"></h3>
+    <p id="generation-timing" class="muted" hidden></p>
     <p id="answer-timing" class="muted" aria-live="off" hidden></p>
     <p id="live-answer" class="answer"></p><small id="live-evidence"></small>
     <details id="answer-readings" hidden><summary>Readings behind this answer</summary><p id="answer-measurements"></p></details>
@@ -227,6 +228,7 @@ function clearLiveAnswer() {
   el("live-result").hidden = true;
   answerSnapshot = null;
   answerCapture = null;
+  el("generation-timing").hidden = true;
 }
 function displayWeightVersions(data) {
   languageWeights = data;
@@ -421,6 +423,17 @@ el("connect").onclick = () => run(async () => {
 el("disconnect").onclick = () => run(async () => {autoUsb = false; setState(await request("disconnect")); clearAnswer(); clearLiveAnswer(); show("Board disconnected.");});
 el("live-question").oninput = controls;
 function askLive(question, captured=null) {
+  const startedAt = performance.now();
+  let firstTextAt = null;
+  function recordDisplay(complete) {
+    const now = performance.now();
+    if (firstTextAt === null) firstTextAt = now;
+    const elapsed = at => ((at - startedAt) / 1000).toFixed(1) + " s";
+    const timing = el("generation-timing");
+    timing.textContent = "First text " + elapsed(firstTextAt) +
+      (complete ? " · Complete answer " + elapsed(now) : "");
+    timing.hidden = false;
+  }
   run(async () => {
     clearLiveAnswer();
     show(captured ? "Replaying captured evidence…" : "Reading board evidence and preparing your answer…");
@@ -437,7 +450,11 @@ function askLive(question, captured=null) {
       el("live-result").hidden = false;
       try {
         while (data.state === "running") {
-          show(data.partial_answer || "");
+          if (data.partial_answer) {
+            el("live-answer").textContent = data.partial_answer;
+            if (firstTextAt === null) recordDisplay(false);
+          }
+          show("");
           await refreshStream();
           await new Promise(resolve => setTimeout(resolve, 1500));
           data = await request("answer_progress", {job_id:data.job_id});
@@ -483,7 +500,8 @@ function askLive(question, captured=null) {
       el("answer-measurements").textContent = facts.join(" ");
     }
     el("live-result").hidden = false;
-    if (!data.job_id) await refreshStream();
+    if (data.job_id) recordDisplay(true);
+    else await refreshStream();
     if (answerCapture && !captured && languageWeights?.capture_listing_supported) await refreshSavedCaptures();
     show("");
   });
