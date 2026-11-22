@@ -53,7 +53,7 @@ class FlanProjectionTests(unittest.TestCase):
         digest = hashlib.sha256(memoryview(self.weights)).hexdigest()
         self.assertEqual(self.model.install_weight_version(SimpleNamespace(patch=None, classifier_sha256=digest)), digest)
 
-    def test_decoder_quantization_uses_native_when_available_and_falls_back(self):
+    def test_activation_quantization_uses_native_when_available_and_falls_back(self):
         model = self.model
         calls = []
 
@@ -66,7 +66,20 @@ class FlanProjectionTests(unittest.TestCase):
         for sample in (x[:1], x):
             for actual, expected in zip(model._quantize_activations(sample), model.quantize_activations(sample)):
                 np.testing.assert_array_equal(actual, expected)
-        self.assertEqual(calls, [(1, 3)])
+        self.assertEqual(calls, [(1, 3), (2, 3)])
+
+    def test_grouped_cross_attention_keeps_single_query_reductions(self):
+        rng = np.random.default_rng(1209)
+        for rows in (2, 7, 8, 15, 16):
+            for length in (1, 63, 128, 131):
+                def heads(n):
+                    return rng.standard_normal((n, 6, 64)).astype(np.float32).transpose(1, 0, 2)
+
+                q, k, v = heads(rows), heads(length), heads(length)
+                expected = np.concatenate([self.model._attend(q[:, i:i+1], k, v, 0)
+                                           for i in range(rows)], axis=0)
+                actual = self.model._attend_each_cross_query(q, k, v, 0)
+                np.testing.assert_array_equal(actual.view(np.uint32), expected.view(np.uint32))
 
     def test_argmax_preserves_first_step_calibration_and_times_generation(self):
         model = self.model
