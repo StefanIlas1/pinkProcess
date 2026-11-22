@@ -506,6 +506,49 @@ The signed sums use these byte offsets from the classifier's AXI base address:
 Four signed INT8 values are packed into each little-endian word. The live
 demo feeds the same raw scores into token selection.
 
+### Benchmark the FLAN projection accelerator
+
+The overlay source includes the existing telemetry classifier and an 8 × 8
+signed INT8 projection engine. One command reads packed activations and
+weights from board DDR through the Zynq HP0 port and writes INT32 scores back.
+Two buffers alternate between loading and computing. Encoder mode processes
+eight positions by eight outputs. Single-position decoder mode processes 64
+outputs in parallel. The FPGA re-reads operands across output and position
+tiles. Board benchmark timings include packing, buffer allocation, cache
+maintenance, the register round trip, and unpacking.
+
+From the repository root, export the two block-zero self-attention query
+projections from the recorded incident. Use a Python environment with NumPy
+and the reconstructed diagnostic checkpoint.
+
+```sh
+python3 -m kit.export_projection build/flan/diagnostic \
+  kit/evidence/three-diagnosis-traces-physical.json build/flan
+python3 fpga/check_projection.py \
+  --system-capture build/flan/projection-encoder.npz \
+  --system-capture build/flan/projection-decoder.npz
+```
+
+The replay checks every signed score against integer matrix multiplication,
+including the padded encoder positions. The AXI testbench also exercises
+backpressure, burst boundaries, and a failed write followed by a retry.
+Simulation clock counts exclude host setup.
+
+On a board reserved for benchmarking, run these commands for each captured
+NPZ. The physical runners acquire the normal service's exclusive lock before
+loading an overlay. `--simulate` runs only the software check.
+
+```sh
+python3 -m kit.benchmark_projection --bitstream OLD/pinkprocess.bit --capture CAPTURE.npz
+python3 -m kit.benchmark_projection_overlay --bitstream NEW/pinkprocess.bit --capture CAPTURE.npz
+```
+
+The live kit server accepts `--projection-overlay` with its normal language
+model arguments. This enables the prototype for the first self-attention
+query projection in each FLAN stack on a compatible overlay. The other
+projections use the existing classifier. Compare complete answers and live
+telemetry separately from isolated projection times.
+
 ### Remote Vivado build on Western GAUL
 
 On 2026-11-20, the Mac reached Western University's SSH service at

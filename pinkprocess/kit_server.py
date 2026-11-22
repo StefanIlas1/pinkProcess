@@ -1,6 +1,7 @@
 """Board service for querying the persistently installed FPGA model."""
 
 import argparse
+from contextlib import ExitStack
 import hmac
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
@@ -109,16 +110,20 @@ def main():
     parser.add_argument("--demo-source", choices=("sqlite",))
     parser.add_argument("--language-model", type=Path)
     parser.add_argument("--manifest-sha256")
+    parser.add_argument("--projection-overlay", action="store_true",
+                        help="Enable the experimental DDR accelerator for the first FLAN query projections.")
     args = parser.parse_args()
     if bool(args.language_model) != bool(args.manifest_sha256):
         parser.error("Supply both the language model directory and its pinned manifest hash.")
+    if args.projection_overlay and args.language_model is None:
+        parser.error("Supply the language model when enabling the projection overlay.")
     token = (args.identity / "token").read_text().strip()
     if len(token) != 64:
         raise ValueError("Invalid kit token.")
     tls = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     tls.load_cert_chain(args.identity / "board.crt", args.identity / "board.key")
     stopped = Event()
-    with board_lock():
+    with board_lock(), ExitStack() as resources:
         model = TelemetryDevice(PynqClassifier(args.bitstream), args.profiles, args.state_file)
         with KitServer(("", PORT), Handler) as server:
             server.tls = tls
@@ -133,7 +138,18 @@ def main():
                 state_dir = args.state_file.parent
                 versions = WeightVersionStore.from_flan(state_dir / "lm-versions.sqlite", args.language_model,
                                                         manifest_sha256=args.manifest_sha256)
-                runtime = Flan(args.language_model, TiledMatvec(model.classifier, lock=server.model_lock))
+                query_projection = None
+                if args.projection_overlay:
+                    from lm_reference.projection_overlay import QueryProjection, projection_mmio
+
+                    mmio = projection_mmio(model.classifier.overlay, required=False)
+                    if mmio is not None:
+                        from pynq import allocate
+
+                        query_projection = QueryProjection(mmio, allocate)
+                        resources.callback(query_projection.close)
+                runtime = Flan(args.language_model, TiledMatvec(model.classifier, lock=server.model_lock),
+                               query_projection=query_projection)
 
                 def snapshot():
                     with server.model_lock:

@@ -57,7 +57,7 @@ class UnigramTokenizer:
 class Flan:
     """The fabric receives every learned dense projection, including lm_head."""
 
-    def __init__(self, path, fabric, *, reference=False):
+    def __init__(self, path, fabric, *, reference=False, query_projection=None):
         if fabric is None and not reference:
             raise ValueError("A fabric backend is required for board generation.")
         path = Path(path)
@@ -67,6 +67,7 @@ class Flan:
                   for k, v in manifest["tensors"].items()}
         self.tokenizer = UnigramTokenizer(path / "tokenizer.json")
         self.fabric = fabric
+        self.query_projection = query_projection
         self._original = None
         self.first_output_activation = None
         self.first_output_max = None
@@ -109,8 +110,11 @@ class Flan:
             # Float32 represents every integer sum exactly for these dimensions.
             dots = q.astype("float32") @ w.astype("float32").T
         else:
-            project = getattr(self.fabric, "matmat_array", None) or self.fabric.matmat
-            dots = np.asarray(project(memoryview(w), q, w.shape[0]), dtype="float32")
+            dots = self.query_projection.project(name, w, q) if self.query_projection is not None else None
+            if dots is None:
+                project = getattr(self.fabric, "matmat_array", None) or self.fabric.matmat
+                dots = project(memoryview(w), q, w.shape[0])
+            dots = np.asarray(dots, dtype="float32")
             self.fabric_projections += 1
         row_scales = self.t[name + ".weight.scale"]
         if name == "lm_head" and self.first_output_max is None:

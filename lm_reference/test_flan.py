@@ -19,6 +19,7 @@ class FlanProjectionTests(unittest.TestCase):
         self.model.t = {"lm_head.weight": self.weights.copy(),
                         "lm_head.weight.scale": np.array([0.3, 0.25], dtype="float32")}
         self.model._original = None
+        self.model.query_projection = None
         self.model.first_output_activation = None
         self.model.first_output_max = None
         self.model.fabric_projections = 0
@@ -50,3 +51,33 @@ class FlanProjectionTests(unittest.TestCase):
             self.model.install_weight_version(version)
         digest = hashlib.sha256(memoryview(self.weights)).hexdigest()
         self.assertEqual(self.model.install_weight_version(SimpleNamespace(patch=None, classifier_sha256=digest)), digest)
+
+    def test_named_accelerator_preserves_scaling_and_legacy_fallback(self):
+        from kit.test_benchmark_projection_overlay import FakeOverlay
+        from lm_reference.projection_overlay import QueryProjection
+
+        class Legacy:
+            calls = 0
+
+            def matmat_array(self, weights, activations, rows):
+                self.calls += 1
+                matrix = np.frombuffer(weights, dtype=np.int8).reshape(rows, -1)
+                return activations.astype(np.int32) @ matrix.astype(np.int32).T
+
+        model = self.model
+        model.fabric = Legacy()
+        overlay = FakeOverlay()
+        names = ("encoder.block.0.layer.0.SelfAttention.q", "decoder.block.0.layer.0.SelfAttention.q",
+                 "encoder.block.0.layer.0.SelfAttention.k", "encoder.block.1.layer.0.SelfAttention.q")
+        inputs = np.array([[-1., 0.25, -0.5, 1.], [0.32, -0.8, 0.5, 0.4]], dtype=np.float32)
+        for name in names:
+            model.t[name + ".weight"] = model.t["lm_head.weight"]
+            model.t[name + ".weight.scale"] = model.t["lm_head.weight.scale"]
+        batches = (inputs, inputs[:1], inputs, inputs)
+        expected = [model.linear(name, batch) for name, batch in zip(names, batches)]
+        model.query_projection = QueryProjection(overlay, overlay.allocate)
+        for name, batch, reference in zip(names, batches, expected):
+            np.testing.assert_array_equal(model.linear(name, batch), reference)
+        self.assertEqual(overlay.events.count(("launch",)), 2)
+        self.assertEqual(model.fabric.calls, 6)
+        self.assertEqual(model.fabric_projections, 8)

@@ -95,6 +95,13 @@ class TiledMatvec:
         """Return exact signed sums, before any row scaling or clipping."""
         return self.matmat(weights, (activation,), rows)[0]
 
+    def _gather_array_tile(self, np, chunk):
+        if chunk.shape[1] != WIDTH:
+            padded = np.zeros((chunk.shape[0], WIDTH), dtype=np.uint8)
+            padded[:, :chunk.shape[1]] = chunk
+            chunk = padded
+        return chunk.tobytes()
+
     def matmat(self, weights, activations, rows):
         """Project a batch of vectors, reusing each tile across the batch."""
         if len(activations) == 0:
@@ -177,12 +184,7 @@ class TiledMatvec:
             for first_row in range(0, rows, tile_rows):
                 last_row = min(first_row + tile_rows, rows)
                 row_count = last_row - first_row
-                chunk = weights[first_row:last_row, column:column + WIDTH]
-                if chunk.shape[1] != WIDTH:
-                    padded = np.zeros((row_count, WIDTH), dtype=np.uint8)
-                    padded[:, :chunk.shape[1]] = chunk
-                    chunk = padded
-                tile = chunk.tobytes()
+                tile = self._gather_array_tile(np, weights[first_row:last_row, column:column + WIDTH])
                 for i, planes in vectors.items():
                     partials = scratch[:len(planes), :row_count]
                     with self.lock:
