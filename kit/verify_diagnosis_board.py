@@ -31,13 +31,15 @@ def idle(stream):
     return stream.get("state") == "idle" and stream.get("session") is None
 
 
-def poll_board(board, job, timeout, *, interval=2, clock=monotonic, wait=sleep):
+def poll_board(board, job, timeout, *, interval=2, clock=monotonic, wait=sleep, observe=None):
     end = clock() + timeout
     while clock() < end:
         result = board.request("lm_result", job_id=job["job_id"])
         if result["state"] == "complete":
             return result
         require(result["state"] == "running", result.get("error", "Board inference failed."))
+        if observe:
+            observe(result)
         wait(interval)
     raise RuntimeError("Timed out waiting for board inference.")
 
@@ -147,7 +149,23 @@ def verify(board, send, base, reference, report, *, timeout=7200, clock=monotoni
         if progress:
             progress(f"{expected['case']} captured as {job['capture_id']}. Fixture released.")
         started = clock()
-        result = poll_board(board, job, timeout, clock=clock, wait=wait)
+        next_update = started + 30
+
+        def observe(status):
+            nonlocal next_update
+            elapsed = clock() - asked
+            if status.get("partial_answer") and "first_partial_seconds" not in run:
+                run["first_partial_seconds"] = round(elapsed, 3)
+            if clock() >= next_update:
+                run["last_running_status"] = {
+                    "seconds": round(elapsed, 3), "fabric_projections": status.get("fabric_projections"),
+                }
+                if progress:
+                    progress(f"{expected['case']} is still running at {elapsed:.0f}s "
+                             f"with {status.get('fabric_projections', 0)} fabric projections.")
+                next_update = clock() + 30
+
+        result = poll_board(board, job, timeout, clock=clock, wait=wait, observe=observe)
         finished = clock()
         run.update(result=result, wait_seconds=round(finished - started, 3),
                    question_to_answer_seconds=round(finished - asked, 3),
