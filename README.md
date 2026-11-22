@@ -508,6 +508,15 @@ demo feeds the same raw scores into token selection.
 
 ### Benchmark the FLAN projection accelerator
 
+On the PYNQ-Z2, the first encoder query projection went from 2,100.19 ms
+to 81.48 ms (25.8×) and the single-position decoder query projection went
+from 43.14 ms to 12.13 ms (3.56×). These are medians of five complete calls
+per backend. Both matched the signed integer reference. In a separate
+concurrency run, 13 telemetry submissions started while the projection core
+was busy and all forecasts matched the sequential run. The routed design
+met timing at 50 MHz and implemented the array with LUTs. [Physical measurements](kit/evidence/physical-systolic-projection.json)
+· [Matched bitstream and hardware handoff](build/projection-qualified)
+
 The overlay source includes the existing telemetry classifier and an 8 × 8
 signed INT8 projection engine. One command reads packed activations and
 weights from board DDR through the Zynq HP0 port and writes INT32 scores back.
