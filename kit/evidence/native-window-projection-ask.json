@@ -1,0 +1,63 @@
+{
+  "case": "native-window unseen ask",
+  "source": "board's authenticated immutable capture listing",
+  "capture": {
+    "id": "b299c45fbd6944b8d215f4bf26e01ea8a41c031ee527d570dfcce7a97fb245b0",
+    "question": "I just opened this pool dashboard mid-shift. Do the latest readings show anyone still in line, how bad did it get, and what should I measure before blaming the database?",
+    "captured_at_ms": 1795327614942,
+    "reading_time_ms": 328400,
+    "baseline": {
+      "answer": "The backlog is ongoing: 71 requests are waiting now. The peak was 74. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "version": {
+        "name": "original",
+        "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+        "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+        "target_row": null
+      }
+    }
+  },
+  "active_when_retrieved": {
+    "name": "original",
+    "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+    "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+    "target_row": null
+  },
+  "versions_when_retrieved": [
+    {
+      "name": "original",
+      "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+      "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+      "target_row": null
+    },
+    {
+      "name": "Astra Now 0f137b5e",
+      "checkpoint_sha256": "f999e7e8702926b53fac296b01db4bdcf0f5d7e5213015e159c04b7de67a2b3b",
+      "classifier_sha256": "e8a86ac9e3caa3cd0a1fbe21070f2b480a6470e02ec0ba70f657b4eca1ceeebf",
+      "target_row": 852
+    },
+    {
+      "name": "Astra reduce Now",
+      "checkpoint_sha256": "5e7e7fb46365c5dd5d1da46e846eab6048f47fe28b1af0f4eabe4216775d3fa1",
+      "classifier_sha256": "bd792f8b76f79721c6510cc5bf4d257477198cdf1dc1a745fa6ee9da05d7da69",
+      "target_row": 852
+    }
+  ],
+  "board_boot_id": "60d4e64d-214c-493f-b29c-eb7e4d7e9a2f",
+  "stream_when_retrieved": {
+    "state": "ready",
+    "fresh": true,
+    "source": "Board SQLite demo (generated traffic)",
+    "origin": "demo",
+    "fpga_submissions": 3761,
+    "sample_count": 600
+  },
+  "board_release": "9cbdcab551734ec5e4a7",
+  "timed_mac_app_commit": "0e02735",
+  "observed_in_native_window": {
+    "first_text_seconds": 13.4,
+    "complete_seconds": 48.6,
+    "latest_reading_ms_at_completion": 374300
+  },
+  "capture_answer_sha256": "1788d7446f8e61bae91a711d6b3541884e8ba5eb09af7ea415720e2b3e8a52cb",
+  "qualification": "The native WebKit window rendered these times. Its saved answer was retrieved separately through the Mac app's authenticated capture list."
+}
