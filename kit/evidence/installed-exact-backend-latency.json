@@ -1,0 +1,150 @@
+{
+  "method": "Chrome driving the installed production Mac interface, paired with the physical PYNQ-Z2. Unmodified Mac release. Each stage had one dataset_ask. The sample picker used pool-recovery at capacity 12; the file picker used the frozen healthy CSV at capacity 4.",
+  "cases": {
+    "sample": {
+      "question": "What's wrong with my system?",
+      "answer": "The queue cleared by the final sample. The peak was 87. The FPGA warns that requests may start waiting within the next ten seconds. Cause unknown. Measure arrivals and connection hold times.",
+      "weights": {
+        "name": "Queue history v2",
+        "checkpoint_sha256": "4ab0bbf9e8c249bf20d08fbe1a1d03321d0819164c5571c13f6ac42df2289f9d",
+        "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+        "target_row": null,
+        "base_name": "Queue history v2"
+      },
+      "before_ui": "First text 10,210 ms \u00b7 Complete answer 24,646 ms",
+      "after_ui": "First text 8,986 ms \u00b7 Complete answer 20,063 ms",
+      "measured_panel": "Measured queue history \u00b7 The queue reached 87 waiting and cleared to 0 by the final reading.",
+      "backend": "PYNQ-Z2 connected",
+      "learned_projections": 802,
+      "fabric_projections": 802
+    },
+    "healthy": {
+      "question": "What's wrong with my system?",
+      "answer": "No backlog was observed; 0 requests are waiting now. The peak was 0. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "weights": {
+        "name": "Queue history v2",
+        "checkpoint_sha256": "4ab0bbf9e8c249bf20d08fbe1a1d03321d0819164c5571c13f6ac42df2289f9d",
+        "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+        "target_row": null,
+        "base_name": "Queue history v2"
+      },
+      "before_ui": "First text 10,919 ms \u00b7 Complete answer 19,071 ms",
+      "after_ui": "First text 9,013 ms \u00b7 Complete answer 16,936 ms",
+      "measured_panel": "Measured queue history \u00b7 No requests waited in the recorded readings.",
+      "backend": "PYNQ-Z2 connected",
+      "learned_projections": 510,
+      "fabric_projections": 510
+    }
+  },
+  "mac_release": "82e73d6",
+  "board_release": "a30952119f47f82fdf30",
+  "fresh_live_query": {
+    "case": "unseen",
+    "question": "From the current readings, is anyone still waiting at the end of the window, and what does the evidence say about the cause?",
+    "utc_started": "2026-11-22T09:19:30.550586+00:00",
+    "capture_id": "9592c6f69f7f4dcbc3c72fe820a3d1b7efab3eeabc3eca1ac2b86085b4e0c367",
+    "active": {
+      "name": "Queue history v2",
+      "checkpoint_sha256": "4ab0bbf9e8c249bf20d08fbe1a1d03321d0819164c5571c13f6ac42df2289f9d",
+      "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+      "target_row": null,
+      "base_name": "Queue history v2"
+    },
+    "answer": "Active queue. Waiting rose from 0 to 62. The peak was 73. The FPGA predicts the queue will remain nonempty over the next ten seconds. Cause unknown. Measure arrivals and connection hold times.",
+    "first_text_seconds": 11.90380612500303,
+    "complete_seconds": 22.768066415999783,
+    "learned_projections": 875,
+    "accelerated_projections": 875,
+    "telemetry_before": {
+      "state": "ready",
+      "fresh": true,
+      "source": "Board SQLite demo (generated traffic)",
+      "origin": "demo",
+      "fpga_submissions": 1652,
+      "sample_count": 600
+    },
+    "telemetry_after": {
+      "state": "ready",
+      "fresh": true,
+      "source": "Board SQLite demo (generated traffic)",
+      "origin": "demo",
+      "fpga_submissions": 1884,
+      "sample_count": 600
+    },
+    "samples": [
+      {
+        "elapsed_seconds": 10.03139658299915,
+        "learned_projections": 138,
+        "accelerated_projections": 138,
+        "stream": {
+          "state": "ready",
+          "fresh": true,
+          "source": "Board SQLite demo (generated traffic)",
+          "origin": "demo",
+          "fpga_submissions": 1756,
+          "sample_count": 600
+        }
+      },
+      {
+        "elapsed_seconds": 20.719280165998498,
+        "learned_projections": 801,
+        "accelerated_projections": 801,
+        "stream": {
+          "state": "ready",
+          "fresh": true,
+          "source": "Board SQLite demo (generated traffic)",
+          "origin": "demo",
+          "fpga_submissions": 1863,
+          "sample_count": 600
+        }
+      }
+    ],
+    "projection_phases": {
+      "native_commands": 656,
+      "allocations": 0,
+      "allocate_ns": 0,
+      "weight_cache_hits": 437,
+      "weight_cache_misses": 137,
+      "pack_weights_ns": 598527629,
+      "pack_activations_ns": 146710447,
+      "upload_activations_ns": 137872577,
+      "activation_bytes": 7618560,
+      "shared_activation_uploads_saved": 296,
+      "upload_weights_ns": 1056352499,
+      "weight_bytes": 362938368,
+      "commands": 656,
+      "device_roundtrip_ns": 10610392356,
+      "download_ns": 155068476,
+      "score_bytes": 55303680,
+      "unpack_ns": 801928491,
+      "fused_batch_groups": 120,
+      "fused_batch_commands_saved": 176,
+      "fused_decoder_groups": 80,
+      "fused_decoder_commands_saved": 120,
+      "resident_host_cache_bypasses": 5,
+      "resident_weight_hits": 40,
+      "packed_weight_bytes": 66519040,
+      "workspace_bytes": 4456448,
+      "resident_weight_bytes": 16449536,
+      "tokenize_ns": 26999576,
+      "encoder_stack_ns": 7912829922,
+      "decoder_stacks_ns": 10663041322,
+      "vocabulary_ns": 3437528098,
+      "decode_text_ns": 2221127,
+      "verification_blocks": 11,
+      "proposed_tokens": 74,
+      "accepted_proposals": 39
+    },
+    "measured_latest": {
+      "busy": 4,
+      "time_ms": 170400,
+      "waiting": 62
+    },
+    "peak_waiting": {
+      "busy": 4,
+      "time_ms": 134000,
+      "waiting": 73
+    },
+    "source_scope": "Fresh window from the board's generated SQLite workload; one-second client polling."
+  }
+}
