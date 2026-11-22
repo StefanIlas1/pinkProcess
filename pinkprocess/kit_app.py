@@ -4,7 +4,9 @@ import argparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
-from threading import Lock
+from threading import Lock, Thread
+from time import monotonic, sleep, time
+from uuid import uuid4
 from urllib.parse import parse_qs, urlsplit
 import webbrowser
 
@@ -12,13 +14,11 @@ from .live_analyst import analyze as analyze_live_evidence
 from .backlog import VERSION as BACKLOG_VERSION
 from .kit_dataset import DEMO_CAPACITY, demo_csv, prepare_dataset
 from .astra_edit import propose
-from .kit_transport import BoardTransport
+from .kit_transport import BoardOperationError, BoardTransport
 from .kit_data import DATA_DIR, MAX_IMPORT_BYTES, SAMPLES, STYLES, DatasetStore, answer_question, parse_table, profile_table, sample_csv, timed
 from .kit_accounts import CALLBACK_PATH, Accounts
 from .kit_export import export_action
 from .kit_evidence import analyst_evidence, live_answer
-from threading import Thread
-from time import sleep, time
 import secrets
 
 
@@ -50,6 +50,8 @@ class Kit:
         self.host = None
         self.evidence_supported = False
         self.lm_supported = False
+        self.connection_epoch = 0
+        self.syntheses = {}
         self.table = None
         self.table_name = ""
         self.table_profile = None
@@ -183,6 +185,8 @@ class Kit:
 
     def disconnect(self):
         self.host = None
+        self.connection_epoch += 1
+        self.syntheses.clear()
         self.evidence_supported = False
         self.lm_supported = False
         self.transport.close()
@@ -192,6 +196,8 @@ class Kit:
             raise ValueError("Connect a board first.")
         try:
             result = self.transport.request(action, **params)
+        except BoardOperationError:
+            raise
         except (OSError, RuntimeError):
             self.disconnect()
             raise
@@ -308,6 +314,98 @@ class Kit:
         return dict(host=host, snapshot=snapshot, answer=diagnosis["answer"],
                     analyst_model=diagnosis["model"], analyst_location="Mac")
 
+    def synthesize_dataset(self, synthesis_id, epoch, data, context):
+        dataset_id = data["dataset_id"]
+        try:
+            if not context["ready"]:
+                with self.lock:
+                    self.require_synthesis_connection(epoch)
+                    job = self.board("lm_dataset_calibrate", dataset_id=dataset_id)
+                    self.syntheses[synthesis_id]["job_id"] = job["job_id"]
+                deadline = monotonic() + 1200
+                while monotonic() < deadline:
+                    with self.lock:
+                        self.require_synthesis_connection(epoch)
+                        result = self.board("lm_result", job_id=job["job_id"])
+                        if result["state"] == "complete":
+                            context = self.board("lm_dataset_calibration", dataset_id=dataset_id,
+                                                 target_row=data["target_row"])
+                            break
+                        if result["state"] == "failed":
+                            raise RuntimeError(result.get("error", "Board calibration failed."))
+                        self.syntheses[synthesis_id].update(
+                            {key: result[key] for key in ("partial_answer", "fabric_projections",
+                                                         "accelerated_projections") if key in result})
+                    sleep(1)
+                if not context["ready"]:
+                    raise RuntimeError("No calibration activation was returned for this dataset.")
+            with self.lock:
+                self.require_synthesis_connection(epoch)
+                self.syntheses[synthesis_id]["stage"] = "authoring"
+            response = propose(data["instruction"], context)
+            with self.lock:
+                self.require_synthesis_connection(epoch)
+                self.syntheses[synthesis_id]["stage"] = "saving"
+            # Keep connection identity and the durable save in one critical section.
+            with self.lock:
+                self.require_synthesis_connection(epoch)
+                dataset = self.board("lm_dataset_save", dataset_id=dataset_id, name=data["name"],
+                                     selected_model=context["selected_model"], target_row=context["target_row"],
+                                     response=response, base_sha256=context["base_sha256"])
+                self.syntheses[synthesis_id].update(state="complete", stage="ready", dataset=dataset)
+        except Exception as exc:
+            with self.lock:
+                if epoch == self.connection_epoch:
+                    self.syntheses[synthesis_id].update(state="failed", stage="failed", error=str(exc))
+
+    def require_synthesis_connection(self, epoch):
+        if self.host is None or self.connection_epoch != epoch:
+            raise RuntimeError("The paired board connection changed during synthesis.")
+
+    def dataset_action(self, action, data):
+        required, optional = {
+            "dataset_upload": ({"csv", "capacity"}, {"name"}),
+            "dataset_models": ({"dataset_id"}, set()),
+            "dataset_select": ({"dataset_id", "name"}, set()),
+            "dataset_ask": ({"dataset_id", "question"}, {"stage"}),
+            "dataset_synthesize": ({"dataset_id", "name", "target_row", "instruction"}, set()),
+            "dataset_synthesis_progress": ({"synthesis_id"}, set()),
+        }[action]
+        fields = {key: value for key, value in data.items() if key != "action"}
+        if required - fields.keys() or fields.keys() - (required | optional):
+            raise ValueError("Invalid dataset action fields.")
+        if action == "dataset_synthesis_progress":
+            synthesis_id = fields["synthesis_id"]
+            if not isinstance(synthesis_id, str) or synthesis_id not in self.syntheses:
+                raise ValueError("Unknown synthesis job.")
+            return dict(host=self.host, **self.syntheses[synthesis_id])
+        if action != "dataset_synthesize":
+            return dict(host=self.host, **self.board("lm_" + action, **fields))
+        if any(job["state"] == "running" for job in self.syntheses.values()):
+            raise ValueError("A model synthesis is in progress.")
+        instruction = fields["instruction"]
+        name = fields["name"]
+        if not isinstance(instruction, str) or not 0 < len(instruction.strip()) <= 1000:
+            raise ValueError("Describe the model edit in 1–1000 characters.")
+        if (not isinstance(name, str) or not 0 < len(name) <= 80 or name != name.strip()
+                or not name.isprintable() or name.casefold() == "original"):
+            raise ValueError("Choose a new model name of up to 80 characters.")
+        context = self.board("lm_dataset_calibration", dataset_id=fields["dataset_id"],
+                             target_row=fields["target_row"])
+        if len(self.syntheses) >= 32:
+            del self.syntheses[next(iter(self.syntheses))]
+        synthesis_id = uuid4().hex
+        job = dict(synthesis_id=synthesis_id, dataset_id=fields["dataset_id"], state="running",
+                   stage="authoring" if context["ready"] else "calibrating")
+        self.syntheses[synthesis_id] = job
+        try:
+            Thread(target=self.synthesize_dataset, args=(synthesis_id, self.connection_epoch, fields, context),
+                   daemon=True).start()
+        except RuntimeError:
+            del self.syntheses[synthesis_id]
+            raise
+        return dict(host=self.host, **job)
+
     def action(self, data):
         if not isinstance(data, dict):
             raise ValueError("Expected a JSON object.")
@@ -343,6 +441,9 @@ class Kit:
         if action == "data_ask":
             return self.ask_data(data)
         with self.lock:
+            if action in ("dataset_upload", "dataset_models", "dataset_select", "dataset_ask",
+                          "dataset_synthesize", "dataset_synthesis_progress"):
+                return self.dataset_action(action, data)
             if action == "answer_progress":
                 return {**self.board("lm_result", job_id=data.get("job_id")), "host": self.host}
             if action == "lm_captures":

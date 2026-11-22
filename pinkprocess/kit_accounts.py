@@ -48,7 +48,7 @@ def clean_text(value, limit=MAX_TEXT):
     return value[:limit] if isinstance(value, str) else ""
 
 
-VARIANT_STYLES = ("short", "summary", "transcript", "table")
+VARIANT_STYLES = ("short", "summary", "final", "transcript", "table")
 
 
 def clean_variants(value):

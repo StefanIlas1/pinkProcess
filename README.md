@@ -1,18 +1,16 @@
 # pinkProcess
 
-PYNQ Process is the Mac app in this repo. It is a tool for live data: you bring
-a stream or a file, it picks a small quantized model for that data, and you ask
-questions about it. It queries a connected PYNQ-Z2 about connection-pool
-telemetry. The kit scores incoming readings and uses a quantized FLAN-T5-small
-language model to answer questions about a captured incident. The Mac app
-shows the live stream alongside that capture and lets you save, select and
-restore language-model weights.
+PYNQ Process (this repo is still named pinkProcess) is an Apple Silicon Mac app for
+live data: you bring a stream or a file, it picks a small quantized model for that
+data, and you ask questions about it. It investigates connection-pool telemetry on a
+paired PYNQ-Z2. Open the dark workspace, import a CSV or connect to the live feed,
+and ask the kit what changed. The board runs a quantized FLAN-T5-small diagnostic
+model. Its FPGA performs the learned integer matrix projections and its ARM
+processor coordinates generation.
 
-The native Mac app uses Mohsen’s frontend design with Stefan’s board discovery,
-live telemetry, quantized FLAN runtime, and named weight controls. Use the
-native app for live diagnoses. Mohsen’s original cartridge prototype, card
-decks, C++ reference kernel and scoped-pruning study are retained for
-reproduction. [Cartridge study and commands](SPEC.md) · [Research notes](research.md)
+[Download the Mac app](https://github.com/StefanIlas1/pinkProcess/raw/refs/heads/main/build/mac-kit/pinkProcess-Mac-arm64.zip) · [Operator walkthrough](#query-the-pinkprocess-kit) · [Research notebook](research.md)
+
+The [physical CSV workflow record](kit/evidence/physical-csv-workflow.json) includes the saved edit, actual answers, and timings. A question and follow-up took 53.4 s and 56.9 s on the test kit, with all 4,744 learned projections per answer on the FPGA.
 
 ## PYNQ Process app
 
@@ -113,6 +111,13 @@ while retaining both named edits.
 [Physical cold-cycle record](kit/evidence/physical-diagnosis-cold-cycle.json) ·
 [Native version switching and restart](kit/evidence/physical-diagnosis-warm-boot.json)
 
+A later native-window question exposed an important diagnostic error. The kit
+counted 27 requests waiting and a recent peak of 92, but the model called
+the queue cleared. First text took 10.5 seconds and the complete diagnosis
+took 46.2 seconds. The pinned software reference generated the same error.
+Inspect the measured readings alongside each answer.
+[Native-window quality record](kit/evidence/native-window-projection-quality-miss.json)
+
 For the queue-onset predictor, the operator-facing quality measure is how often
 a warning appears on the Mac at least one second before a real request queues,
 alongside misses and false alarms.
@@ -127,19 +132,46 @@ The app connects to a provisioned PYNQ-Z2.
    Mac if the USB appliance relay is enabled, or use a reachable Ethernet
    network. Open **pinkProcess.app**. Allow macOS local-network access when
    prompted. The app scans on launch. Press **Find boards**; a single kit connects
-   on its own, or use **Connect by address**. Press it again after plugging in. The active model version comes from the board.
-2. Check the status strip at the bottom of the window for the source name, reading age and status. This
-   kit starts a SQLite connection-pool demo on the board. Its generated traffic
-   is labeled **Simulated**. The board gathers data while the app is closed.
-3. Ask a question in your own words, such as **What looks wrong with our system,
-   and what should I check next?** On kits provisioned with the resident model, FLAN runs on the board and
-   receives the latest board measurements, their recent history and the FPGA
-   forecast. It generates an answer for that capture. Expand **Readings behind
-   this answer** to check it against the source. The four measurement and
-   forecast shortcuts return their exact board values directly.
-4. Under **Queue-onset model**, choose a profile and select **Apply weights**
-   to change the resident onset coefficients and threshold. **Restore base**
-   restores the original profile. The backlog model has its own weights.
+   on its own, or use **Connect by address**. Press it again after plugging in.
+   The active model version comes from the board.
+2. Press **Import data** and choose a CSV. With a board connected, a queue CSV is
+   uploaded to the board and the app asks for the pool capacity. To try it,
+   download the [synthetic recovery CSV](kit/examples/pool-recovery.csv)
+   and enter **4**. Board uploads accept the integer columns `time_ms,busy,waiting`, in that order,
+   with 50–2,097 consecutive samples at 100 ms intervals, up to 100 KiB. The sample contains
+   60 readings. A queue
+   reaches 12 and drains to zero before the final reading. Other CSV and JSON lines
+   files are analyzed on this Mac instead. The **Table** answer shows the
+   measurements that let you check the answer.
+3. Under **Skills**, pick a saved **Answer skill** for this dataset, or choose
+   **Synthesize model**. To synthesize
+   a version, supply a name, a single-token target (e.g. `Now`), and an edit
+   request. The kit calibrates on this CSV if needed. The signed-in Codex CLI
+   on the Mac asks Astra to design an edit, then the kit saves the quantized
+   output row under that name and selects it for this dataset. Synthesis
+   reuses the provisioned FPGA circuit and the original FLAN checkpoint.
+   Each dataset query loads its selected version and restores the live model
+   afterward. Existing versions can be selected without Astra.
+4. Type a question such as **Did the queue clear, and what was its peak?**
+   or use the microphone key. Native dictation uses on-device speech recognition.
+   Allow speech and microphone access if prompted, check the editable
+   transcript, then submit. The answer bubble opens on **Short**, which reveals
+   the first complete sentence as it arrives. **Summary** excerpts the completed
+   answer. **Final** preserves the model's full wording. **Transcript** lists
+   timestamped events and **Table** lists the key readings. All three model views come
+   from one generation.
+5. Ask again for a follow-up such as **Which reading supports that conclusion?**
+   The kit uses this upload and the previous exchange. The live board feed keeps
+   its own samples while you work with a file. **Readings behind this answer**
+   shows what the uploaded readings measure.
+
+For a continuously arriving source, use the live board feed in the same
+window. Check the source name, age and status in the bottom strip before asking a question.
+The built-in SQLite workload is labeled **Simulated**. **Readings behind
+this answer** opens the incident captured for a live question. The predefined
+measurement and forecast shortcuts retrieve their exact board values.
+**Queue-onset model** and the backlog model have separate predictor weights; the
+active queue skill is chosen under **Skills**.
 
 The board processor keeps the most recent 600 readings, prepares fixed-point
 features and submits each eligible reading to the FPGA as it arrives. After
@@ -211,10 +243,19 @@ for the data path and evidence.
 
 ### Set up another kit or Mac
 
-Factory provisioning requires a PYNQ-Z2 with the PYNQ environment and the
-matching `.bit` and `.hwh`. Run `python3 kit/provision.py --install USER@HOST`
-from the checkout. This installs the boot service and pairs the provisioning
-Mac. Add `--sqlite-demo` to enable generated board-local traffic. For another Mac, transfer the kit's pairing JSON privately, then select
+For a fresh diagnostic kit, first [reconstruct the diagnostic checkpoint](profiles/flan-telemetry-diagnostic/README.md).
+Provision the board with the matched, timing-qualified overlay and pinned model:
+
+```sh
+python3 kit/provision.py --install USER@HOST \
+  --overlay build/projection-queue-qualified/pinkprocess.bit \
+  --language-model build/flan/diagnostic-install \
+  --manifest-sha256 14d7912c66a78edf407bbb272f7aa04b953af920827a9a035275194ec4f2f2f2
+```
+
+Follow the [projection configuration](#benchmark-the-flan-projection-accelerator)
+to enable all learned projections on the fabric. Provisioning installs the
+boot service and pairs the provisioning Mac. Add `--sqlite-demo` to enable generated board-local traffic. For another Mac, transfer the kit's pairing JSON privately, then select
 **PYNQ Process → Import Kit Pairing…**. The file grants access to query the kit
 and change its active profile.
 
@@ -567,7 +608,7 @@ PYNQ-Z2 board preset builds the overlay on an x86-64 Windows or Linux host.
    RTL design. The outputs are `pinkprocess.bit` and its matching
    `pinkprocess.hwh`, which describes the register map. This workflow adapts
    Mohsen’s reference-vector check before synthesis to the same overlay used
-   for live forecasts and language-model projections. [Mohsen’s PR #1](https://github.com/StefanIlas1/pinkProcess/pull/1)
+   for live forecasts and language-model projections. [Reference circuit check on main](cartridge/check.py)
 3. Upload both files, the reference JSON, and `fpga/check_classifier.py`
    to the same folder on the board using Jupyter. Open a Jupyter Terminal
    in that folder and run:
@@ -684,7 +725,7 @@ On boards with sufficient contiguous memory, add
 FPGA-readable buffers. The driver uses the existing streaming workspace if an
 allocation fails, and the active version determines what the FPGA reads.
 
-The next overlay adds an eight-entry queue and stores each activation tile of
+The [timing-qualified overlay](build/projection-queue-qualified) adds an eight-entry queue and stores each activation tile of
 depth up to 1,024 in block RAM for reuse across output tiles. The block-level
 simulation covers AXI stalls, queue bounds, interrupted batches, retry, and
 the streaming fallback above that depth. To build the optional vocabulary
@@ -696,6 +737,13 @@ first output step preserves the full calibration data for edits. Earlier
 images continue to support the all-matrix configuration above. For isolated
 qualification, add `--hardware-counters` to `kit.benchmark_projection_overlay`
 on a queue-capable image to record useful MAC cycles and 64-bit DDR beats.
+
+The installed kit uses the queue, the shared activation cache, and a 16 MiB
+vocabulary weight budget. FPGA vocabulary reduction remains opt-in. The
+same saved incident completed in 48.289 s cold and 46.944 s warm with
+software token selection on the new image; all learned matrix operations
+ran on the FPGA. The named edit, rollback, and a new incident each reproduced
+their reference answer. [Physical comparison](kit/evidence/physical-projection-queue-comparison.json)
 
 ### Remote Vivado build on Western GAUL
 
@@ -986,9 +1034,9 @@ write took 0.70 ms to apply and 0.70 ms to restore. See
 `build/pynq/repro-board/suite.json` for the verified report and
 `build/pynq/cold-repro-timing.json` for transfer timings.
 
-### Browser operator
+### Historical TinyStories browser operator
 
-To query the quantized model from your MacBook, use the Mac query kit
+To reproduce the early TinyStories weight-edit experiment, use the archived Mac query kit
 at `build/pynq/pinkprocess-mac-query.tar.gz` or start the local operator
 with `--software`. Enter a story prompt in your browser and generate
 with the active weights. See [Mac query instructions](lm_reference/HANDOFF.md#query-tinystories-on-the-mac).

@@ -13,6 +13,7 @@ from threading import Condition, Event, Thread
 
 from fpga.check_classifier import board_lock
 from lm_reference.live_demo import PynqClassifier
+from .kit_dataset import MAX_DATASET_REQUEST
 from .kit_transport import DISCOVER, PORT, discovery_proof
 from .telemetry_device import TelemetryDevice
 
@@ -59,9 +60,12 @@ class Handler(BaseHTTPRequestHandler):
             return self.reply(403, "Kit pairing rejected.")
         try:
             length = int(self.headers.get("Content-Length", 0))
-            if self.headers.get_content_type() != "application/json" or not 0 < length <= 65536:
-                raise ValueError("Expected a JSON request of at most 64 KiB.")
+            limit = MAX_DATASET_REQUEST if self.path == "/v1/query" else 65536
+            if self.headers.get_content_type() != "application/json" or not 0 < length <= limit:
+                raise ValueError(f"Expected a JSON request of at most {limit // 1024} KiB.")
             command = json.loads(self.rfile.read(length))
+            if length > 65536 and (not isinstance(command, dict) or command.get("op") != "lm_dataset_upload"):
+                raise ValueError("Expected a JSON request of at most 64 KiB.")
             if (self.path == "/v1/query" and isinstance(command, dict)
                     and isinstance(command.get("op"), str) and command["op"].startswith("lm_")):
                 language = getattr(self.server, "language", None)
@@ -75,6 +79,7 @@ class Handler(BaseHTTPRequestHandler):
                     result = self.server.model.handle(command)
                     if command.get("op") == "status":
                         result["lm_supported"] = getattr(self.server, "language", None) is not None
+                        result["datasets_supported"] = result["lm_supported"]
         except (UnicodeError, ValueError, TypeError, KeyError) as exc:
             return self.reply(422, str(exc))
         except (RuntimeError, OSError) as exc:
@@ -180,7 +185,11 @@ def main():
                     with server.model_lock:
                         return model.handle(dict(op="stream_evidence", window_ms=60000))
 
-                server.language = BoardLanguage(runtime, versions, state_dir, snapshot)
+                def dataset_score(window, capacity):
+                    with server.model_lock:
+                        return model._score_stream_window(window, capacity, stream=False)
+
+                server.language = BoardLanguage(runtime, versions, state_dir, snapshot, dataset_score=dataset_score)
             server.authorization = ("Bearer " + token).encode()
             discovery = Thread(target=advertise, args=(token, stopped), daemon=True)
             discovery.start()

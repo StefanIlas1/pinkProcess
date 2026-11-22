@@ -9,6 +9,7 @@ import unittest
 
 from lm_reference.weight_versions import ORIGINAL, WeightLayout, WeightVersionStore
 from .board_language import BoardLanguage
+from .kit_dataset import DEMO_CAPACITY, demo_csv
 
 
 QUESTION = "Has this connection pool recovered?"
@@ -107,6 +108,59 @@ class BoardLanguageTest(unittest.TestCase):
     def save(self, coordinator, name="Astra attempt"):
         return coordinator.handle({"op": "lm_save", "name": name, "target_row": 1,
                                    "response": {"row": [-127, 0, 127, 22]}})
+
+    def test_dataset_selection_is_scoped_and_followup_uses_prior_answer(self):
+        runtime = FakeRuntime()
+        score_calls = []
+
+        def score(window, capacity):
+            score_calls.append((len(window), capacity))
+            return {"model": "pool_wait_logistic", "alert": True, "version": "test",
+                    "time_ms": window[-1].time_ms, "horizon_ms": 10000}
+
+        service = BoardLanguage(runtime, self.store(), self.state_dir,
+                                lambda: self.fail("Dataset inference touched the live stream."), dataset_score=score)
+        dataset = service.handle(dict(op="lm_dataset_upload", csv=demo_csv(), capacity=DEMO_CAPACITY, name="Raw CSV"))
+        dataset_id = dataset["dataset_id"]
+        self.assertEqual(score_calls, [(50, DEMO_CAPACITY)])
+        self.assertEqual(dataset["snapshot"]["origin"], "dataset")
+        self.assertEqual(dataset["summary"]["sample_count"], dataset["snapshot"]["sample_count"])
+        self.assertNotIn("csv", dataset)
+        self.save(service)
+        service.handle(dict(op="lm_dataset_select", dataset_id=dataset_id, name="Astra attempt"))
+        question = "What is the latest forecast?"
+        first = self.finish(service, service.handle(dict(op="lm_dataset_ask", dataset_id=dataset_id,
+                                                         question=question, stage="final")))
+        self.assertEqual(first["active"]["name"], "Astra attempt")
+        self.assertIn("CSV measurements", first["answer"])
+        self.assertIn("The FPGA warns", first["answer"])
+        self.assertEqual(runtime.installed.name, ORIGINAL)
+        next_job = service.handle(dict(op="lm_dataset_ask", dataset_id=dataset_id, question=QUESTION,
+                                       stage="followup"))
+        self.assertIn("Previous question: " + question, self.finish(service, next_job)["answer"])
+        reopened = BoardLanguage(FakeRuntime(), self.store(), self.state_dir, lambda: self.observation,
+                                 dataset_score=score)
+        reply = reopened.handle(dict(op="lm_dataset_models", dataset_id=dataset_id))
+        self.assertEqual(reply["selected_model"], "Astra attempt")
+        self.assertEqual(reopened.status()["active"]["name"], ORIGINAL)
+
+    def test_dataset_calibration_saves_a_real_scoped_weight_version(self):
+        service = BoardLanguage(FakeRuntime(), self.store(), self.state_dir, lambda: self.observation,
+                                dataset_score=lambda window, capacity: None)
+        dataset_id = service.handle(dict(op="lm_dataset_upload", csv=demo_csv(),
+                                         capacity=DEMO_CAPACITY))["dataset_id"]
+        action = dict(op="lm_dataset_calibration", dataset_id=dataset_id, target_row=1)
+        self.assertFalse(service.handle(action)["ready"])
+        calibration = service.handle(dict(op="lm_dataset_calibrate", dataset_id=dataset_id))
+        self.assertEqual(self.finish(service, calibration)["state"], "complete")
+        context = service.handle(action)
+        self.assertTrue(context["ready"])
+        response = service.handle(dict(op="lm_dataset_save", dataset_id=dataset_id, name="CSV synthesis",
+                                       target_row=1, response={"row": [127, 0, -127, 2]},
+                                       base_sha256=context["base_sha256"], selected_model=context["selected_model"]))
+        self.assertEqual(response["selected_model"], "CSV synthesis")
+        self.assertEqual(self.store().get("CSV synthesis").patch.payload, bytes([127, 0, 129, 2]))
+        self.assertEqual(self.store().active().name, ORIGINAL)
 
     def test_capture_freezes_evidence_while_inference_and_telemetry_continue(self):
         runtime = FakeRuntime(block=True)

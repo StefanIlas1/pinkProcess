@@ -10,10 +10,15 @@ final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigati
     private var origin: URL?
     private var closing = false
     private var view: WKWebView!
+    private lazy var speechInput = SpeechInput { [weak self] event in
+        guard let self, self.isTrustedPage(self.view.url) else { return }
+        self.notifyPage("window.pinkprocessSpeechInput?.(event)", ["event": event])
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let config = WKWebViewConfiguration()
         config.userContentController.add(self, name: "toggleFullscreen")
+        config.userContentController.add(self, name: "speechInput")
         view = WKWebView(frame: .zero, configuration: config)
         view.uiDelegate = self
         view.navigationDelegate = self
@@ -32,6 +37,7 @@ final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigati
         service.standardOutput = pipe
         service.terminationHandler = { _ in
             DispatchQueue.main.async {
+                self.speechInput.cancel()
                 if !self.closing { self.fail("The local service stopped. Reopen PYNQ Process to reconnect.") }
             }
         }
@@ -44,7 +50,7 @@ final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigati
         DispatchQueue.global().async {
             let data = pipe.fileHandleForReading.availableData
             let address = String(decoding: data, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
-            guard let url = URL(string: address), url.scheme == "http", url.host == "127.0.0.1", url.port != nil else { return }
+            guard let url = URL(string: address), isWorkbenchPage(url, origin: url) else { return }
             DispatchQueue.main.async {
                 self.origin = url
                 self.view.load(URLRequest(url: url))
@@ -54,8 +60,7 @@ final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigati
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        guard let url = navigationAction.request.url, let origin = origin,
-              url.scheme == origin.scheme, url.host == origin.host, url.port == origin.port else {
+        guard isTrustedPage(navigationAction.request.url) || isSignInStart(navigationAction.request.url, origin: origin) else {
             if let external = navigationAction.request.url, external.scheme == "https" { NSWorkspace.shared.open(external) }
             decisionHandler(.cancel)
             return
@@ -63,8 +68,28 @@ final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigati
         decisionHandler(.allow)
     }
 
+    private func isTrustedPage(_ url: URL?) -> Bool {
+        isWorkbenchPage(url, origin: origin)
+    }
+
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        speechInput.cancel()
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        if isTrustedPage(webView.url) { speechInput.handle("ready") }
+    }
+
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        speechInput.cancel()
+    }
+
     func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters,
                  initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
+        guard webView === view, frame.isMainFrame, isTrustedPage(frame.request.url) else {
+            completionHandler(nil)
+            return
+        }
         let panel = NSOpenPanel()
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
@@ -72,10 +97,24 @@ final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigati
     }
 
     func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard let source = message.frameInfo.request.url, message.frameInfo.isMainFrame,
-              source.scheme == origin?.scheme, source.host == origin?.host, source.port == origin?.port,
-              message.name == "toggleFullscreen", message.body as? String == "toggle" else { return }
-        window.toggleFullScreen(nil)
+        guard message.webView === view, message.frameInfo.isMainFrame,
+              isTrustedPage(message.frameInfo.request.url),
+              let action = message.body as? String else { return }
+        if message.name == "speechInput" {
+            let sourceOrigin = message.frameInfo.securityOrigin
+            guard sourceOrigin.protocol == origin?.scheme, sourceOrigin.host == origin?.host,
+                  sourceOrigin.port == origin?.port,
+                  action != "start" || (NSApp.isActive && window.isKeyWindow) else { return }
+            speechInput.handle(action)
+            return
+        }
+        if message.name == "toggleFullscreen", action == "toggle" {
+            window.toggleFullScreen(nil)
+        }
+    }
+
+    private func notifyPage(_ code: String, _ arguments: [String: Any]) {
+        view.callAsyncJavaScript(code, arguments: arguments, in: nil, in: .page, completionHandler: nil)
     }
 
     @objc func pairKit(_ sender: Any?) {
@@ -138,6 +177,7 @@ final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigati
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
     func applicationWillTerminate(_ notification: Notification) {
         closing = true
+        speechInput.cancel()
         if service.isRunning { service.terminate() }
     }
 }

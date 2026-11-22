@@ -1,0 +1,99 @@
+{
+  "synthetic": true,
+  "dataset_id": "f0c0c8ccbf4747eaa67658e49722ef5a",
+  "forecast": {
+    "ok": true,
+    "backend": "PYNQ-Z2",
+    "model": "queue_outlook",
+    "version": "queue-outlook-v2",
+    "weights_sha256": "13c28113cc4ef20b76d3c746f4c1192f33bd2341240ba4ed1e878b13ad4b6ce6",
+    "scores": [
+      71,
+      3
+    ],
+    "horizon_ms": 10000,
+    "time_ms": 6900,
+    "targets": [
+      "persists",
+      "grows"
+    ]
+  },
+  "initial_live_version": {
+    "name": "original",
+    "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+    "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+    "target_row": null
+  },
+  "synthesis": {
+    "state": "complete",
+    "stages": [
+      "calibrating",
+      "authoring",
+      "ready"
+    ],
+    "first_calibration_text_seconds": 9.935407416996895,
+    "elapsed_seconds": 54.49533445900306,
+    "error": null,
+    "selected_model": "CSV Calibration Check 216b7c6"
+  },
+  "cases": [
+    {
+      "stage": "final",
+      "question": "What is the current queue, and what does the forecast predict?",
+      "state": "complete",
+      "active": {
+        "name": "CSV Calibration Check 216b7c6",
+        "checkpoint_sha256": "55aacad33fe90af43212ce5efa00cc0abcf2fcc75533bd7dd0b1ba8bd4d46597",
+        "classifier_sha256": "d46d6c7756d72d00d8101c3187af3da5909964d94ca11f276176eca2a915f952",
+        "target_row": 852
+      },
+      "answer": "Now 8 requests are waiting Now. Now the peak was 8. Now the FPGA predicts the queue will remain nonempty over the next ten seconds. Now the cause is unknown. Measure request arrivals and connection hold times. Now are two cases. Now are ongoing. Now is the cause. Now is the",
+      "first_text_seconds": 9.199936207995052,
+      "complete_seconds": 53.391850333006005,
+      "fabric_projections": 4744,
+      "accelerated_projections": 4744,
+      "error": null
+    },
+    {
+      "stage": "followup",
+      "question": "Using the same measurements, what should we measure before blaming the database?",
+      "state": "complete",
+      "active": {
+        "name": "CSV Calibration Check 216b7c6",
+        "checkpoint_sha256": "55aacad33fe90af43212ce5efa00cc0abcf2fcc75533bd7dd0b1ba8bd4d46597",
+        "classifier_sha256": "d46d6c7756d72d00d8101c3187af3da5909964d94ca11f276176eca2a915f952",
+        "target_row": 852
+      },
+      "answer": "Now 8 requests are waiting Now the peak was 8. Now the FPGA predicts the queue will remain nonempty over the next ten seconds. Now the cause is unknown. Measure request arrivals and connection hold times. Now the cause is unknown Now 8. Now the FPGA predicts the queue will remain nonempt",
+      "first_text_seconds": 12.160281750009744,
+      "complete_seconds": 56.92855212499853,
+      "fabric_projections": 4744,
+      "accelerated_projections": 4744,
+      "error": null
+    }
+  ],
+  "live_weights_preserved": true,
+  "existing_versions_preserved": true,
+  "live_fpga_submissions_before": 362,
+  "live_fpga_submissions_after": 2126,
+  "capture": {
+    "sample_count": 70,
+    "start_ms": 0,
+    "end_ms": 6900,
+    "latest": {
+      "time_ms": 6900,
+      "busy": 4,
+      "waiting": 8
+    },
+    "peak_waiting": {
+      "time_ms": 4200,
+      "busy": 4,
+      "waiting": 8
+    }
+  },
+  "execution": "Current Mac action server through the installed Mac app\u2019s existing USB relay to the paired PYNQ-Z2.",
+  "host_and_board_source": "216b7c6",
+  "timing_scope": "Timing starts once the action endpoint returns the initial job.",
+  "same_uploaded_snapshot_for_both_questions": true,
+  "output_quality": "The actual phrase Now repeated after the calibrated one-row edit; preserved here verbatim."
+}

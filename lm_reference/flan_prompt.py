@@ -6,7 +6,7 @@ def telemetry_prompt(question, evidence):
         raise ValueError("Enter a question of up to 500 characters.")
     latest = evidence["latest"]
     obs = evidence.get("observations") or {}
-    origin = "demo" if evidence.get("origin") == "demo" else "live"
+    origin = {"demo": "demo", "dataset": "CSV"}.get(evidence.get("origin"), "live")
     sentences = [f"Connection pool {origin} measurements ({evidence.get('state', 'unknown')}).",
                  f"Current queue: {latest['waiting']} waiting requests.",
                  f"Current occupancy: {latest['busy']} of {evidence['capacity']} connections busy."]

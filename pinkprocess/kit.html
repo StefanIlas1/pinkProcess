@@ -40,7 +40,7 @@ body[data-boot] .app{visibility:hidden}
 .app.nosidebar{grid-template-columns:26px 0 minmax(0,1fr) clamp(280px,24vw,420px)}.app.nosidebar .center{padding-left:calc(var(--peek-w) - 12px)}.app.nosidebar .side{display:none}
 @media(max-width:699px),(max-height:479px){.app{display:none}#tiny{display:grid}dialog{display:none!important}}
 .top{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 28px;border-bottom:1px solid var(--line)}
-.logo{display:flex;align-items:center;gap:12px;user-select:none;white-space:nowrap}.logo img{max-height:34px;max-width:200px;display:block}
+.logo{display:flex;align-items:center;gap:12px;user-select:none;white-space:nowrap}.logo img{max-height:34px;max-width:200px;display:block}.logo .brandmark{display:block;height:30px;width:auto}
 .wordmark{display:inline-flex;align-items:baseline;font:600 1.45rem/1 ui-rounded,"SF Pro Rounded",system-ui,sans-serif;letter-spacing:-.045em;text-shadow:0 1px 2px rgba(0,0,0,.35)}.wordmark b{font-weight:600;color:var(--pink)}.wordmark span{color:#c9cdd1;margin-left:.15em}
 .top-right{display:flex;align-items:center;gap:20px}
 .chip{position:relative;display:flex;align-items:center;gap:10px;font-size:.78rem;color:var(--dim);cursor:default}
@@ -109,7 +109,7 @@ button.icon{width:32px;height:32px;padding:0;border-radius:50%;font-size:1.1rem;
 .empty{position:absolute;inset:0;display:grid;align-content:start;justify-items:start;gap:16px;text-align:left;padding:clamp(16px,10vh,120px) max(5%,calc((100% - 960px)/2)) 0}.empty p{color:var(--dim);max-width:520px}
 #samples{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-start;align-items:center}
 .offline-view{position:relative;z-index:1;display:none;height:100vh;align-content:center;justify-items:center;gap:16px;text-align:center;padding:24px}
-.offline-view p{color:var(--dim);max-width:520px}.offline-view .logo{margin-bottom:12px}.offline-view .wordmark{font-size:2.4rem}.offline-view .logo img{max-height:56px}
+.offline-view p{color:var(--dim);max-width:520px}.offline-view .logo{margin-bottom:12px}.offline-view .brandmark{height:56px}.offline-view .logo img{max-height:56px}
 body.offline .app{display:none}body.offline .offline-view{display:grid}
 @media(max-width:699px),(max-height:479px){body.offline .offline-view{display:none}}
 #notice{margin:0 auto;width:min(960px,90%);font-size:.9rem;color:var(--dim)}#notice:empty{display:none}#notice[data-error="true"]{color:var(--ink);font-weight:600}
@@ -141,6 +141,8 @@ code{display:none}@media(min-height:780px){code{display:block}}
 @media(max-height:780px){.section>h2,#model-note{display:none}.section{padding:14px 18px;gap:8px}.rail .section button{padding:6px 12px}.rail .section select,.rail .section input,.rail .section textarea{padding:6px 10px}.stack{gap:8px}.section label{gap:4px}}
 @media(max-height:640px){.app{grid-template-rows:50px minmax(0,1fr) 26px}.toolbar{padding:6px 28px}.section{padding:12px 18px;gap:8px}.side{padding:12px}h1{font-size:1.7rem}.empty{gap:10px}#ask-form{margin-top:4px}.msg{padding:9px 12px}.skeleton{gap:8px}}
 #library-dialog{width:min(94vw,640px)}
+#plan-list{max-height:28vh;overflow-y:auto}#synth-form textarea{resize:none;width:100%}
+.mic{width:34px;height:34px;padding:0;border:0;border-radius:50%;display:inline-grid;place-items:center;color:var(--dim);background:transparent;flex:none}.mic:hover:not(:disabled){color:var(--ink);background:#2c3035;border:0}.mic.on{color:var(--green);animation:blink .6s infinite alternate}
 .lib-tools{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;margin-bottom:10px}.lib-tools select,.lib-tools input{padding:6px 10px;font-size:.85rem}
 #library-list{max-height:min(46vh,360px);overflow-y:auto}
 .model-item .meta{font:.74rem var(--mono);color:var(--dim);margin:2px 0}.model-item .acts{display:flex;align-items:center;gap:8px;flex:none}
@@ -227,6 +229,7 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
     </div>
     <div class="bar">
       <input id="live-question" type="text" maxlength="500" placeholder="Ask about your data" aria-label="Your question" autocomplete="off" required>
+      <button class="mic" id="mic" type="button" aria-label="Dictate" title="Dictate" hidden><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="1.5" width="5" height="8" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5v2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
       <button class="send" id="ask-live" type="submit" aria-label="Send" title="Send" disabled>&crarr;</button>
     </div>
   </form>
@@ -309,10 +312,24 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
   <div class="row"><button id="mcp-copy" class="solid">Copy</button><small>Coming soon: one-click setup</small></div>
 </dialog>
 
+<dialog id="capacity-dialog">
+  <div class="head"><h2>Upload to the board</h2><button class="text" data-close>Skip</button></div>
+  <form id="capacity-form" class="stack">
+    <label>Pool capacity<input id="capacity-input" type="number" min="1" step="1" value="32" required></label>
+    <small>The board analyzes this file on the FPGA. Skip to analyze it here instead.</small>
+    <div class="row"><button class="solid" type="submit">Upload</button></div>
+  </form>
+</dialog>
+
 <dialog id="plan-dialog">
   <div class="head"><h2>Synthesize model</h2><button class="text" data-close>Close</button></div>
   <p class="dim" id="plan-intro"></p>
   <div id="plan-list"></div>
+  <form id="synth-form" class="stack" style="margin-top:12px">
+    <div class="two"><label>Name<input id="synth-name" maxlength="80" required></label><label>Word<input id="synth-target" maxlength="80" placeholder="Now" required></label></div>
+    <label>What should it do differently?<textarea id="synth-instruction" maxlength="1000" rows="2" required></textarea></label>
+    <div class="row"><button id="synth-run" class="solid" type="submit">Synthesize</button><small id="synth-status"></small></div>
+  </form>
 </dialog>
 
 <script>
@@ -328,7 +345,7 @@ const STAGE_PHRASES = [
   ["Running the decoder, one word at a time","Picking the most likely next word","Tying the readings to a likely cause","Trimming the answer to the point","Writing the answer in plain words","Almost there, the board is still working","Hang tight, this runs on the board itself","Checking the board is still healthy"]
 ];
 const ON_TOPIC = /queue|request|connection|load|busy|wait|latenc|slow|system|server|traffic|capacity|pool|fpga|board|error|outage|\bdown\b|fail|spike|forecast|warn|peak|health|status|wrong|problem|issue|trend|grow|drain|backlog|arriv|timeout|check next|\bdata\b|reading|average|\bmean\b|\bmax\b|\bmin\b|temperature|sales|revenue|order|events?|summar|happen|unusual|anomal|\bnow\b|latest|\brows?\b|column/i;
-const LOGO_WORD = '<span class="wordmark" role="img" aria-label="PYNQ Process"><b>pynq</b><span>process</span></span>';
+const LOGO_WORD = '<svg class="brandmark" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PYNQ Process" viewBox="0 0 202 46" fill="none"><title>PYNQ Process</title><g stroke-linecap="round" stroke-linejoin="round"><path d="M6 18v22m0-16c0-10 14-11 14 0 0 9-10 12-14 5 M29 18v14m.1-24v.1 M39 18v14m0-8c0-9 13-11 13-1v9 M62 7v25m12-15-11 9m5-4 8 10" stroke="#db759a" stroke-width="7.1"/><path d="M6 18v22m0-16c0-10 14-11 14 0 0 9-10 12-14 5 M29 18v14m.1-24v.1 M39 18v14m0-8c0-9 13-11 13-1v9 M62 7v25m12-15-11 9m5-4 8 10" stroke="#ffb5d0" stroke-width="5.7"/><g transform="translate(4 0) scale(.92 1)"><path d="M88 32V9h7c13 0 12 16 0 16h-7 M110 18v14m0-8c1-5 4-7 8-7 M137 24.5c0 11-15 11-15 0s15-11 15 0z M155 19c-10-7-18 10-7 13 2 1 5 0 7-1 M162 25h12c0-10-13-10-14-1-1 8 7 11 13 7 M190 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#dfa0b7" stroke-width="7.1"/><path d="M88 32V9h7c13 0 12 16 0 16h-7 M110 18v14m0-8c1-5 4-7 8-7 M137 24.5c0 11-15 11-15 0s15-11 15 0z M155 19c-10-7-18 10-7 13 2 1 5 0 7-1 M162 25h12c0-10-13-10-14-1-1 8 7 11 13 7 M190 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#fff1f5" stroke-width="5.7"/><path d="M205 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#dfa0b7" stroke-width="7.1"/><path d="M205 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#fff1f5" stroke-width="5.7"/><g transform="translate(136 15) rotate(17)" fill="#ff8ab6" stroke="#632d46" stroke-width="1.2"><path d="M0 0c-2-3-6-5-7-3s0 6 2 6l5-2 5 2c2 0 3-4 2-6s-5 0-7 3z"/><circle r="1.8" fill="#ffd1e3"/></g></g><path d="m68 9 3-4m2 7 5-3m-4 6 5-.4" stroke="#ffb5d0" stroke-width="1.4"/></g></svg>';
 const BEST_FOR = {
   "queue-onset-logistic":"spotting queue build-up in connection pools",
   "flan-t5-small-int8":"explaining what went wrong in plain words",
@@ -367,6 +384,8 @@ let status = null, address = "", busy = true, interaction = 0, pollPending = fal
 let languageWeights = null, savedCaptures = [], olderCaptures = null, latestStream = null, answerCapture = null;
 let messages = [], chatId = null, chats = [], user = null, auth0 = false, demo = false, loginWatch = null, models = null, samples = [];
 let demoPublished = [];
+let boardDataset = null, boardHost = "", boardCalibrated = false, lastCsvText = "", voiceState = "idle", voiceBefore = "";
+const speechInput = window.webkit?.messageHandlers?.speechInput;
 let dataset = null, datasetLabel = "", chosenModel = null, accepted = false, notes = "", notesTimer = null;
 let answerStyle = "short", lastLatency = null, activeTab = "notes", lastTimings = null;
 const query = new URLSearchParams(location.search || location.hash.slice(1));
@@ -504,8 +523,8 @@ function controls() {
   el("new-chat").disabled = busy;
   const languageAvailable = !busy && Boolean(status?.lm_supported && languageWeights);
   el("weight").disabled = busy || !online;
-  el("lm-label").hidden = !status?.lm_supported;
-  el("lm-selection").disabled = !languageAvailable;
+  el("lm-label").hidden = !status?.lm_supported && !boardDataset;
+  el("lm-selection").disabled = !languageAvailable && !(boardDataset && !busy);
   el("rollback").disabled = busy || !online || status.version === "pool-logistic-v1";
   el("lm-restore").hidden = !status?.lm_supported;
   el("lm-restore").disabled = !languageAvailable || languageWeights?.active.name === "original";
@@ -514,6 +533,12 @@ function controls() {
   el("lm-author").disabled = !languageAvailable || !versionNamed || !el("lm-instruction").value.trim();
   el("lm-save").disabled = !languageAvailable || !versionNamed;
   el("publish-skill").disabled = busy || !skillToPublish();
+  const synthReady = !busy && Boolean(boardDataset);
+  for (const id of ["synth-name", "synth-target", "synth-instruction"]) el(id).disabled = !synthReady;
+  el("synth-run").disabled = !synthReady || ["synth-name", "synth-target", "synth-instruction"].some(id => !el(id).value.trim());
+  if (!el("synth-status").dataset.live) el("synth-status").textContent = synthReady ? "" : "Upload a queue CSV to a connected board to synthesize.";
+  el("mic").disabled = busy || ["requesting", "stopping"].includes(voiceState);
+  el("live-question").readOnly = ["requesting", "listening", "stopping"].includes(voiceState);
   el("saved-incident").disabled = busy || !savedCaptures.length;
   el("replay-saved").disabled = busy || !status?.lm_supported || !el("saved-incident").value;
   el("more-incidents").disabled = busy;
@@ -565,12 +590,19 @@ function renderModel() {
 }
 function renderLanguageSelect() {
   const selector = el("lm-selection");
+  if (boardDataset?.models?.length) {
+    selector.replaceChildren(...boardDataset.models.map(model => new Option(model.name, model.name)));
+    selector.value = boardDataset.selected_model || "";
+    selector.title = "Model for this dataset";
+    return;
+  }
   const versions = languageWeights?.versions || [];
   selector.replaceChildren(...versions.map(version => new Option(version.name, version.name)));
   selector.value = languageWeights?.active?.name || "";
   selector.title = languageWeights?.active?.checkpoint_sha256 ? "Fingerprint " + languageWeights.active.checkpoint_sha256 : "";
 }
 function setState(data) {
+  if (boardDataset && data.host !== boardHost) {boardDataset = null; boardCalibrated = false;}
   if (data.host !== address || !data.status?.lm_supported) {
     displayWeightVersions(null);
     displaySavedCaptures();
@@ -714,13 +746,15 @@ async function openChat(id) {
 function newSession() {
   if (busy) return;
   messages = []; chatId = null; dataset = null; datasetLabel = ""; chosenModel = null; accepted = false; notes = "";
+  boardDataset = null; boardCalibrated = false; lastCsvText = "";
   answerCapture = null; lastLatency = null; lastTimings = null; clearTimeout(notesTimer);
   el("notes").value = ""; el("live-question").value = "";
   pathReset(); show(""); renderMessages(); controls();
   if (status) el("live-question").focus();
 }
-const STYLE_ORDER = ["short", "summary", "transcript", "table"];
-const STYLE_NAMES = {short:"Short", summary:"Summary", transcript:"Transcript", table:"Table"};
+const STYLE_ORDER = ["short", "summary", "final", "transcript", "table"];
+const LOCAL_STYLES = ["short", "summary", "transcript", "table"];
+const STYLE_NAMES = {short:"Short", summary:"Summary", final:"Final", transcript:"Transcript", table:"Table"};
 function ensureVariants(message) {
   if (message.role !== "answer" || message.variants) return;
   const style = STYLE_ORDER.includes(message.style) ? message.style : "short";
@@ -764,7 +798,7 @@ function renderMessages() {
     const ready = readyStyles(message);
     if (message.pending || ready.length > 1) {
       const tabs = document.createElement("div"); tabs.className = "vtabs"; tabs.setAttribute("role", "tablist");
-      for (const style of STYLE_ORDER) {
+      for (const style of message.pending ? (message.styles || LOCAL_STYLES) : STYLE_ORDER) {
         const done = Boolean(message.variants[style]);
         if (!done && !message.pending) continue;
         const tab = document.createElement("button");
@@ -844,7 +878,7 @@ function updateThinking() {
   }
 }
 function pendingEntry() {
-  return {role:"answer", pending:true, readings:"", variants:{}, view:"short", picked:false, defaultStyle:answerStyle, start:Date.now(), stage:0, stageStart:Date.now(), order:STAGE_PHRASES.map(group => shuffled(group.map((_, index) => index)))};
+  return {role:"answer", pending:true, styles:LOCAL_STYLES, readings:"", variants:{}, view:"short", picked:false, defaultStyle:answerStyle, start:Date.now(), stage:0, stageStart:Date.now(), order:STAGE_PHRASES.map(group => shuffled(group.map((_, index) => index)))};
 }
 function setVariant(entry, style, variant) {
   entry.variants[style] = variant;
@@ -969,7 +1003,7 @@ function askLive(question, captured=null) {
       const baseline = data.baseline || (captured ? captured.baseline : {answer:data.answer, version:data.active});
       const captureId = data.capture_id || captured?.id;
       answerCapture = typeof captureId === "string" ? {id:captureId, question, baseline} : null;
-      for (const style of STYLE_ORDER) setVariant(entry, style, shapeLive(style, data));
+      for (const style of LOCAL_STYLES) setVariant(entry, style, shapeLive(style, data));
       entry.pending = false; entry.partial = "";
       lastLatency = Math.round((Date.now() - entry.start) / 1000);
       entry.readings = readingsText(data, captured, captured ? baseline : null);
@@ -991,40 +1025,145 @@ function askLive(question, captured=null) {
     show("");
   });
 }
+function completeSentences(text, finished) {
+  let prior = 0;
+  const segments = typeof Intl.Segmenter === "function"
+    ? [...new Intl.Segmenter("en", {granularity:"sentence"}).segment(text)]
+    : [...text.matchAll(/[.!?]+[\u201d\u2019"')\]]*(?:\s+|$)/g)].map(match => {
+      const index = prior;
+      prior = match.index + match[0].length;
+      return {segment:text.slice(index, prior), index};
+    });
+  return segments.filter(({segment, index}) => {
+    const trimmed = segment.trim();
+    return /[.!?][\u201d\u2019"')\]]*$/.test(trimmed) && (finished || index + segment.length < text.length || /\s$/.test(segment));
+  }).map(({segment}) => segment.trim());
+}
+function extractiveSummary(answer, sentences) {
+  if (sentences.length > 1) return sentences[0] + "\n" + sentences.at(-1);
+  if (sentences.length === 1) return sentences[0];
+  const clean = answer.trim();
+  const end = clean.length > 240 ? clean.lastIndexOf(" ", 240) : -1;
+  return end > 0 ? clean.slice(0, end) + "\u2026" : clean;
+}
+function boardObservations(set) {
+  const snapshot = set.snapshot || {}, observed = snapshot.observations || set.summary || {};
+  const {latest, capacity} = snapshot;
+  const count = observed.sample_count ?? snapshot.sample_count;
+  const lines = [];
+  if (Number.isFinite(count)) {
+    const interval = Number.isFinite(observed.start_ms) && Number.isFinite(observed.end_ms) ? " from " + observed.start_ms + " to " + observed.end_ms + " ms" : "";
+    lines.push(count.toLocaleString() + " readings" + interval + ".");
+  }
+  if (latest && Number.isFinite(capacity)) lines.push("Last reading: " + latest.busy + " of " + capacity + " connections busy; " + latest.waiting + " waiting.");
+  if (observed.peak_waiting) lines.push("Peak queue: " + observed.peak_waiting.waiting + " waiting at " + observed.peak_waiting.time_ms + " ms.");
+  if (lines.length) lines.push("These measurements do not identify a cause or request-level latency.");
+  return lines.join("\n") || "This upload has no measured observations available.";
+}
+function boardEligible() {
+  return !demo && Boolean(status?.lm_supported && dataset?.queue_ready && lastCsvText && lastCsvText.length <= 100 * 1024);
+}
+function askCapacity() {
+  const dialog = el("capacity-dialog");
+  el("capacity-input").value = dataset?.capacity || 32;
+  return new Promise(resolve => {
+    dialog.returnValue = "";
+    dialog.addEventListener("close", () => resolve(dialog.returnValue === "ok" ? Number(el("capacity-input").value) : null), {once:true});
+    dialog.showModal();
+  });
+}
+async function prepareBoardDataset() {
+  if (!boardEligible()) return false;
+  if (boardDataset && boardHost === address) return true;
+  const capacity = await askCapacity();
+  if (!capacity) return false;
+  try {
+    show("Uploading to the board\u2026");
+    boardDataset = await request("dataset_upload", {csv:lastCsvText, capacity, name:dataset.name});
+    boardHost = address; boardCalibrated = false;
+    renderLanguageSelect(); controls(); show("Uploaded to the board."); peekPulse();
+    return true;
+  } catch (err) {
+    boardDataset = null; show(err.message, true);
+    return false;
+  }
+}
+el("capacity-form").onsubmit = event => {
+  event.preventDefault();
+  el("capacity-dialog").close("ok");
+};
+async function localAnswer(entry, question, only) {
+  let job = await request("data_ask_begin", {question, style:answerStyle});
+  const seen = new Set();
+  for (;;) {
+    const elapsed = Date.now() - entry.start;
+    for (const style of job.order) {
+      const result = job.ready[style];
+      if (!result || seen.has(style)) continue;
+      seen.add(style);
+      if (!only.includes(style)) continue;
+      setVariant(entry, style, {text:result.answer, table:result.table, mono:style === "transcript"});
+      if (style === "short") entry.readings = result.readings + " Answered on " + job.where + ".";
+    }
+    if (job.state === "error") throw new Error(job.error);
+    if (only.includes("short")) entryStage(entry, seen.has("short") ? 4 : elapsed < 500 ? 2 : 3);
+    if (job.state !== "running" && elapsed > 1800) return job.timings;
+    await sleep(300);
+    if (job.state === "running") job = await request("data_ask_progress", {job_id:job.job_id});
+  }
+}
+async function boardAnswer(entry, question) {
+  const stage = boardCalibrated ? "followup" : "final";
+  const startedAt = Date.now();
+  let job = await request("dataset_ask", {dataset_id:boardDataset.dataset_id, question, stage});
+  const jobId = job.job_id;
+  if (job.state === "running" && !jobId) throw new Error("The board did not provide a job ID.");
+  entryStage(entry, 2);
+  while (job.state === "running") {
+    const elapsed = Date.now() - entry.start;
+    entryStage(entry, job.partial_answer ? 4 : elapsed < 1500 ? 2 : 3);
+    if (job.partial_answer && job.partial_answer !== entry.partial) {
+      if (entry.firstTextAt == null) entry.firstTextAt = Date.now();
+      entry.partial = job.partial_answer;
+      const opening = completeSentences(job.partial_answer, false)[0];
+      if (opening && !entry.variants.short) setVariant(entry, "short", {text:opening});
+    }
+    await sleep(1100);
+    job = await request("answer_progress", {job_id:jobId});
+  }
+  if (job.state !== "complete" || typeof job.answer !== "string" || !job.answer.trim()) throw new Error(job.error || "The board did not return an answer.");
+  const text = job.answer, sentences = completeSentences(text, true);
+  setVariant(entry, "short", {text:sentences[0] || text});
+  setVariant(entry, "summary", {text:extractiveSummary(text, sentences)});
+  setVariant(entry, "final", {text});
+  boardCalibrated = true;
+  const done = Date.now(), took = at => ((at - startedAt) / 1000).toFixed(1) + " s";
+  entry.genTiming = "First text " + took(entry.firstTextAt ?? done) + " \u00b7 Complete answer " + took(done);
+  entry.readings = boardObservations(boardDataset) + "\nAnswered on PYNQ-Z2 with " + boardDataset.selected_model + (stage === "followup" ? " using the previous exchange." : ".");
+  return done - startedAt;
+}
 function askData(question) {
   run(async () => {
     const entry = pendingEntry();
+    const board = await prepareBoardDataset();
+    if (board) entry.styles = STYLE_ORDER;
     const asked = {role:"user", text:question};
     messages.push(asked, entry); renderMessages(); show("");
     accepted = true;
     pathBegin();
     try {
-      let job = await request("data_ask_begin", {question, style:answerStyle});
-      const seen = new Set();
       document.body.classList.add("working");
-      for (;;) {
-        const elapsed = Date.now() - entry.start;
-        for (const style of job.order) {
-          const result = job.ready[style];
-          if (!result || seen.has(style)) continue;
-          seen.add(style);
-          setVariant(entry, style, {text:result.answer, table:result.table, mono:style === "transcript"});
-          if (style === "short") entry.readings = result.readings + " Answered on " + job.where + ".";
-        }
-        if (job.state === "error") throw new Error(job.error);
-        entryStage(entry, seen.has("short") ? 4 : elapsed < 500 ? 2 : 3);
-        if (job.state !== "running" && elapsed > 1800) break;
-        await sleep(300);
-        if (job.state === "running") job = await request("data_ask_progress", {job_id:job.job_id});
-      }
-      const times = job.timings;
-      const values = [dataset.timings?.data_ms ?? 0, dataset.timings?.profile_ms ?? 0, Math.max(times.model_ms, 0.5), times.fabric_ms, times.answer_ms];
+      const work = [localAnswer(entry, question, board ? ["transcript", "table"] : LOCAL_STYLES)];
+      if (board) work.push(boardAnswer(entry, question));
+      const [times, boardMs] = await Promise.all(work);
+      const values = [dataset.timings?.data_ms ?? 0, dataset.timings?.profile_ms ?? 0, Math.max(times.model_ms, 0.5), board ? boardMs : times.fabric_ms, times.answer_ms];
       values.forEach((value, stage) => pathMark(stage, "done", value));
       document.body.classList.remove("working");
       lastLatency = Math.round(values.reduce((total, value) => total + value, 0) / 100) / 10;
       entry.pending = false;
       entry.offTopic = !ON_TOPIC.test(question);
       entry.style = entry.defaultStyle; entry.timings = lastTimings = timingsFromPath();
+      if (board) show("Final answer completed in " + (boardMs / 1000).toFixed(1) + " s.");
     } catch (err) {
       messages.splice(messages.indexOf(asked), 2); renderMessages();
       el("live-question").value = question;
@@ -1048,12 +1187,12 @@ function demoAnswer(question) {
   accepted = true;
   pathBegin();
   const offTopic = !ON_TOPIC.test(question);
-  const held = query.has("hold") ? (Number(query.get("hold")) || 1) : STYLE_ORDER.length;
+  const held = query.has("hold") ? (Number(query.get("hold")) || 1) : LOCAL_STYLES.length;
   [[1, 500], [2, 1000], [3, 1500], [4, 2000]].forEach(([stage, delay]) => setTimeout(() => entryStage(entry, stage), delay));
-  STYLE_ORDER.slice(0, offTopic ? 1 : held).forEach(style => setTimeout(() => {
+  LOCAL_STYLES.slice(0, offTopic ? 1 : held).forEach(style => setTimeout(() => {
     const item = offTopic ? {text:"I only read this board's system health, so I can't answer that one well."} : DEMO_ANSWERS[style];
     setVariant(entry, style, {...item});
-    if (offTopic) for (const other of STYLE_ORDER) entry.variants[other] = {...item};
+    if (offTopic) for (const other of LOCAL_STYLES) entry.variants[other] = {...item};
     entry.readings = "t-30s waiting 3 \u00b7 t-20s waiting 6 \u00b7 t-10s waiting 10 \u00b7 now waiting 14 \u00b7 busy 20 of 20\nPredicted: queue onset in 2 s (p 0.91). Answered in 7 s \u00b7 demo";
     if (offTopic || style === "table") {
       pathFinish();
@@ -1174,6 +1313,7 @@ function openPlan() {
     return row;
   }));
   el("plan-dialog").showModal();
+  controls();
 }
 function sessionObject() {
   const title = messages.find(message => message.role === "user")?.text || dataset?.name || datasetLabel || "Session";
@@ -1230,7 +1370,7 @@ function selectTab(name) {
 }
 function applyProfile(data) {
   dataset = {...data.profile, timings:data.timings};
-  datasetLabel = "";
+  datasetLabel = ""; boardDataset = null; boardCalibrated = false;
   chosenModel = models?.find(model => model.id === dataset.recommendation.model_id) || null;
   accepted = true; messages = []; chatId = null; notes = ""; el("notes").value = "";
   renderMessages(); pathReset(); peekPulse();
@@ -1240,9 +1380,11 @@ async function importData(name, text) {
   show("Reading " + name + "…");
   const data = await request("import_data", {name, text});
   applyProfile(data);
+  lastCsvText = text;
   show("");
   await pathPlay(data.timings, [0, 1]);
   pathMark(2, "done", 1);
+  await prepareBoardDataset();
   await persistSession();
 }
 async function importSample(id) {
@@ -1355,6 +1497,61 @@ el("publish-skill").onclick = async () => {
     show("Published " + name + " to your marketplace.");
   } catch (err) {show(err.message, true);}
 };
+for (const id of ["synth-name", "synth-target", "synth-instruction"]) el(id).addEventListener("input", controls);
+el("synth-form").onsubmit = event => {
+  event.preventDefault();
+  if (el("synth-run").disabled) return;
+  const name = el("synth-name").value.trim(), target = el("synth-target").value.trim();
+  const target_row = /^\d+$/.test(target) ? Number(target) : target;
+  const instruction = el("synth-instruction").value.trim();
+  const note = el("synth-status");
+  run(async () => {
+    note.dataset.live = "1"; note.textContent = "Starting model synthesis\u2026";
+    pathReset(); pathMark(0, "done"); pathMark(1, "done");
+    document.body.classList.add("working");
+    try {
+      let job = await request("dataset_synthesize", {dataset_id:boardDataset.dataset_id, name, target_row, instruction});
+      const id = job.synthesis_id;
+      if (job.state === "running" && !id) throw new Error("The server did not provide a synthesis ID.");
+      while (job.state === "running") {
+        if (job.stage === "calibrating") {pathMark(3, "active"); note.textContent = "Calibrating on the FPGA with this data\u2026";}
+        else if (job.stage === "authoring") {pathMark(3, "done"); pathMark(2, "active"); note.textContent = "Astra is proposing the INT8 row\u2026";}
+        else if (job.stage === "saving") {pathMark(2, "done"); pathMark(4, "active"); note.textContent = "Saving the named model\u2026";}
+        await sleep(1100);
+        job = await request("dataset_synthesis_progress", {synthesis_id:id});
+      }
+      if (job.state !== "complete" || !job.dataset) throw new Error(job.error || "Model synthesis stopped.");
+      for (const index of [2, 3, 4]) pathMark(index, "done");
+      boardDataset = job.dataset; boardCalibrated = false; renderLanguageSelect();
+      note.textContent = "Saved and selected " + job.dataset.selected_model + ".";
+      show("Ask a question with the new model."); peekPulse();
+    } catch (err) {
+      note.textContent = "Synthesis did not complete."; pathReset();
+      throw err;
+    } finally {document.body.classList.remove("working"); delete note.dataset.live;}
+  });
+};
+window.pinkprocessSpeechInput = event => {
+  if (!speechInput || !event || typeof event.state !== "string") return;
+  voiceState = event.state;
+  el("mic").hidden = event.state === "unavailable";
+  el("mic").classList.toggle("on", event.state === "listening");
+  const message = event.message || ({requesting:"Requesting microphone access\u2026", listening:"Listening\u2026", stopping:"Transcribing\u2026"})[event.state] || "";
+  if (message || event.state === "idle") show(message);
+  if (typeof event.transcript === "string" && event.transcript.trim()) {
+    const input = el("live-question");
+    input.value = [voiceBefore, event.transcript.trim()].filter(Boolean).join(" ").slice(0, input.maxLength);
+    if (event.final) input.focus();
+  }
+  controls();
+};
+if (speechInput) {
+  el("mic").onclick = () => {
+    if (voiceState === "listening") speechInput.postMessage("stop");
+    else {voiceBefore = el("live-question").value.trim(); speechInput.postMessage("start");}
+  };
+  speechInput.postMessage("ready");
+}
 el("replay-saved").onclick = () => {
   const capture = savedCapture();
   if (demo) return demoNotice();
@@ -1387,6 +1584,17 @@ el("lm-artifact").onchange = () => run(async () => {
   show("Saved weight version " + draft.name + ".");
 });
 el("lm-selection").onchange = () => {
+  if (boardDataset && !demo) {
+    const name = el("lm-selection").value;
+    if (!name || name === boardDataset.selected_model) return;
+    return run(async () => {
+      try {
+        boardDataset = await request("dataset_select", {dataset_id:boardDataset.dataset_id, name});
+        boardCalibrated = false; renderLanguageSelect();
+        show("Dataset model is " + boardDataset.selected_model + "."); peekPulse();
+      } catch (err) {renderLanguageSelect(); throw err;}
+    });
+  }
   if (demo) {languageWeights.active = languageWeights.versions.find(version => version.name === el("lm-selection").value); controls(); return demoNotice();}
   if (el("lm-selection").value && el("lm-selection").value !== languageWeights?.active.name) run(() => changeLanguageWeights("select", el("lm-selection").value));
 };

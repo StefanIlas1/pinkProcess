@@ -8,6 +8,8 @@
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleVersion</key><string>1</string>
 <key>CFBundleShortVersionString</key><string>0.1</string>
+<key>NSMicrophoneUsageDescription</key><string>Dictate a question into the PYNQ Process input bar.</string>
+<key>NSSpeechRecognitionUsageDescription</key><string>Convert your dictated question to editable text on this Mac.</string>
 <key>NSLocalNetworkUsageDescription</key><string>Find your PYNQ Process FPGA kit and query its installed model.</string>
 <key>NSBonjourServices</key><array><string>_pinkprocess._tcp</string></array>
 <key>NSAppTransportSecurity</key><dict><key>NSAllowsLocalNetworking</key><true/></dict>
