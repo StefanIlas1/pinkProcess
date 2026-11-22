@@ -68,6 +68,8 @@ class Flan:
         self.tokenizer = UnigramTokenizer(path / "tokenizer.json")
         self.fabric = fabric
         self.query_projection = query_projection
+        if self.query_projection is not None:
+            self.query_projection.bind_model(self.t)
         self._original = None
         self.first_output_activation = None
         self.first_output_max = None
@@ -80,6 +82,8 @@ class Flan:
             row, original = self._original
             self.t["lm_head.weight"][row] = original
             self._original = None
+            if self.query_projection is not None:
+                self.query_projection.invalidate_weights("lm_head")
 
     def select_head_row(self, row, payload):
         head = self.t["lm_head.weight"]
@@ -88,6 +92,8 @@ class Flan:
         self.restore_head()
         self._original = row, head[row].copy()
         head[row] = np.frombuffer(payload, dtype="int8")
+        if self.query_projection is not None:
+            self.query_projection.invalidate_weights("lm_head")
 
     def install_weight_version(self, version):
         """Use a process-private output projection and verify its exact digest."""
@@ -185,6 +191,8 @@ class Flan:
         self.fabric_projections = 0
         self.accelerated_projections = 0
         self.partial_answer = ""
+        if self.query_projection is not None:
+            self.query_projection.start_generation()
         ids = self.tokenizer.encode(prompt)
         if len(ids) > 512:
             raise ValueError("The evidence and question exceed the model's 512-token input.")
@@ -200,3 +208,6 @@ class Flan:
             tokens.append(previous)
             self.partial_answer = self.tokenizer.decode(tokens)
         return self.tokenizer.decode(tokens)
+
+    def projection_profile(self):
+        return self.query_projection.profile() if self.query_projection is not None else {}

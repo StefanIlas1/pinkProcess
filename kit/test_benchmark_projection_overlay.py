@@ -16,6 +16,11 @@ from lm_reference import projection_overlay as projection
 
 
 class Buffer(np.ndarray):
+    def __array_finalize__(self, source):
+        if hasattr(source, "device_address"):
+            self.device_address = source.device_address
+            self.events = source.events
+
     def flush(self):
         self.events.append(("flush", self.device_address))
 
@@ -34,7 +39,8 @@ class FakeOverlay:
 
     @contextmanager
     def allocate(self, *, shape, dtype):
-        address = (len(self.buffers) + 1) * 16 * 1024 * 1024
+        step = 64 * 1024 * 1024
+        address = next(address for address in range(step, 64 * step, step) if address not in self.buffers)
         buffer = np.zeros(shape, dtype).view(Buffer)
         buffer.device_address = address
         buffer.events = self.events
@@ -58,7 +64,12 @@ class FakeOverlay:
             return  # Control retains bit zero (busy) until reset.
         a, w, y = (self.buffers[self.registers[r]] for r in (
             projection.A_ADDRESS, projection.W_ADDRESS, projection.Y_ADDRESS))
-        y[:] = benchmark.simulate_projection(a, w, self.registers[projection.MODE])
+        positions, outputs, depth, decode = (self.registers[r] for r in (
+            projection.POSITION_TILES, projection.OUTPUT_TILES, projection.DEPTH, projection.MODE))
+        lanes = 64 if decode else 8
+        a = a.reshape(-1)[:positions * depth * 8].reshape(positions, depth, 8)
+        w = w.reshape(-1)[:outputs * depth * lanes].reshape(outputs, depth, lanes)
+        y.reshape(-1)[:positions * outputs * 64] = benchmark.simulate_projection(a, w, decode).ravel()
         self.registers[projection.CONTROL] = projection.DONE
 
     def download(self):
@@ -140,6 +151,9 @@ class ProjectionOverlayTest(unittest.TestCase):
         np.testing.assert_array_equal(runner.project("lm_head", weights, activations), expected)
         self.assertEqual(overlay.events.count(("launch",)), 8)
         self.assertEqual(max(overlay.allocations), projection.MAX_SEGMENT_BUFFER_BYTES)
+        self.assertEqual(len(overlay.allocations), 3)
+        self.assertEqual(len(overlay.buffers), 3)
+        runner.close()
         self.assertFalse(overlay.buffers)
 
     def test_service_scope_selection(self):
@@ -198,7 +212,8 @@ class ProjectionOverlayTest(unittest.TestCase):
                 self.assertEqual(actual["active"], result["active"])
                 self.assertEqual(actual["fabric_projections"], result["fabric_projections"])
                 self.assertEqual(actual["accelerated_projections"], result["fabric_projections"])
-                self.assertFalse(overlay.buffers)
+                self.assertEqual(len(overlay.buffers), 3)
+                self.assertGreaterEqual(actual["projection_phases"]["commands"], actual["accelerated_projections"])
                 return actual["capture_id"]
 
             capture_id = run(expected)
@@ -223,6 +238,7 @@ class ProjectionOverlayTest(unittest.TestCase):
                 self.assertEqual(runtime.fabric.readback, versions.classifier[row*width:(row+1)*width].tobytes())
                 run(expected, capture_id)
             runner.close()
+            self.assertFalse(overlay.buffers)
 
     def test_real_checkpoint_original_replay(self):
         path = Path(__file__).resolve().parent / "evidence/three-diagnosis-traces-physical.json"

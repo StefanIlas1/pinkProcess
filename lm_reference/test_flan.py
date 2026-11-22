@@ -53,6 +53,38 @@ class FlanProjectionTests(unittest.TestCase):
         digest = hashlib.sha256(memoryview(self.weights)).hexdigest()
         self.assertEqual(self.model.install_weight_version(SimpleNamespace(patch=None, classifier_sha256=digest)), digest)
 
+    def test_cached_head_uses_active_row_and_restores_both_layouts(self):
+        from kit.test_benchmark_projection_overlay import FakeOverlay
+        from lm_reference.projection_overlay import OverlayProjection
+
+        overlay = FakeOverlay()
+        runner = OverlayProjection(overlay, overlay.allocate, scope="all")
+        self.addCleanup(runner.close)
+        model = self.model
+        model.fabric = object()
+        model.query_projection = runner
+        runner.bind_model(model.t)
+        inputs = np.array([[-1., 0.25, -0.5, 1.], [0.32, -0.8, 0.5, 0.4]], dtype=np.float32)
+        baseline = model.linear("lm_head", inputs)
+        baseline_decode = model.linear("lm_head", inputs[:1])
+        runner.start_generation()
+        np.testing.assert_array_equal(model.linear("lm_head", inputs), baseline)
+        np.testing.assert_array_equal(model.linear("lm_head", inputs[:1]), baseline_decode)
+        self.assertEqual(runner.profile()["weight_cache_hits"], 2)
+        self.assertEqual(runner.profile()["allocations"], 0)
+
+        model.select_head_row(1, bytes([1, 1, 1, 1]))
+        edited = model.linear("lm_head", inputs)
+        self.assertTrue(np.all(edited[:, 1] != baseline[:, 1]))
+        np.testing.assert_array_equal(model.linear("lm_head", inputs[:1]), edited[:1])
+        self.assertEqual(runner.profile()["weight_cache_misses"], 2)
+
+        bad_version = SimpleNamespace(patch=SimpleNamespace(row=1, payload=bytes(4)), classifier_sha256="0" * 64)
+        with self.assertRaises(ValueError):
+            model.install_weight_version(bad_version)
+        np.testing.assert_array_equal(model.linear("lm_head", inputs), baseline)
+        np.testing.assert_array_equal(model.linear("lm_head", inputs[:1]), baseline_decode)
+
     def test_named_accelerator_preserves_scaling_and_legacy_fallback(self):
         from kit.test_benchmark_projection_overlay import FakeOverlay
         from lm_reference.projection_overlay import QueryProjection
