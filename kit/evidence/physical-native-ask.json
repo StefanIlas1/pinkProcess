@@ -1,0 +1,208 @@
+{
+  "passed": true,
+  "execution": "Ask in the installed native macOS pinkProcess app over paired PYNQ-Z2 USB relay",
+  "prior_physical_replay_phase_at_submission": "complete",
+  "board_boot_id": "c4785ced-dfb0-4406-9580-b38c8ef3922a",
+  "question": "Which symptom should the on-call engineer investigate first, and what should they check to distinguish pool saturation from a short-lived backlog?",
+  "model": "flan-t5-small",
+  "active_at_submission_and_verification": {
+    "name": "original",
+    "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+    "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+    "target_row": null
+  },
+  "source": "Board SQLite demo (generated traffic)",
+  "queue_forecast_profile_shown": "queue-outlook-v2",
+  "capture": {
+    "id": "0ae2e2c1a5c6e1d601cd7dc3752cfb79be67bfe416d435b18cd13ae484a10597",
+    "question": "Which symptom should the on-call engineer investigate first, and what should they check to distinguish pool saturation from a short-lived backlog?",
+    "captured_at_ms": 1795301309010,
+    "reading_time_ms": 1657900,
+    "baseline": {
+      "answer": "The backlog is ongoing: 6 requests are waiting now. The peak was 94. The FPGA predicts the queue will drain at least once over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+      "version": {
+        "name": "original",
+        "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+        "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+        "target_row": null
+      }
+    },
+    "baseline_existed_before_completion": false
+  },
+  "answer_shown": "The backlog is ongoing: 6 requests are waiting now. The peak was 94. The FPGA predicts the queue will drain at least once over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times.",
+  "mac_ask_to_observed_text_seconds": 291.087,
+  "mac_ask_to_observed_completed_answer_seconds": 791.951,
+  "answer_readings_shown": {
+    "busy": 4,
+    "capacity": 4,
+    "waiting": 6,
+    "time_ms": 1657900,
+    "peak_waiting": 94,
+    "observation_count": 600,
+    "start_ms": 1598000,
+    "end_ms": 1657900
+  },
+  "native_ui_observations": [
+    {
+      "mac_unix_ms": 1795307785895,
+      "event": "Ask clicked in the installed native Mac app after replay phase complete",
+      "stream": {
+        "busy": 4,
+        "capacity": 4,
+        "waiting": 27,
+        "contiguous_readings": 600,
+        "session_prefix": "0f59511a"
+      }
+    },
+    {
+      "mac_unix_ms": 1795307788590,
+      "event": "Generating on the FPGA",
+      "captured_sample_ms": 1657900,
+      "latest_stream_sample_ms": 1658600,
+      "stream": {
+        "busy": 4,
+        "capacity": 4,
+        "waiting": 0,
+        "contiguous_readings": 600,
+        "session_prefix": "0f59511a"
+      }
+    },
+    {
+      "mac_unix_ms": 1795307882919,
+      "event": "Generating on the FPGA",
+      "captured_sample_ms": 1657900,
+      "latest_stream_sample_ms": 1752400,
+      "stream": {
+        "busy": 0,
+        "capacity": 4,
+        "waiting": 0,
+        "contiguous_readings": 35,
+        "session_prefix": "0f59511a"
+      }
+    },
+    {
+      "mac_unix_ms": 1795308010672,
+      "event": "Generating on the FPGA",
+      "captured_sample_ms": 1657900,
+      "latest_stream_sample_ms": 1879700,
+      "stream": {
+        "busy": 3,
+        "capacity": 4,
+        "waiting": 0,
+        "contiguous_readings": 9,
+        "session_prefix": "0f59511a"
+      }
+    },
+    {
+      "mac_unix_ms": 1795308076982,
+      "event": "Generating on the FPGA",
+      "partial_answer": "The",
+      "captured_sample_ms": 1657900,
+      "latest_stream_sample_ms": 1948000,
+      "stream": {
+        "busy": 0,
+        "capacity": 4,
+        "waiting": 0,
+        "contiguous_readings": 478,
+        "session_prefix": "0f59511a"
+      }
+    },
+    {
+      "mac_unix_ms": 1795308215067,
+      "event": "Generating on the FPGA",
+      "partial_answer": "The backlog is ongoing: 6 requests are waiting now. The peak was",
+      "captured_sample_ms": 1657900,
+      "latest_stream_sample_ms": 2084600,
+      "stream": {
+        "busy": 4,
+        "capacity": 4,
+        "waiting": 7,
+        "contiguous_readings": 600,
+        "session_prefix": "0f59511a"
+      }
+    },
+    {
+      "mac_unix_ms": 1795308348939,
+      "event": "Generating on the FPGA",
+      "partial_answer": "The backlog is ongoing: 6 requests are waiting now. The peak was 94. The FPGA predicts the queue will drain at least",
+      "captured_sample_ms": 1657900,
+      "latest_stream_sample_ms": 2218200,
+      "stream": {
+        "busy": 4,
+        "capacity": 4,
+        "waiting": 11,
+        "contiguous_readings": 600,
+        "session_prefix": "0f59511a"
+      }
+    },
+    {
+      "mac_unix_ms": 1795308480570,
+      "event": "Generating on the FPGA",
+      "partial_answer": "The backlog is ongoing: 6 requests are waiting now. The peak was 94. The FPGA predicts the queue will drain at least once over the next ten seconds. The cause is unknown. Measure",
+      "captured_sample_ms": 1657900,
+      "latest_stream_sample_ms": 2351100,
+      "stream": {
+        "busy": 2,
+        "capacity": 4,
+        "waiting": 0,
+        "contiguous_readings": 600,
+        "session_prefix": "0f59511a"
+      }
+    },
+    {
+      "mac_unix_ms": 1795308532549,
+      "event": "Generating on the FPGA",
+      "partial_answer": "The backlog is ongoing: 6 requests are waiting now. The peak was 94. The FPGA predicts the queue will drain at least once over the next ten seconds. The cause is unknown. Measure request arrivals and connection",
+      "captured_sample_ms": 1657900,
+      "latest_stream_sample_ms": 2402000,
+      "stream": {
+        "busy": 4,
+        "capacity": 4,
+        "waiting": 4,
+        "contiguous_readings": 600,
+        "session_prefix": "0f59511a"
+      }
+    },
+    {
+      "mac_unix_ms": 1795308577846,
+      "event": "Completed answer visible with replay control",
+      "captured_sample_ms": 1657900,
+      "latest_stream_sample_ms": 2448400,
+      "stream": {
+        "busy": 4,
+        "capacity": 4,
+        "waiting": 36,
+        "contiguous_readings": 600,
+        "session_prefix": "0f59511a"
+      }
+    },
+    {
+      "mac_unix_ms": 1795308580457,
+      "event": "Readings behind this answer expanded",
+      "captured_sample_ms": 1657900,
+      "latest_stream_sample_ms": 2451400,
+      "stream": {
+        "busy": 4,
+        "capacity": 4,
+        "waiting": 49,
+        "contiguous_readings": 600,
+        "session_prefix": "0f59511a"
+      }
+    }
+  ],
+  "ollama_tcp_probe": {
+    "address": "127.0.0.1:11434",
+    "samples": 164,
+    "any_open": false,
+    "first_mac_unix_ms": 1795307778146,
+    "last_mac_unix_ms": 1795308611281,
+    "periodic_interval_seconds": 5
+  },
+  "limitations": [
+    "The measurements came from generated SQLite demo traffic, not an incident in a production connection pool.",
+    "The sample stream continued in the same session, but contiguous history temporarily fell to nine during generation before recovering to 600. Continuous 100 ms sampling is not established by this run.",
+    "The six waiting requests and peak of 94 agree with the readings disclosure. The model reported an unknown cause and recommended gathering arrivals and connection hold time; it did not establish a cause or explicitly rank every symptom.",
+    "The timing values are observations from the native UI, not the model's exact first-token or completion timestamps. Sample comparisons use the common stream session because the Mac and board wall clocks differed.",
+    "The native UI showed the forecast profile but did not expose the underlying integer scores; the forecast's accuracy was not independently established by this run."
+  ]
+}
