@@ -116,9 +116,7 @@ class Flan:
 
     def _quantize_activations(self, x):
         native = getattr(self.query_projection, "native", None)
-        # The low-overhead path targets single decoder activations. NumPy
-        # processes the batched encoder rows with vectorized array kernels.
-        if native is not None and x.ndim == 2 and x.shape[0] == 1:
+        if native is not None and x.ndim == 2:
             result = native.quantize_activations(x)
             if result is not None:
                 return result
@@ -202,7 +200,10 @@ class Flan:
         else:
             q = heads(self.linear(name + ".q", x))
             k, v = key
-        if cache.get("_verifying") and q.shape[1] > 1:
+        verifying = cache.get("_verifying") and q.shape[1] > 1
+        if verifying and not incremental and source is not x and np.isscalar(bias):
+            attended = self._attend_each_cross_query(q, k, v, bias)
+        elif verifying:
             # Preserve the scalar path's FP32 reductions (including their exact
             # lengths); masked padding can change near-tie token decisions.
             output = []
@@ -220,6 +221,13 @@ class Flan:
         scores = q @ k.transpose(0, 2, 1) + bias
         p = np.exp(scores - scores.max(axis=2, keepdims=True))
         return ((p / p.sum(axis=2, keepdims=True)) @ v).transpose(1, 0, 2)
+
+    @staticmethod
+    def _attend_each_cross_query(q, k, v, bias):
+        queries = q.transpose(1, 0, 2)[:, :, None, :]
+        scores = queries @ k.transpose(0, 2, 1)[None] + bias
+        p = np.exp(scores - scores.max(axis=-1, keepdims=True))
+        return ((p / p.sum(axis=-1, keepdims=True)) @ v[None])[:, :, 0, :]
 
     def stack(self, side, ids, cache, encoder=None, step=None):
         x = self.t["shared.weight"][ids].astype("float32") * self.t["shared.weight.scale"][ids, None]
