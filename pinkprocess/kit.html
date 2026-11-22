@@ -592,7 +592,7 @@ function controls() {
   el("lm-selection").disabled = !languageAvailable && !(boardDataset && !busy);
   el("rollback").disabled = busy || !online || status.version === "pool-logistic-v1";
   el("lm-restore").hidden = !status?.lm_supported;
-  el("lm-restore").disabled = !languageAvailable || languageWeights?.active.name === "original";
+  el("lm-restore").disabled = busy || (boardDataset ? boardDataset.selected_model === "original" : !languageAvailable || languageWeights?.active.name === "original");
   const versionNamed = el("lm-name").value.trim() && el("lm-row").value !== "" && el("lm-row").validity.valid;
   for (const id of ["lm-name", "lm-row", "lm-instruction"]) el(id).disabled = !languageAvailable;
   el("lm-author").disabled = !languageAvailable || !versionNamed || !el("lm-instruction").value.trim();
@@ -1359,6 +1359,10 @@ function renderLibrary() {
     text.append(name, meta, task);
     const acts = document.createElement("div"); acts.className = "acts";
     const activeId = chosenModel?.id || (status ? "queue-onset-logistic" : "");
+    const versionName = model.id === "flan-t5-small-int8" ? "original" : model.name;
+    const active = model.kind === "language"
+      ? versionName === (boardDataset?.selected_model || languageWeights?.active?.name)
+      : model.id === activeId;
     if (model.published) {
       const remove = document.createElement("button"); remove.className = "text"; remove.type = "button"; remove.textContent = "Unpublish";
       remove.onclick = async () => {
@@ -1369,7 +1373,7 @@ function renderLibrary() {
       };
       acts.append(remove);
     }
-    if (model.available && model.id === activeId) {
+    if (model.available && active) {
       acts.append(Object.assign(document.createElement("span"), {className:"tag", textContent:"Active"}));
     } else {
       const action = document.createElement("button"); action.textContent = "Switch"; action.dataset.model = model.id;
@@ -1379,9 +1383,14 @@ function renderLibrary() {
         controls();
         if (status && model.kind === "queue") run(() => changeQueueWeights("rollback"));
         else if (status?.lm_supported && model.kind === "language") {
-          if (model.id === "flan-t5-small-int8") run(() => changeLanguageWeights("restore"));
-          else if (languageWeights?.versions?.some(version => version.name === model.name)) run(() => changeLanguageWeights("select", model.name));
-          else show("That skill is not on this board.", true);
+          const versions = boardDataset?.models || languageWeights?.versions;
+          if (!versions?.some(version => version.name === versionName)) {
+            show("That skill is not on this board.", true);
+          } else if (boardDataset) {
+            run(() => selectDatasetModel(versionName));
+          } else {
+            run(() => changeLanguageWeights("select", versionName));
+          }
         }
       };
       acts.append(action);
@@ -1427,6 +1436,7 @@ function renderStarts() {
   }));
 }
 function openPlan() {
+  if (!busy) delete el("synth-status").dataset.live;
   const shown = chosenModel || (status ? models?.find(model => model.id === "queue-onset-logistic") : null);
   el("synth-current").textContent = shown ? "Current model: " + shown.name + ", " + shown.task.charAt(0).toLowerCase() + shown.task.slice(1) : "Current model: none yet";
   const picked = boardDataset?.selected_model;
@@ -1653,7 +1663,7 @@ el("synth-form").onsubmit = event => {
     } catch (err) {
       note.textContent = "Synthesis did not complete."; pathReset();
       throw err;
-    } finally {document.body.classList.remove("working"); delete note.dataset.live;}
+    } finally {document.body.classList.remove("working");}
   });
 };
 window.pinkprocessSpeechInput = event => {
@@ -1708,19 +1718,24 @@ el("lm-artifact").onchange = () => run(async () => {
   el("lm-artifact").value = "";
   show("Saved weight version " + draft.name + ".");
 });
-el("lm-selection").onchange = () => {
-  if (boardDataset) {
-    const name = el("lm-selection").value;
-    if (!name || name === boardDataset.selected_model) return;
-    return run(async () => {
-      try {
-        boardDataset = await request("dataset_select", {dataset_id:boardDataset.dataset_id, name});
-        boardCalibrated = false; renderLanguageSelect();
-        show("Dataset model is " + boardDataset.selected_model + "."); peekPulse();
-      } catch (err) {renderLanguageSelect(); throw err;}
-    });
+async function selectDatasetModel(name) {
+  try {
+    boardDataset = await request("dataset_select", {dataset_id:boardDataset.dataset_id, name});
+    boardCalibrated = false;
+    show("Dataset model is " + boardDataset.selected_model + ".");
+    peekPulse();
+  } finally {
+    renderLanguageSelect();
   }
-  if (el("lm-selection").value && el("lm-selection").value !== languageWeights?.active.name) run(() => changeLanguageWeights("select", el("lm-selection").value));
+}
+el("lm-selection").onchange = () => {
+  const name = el("lm-selection").value;
+  if (!name) return;
+  if (boardDataset) {
+    if (name !== boardDataset.selected_model) run(() => selectDatasetModel(name));
+  } else if (name !== languageWeights?.active.name) {
+    run(() => changeLanguageWeights("select", name));
+  }
 };
 el("weight").onchange = () => {
   const version = el("weight").value;
@@ -1730,7 +1745,7 @@ el("rollback").onclick = () => {
   run(() => changeQueueWeights("rollback"));
 };
 el("lm-restore").onclick = () => {
-  run(() => changeLanguageWeights("restore"));
+  run(() => boardDataset ? selectDatasetModel("original") : changeLanguageWeights("restore"));
 };
 el("login").onclick = startLogin;
 el("note-login").onclick = startLogin;

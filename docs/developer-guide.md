@@ -76,6 +76,14 @@ http://127.0.0.1:53530/auth/callback
 
 The app listens on port 53530 so the callback stays stable. If that port is taken it tries 53531 to 53534, so allow those callbacks too. Past those it falls back to a random port, where sign-in will not work. The ID token must name your client as its audience and carry the nonce the app sent. Without the two variables the sign-in sheet shows **Continue as guest**, which makes a local stand-in profile.
 
+## Rehearse the board demo
+
+1. Connect the PYNQ-Z2 and sign in. Import [the queue recovery recording](../datasets/pool-recovery.csv) with a capacity of **12**.
+2. In **Skills → Answer skill**, choose **Queue history v2**. Ask “What's wrong with my system?” The measured history shows a peak of 87 and zero waiting at the end. Open **Readings behind this answer** and distinguish those readings from the forecast.
+3. Select a saved edit and repeat the same question. Then switch back to **Queue history v2** and repeat it again. Use **Reset** beside **Answer skill** to restore the factory FLAN-T5-small INT8 checkpoint. Saved edits remain available.
+4. To show a new edit being created, open **Synthesize model**, pick a starting point, and enter a unique name. The board calibrates on the imported recording. Astra needs a signed-in Codex CLI on the Mac. Use a saved edit for the time-limited version of this demo.
+5. Export the session, then sign out and back in to check that the conversation appears in the session list.
+
 ## Data on your Mac
 
 All under `~/Library/Application Support/PYNQ Process/`:
