@@ -31,3 +31,5 @@ python3 -m kit.verify_diagnosis_board pynq.local build/three-diagnosis-traces-bo
 For each frozen trace the runner submits the recorded samples through authenticated ingress. The board admits a labeled synthetic fixture only while the observed SQLite demo session still owns the stream or the board is still idle. The runner releases its own session immediately after capture, including when a request fails, so the demo or another producer can publish while generation finishes. This command runs without a local language-model runtime.
 
 The JSON report includes the exact captured evidence, capture digest, active weight fingerprints and Linux boot ID, FPGA forecast submission count, language-model fabric projection count, producer status after release, and comparison against the frozen expected answer. A paired physical run has yet to produce a report.
+
+Mohsen’s cartridge evaluation included off-topic questions to test when a system should decline to answer. This evaluation applies the same principle to an in-domain question with insufficient measurements to establish a cause. [PR #1](https://github.com/StefanIlas1/pinkProcess/pull/1)

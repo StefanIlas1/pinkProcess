@@ -455,17 +455,16 @@ writes the weights and inputs over AXI4-Lite. The FPGA computes the sums
 and exposes them for readback. AMD Vivado with Zynq-7000 support and the
 PYNQ-Z2 board preset builds the overlay on an x86-64 Windows or Linux host.
 
-1. On the Mac, generate the INT8 JSON above. With Icarus Verilog installed,
-   run `python3 fpga/check_classifier.py /tmp/pinkprocess-lm-int8.json`.
-2. On the Vivado host, run from the repository root:
-
-   ```sh
-   vivado -mode batch -source fpga/build_pynq.tcl -tclargs build/pynq
-   ```
-
-   This should produce `build/pynq/pinkprocess.bit` and
-   `build/pynq/pinkprocess.hwh`. The HWH tells PYNQ where the classifier's
-   registers are mapped.
+1. Install Icarus Verilog and run `fpga/build.sh --check-only` to compare the
+   RTL scores with the shipped integer reference, including an edited weight
+   row and its restoration.
+2. On the Linux Vivado host, source the Vivado environment and run
+   `fpga/build.sh build/vivado-pynq` from the checkout. Use a new output
+   directory. This repeats the reference check and builds the kit's existing
+   RTL design. The outputs are `pinkprocess.bit` and its matching
+   `pinkprocess.hwh`, which describes the register map. This workflow adapts
+   Mohsen’s reference-vector check before synthesis to the same overlay used
+   for live forecasts and language-model projections. [Mohsen’s PR #1](https://github.com/StefanIlas1/pinkProcess/pull/1)
 3. Upload both files, the reference JSON, and `fpga/check_classifier.py`
    to the same folder on the board using Jupyter. Open a Jupyter Terminal
    in that folder and run:
