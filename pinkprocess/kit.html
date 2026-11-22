@@ -485,7 +485,7 @@ function pathLabels() {
 function controls() {
   const online = Boolean(status);
   const hasData = Boolean(dataset || datasetLabel);
-  document.body.classList.toggle("offline", !online && !hasData);
+  document.body.classList.toggle("offline", !online && !hasData && !user);
   el("app").classList.toggle("nosidebar", !user);
   el("chip").classList.toggle("online", online);
   el("chip").dataset.tip = online ? "Board clock: 100 MHz\nBoard temperature: " + (status.temp_c != null ? status.temp_c + " °C" : "not reported") + "\nLast answer latency: " + (lastLatency !== null ? fmtMs(lastLatency) : "none yet") + "\nLEDs: link, activity, answering" : "No board connected";
