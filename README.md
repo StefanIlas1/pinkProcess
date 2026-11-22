@@ -18,15 +18,14 @@ Real:
 Not the same as it looks:
 
 - The board's built-in SQLite workload is generated traffic. The app labels it **Simulated**.
-- **Watch demo instead** is a scripted walkthrough with canned data and no board.
-- With no board connected, any CSV or JSON lines file is profiled and answered on this Mac with plain statistics. Only queue CSVs can be sent to the board.
+- A file you import is always profiled on this Mac, and the Transcript and Table answers come from plain statistics computed here. Only queue CSVs can be sent to the board for the model answers.
 - The model recommendation is a rule-based guess from column names and types.
 - The marketplace is local. Online sharing does not exist.
 - Measured speed is slow: about 46 to 60 seconds for a complete answer on the physical kit. See [results](docs/results.md).
 
 ## Quick start
 
-Download and extract the [arm64 Mac app](https://github.com/StefanIlas1/pinkProcess/raw/refs/heads/main/build/mac-kit/pinkProcess-Mac-arm64.zip), open it and press **Watch demo instead** to see the whole flow without hardware. To use a kit, follow [board setup](docs/board-setup.md).
+Download and extract the [arm64 Mac app](https://github.com/StefanIlas1/pinkProcess/raw/refs/heads/main/build/mac-kit/pinkProcess-Mac-arm64.zip), open it and press **Find boards**. To provision a kit, follow [board setup](docs/board-setup.md).
 
 Build the app yourself with an interpreter that has PyInstaller installed:
 
@@ -44,14 +43,15 @@ PYTHONPATH=$PWD python3 mac/kit_backend.py
 
 ## Using the app
 
-1. **Import data.** Press **Import data** and choose a CSV or JSON lines file, or start from a sample. The app reads the columns, types, row count and time column and spots signals such as queue, latency, errors, temperature or sales.
-2. **Pick a model.** A recommended quantized model is applied when the data loads. **Search models** opens the library, which you can filter by task, maker and size. **Synthesize model** builds your own from a starting point, a name and a request. **Publish** adds a skill you trained to your library, stored in `~/Library/Application Support/PYNQ Process/models.json`.
-3. **Watch the hot path.** The strip on the left edge shows Data, Profile, Model, PYNQ-Z2 and Answer with the time each stage took. Hover it to open it. With no board the fabric stage reads **This Mac**.
-4. **Ask.** Type a question or use the microphone key and press Enter. Answers arrive style by style: **Short** first, then **Summary**, **Final** (board answers), **Transcript** and **Table**. Switch between the ready ones on the answer. The style row above the input picks which one opens first. A follow-up on a board dataset sees the previous exchange. **Readings behind this answer** shows the data the answer rests on.
-5. **Notes.** The **Notes** tab keeps your own notes with the session.
-6. **History.** Logged-in users see past sessions in the left sidebar, with dataset, model and question count. Without logging in, everything works but nothing is saved.
-7. **Export.** **Export** saves the session as Markdown, CSV or JSON, with every answer style that was ready. In the Mac app it opens a dialog with a Copy button instead of downloading.
-8. **Connect to Claude.** The same menu shows the config for the MCP connector (below).
+1. **Connect.** Press **Find boards** on the start screen. The rest of the app opens once a board is connected.
+2. **Import data.** Press **Import data** and choose a CSV or JSON lines file, or start from a sample. The app reads the columns, types, row count and time column and spots signals such as queue, latency, errors, temperature or sales.
+3. **Pick a model.** A recommended quantized model is applied when the data loads. **Search models** opens the library, which you can filter by task, maker and size. **Synthesize model** builds your own from a starting point, a name and a request. **Publish** adds a skill you trained to your library, stored in `~/Library/Application Support/PYNQ Process/models.json`.
+4. **Watch the hot path.** The strip on the left edge shows Data, Profile, Model, PYNQ-Z2 and Answer with the time each stage took. Hover it to open it. With no board the fabric stage reads **This Mac**.
+5. **Ask.** Type a question or use the microphone key and press Enter. Answers arrive style by style: **Short** first, then **Summary**, **Final** (board answers), **Transcript** and **Table**. Switch between the ready ones on the answer. The style row above the input picks which one opens first. A follow-up on a board dataset sees the previous exchange. **Readings behind this answer** shows the data the answer rests on.
+6. **Notes.** The **Notes** tab keeps your own notes with the session.
+7. **History.** Logged-in users see past sessions in the left sidebar, with dataset, model and question count. Without logging in, everything works but nothing is saved.
+8. **Export.** **Export** saves the session as Markdown, CSV or JSON, with every answer style that was ready. In the Mac app it opens a dialog with a Copy button instead of downloading.
+9. **Connect to Claude.** The same menu shows the config for the MCP connector (below).
 
 The **Skills**, **Train** and **Replay** tabs change and compare the board's language-model versions. See [board setup](docs/board-setup.md).
 

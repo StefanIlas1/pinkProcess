@@ -105,7 +105,7 @@ The held-out questions were also used to pick training settings, so treat the fi
 
 The FPGA only runs a design after it is compiled into a **bitstream**, the file that configures the chip. Compiling needs Xilinx Vivado and Vitis HLS, which run on x86 Linux or Windows and not on a Mac. That step has not been done.
 
-Two ways to demo on the board:
+Two ways to run it on the board:
 
 | mode | needs | what runs where |
 |---|---|---|

@@ -13,7 +13,7 @@ from threading import Lock
 from statistics import fmean, pstdev
 from time import perf_counter
 
-from .kit_dataset import demo_csv
+from .kit_dataset import pool_sample_csv
 
 MAX_ROWS = 50000
 MAX_COLUMNS = 40
@@ -323,7 +323,7 @@ def answer_question(table, question, style):
 
 def sample_csv(sample_id):
     if sample_id == "pool":
-        return demo_csv()
+        return pool_sample_csv()
     if sample_id == "latency":
         rows = ["time_ms,latency_ms,errors"]
         for index in range(240):

@@ -46,7 +46,7 @@ Send the header `time_ms,busy,waiting` followed by a reading every 100 ms. An au
 
 With a board connected, a queue CSV is uploaded to it and analyzed on the FPGA. Press **Import data**, choose the file and enter the pool capacity when asked. The file needs the integer columns `time_ms,busy,waiting` in that order, 50 to 2,097 consecutive samples at 100 ms spacing, and at most 100 KiB. To try it, use the [synthetic recovery CSV](../kit/examples/pool-recovery.csv) with capacity **4**. The sample has 60 readings: a queue reaches 12 and drains to zero before the last reading.
 
-The board stores the upload separately from its live feed and answers from one generation: **Short** is the first complete sentence, **Summary** excerpts the finished answer and **Final** keeps the model's wording. A second question on the same dataset is answered as a follow-up that sees the previous exchange. Other files, and any file when no board is connected, are analyzed on this Mac.
+The board stores the upload separately from its live feed and answers from one generation: **Short** is the first complete sentence, **Summary** excerpts the finished answer and **Final** keeps the model's wording. A second question on the same dataset is answered as a follow-up that sees the previous exchange. Other files are profiled and answered on this Mac while the board stays connected.
 
 ## Change the language-model weights
 

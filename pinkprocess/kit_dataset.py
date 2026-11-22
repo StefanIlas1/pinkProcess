@@ -11,14 +11,14 @@ from .fixed_point import encode_features
 from .simulator import SAMPLE_MS, Reading, simulate
 from .telemetry_stream import StreamSession, TelemetryStream
 
-DEMO_CAPACITY = 12
+POOL_SAMPLE_CAPACITY = 12
 WINDOW_SIZE = OBSERVATION_MS // SAMPLE_MS
 MAX_ROWS = WINDOW_SIZE + 2048 - 1
 MAX_DATASET_REQUEST = 128 * 1024
 
 
-def demo_csv() -> str:
-    run = simulate(200, duration_ms=20_000, capacity=DEMO_CAPACITY)
+def pool_sample_csv() -> str:
+    run = simulate(200, duration_ms=20_000, capacity=POOL_SAMPLE_CAPACITY)
     return "time_ms,busy,waiting\n" + "".join(
         f"{row.time_ms},{row.busy},{row.waiting}\n" for row in run.readings
     )

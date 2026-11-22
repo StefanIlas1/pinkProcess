@@ -9,7 +9,7 @@ import unittest
 
 from lm_reference.weight_versions import ORIGINAL, WeightLayout, WeightVersionStore
 from .board_language import BoardLanguage
-from .kit_dataset import DEMO_CAPACITY, demo_csv
+from .kit_dataset import POOL_SAMPLE_CAPACITY, pool_sample_csv
 
 
 QUESTION = "Has this connection pool recovered?"
@@ -120,9 +120,9 @@ class BoardLanguageTest(unittest.TestCase):
 
         service = BoardLanguage(runtime, self.store(), self.state_dir,
                                 lambda: self.fail("Dataset inference touched the live stream."), dataset_score=score)
-        dataset = service.handle(dict(op="lm_dataset_upload", csv=demo_csv(), capacity=DEMO_CAPACITY, name="Raw CSV"))
+        dataset = service.handle(dict(op="lm_dataset_upload", csv=pool_sample_csv(), capacity=POOL_SAMPLE_CAPACITY, name="Raw CSV"))
         dataset_id = dataset["dataset_id"]
-        self.assertEqual(score_calls, [(50, DEMO_CAPACITY)])
+        self.assertEqual(score_calls, [(50, POOL_SAMPLE_CAPACITY)])
         self.assertEqual(dataset["snapshot"]["origin"], "dataset")
         self.assertEqual(dataset["summary"]["sample_count"], dataset["snapshot"]["sample_count"])
         self.assertNotIn("csv", dataset)
@@ -147,8 +147,8 @@ class BoardLanguageTest(unittest.TestCase):
     def test_dataset_calibration_saves_a_real_scoped_weight_version(self):
         service = BoardLanguage(FakeRuntime(), self.store(), self.state_dir, lambda: self.observation,
                                 dataset_score=lambda window, capacity: None)
-        dataset_id = service.handle(dict(op="lm_dataset_upload", csv=demo_csv(),
-                                         capacity=DEMO_CAPACITY))["dataset_id"]
+        dataset_id = service.handle(dict(op="lm_dataset_upload", csv=pool_sample_csv(),
+                                         capacity=POOL_SAMPLE_CAPACITY))["dataset_id"]
         action = dict(op="lm_dataset_calibration", dataset_id=dataset_id, target_row=1)
         self.assertFalse(service.handle(action)["ready"])
         calibration = service.handle(dict(op="lm_dataset_calibrate", dataset_id=dataset_id))

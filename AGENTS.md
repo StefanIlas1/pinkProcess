@@ -34,6 +34,7 @@ Swift shell (mac/KitWindow.swift)
 | Dictation | `mac/SpeechInput.swift`, bridged to `window.pinkprocessSpeechInput` in `kit.html` |
 | Hot-path strip, answer tabs, skeleton loader | `kit.html` (`pathMark`, `renderMessages`, `setVariant`) |
 | Logo | `pinkprocess/static/logo.png`, served at `/static/logo.png` |
+| Simulated board for development | `board_sim.py`, enabled by `PYNQ_SIM_BOARD=1` in `make_server` |
 
 ## Code style
 
@@ -71,20 +72,24 @@ xcrun swiftc -parse-as-library mac/test_workbench_origin.swift mac/WorkbenchOrig
 
 Build the app with `PYTHON=/path/to/python3 mac/build_kit.sh`. It needs PyInstaller, bundles `kit.html` and `static/`, and writes `build/mac-kit/pinkProcess.app`.
 
-## Demo and screenshot parameters
+## Simulated board and screenshots
 
-The page accepts parameters in the URL hash (the server only serves the exact path `/`), for example `http://127.0.0.1:53530/#demo=1&login=1&ask=1`. They exist for demos and headless screenshots.
+There is no demo mode in the app. To see the connected interface without hardware, start the backend with a simulated board. The flag is for development only and appears nowhere in the interface:
+
+```sh
+PYNQ_SIM_BOARD=1 PYTHONPATH=$PWD python3 mac/kit_backend.py
+```
+
+`pinkprocess/board_sim.py` answers the board actions the interface uses (status, telemetry from `simulator.py`, streamed answers, saved incidents, dataset upload, follow-ups). The kit starts already connected to it. Synthesis and other board-only actions return a clean error.
+
+The page accepts parameters in the URL hash (the server only serves the exact path `/`), for example `http://127.0.0.1:53530/#login=1&tab=weights`. They exist for headless screenshots.
 
 | Parameter | Effect |
 | --- | --- |
-| `demo=1` | Start **Watch demo instead** on load |
-| `login=1` / `logout=1` | Sign in as the local stand-in profile / sign out |
-| `ask=1` | Ask one demo question after load |
-| `hold=N` | Demo answers stop after the first N styles arrive, so the loader stays visible |
+| `login=1` / `logout=1` | Sign in as the local guest profile / sign out |
 | `tab=notes\|incidents\|weights\|create` | Open a rail tab |
 | `dialog=library\|mcp\|plan\|login` | Open that dialog |
-| `menu=export` / `menu=late` | Open the export menu now / after the demo answer finishes |
-| `vt=Transcript` | Click that answer tab after the demo answer finishes |
+| `menu=export` | Open the export menu |
 | `peek=1` | Show the hot-path strip expanded |
 | `help=1` | Open the help popover on the tab row |
 

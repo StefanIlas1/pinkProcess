@@ -105,7 +105,7 @@ button.icon{width:32px;height:32px;padding:0;border-radius:50%;font-size:1.1rem;
 #samples{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-start;align-items:center}
 .offline-view{position:relative;z-index:1;display:none;height:100vh;align-content:center;justify-items:center;gap:16px;text-align:center;padding:24px}
 .offline-view p{color:var(--dim);max-width:520px}
-.offline-top .logo{margin:0}.offline-top{position:absolute;left:0;right:0;top:0;height:var(--topbar);display:flex;align-items:center;padding:0 28px;border-bottom:1px solid var(--line)}
+.offline-top .logo{margin:0}.manual input{width:min(280px,80vw)}.offline-top{position:absolute;left:0;right:0;top:0;height:var(--topbar);display:flex;align-items:center;padding:0 28px;border-bottom:1px solid var(--line)}
 body.offline .app{display:none}body.offline .offline-view{display:grid}
 @media(max-width:699px),(max-height:479px){body.offline .offline-view{display:none}}
 #notice{margin:0 auto;width:min(960px,90%);font-size:.9rem;color:var(--dim)}#notice:empty{display:none}#notice[data-error="true"]{color:var(--ink);font-weight:600}
@@ -164,9 +164,8 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
   <div class="offline-top"><div class="logo"></div></div>
   <h2>No board connected</h2>
   <p id="discovery" role="status">Plug your PYNQ Process kit into this Mac, then find it here.</p>
-  <div class="row" style="justify-content:center"><button id="find" class="solid">Find boards</button><button id="import-offline">Import data</button><button id="watch-demo">Watch demo instead</button></div>
-  <small>Imported data stays on this Mac.</small>
-  <button id="open-connect" class="text">Connect by address</button>
+  <div class="row" style="justify-content:center"><button id="find" class="solid">Find boards</button><button id="login-offline">Log in</button><div class="profile" id="profile-offline" hidden><button id="profile-offline-button" class="avatar" aria-label="Profile"></button><div class="menu" id="profile-offline-menu" hidden><span id="profile-offline-name"></span><button id="logout-offline">Log out</button></div></div></div>
+  <div class="row manual" id="manual" hidden><input id="host" list="known" placeholder="Board address" aria-label="Board address" autocomplete="off" autocapitalize="none" spellcheck="false"><datalist id="known"></datalist><button id="connect" class="solid">Connect</button></div>
   <p id="offline-notice" role="status"></p>
 </div>
 <div class="app" id="app">
@@ -176,7 +175,7 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
     <span class="chip" id="chip"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="4" y="4" width="10" height="10" rx="1" fill="none" stroke="#9aa1a7"/><rect x="7" y="7" width="4" height="4" fill="#9aa1a7"/><path d="M6 1v3M9 1v3M12 1v3M6 14v3M9 14v3M12 14v3M1 6h3M1 9h3M1 12h3M14 6h3M14 9h3M14 12h3" stroke="#9aa1a7" stroke-width="1"/></svg><span class="leds"><i class="led"></i><i class="led"></i><i class="led"></i></span><span id="chip-text"></span></span>
     <div class="conn">
       <button id="connection" class="pill" type="button" aria-haspopup="true"></button>
-      <div class="menu" id="conn-menu" hidden><button id="disconnect" hidden>Disconnect</button><button id="find-top" hidden>Find a board</button></div>
+      <div class="menu" id="conn-menu" hidden><button id="disconnect" hidden>Disconnect</button></div>
     </div>
     <button id="login" class="text">Log in</button>
     <div class="profile" id="profile" hidden>
@@ -276,14 +275,6 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
 </aside>
 </div>
 
-<dialog id="connect-dialog">
-  <div class="head"><h2>Connect by address</h2><button class="text" data-close>Close</button></div>
-  <div class="stack">
-    <label>Kit or network address<input id="host" list="known" placeholder="pynq.local" autocomplete="off" autocapitalize="none" spellcheck="false"></label><datalist id="known"></datalist>
-    <div class="row"><button id="connect" class="solid">Connect</button></div>
-  </div>
-</dialog>
-
 <dialog id="login-dialog">
   <div class="head"><h2>Log in</h2><button class="text" data-close>Close</button></div>
   <button id="google" class="google"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C.9 16.5 0 20.1 0 24s.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>Continue with Google</button>
@@ -356,26 +347,9 @@ const BEST_FOR = {
   "queue-onset-logistic-long":"warning a full minute ahead"
 };
 const bestFor = model => "Best for: " + (BEST_FOR[model.id] || model.task.charAt(0).toLowerCase() + model.task.slice(1));
-const demoProfile = {
-  name:"pool-telemetry.csv", format:"CSV", rows:6000, time_column:"time_ms", signals:["connections","queue"], queue_ready:true, capacity:20,
-  columns:[{name:"time_ms", type:"number"}, {name:"busy", type:"number"}, {name:"waiting", type:"number"}],
-  recommendation:{model_id:"queue-onset-logistic", reason:"Looks like connection-pool telemetry, so Queue-onset INT8 fits"}
-};
-const demoChats = [
-  {id:"demo-1", title:"pool-telemetry.csv", dataset:"pool-telemetry.csv", model:"queue-onset-logistic", notes:"Pool size was 20. Ask ops about retries.", updated_ms:Date.now() - 86400000, questions:2, messages:[
-    {role:"user", text:"What was the peak queue?"},
-    {role:"answer", text:"The queue peaked at 9 at 14.5 s and then drained.", readings:"6,000 readings of waiting. Highest 9."},
-    {role:"user", text:"Why did requests wait?"},
-    {role:"answer", text:"All 20 connections were busy and new requests arrived faster than they finished.", readings:"busy 20 of 20 from 13.5 s to 15.3 s."}]}
-];
 let status = null, address = "", busy = true, interaction = 0, pollPending = false, nextModelCheck = 0, autoUsb = true;
 let languageWeights = null, savedCaptures = [], olderCaptures = null, latestStream = null, answerCapture = null;
-let messages = [], chatId = null, chats = [], user = null, auth0 = false, demo = false, loginWatch = null, models = null, samples = [];
-let demoPublished = [], demoTimers = [];
-function clearDemoTimers() {
-  for (const id of demoTimers) clearTimeout(id);
-  demoTimers = [];
-}
+let messages = [], chatId = null, chats = [], user = null, auth0 = false, loginWatch = null, models = null, samples = [];
 let boardDataset = null, boardHost = "", boardCalibrated = false, lastCsvText = "", voiceState = "idle", voiceBefore = "", voiceIgnore = false;
 const speechInput = window.webkit?.messageHandlers?.speechInput;
 let dataset = null, datasetLabel = "", chosenModel = null, accepted = false, notes = "", notesTimer = null;
@@ -410,7 +384,7 @@ function blinkLed() {
 }
 async function post(url, action, extra) {
   const response = await fetch(url, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({action,...extra})});
-  if (status && !demo && url === "/api/action") blinkLed();
+  if (status && url === "/api/action") blinkLed();
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || "Something went wrong.");
   return data;
@@ -436,7 +410,7 @@ function peekPulse() {
 }
 function pathMark(index, state, ms=null) {
   path.state[index] = state;
-  if (state === "active") {peekPulse(); if (demo) blinkLed();}
+  if (state === "active") peekPulse();
   const node = document.querySelector('.node[data-stage="' + index + '"]');
   node.dataset.state = state;
   document.querySelector('.pdot[data-stage="' + index + '"]').dataset.state = state;
@@ -484,7 +458,7 @@ function pathLabels() {
 function controls() {
   const online = Boolean(status);
   const hasData = Boolean(dataset || datasetLabel);
-  document.body.classList.toggle("offline", !online && !hasData);
+  document.body.classList.toggle("offline", !online);
   el("app").classList.toggle("nosidebar", !user);
   el("chip").classList.toggle("online", online);
   el("chip").dataset.tip = online ? "Board clock: 100 MHz\nBoard temperature: " + (status.temp_c != null ? status.temp_c + " °C" : "not reported") + "\nLast answer latency: " + (lastLatency !== null ? fmtMs(lastLatency) : "none yet") + "\nLEDs: link, activity, answering" : "No board connected";
@@ -493,14 +467,15 @@ function controls() {
   el("connection").classList.toggle("off", !online);
   el("disconnect").hidden = !online;
   el("disconnect").disabled = busy;
-  el("find-top").hidden = online;
-  el("find-top").disabled = busy;
   el("login").hidden = Boolean(user);
   el("profile").hidden = !user;
   el("profile-button").textContent = user ? user.name.trim().charAt(0).toUpperCase() : "";
   el("profile-name").textContent = user ? user.name : "";
   el("find").disabled = busy;
-  el("import-offline").disabled = busy;
+  el("login-offline").hidden = Boolean(user);
+  el("profile-offline").hidden = !user;
+  el("profile-offline-button").textContent = user ? user.name.trim().charAt(0).toUpperCase() : "";
+  el("profile-offline-name").textContent = user ? user.name : "";
   el("connect").disabled = busy || !el("host").value.trim();
   el("data-chip").hidden = !hasData;
   el("data-name").textContent = dataset?.name || datasetLabel;
@@ -541,7 +516,7 @@ function controls() {
   el("saved-incident").disabled = busy || !savedCaptures.length;
   el("replay-saved").disabled = busy || !status?.lm_supported || !el("saved-incident").value;
   el("more-incidents").disabled = busy;
-  el("tab-incidents").hidden = !languageWeights?.capture_listing_supported && !demo;
+  el("tab-incidents").hidden = !languageWeights?.capture_listing_supported;
   el("notes-hint").textContent = user ? "" : "Log in to save notes";
   if (el("tab-incidents").hidden && activeTab === "incidents") selectTab("notes");
   renderModel();
@@ -677,7 +652,7 @@ async function run(task) {
   try { await task(); }
   catch (err) {
     show(err.message, true);
-    if (status && !demo) {
+    if (status) {
       try { setState(await request("status")); }
       catch { setState({status:null}); }
     }
@@ -688,7 +663,8 @@ async function discover(connectSingle=false) {
   const data = await request("discover");
   el("known").replaceChildren(...data.boards.map(board => new Option(board.name, board.host)));
   if (!el("host").value || data.boards.length === 1) el("host").value = data.boards[0]?.host || "";
-  el("discovery").textContent = data.boards.length === 1 ? "One kit found." : data.boards.length ? data.boards.length + " kits found. Choose one with Connect by address." : "No kits found. Connect a provisioned USB kit or check Ethernet and macOS Local Network access. For a new kit, choose PYNQ Process, then Import Kit Pairing….";
+  el("discovery").textContent = data.boards.length === 1 ? "One kit found." : data.boards.length ? data.boards.length + " kits found. Enter its address below." : "No kits found. Connect a provisioned USB kit or check Ethernet and macOS Local Network access. For a new kit, choose PYNQ Process, then Import Kit Pairing…";
+  el("manual").hidden = data.boards.length === 1;
   if (connectSingle && data.boards.length === 1) await connectBoard(data.boards[0].host);
 }
 async function connectBoard(host) {
@@ -702,7 +678,7 @@ function dateLabel(ms) {
   return new Date(ms).toLocaleDateString(undefined, {month:"short", day:"numeric"});
 }
 function renderHistory() {
-  const list = !user ? [] : demo ? demoChats : chats;
+  const list = !user ? [] : chats;
   el("chat-list").replaceChildren(...list.map(chat => {
     const item = document.createElement("button");
     item.className = "chat-item"; item.type = "button"; item.disabled = busy;
@@ -722,7 +698,7 @@ async function refreshChats() {
 }
 async function openChat(id) {
   try {
-    const chat = demo ? demoChats.find(item => item.id === id) : (await account("history_get", {chat_id:id})).chat;
+    const chat = (await account("history_get", {chat_id:id})).chat;
     messages = chat.messages.map(message => ({role:message.role, text:message.text, readings:message.readings || "", table:message.table, mono:message.mono, style:message.style, variants:message.variants && Object.keys(message.variants).length ? message.variants : undefined, picked:true}));
     for (const message of messages) {ensureVariants(message); if (message.role === "answer") message.view = message.variants[message.style] ? message.style : readyStyles(message)[0];}
     chatId = chat.id; notes = chat.notes || ""; el("notes").value = notes;
@@ -735,7 +711,7 @@ function newSession() {
   if (busy) return;
   messages = []; chatId = null; dataset = null; datasetLabel = ""; chosenModel = null; accepted = false; notes = "";
   boardDataset = null; boardCalibrated = false; lastCsvText = "";
-  answerCapture = null; lastLatency = null; lastTimings = null; clearTimeout(notesTimer); clearDemoTimers();
+  answerCapture = null; lastLatency = null; lastTimings = null; clearTimeout(notesTimer);
   el("notes").value = ""; el("live-question").value = "";
   pathReset(); show(""); renderMessages(); controls();
   if (status) el("live-question").focus();
@@ -900,7 +876,7 @@ function renderLoginButton() {
 async function continueWithGoogle() {
   if (!auth0) {
     try {
-      applySession(await account("local_login", {name:"Demo user"}));
+      applySession(await account("local_login", {name:"Guest"}));
       el("login-dialog").close();
     } catch (err) {show(err.message, true);}
     return;
@@ -916,7 +892,7 @@ async function continueWithGoogle() {
   window.location.href = "/auth/login";
 }
 async function persistSession(extra={}) {
-  if (!user || demo) return;
+  if (!user) return;
   try {
     const saved = await account(extra.question ? "history_save" : "session_save", {chat_id:chatId, dataset:dataset?.name || datasetLabel, model:chosenModel?.id || "", notes, ...extra});
     chatId = saved.chat_id;
@@ -1056,7 +1032,7 @@ function boardObservations(set) {
   return lines.join("\n") || "This upload has no measured observations available.";
 }
 function boardEligible() {
-  return !demo && Boolean(status?.lm_supported && dataset?.queue_ready && lastCsvText && lastCsvText.length <= 100 * 1024);
+  return Boolean(status?.lm_supported && dataset?.queue_ready && lastCsvText && lastCsvText.length <= 100 * 1024);
 }
 function askCapacity() {
   const dialog = el("capacity-dialog");
@@ -1173,36 +1149,6 @@ function askData(question) {
     await persistSession({question, answer:entry.variants.short?.text || "", readings:entry.readings, style:entry.style, variants:variantsPayload(entry)});
   });
 }
-const DEMO_ANSWERS = {
-  short:{text:"The queue is still growing: 14 requests are waiting and all 20 connections are busy."},
-  summary:{text:"The queue is still growing. 14 requests are waiting and all 20 connections are busy, up from 3 waiting 30 seconds ago.\nThe board expects more than 20 waiting within ten seconds.\nCheck whether more requests are arriving or connections are being held longer."},
-  transcript:{mono:true, text:"00:00.0  START  waiting 0\n00:13.5  SPIKE  waiting jumps to 13\n00:14.5  PEAK   highest waiting, 19\n00:15.3  CALM   waiting eases to 12\n00:20.0  NOW    waiting 14, rising"},
-  table:{text:"", table:{columns:["Time", "Event", "Waiting"], rows:[["0.0 s", "start", "0"], ["13.5 s", "spike", "13"], ["14.5 s", "peak", "19"], ["20.0 s", "now", "14"]]}}
-};
-const DEMO_SCHEDULE = {short:2000, summary:4000, transcript:6000, table:7000};
-function demoAnswer(question) {
-  const entry = pendingEntry();
-  messages.push({role:"user", text:question}, entry); renderMessages();
-  accepted = true;
-  pathBegin();
-  const offTopic = !ON_TOPIC.test(question);
-  const held = query.has("hold") ? (Number(query.get("hold")) || 1) : LOCAL_STYLES.length;
-  [[1, 500], [2, 1000], [3, 1500], [4, 2000]].forEach(([stage, delay]) => demoTimers.push(setTimeout(() => entryStage(entry, stage), delay)));
-  LOCAL_STYLES.slice(0, offTopic ? 1 : held).forEach(style => demoTimers.push(setTimeout(() => {
-    const item = offTopic ? {text:"I only read this board's system health, so I can't answer that one well."} : DEMO_ANSWERS[style];
-    setVariant(entry, style, {...item});
-    if (offTopic) for (const other of LOCAL_STYLES) entry.variants[other] = {...item};
-    entry.readings = "t-30s waiting 3 \u00b7 t-20s waiting 6 \u00b7 t-10s waiting 10 \u00b7 now waiting 14 \u00b7 busy 20 of 20\nPredicted: queue onset in 2 s (p 0.91). Answered in 7,000 ms \u00b7 demo";
-    if (offTopic || style === "table") {
-      pathFinish();
-      [120, 210, 380, 3900, 1300].forEach((ms, index) => pathMark(index, "done", ms));
-      lastLatency = 7000;
-      entry.pending = false; entry.style = entry.defaultStyle; entry.offTopic = offTopic;
-      entry.timings = lastTimings = timingsFromPath();
-    }
-    renderMessages(); controls();
-  }, offTopic ? 2000 : DEMO_SCHEDULE[style])));
-}
 async function changeQueueWeights(action, version) {
   const supportsStream = status.stream_supported, supportsLanguageModel = status.lm_supported;
   const update = await request(action, action === "apply" ? {version} : {});
@@ -1214,9 +1160,6 @@ async function changeLanguageWeights(action, name) {
   const data = await request("lm_" + action, action === "select" ? {name} : {});
   displayWeightVersions(data);
   show("Explanations now use " + data.active.name + "."); peekPulse();
-}
-function demoNotice() {
-  show("This is demo data. Nothing changed on a board.");
 }
 function loadable(id) {
   const model = models?.find(item => item.id === id);
@@ -1237,12 +1180,11 @@ async function loadSamples() {
 }
 async function reloadModels() {
   models = (await (await fetch("/api/models")).json()).models;
-  if (demo) models = [...models, ...demoPublished];
 }
 function skillToPublish() {
   const active = boardDataset?.selected_model || languageWeights?.active?.name;
   if (active && active !== "original") return active;
-  return demo ? "tighter-warnings" : null;
+  return null;
 }
 function renderLibrary() {
   const query = el("lib-search").value.trim().toLowerCase();
@@ -1268,8 +1210,7 @@ function renderLibrary() {
       const remove = document.createElement("button"); remove.className = "text"; remove.type = "button"; remove.textContent = "Unpublish";
       remove.onclick = async () => {
         try {
-          if (demo) demoPublished = demoPublished.filter(item => item.id !== model.id);
-          else await account("model_unpublish", {id:model.id});
+          await account("model_unpublish", {id:model.id});
           await reloadModels(); renderLibrary();
         } catch (err) {show(err.message, true);}
       };
@@ -1282,7 +1223,6 @@ function renderLibrary() {
       action.onclick = () => {
         el("library-dialog").close();
         chosenModel = model; accepted = true; peekPulse();
-        if (demo) {controls(); return demoNotice();}
         controls();
         if (status && model.kind === "queue") run(() => changeQueueWeights("rollback"));
         else if (status?.lm_supported && model.kind === "language") {
@@ -1367,7 +1307,7 @@ async function copyText(text) {
 async function exportSession(format) {
   el("export-menu").hidden = true;
   try {
-    const saved = Boolean(user && !demo && chatId);
+    const saved = Boolean(user && chatId);
     const file = await request("export", {session_id:saved ? chatId : null, session:sessionObject(), format});
     const inApp = /AppleWebKit/.test(navigator.userAgent) && !/Safari\//.test(navigator.userAgent);
     if (!inApp) {
@@ -1460,37 +1400,27 @@ for (const button of document.querySelectorAll("[data-close]")) button.onclick =
 for (const button of document.querySelectorAll("#styles button")) button.onclick = () => {answerStyle = button.dataset.style; controls();};
 const pickFile = () => el("file").click();
 el("import-big").onclick = pickFile;
-el("import-offline").onclick = pickFile;
 el("import-more").onclick = pickFile;
 el("file").onchange = async event => {
   const file = event.target.files[0];
   event.target.value = "";
   if (!file) return;
   if (file.size > 1.9 * 1024 * 1024) {show("Choose a file smaller than 1.9 MiB.", true); return;}
-  if (demo) {show("Leave the demo to import your own data."); return;}
   run(async () => importData(file.name, await file.text()));
 };
 el("make-own").onclick = openPlan;
 el("open-library").onclick = openLibrary;
-el("open-connect").onclick = () => el("connect-dialog").showModal();
 el("find").onclick = () => run(() => discover(true));
-el("find-top").onclick = () => run(() => discover(true));
 el("host").oninput = controls;
 el("connect").onclick = () => {
-  const host = el("host").value.trim();
-  el("connect-dialog").close();
-  run(() => connectBoard(host));
+  run(() => connectBoard(el("host").value.trim()));
 };
-el("disconnect").onclick = () => {
-  if (demo) {
-    demo = false; clearDemoTimers(); address = ""; el("host").value = ""; lastLatency = null; show("");
-    displayWeightVersions(null); displaySavedCaptures(); setState({status:null});
-    newSession();
-    if (user) refreshChats().catch(err => show(err.message, true));
-    return;
-  }
-  run(async () => {autoUsb = false; setState(await request("disconnect")); show("Board disconnected.");});
-};
+el("disconnect").onclick = () => run(async () => {
+  autoUsb = false;
+  setState(await request("disconnect"));
+  boardDataset = null; boardCalibrated = false; dataset = null; datasetLabel = ""; lastCsvText = ""; messages = []; chatId = null;
+  renderMessages(); pathReset(); show("");
+});
 el("live-question").oninput = controls;
 el("ask-form").onsubmit = event => {
   event.preventDefault();
@@ -1499,7 +1429,6 @@ el("ask-form").onsubmit = event => {
   if (["requesting", "listening"].includes(voiceState)) speechInput?.postMessage("stop");
   voiceIgnore = true;
   el("live-question").value = ""; controls();
-  if (demo) return demoAnswer(question);
   if (dataset) return askData(question);
   askLive(question);
 };
@@ -1534,10 +1463,7 @@ el("publish-skill").onclick = async () => {
   const name = skillToPublish();
   if (!name) return;
   try {
-    if (demo) {
-      demoPublished = [...demoPublished.filter(item => item.name !== name), {id:"you-" + name, name, task:"Answer skill made by you", task_tag:"custom", kind:"language", available:true, maker:"you", size_kb:70, size:"tiny", published:true, rank:99, runs_on:"board"}];
-      await reloadModels();
-    } else {
+    {
       models = (await account("model_publish", {name, task:"Answer skill made by you", task_tag:"custom", base:"flan-t5-small-int8"})).models;
     }
     show("Published " + name + " to your marketplace.");
@@ -1602,7 +1528,6 @@ if (speechInput) {
 }
 el("replay-saved").onclick = () => {
   const capture = savedCapture();
-  if (demo) return demoNotice();
   if (capture) askLive(capture.question, capture);
 };
 el("more-incidents").onclick = () => run(() => refreshSavedCaptures(olderCaptures));
@@ -1614,7 +1539,6 @@ const weightDraft = () => ({name:el("lm-name").value.trim(), target_row:/^\d+$/.
 el("lm-author-form").onsubmit = event => {
   event.preventDefault();
   if (el("lm-author").disabled) return;
-  if (demo) return demoNotice();
   run(async () => {
     const draft = weightDraft();
     show("Asking Astra to propose an INT8 row…");
@@ -1622,8 +1546,8 @@ el("lm-author-form").onsubmit = event => {
     show("Saved weight version " + draft.name + ".");
   });
 };
-el("lm-save").onclick = () => {if (demo) return demoNotice(); el("lm-artifact").click();};
-el("lm-artifact").onchange = () => demo ? demoNotice() : run(async () => {
+el("lm-save").onclick = () => el("lm-artifact").click();
+el("lm-artifact").onchange = () => run(async () => {
   const file = el("lm-artifact").files[0], draft = weightDraft();
   if (!file) return;
   if (file.size > 128 * 1024) throw new Error("Choose an Astra response JSON smaller than 128 KiB.");
@@ -1633,7 +1557,7 @@ el("lm-artifact").onchange = () => demo ? demoNotice() : run(async () => {
   show("Saved weight version " + draft.name + ".");
 });
 el("lm-selection").onchange = () => {
-  if (boardDataset && !demo) {
+  if (boardDataset) {
     const name = el("lm-selection").value;
     if (!name || name === boardDataset.selected_model) return;
     return run(async () => {
@@ -1644,20 +1568,16 @@ el("lm-selection").onchange = () => {
       } catch (err) {renderLanguageSelect(); throw err;}
     });
   }
-  if (demo) {languageWeights.active = languageWeights.versions.find(version => version.name === el("lm-selection").value); controls(); return demoNotice();}
   if (el("lm-selection").value && el("lm-selection").value !== languageWeights?.active.name) run(() => changeLanguageWeights("select", el("lm-selection").value));
 };
 el("weight").onchange = () => {
   const version = el("weight").value;
-  if (demo) {status.version = version; controls(); return demoNotice();}
   if (version && version !== status.version) run(() => changeQueueWeights("apply", version));
 };
 el("rollback").onclick = () => {
-  if (demo) return demoNotice();
   run(() => changeQueueWeights("rollback"));
 };
 el("lm-restore").onclick = () => {
-  if (demo) return demoNotice();
   run(() => changeLanguageWeights("restore"));
 };
 el("login").onclick = startLogin;
@@ -1670,31 +1590,20 @@ document.addEventListener("click", event => {
   if (!event.target.closest(".xport")) el("export-menu").hidden = true;
   if (!event.target.closest(".pop")) closeHelp();
   if (!event.target.closest("#profile")) el("profile-menu").hidden = true;
+  if (!event.target.closest("#profile-offline")) el("profile-offline-menu").hidden = true;
 });
-el("logout").onclick = async () => {
-  el("profile-menu").hidden = true;
+async function logOut() {
+  el("profile-menu").hidden = true; el("profile-offline-menu").hidden = true;
   try {
     applySession(await account("logout"));
-    if (chatId === null) renderHistory();
+    renderHistory();
   } catch (err) {show(err.message, true);}
-};
+}
+el("logout").onclick = logOut;
+el("logout-offline").onclick = logOut;
+el("login-offline").onclick = startLogin;
+el("profile-offline-button").onclick = () => {el("profile-offline-menu").hidden = !el("profile-offline-menu").hidden;};
 setLogo();
-el("watch-demo").onclick = async () => {
-  demo = true;
-  try {await loadModels();} catch {}
-  setState({host:"demo.local", status:{backend:"Demo kit", board_name:"PYNQ-Z2", temp_c:47, stream_supported:true, lm_supported:true, version:"pool-logistic-v1", versions:["pool-logistic-v1", "pool-logistic-v2"], model:"Queue-onset logistic, INT8 on FPGA", weights_sha256:"demo"}});
-  languageWeights = {active:{name:"original", checkpoint_sha256:"demo"}, versions:[{name:"original"}, {name:"tighter-warnings"}], capture_listing_supported:true};
-  renderLanguageSelect(); controls();
-  displaySavedCaptures({captures:[{id:"demo", captured_at_ms:Date.now() - 3600000, question:"Why are requests waiting?", reading_time_ms:84200, baseline:{answer:"All connections were busy.", version:{name:"original"}}}]});
-  displayStream({state:"ready", origin:"demo", latest:{waiting:14, busy:20}, capacity:20, age_ms:1000});
-  dataset = {...demoProfile, timings:{data_ms:42, profile_ms:18}};
-  chosenModel = models?.find(model => model.id === demoProfile.recommendation.model_id) || null; accepted = true;
-  messages = []; chatId = null; notes = ""; el("notes").value = ""; lastLatency = 41200; renderMessages(); show("");
-  controls();
-  pathReset();
-  await pathPlay({data_ms:42, profile_ms:18}, [0, 1]);
-  pathMark(2, "done", 1);
-};
 async function start() {
   controls();
   try {
@@ -1723,7 +1632,6 @@ async function devStart() {
   await start();
   if (query.has("logout")) applySession(await account("logout"));
   if (query.has("login")) await continueWithGoogle();
-  if (query.has("demo")) await el("watch-demo").onclick();
   if (query.get("tab")) selectTab(query.get("tab"));
   if (query.has("peek")) el("path").classList.add("open");
   if (query.get("dialog") === "library") openLibrary();
@@ -1732,18 +1640,11 @@ async function devStart() {
   if (query.get("dialog") === "login") startLogin();
   if (query.get("menu") === "export") el("export-btn").click();
   if (query.has("help")) document.querySelector(".tabs .help").click();
-  if (query.get("menu") === "late") setTimeout(() => {el("export-btn").click();}, 6600);
-  if (query.get("vt")) setTimeout(() => [...document.querySelectorAll(".vt")].find(button => button.textContent.startsWith(query.get("vt")))?.click(), 7600);
-  if (query.has("ask")) {
-    el("live-question").value = "What looks wrong with our system?";
-    controls();
-    el("ask-form").requestSubmit();
-  }
 }
 devStart();
 setInterval(updateThinking, 500);
 setInterval(async () => {
-  if (demo || busy || pollPending || document.hidden) return;
+  if (busy || pollPending || document.hidden) return;
   const startedAt = interaction;
   if (!status) {
     if (!autoUsb) return;

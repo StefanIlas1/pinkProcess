@@ -2,7 +2,7 @@ import unittest
 
 from .dataset import build_examples
 from .fixed_point import encode_features
-from .kit_dataset import DEMO_CAPACITY, demo_csv, prepare_dataset
+from .kit_dataset import POOL_SAMPLE_CAPACITY, pool_sample_csv, prepare_dataset
 from .simulator import simulate
 
 
@@ -15,9 +15,9 @@ class DatasetTest(unittest.TestCase):
         self.assertEqual(prepare_dataset(rows+"5000,4,0\n", 4, backlog=True)["waiting"], 0)
 
     def test_export_matches_training_features_and_times(self):
-        parsed = prepare_dataset(demo_csv(), DEMO_CAPACITY)
+        parsed = prepare_dataset(pool_sample_csv(), POOL_SAMPLE_CAPACITY)
         actual = dict(zip(parsed["times_ms"], parsed["features"]))
-        run = simulate(200, duration_ms=20_000, capacity=DEMO_CAPACITY)
+        run = simulate(200, duration_ms=20_000, capacity=POOL_SAMPLE_CAPACITY)
         examples = build_examples(run)
         self.assertTrue(examples)
         for example in examples:

@@ -9,7 +9,7 @@ from urllib.request import Request, urlopen
 from unittest.mock import patch
 
 from .kit_app import Kit, make_server
-from .kit_dataset import DEMO_CAPACITY, demo_csv, prepare_dataset
+from .kit_dataset import POOL_SAMPLE_CAPACITY, pool_sample_csv, prepare_dataset
 
 
 class MockBoard:
@@ -122,7 +122,7 @@ class KitTest(unittest.TestCase):
 
     def test_select_then_query_latest(self):
         self.assertIsNone(self.kit.action({"action": "status"})["host"])
-        data = dict(action="query", question="latest", csv=demo_csv(), capacity=DEMO_CAPACITY)
+        data = dict(action="query", question="latest", csv=pool_sample_csv(), capacity=POOL_SAMPLE_CAPACITY)
         with self.assertRaisesRegex(ValueError, "Connect a board"):
             self.kit.action(data)
         address = self.kit.action({"action": "discover"})["boards"][0]["host"]
@@ -139,7 +139,7 @@ class KitTest(unittest.TestCase):
         self.kit.action({"action": "connect", "host": "pynq.local"})
         # 49 warmup readings plus 513 eligible windows exercise the batch boundary.
         csv_text = "time_ms,busy,waiting\n" + "".join(f"{i * 100},9,0\n" for i in range(562))
-        data = dict(action="query", question="warnings", csv=csv_text, capacity=DEMO_CAPACITY)
+        data = dict(action="query", question="warnings", csv=csv_text, capacity=POOL_SAMPLE_CAPACITY)
         result = self.kit.action(data)
         self.assertEqual(self.transport.batches, [512, 1])
         self.assertEqual(result["windows"], 513)
@@ -273,10 +273,8 @@ class KitTest(unittest.TestCase):
             headers = {"Content-Type": "application/json"}
             data = json.dumps({"action": "discover"}).encode()
             try:
-                with urlopen(origin + "/api/setup") as response:
-                    self.assertEqual(json.load(response)["csv"], demo_csv())
-                with urlopen(origin + "/api/live-setup") as response:
-                    self.assertEqual(set(json.load(response)), {"examples"})
+                with urlopen(origin + "/api/samples") as response:
+                    self.assertTrue(json.load(response)["samples"])
                 with self.assertRaises(HTTPError) as failure:
                     urlopen(Request(origin + "/api/action", data, headers))
                 self.assertEqual(failure.exception.code, 403)

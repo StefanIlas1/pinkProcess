@@ -3,6 +3,7 @@
 import argparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
+import os
 from pathlib import Path
 from threading import Lock, Thread
 from time import monotonic, sleep, time
@@ -12,8 +13,9 @@ import webbrowser
 
 from .live_analyst import analyze as analyze_live_evidence
 from .backlog import VERSION as BACKLOG_VERSION
-from .kit_dataset import DEMO_CAPACITY, demo_csv, prepare_dataset
+from .kit_dataset import prepare_dataset
 from .astra_edit import propose
+from .board_sim import HOST as SIM_HOST, SimulatedBoard
 from .kit_transport import BoardOperationError, BoardTransport
 from .kit_data import DATA_DIR, MAX_IMPORT_BYTES, SAMPLES, STYLES, DatasetStore, answer_question, parse_table, profile_table, sample_csv, timed
 from .kit_accounts import CALLBACK_PATH, Accounts
@@ -32,14 +34,12 @@ QUESTIONS = {
 }
 MAX_BODY_BYTES = MAX_IMPORT_BYTES + 64 * 1024
 REQUEST_TIMEOUT_SECONDS = 30
-DIAGNOSIS_EXAMPLE = "What looks wrong with our system, and what should I check next?"
 QUICK_READS = {
     "How many requests are waiting now?": ("stream_status", None, ["waiting"]),
     "What was the peak queue in the last 30 seconds?": ("peak", 30000, ["waiting"]),
     "Is the queue growing over the last 10 seconds?": ("trend", 10000, ["waiting"]),
     "What does the FPGA predict for the next ten seconds?": ("stream_forecast", None, []),
 }
-LIVE_EXAMPLES = (DIAGNOSIS_EXAMPLE, *QUICK_READS)
 
 
 class Kit:
@@ -531,10 +531,6 @@ class KitHandler(BaseHTTPRequestHandler):
             return self.reply(403, {"error": "Open the app on this Mac."})
         if self.path == "/":
             return self.reply(200, PAGE.read_bytes(), "text/html; charset=utf-8")
-        if self.path == "/api/setup":
-            return self.reply(200, {"questions": QUESTIONS, "capacity": DEMO_CAPACITY, "csv": demo_csv()})
-        if self.path == "/api/live-setup":
-            return self.reply(200, {"examples": LIVE_EXAMPLES})
         if self.path == "/api/samples":
             return self.reply(200, {"samples": SAMPLES})
         if self.path == "/api/mcp":
@@ -619,7 +615,8 @@ DEFAULT_PORT = 53530
 def make_server(host="127.0.0.1", port=DEFAULT_PORT, data_dir=DATA_DIR):
     if host != "127.0.0.1":
         raise ValueError("The Mac app must use the local loopback address.")
-    transport = BoardTransport()
+    simulated = os.environ.get("PYNQ_SIM_BOARD") == "1"
+    transport = SimulatedBoard() if simulated else BoardTransport()
     try:
         server = KitServer((host, port), KitHandler)
     except OSError:
@@ -628,6 +625,8 @@ def make_server(host="127.0.0.1", port=DEFAULT_PORT, data_dir=DATA_DIR):
         server = KitServer((host, 0), KitHandler)
     server.kit = Kit(transport, store=DatasetStore(data_dir))
     server.accounts = Accounts()
+    if simulated:
+        server.kit.action({"action": "connect", "host": SIM_HOST})
     server.allowed_hosts = {f"127.0.0.1:{server.server_port}", f"localhost:{server.server_port}"}
     return server
 
