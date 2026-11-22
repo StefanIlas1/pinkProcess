@@ -50,7 +50,7 @@ body[data-boot] .app{visibility:hidden}
 @keyframes blink{from{opacity:.25}to{opacity:1}}
 .conn{position:relative}
 #connection-name{display:inline-flex;align-items:center;gap:7px}
-#connection-name::before{content:"";width:8px;height:8px;flex:none;border-radius:50%;background:var(--green)}
+#connection-name::before{content:"";width:8px;height:8px;flex:none;border-radius:50%;background:var(--pink-bow)}
 #connection.off #connection-name::before{background:var(--dim)}
 button.pill{display:flex;align-items:center;gap:8px;font:.8rem var(--mono);font-weight:400;border:0;padding:6px 8px;color:var(--ink)}
 .profile{position:relative}.avatar{width:32px;height:32px;padding:0;border-radius:50%;background:var(--ink);border-color:var(--ink);color:var(--bg)}
@@ -222,8 +222,8 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
 #new-chat,#history-hint{align-self:center}
 .peek-chev{top:calc(var(--toolbar-h)/2 - 7px)}
 .top-right #model-toggle{padding-inline:0;max-width:min(26vw,30ch);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.model-tab{position:absolute;z-index:6;right:0;top:calc(var(--topbar) + var(--toolbar-h)/2 - 18px);display:grid;place-items:center;width:26px;height:36px;padding:0;border:1px solid transparent;border-right:0;border-radius:9px 0 0 9px;color:#c9bfc7;background:transparent}
-.model-tab:is(:hover,:focus-visible){background:#382731;color:#ffdae8;border-color:#654857}
+.model-tab{position:absolute;z-index:6;right:0;top:calc(var(--topbar) + var(--toolbar-h)/2 - 18px);display:grid;place-items:center;width:40px;height:36px;padding:0;border:1px solid #765467;border-right:0;border-radius:10px 0 0 10px;color:var(--pink);background:#382731}
+.model-tab:is(:hover,:focus-visible){background:#503443;color:#ffdae8;border-color:#bf859c}
 .model-tab[aria-expanded=true] svg{transform:rotate(180deg)}
 .bar{background:color-mix(in srgb,var(--field) 55%,transparent)}
 #live-question::placeholder{color:rgba(220,207,218,.64);opacity:1}
@@ -310,7 +310,7 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
       </div>
   </footer>
 </section>
-<button id="model-tab" class="model-tab" type="button" aria-label="Open model settings" aria-controls="model-drawer" aria-expanded="false"><svg width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><path d="M8 2L3 7l5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+<button id="model-tab" class="model-tab" type="button" aria-label="Open model settings" aria-controls="model-drawer" aria-expanded="false"><svg width="24" height="14" viewBox="0 0 24 14" aria-hidden="true"><path d="M7 3l-4 4 4 4m7-8-4 4 4 4m7-8-4 4 4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 <aside class="rail" id="model-drawer" aria-label="Model settings" inert>
   <section class="section">
     <div class="drawer-heading"><h2>Model</h2></div>
