@@ -1,6 +1,10 @@
 # PYNQ Process research
 
-[Read the full research log](research.md) for the experiments, attribution, failed hypotheses and unresolved questions. It includes the weight-reading studies, scoped pruning, the move to a PYNQ-Z2 and physical tests of the queue-diagnosis workflow. The source is Mohsen Sarrafan Chaharsoughi’s shared research document and the team’s subsequent engineering entries. The private black-box program’s decision records are described in the log.
+The primary source for the paper is the [pinkProcess research notebook and build tracker on ChatGPT](https://chatgpt.com/space/page_6af3b6b986c481919b77b397b197bdc2). The [full notebook snapshot](paper-notebook.md) includes the experimental protocol, dated results, decision history and [evidence for the paper](paper-notebook.md#evidence-for-the-paper).
+
+In the held-out weight-edit experiment, the conventional edit selected Tim first on five of six target prompts. Astra’s proposal did so on three of six. Each edit preserved the original sampled tokens on five of six controls. Across all 48 runs, the physical PYNQ-Z2 matched the integer reference on 925,696 classifier scores. These results cover one checkpoint, one task and one Astra proposal. [LM001 experiment record](paper-notebook.md#november-21-2026--lm001-held-out-comparison)
+
+[Reading model weights](research.md) is a companion log by Mohsen Sarrafan Chaharsoughi with later team engineering entries. It covers weight-reading studies, pruning and hardware experiments.
 
 ## What the experiments established
 

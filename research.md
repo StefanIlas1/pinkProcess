@@ -1,3 +1,3 @@
 # PYNQ Process research
 
-[Read the full research log](research/research.md) or [browse the research archive](research/).
+[Read the paper research notebook](research/paper-notebook.md) or [browse the research archive](research/).
