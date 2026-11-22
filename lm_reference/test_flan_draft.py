@@ -2,6 +2,7 @@
 import json
 import os
 from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
 
 from .flan_draft import TokenDraft
@@ -14,6 +15,13 @@ class DraftTests(unittest.TestCase):
         self.assertEqual(draft.propose([3], 1), [4])
         self.assertEqual(draft.propose([7], 7), [])
         self.assertEqual(draft.propose([3], 0), [])
+
+    def test_history_table_requires_the_pinned_bytes(self):
+        with TemporaryDirectory() as work:
+            path = Path(work) / "draft.gz"
+            path.write_bytes(b"wrong table")
+            with self.assertRaisesRegex(ValueError, "SHA-256 mismatch"):
+                TokenDraft.load_history(path)
 
     @unittest.skipUnless(os.getenv("PINKPROCESS_FLAN_MODEL"), "A quantized FLAN checkpoint is required.")
     def test_rejected_proposals_calibration_limits_and_active_weight_edit(self):

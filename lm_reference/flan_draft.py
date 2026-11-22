@@ -3,6 +3,8 @@
 import argparse
 from collections import Counter, defaultdict
 import gzip
+from hashlib import sha256
+from io import BytesIO
 from pathlib import Path
 from random import Random
 
@@ -12,14 +14,24 @@ class TokenDraft:
         self.transitions = transitions
 
     @classmethod
-    def load(cls):
-        path = Path(__file__).with_name("telemetry-token-draft.tsv.gz")
+    def load(cls, path=None):
+        if path is None:
+            path = Path(__file__).with_name("telemetry-token-draft.tsv.gz")
         transitions = {}
         with gzip.open(path, "rt", encoding="ascii") as source:
             for line in source:
                 *prefix, token = map(int, line.split())
                 transitions[tuple(prefix)] = token
         return cls(transitions)
+
+    @classmethod
+    def load_history(cls, path):
+        """Load the independently distributed proposal table matching this recipe."""
+        compressed = Path(path).read_bytes()
+        digest = sha256(compressed).hexdigest()
+        if digest != "e84e9244b04623ea7924bf1cc027738f5a6b48d5a305a1a4e8f0e49a3da948d2":
+            raise ValueError("Queue history proposal table SHA-256 mismatch.")
+        return cls.load(BytesIO(compressed))
 
     def propose(self, tokens, limit):
         # The initial decoder symbol is zero. Only five preceding IDs matter.
@@ -47,12 +59,24 @@ def main():
     args = argparse.ArgumentParser(description=__doc__)
     args.add_argument("tokenizer", type=Path)
     args.add_argument("output", type=Path)
+    args.add_argument("--queue-history", action="store_true",
+                      help="Train proposals on development examples from the queue-history recipe")
     options = args.parse_args()
     tokenizer = UnigramTokenizer(options.tokenizer)
     counts = defaultdict(Counter)
     random = Random(147)
-    for index in range(500):
-        _, answer = example(random, index % 7, detailed=True, diagnostic=True)
+    if options.queue_history:
+        from functools import partial
+        from kit.reference_forecast import make_forecaster
+        from .train_queue_history import example as history_example
+
+        history = partial(history_example, forecast=make_forecaster(Path(__file__).resolve().parents[1] / "profiles"),
+                          detailed=True, diagnostic=True, balanced_history=True)
+    for index in range(800 if options.queue_history else 500):
+        if options.queue_history:
+            _, answer = history(random, random.choice([0] * 12 + list(range(1, 11))))
+        else:
+            _, answer = example(random, index % 7, detailed=True, diagnostic=True)
         sequence = [0, *tokenizer.encode(answer)]
         for pos in range(1, len(sequence)):
             for size in range(1, min(5, pos) + 1):

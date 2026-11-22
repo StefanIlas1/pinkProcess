@@ -115,6 +115,7 @@ def parse_args(argv=None):
     parser.add_argument("--demo-source", choices=("sqlite",))
     parser.add_argument("--language-model", type=Path)
     parser.add_argument("--manifest-sha256")
+    parser.add_argument("--history-token-draft", type=Path, help="Pinned proposal table for Queue history v2.")
     parser.add_argument("--history-model", type=Path, help="Verified Queue history v2 checkpoint directory.")
     parser.add_argument("--history-manifest-sha256")
     parser.add_argument("--projection-overlay", action="store_true",
@@ -132,6 +133,8 @@ def parse_args(argv=None):
     args = parser.parse_args(argv)
     if bool(args.language_model) != bool(args.manifest_sha256):
         parser.error("Supply both the language model directory and its pinned manifest hash.")
+    if args.history_token_draft and not (args.history_model and args.verified_draft):
+        parser.error("--history-token-draft requires --history-model and --verified-draft.")
     if bool(args.history_model) != bool(args.history_manifest_sha256):
         parser.error("Supply both the history-model directory and its pinned manifest hash.")
     if args.history_model and (not args.language_model or not args.projection_overlay or args.projection_scope != "all"):
@@ -205,7 +208,8 @@ def main():
                     # Defer FPGA cache binding until the operator selects this checkpoint.
                     history_runtime = Flan(args.history_model, runtime.fabric)
                     history_runtime.query_projection = query_projection
-                    history_runtime.token_draft = getattr(runtime, "token_draft", None)
+                    history_runtime.token_draft = (TokenDraft.load_history(args.history_token_draft)
+                                                   if args.history_token_draft else getattr(runtime, "token_draft", None))
 
                 def snapshot():
                     with server.model_lock:
