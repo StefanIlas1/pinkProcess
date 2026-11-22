@@ -30,6 +30,8 @@ With v2 already active and its checkpoint-specific proposal table installed, the
 
 The previous v2 runs used the shared proposal table and selected v2 per dataset while the global selection was original. The comparison includes both configuration changes. Encoder time was 6.29–7.24 s and decoder-stack time was 7.69–8.08 s on the new runs. [Full answers and counters](../kit/evidence/physical-history-verifier-tuned.json)
 
+Astra also authored a named edit to the v2 output row for “Now”. On the same healthy recording and question, selecting the edit produced “Now” as the first word and repeated it later. The edit demonstrated control over output and degraded the wording. Restore original succeeded, and selecting the unmodified v2 checkpoint then reproduced its entire earlier answer byte for byte. All seven library entries remained available. The board stayed powered. [Named edit and rollback](../kit/evidence/physical-history-named-edit-rollback.json)
+
 ## Current status
 
 The FPGA scores live telemetry. A provisioned language-model
