@@ -8,7 +8,7 @@
 :root{color-scheme:dark;--bg:#111416;--panel:#191d20;--line:#373c3d;--ink:#eff1eb;--dim:#acb5b0;--pink:#ffadc9;--mint:#a3dec1;font:15px/1.5 "Inter",-apple-system,BlinkMacSystemFont,sans-serif}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}main{max-width:1060px;margin:auto;padding:24px 28px 64px}
 header,.row,.spread,.buttons{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.spread,header{justify-content:space-between}
-header{padding-bottom:18px;border-bottom:1px solid var(--line)}.brand{font-weight:750;font-size:1.18rem;letter-spacing:-.055em}.brand span{color:var(--pink)}
+header{padding-bottom:18px;border-bottom:1px solid var(--line)}.brand{display:block;flex:none;max-width:56%;height:auto}
 h1,h2,h3,p{margin:0}h1{font-size:clamp(1.8rem,4vw,2.65rem);letter-spacing:-.055em;line-height:1.15;margin:27px 0 17px}h2{font-size:1.2rem;letter-spacing:-.025em}h3{font-size:.96rem}
 button,input,select,textarea{font:inherit}button,input,select,textarea,.file{border-radius:7px;border:1px solid #545d60;color:var(--ink);background:#252a2d;padding:8px 12px;max-width:100%}button,.file{cursor:pointer;font-weight:600}
 button.primary{background:var(--pink);border-color:var(--pink);color:#27161e}button:disabled{opacity:.45;cursor:default}
@@ -54,7 +54,20 @@ table.workflow-table{font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body><main>
-<header><div class="brand"><span>pink</span>Process</div><div id="connection" class="pill">Disconnected</div></header>
+<header><svg class="brand" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" aria-label="pinkProcess" width="194" height="44" viewBox="0 0 202 46" fill="none">
+  <title>pinkProcess</title>
+  <defs>
+    <path id="brand-pink" d="M6 18v22m0-16c0-10 14-11 14 0 0 9-10 12-14 5 M29 18v14m.1-24v.1 M39 18v14m0-8c0-9 13-11 13-1v9 M62 7v25m12-15-11 9m5-4 8 10"/>
+    <path id="brand-process" d="M88 32V9h7c13 0 12 16 0 16h-7 M110 18v14m0-8c1-5 4-7 8-7 M137 24.5c0 11-15 11-15 0s15-11 15 0z M155 19c-10-7-18 10-7 13 2 1 5 0 7-1 M162 25h12c0-10-13-10-14-1-1 8 7 11 13 7 M190 18c-9-5-16 4-6 6 12 2 5 12-5 7"/>
+  </defs>
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <use href="#brand-pink" xlink:href="#brand-pink" stroke="#db759a" stroke-width="7.1"/><use href="#brand-pink" xlink:href="#brand-pink" stroke="#ffb5d0" stroke-width="5.7"/>
+    <g transform="translate(4 0) scale(.92 1)"><use href="#brand-process" xlink:href="#brand-process" stroke="#dfa0b7" stroke-width="7.1"/><use href="#brand-process" xlink:href="#brand-process" stroke="#fff1f5" stroke-width="5.7"/>
+    <path d="M205 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#dfa0b7" stroke-width="7.1"/><path d="M205 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#fff1f5" stroke-width="5.7"/>
+    <g transform="translate(136 15) rotate(17)" fill="#ff8ab6" stroke="#632d46" stroke-width="1.2"><path d="M0 0c-2-3-6-5-7-3s0 6 2 6l5-2 5 2c2 0 3-4 2-6s-5 0-7 3z"/><circle r="1.8" fill="#ffd1e3"/></g></g>
+    <path d="m68 9 3-4m2 7 5-3m-4 6 5-.4" stroke="#ffb5d0" stroke-width="1.4"/>
+  </g>
+</svg><div id="connection" class="pill">Disconnected</div></header>
 <h1>Live FPGA workspace</h1>
 <section class="panel" aria-labelledby="board-heading">
   <div class="spread"><h2 id="board-heading">Board connection</h2><button id="refresh">Find boards</button></div>
