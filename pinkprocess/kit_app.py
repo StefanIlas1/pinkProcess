@@ -19,6 +19,7 @@ from .board_sim import HOST as SIM_HOST, SimulatedBoard
 from .kit_transport import BoardOperationError, BoardTransport
 from .kit_data import DATA_DIR, MAX_IMPORT_BYTES, SAMPLES, STYLES, DatasetStore, answer_question, parse_table, profile_table, sample_csv, timed
 from .kit_accounts import CALLBACK_PATH, Accounts
+from .kit_config import load_env
 from .kit_export import export_action
 from .kit_evidence import analyst_evidence, live_answer
 import secrets
@@ -617,6 +618,7 @@ class KitServer(ThreadingHTTPServer):
 
 
 DEFAULT_PORT = 53530
+SIGN_IN_PORTS = 5
 
 
 def make_server(host="127.0.0.1", port=DEFAULT_PORT, data_dir=DATA_DIR):
@@ -624,13 +626,16 @@ def make_server(host="127.0.0.1", port=DEFAULT_PORT, data_dir=DATA_DIR):
         raise ValueError("The Mac app must use the local loopback address.")
     simulated = os.environ.get("PYNQ_SIM_BOARD") == "1"
     transport = SimulatedBoard() if simulated else BoardTransport()
-    try:
-        server = KitServer((host, port), KitHandler)
-    except OSError:
-        if not port:
-            raise
-        server = KitServer((host, 0), KitHandler)
+    server = None
+    for candidate in ([port + offset for offset in range(SIGN_IN_PORTS)] if port else []) + [0]:
+        try:
+            server = KitServer((host, candidate), KitHandler)
+            break
+        except OSError:
+            if not candidate:
+                raise
     server.kit = Kit(transport, store=DatasetStore(data_dir))
+    load_env()
     server.accounts = Accounts()
     if simulated:
         server.kit.action({"action": "connect", "host": SIM_HOST})
