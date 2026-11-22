@@ -141,7 +141,8 @@ class BoardTransport:
         if not kits:
             return None
         relay = self.start_usb_relay()
-        if not relay.ready.is_set():
+        owns_relay = relay.ready.is_set()
+        if not owns_relay and self.usb_pairing is None:
             return None
         for kit in kits:
             try:
@@ -152,7 +153,8 @@ class BoardTransport:
                 self.host, self.kit = "127.0.0.1", kit
                 self.usb_pairing = kit
                 return status
-        relay.rejected.set()
+        if owns_relay:
+            relay.rejected.set()
         return None
 
     def stop_usb(self):

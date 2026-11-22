@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 import unittest
 
-from .flan_draft import TokenDraft
+from lm_reference.flan_draft import TokenDraft
 
 
 class DraftTests(unittest.TestCase):
@@ -17,7 +17,7 @@ class DraftTests(unittest.TestCase):
 
     @unittest.skipUnless(os.getenv("PINKPROCESS_FLAN_MODEL"), "A quantized FLAN checkpoint is required.")
     def test_rejected_proposals_calibration_limits_and_active_weight_edit(self):
-        from .flan import Flan
+        from lm_reference.flan import Flan
         model = Flan(os.environ["PINKPROCESS_FLAN_MODEL"], None, reference=True)
         draft = TokenDraft.load()
         for prompt, limit, edit in (("What does the pool forecast mean?", 3, False),
@@ -40,7 +40,7 @@ class DraftTests(unittest.TestCase):
 
     @unittest.skipUnless(os.getenv("PINKPROCESS_FLAN_MODEL"), "A quantized FLAN checkpoint is required.")
     def test_frozen_heldout_questions_match_scalar_greedy_decoding(self):
-        from .flan import Flan
+        from lm_reference.flan import Flan
         model = Flan(os.environ["PINKPROCESS_FLAN_MODEL"], None, reference=True)
         draft = TokenDraft.load()
         evidence = Path(__file__).resolve().parents[1] / "kit/evidence/blind-diagnosis-replacement-w8a8.json"

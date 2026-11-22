@@ -1083,7 +1083,7 @@ function boardObservations(set) {
   return lines.join("\n") || "This upload has no measured observations available.";
 }
 function boardEligible() {
-  return !demo && Boolean(status?.lm_supported && dataset?.queue_ready && lastCsvText && lastCsvText.length <= 100 * 1024);
+  return !demo && Boolean(status?.datasets_supported && dataset?.format === "CSV" && dataset.queue_ready && lastCsvText && lastCsvText.length <= 100 * 1024);
 }
 function askCapacity() {
   const dialog = el("capacity-dialog");
@@ -1107,8 +1107,8 @@ async function prepareBoardDataset() {
     renderLanguageSelect(); controls(); show("Uploaded to the board."); peekPulse();
     return true;
   } catch (err) {
-    boardDataset = null; show(err.message, true);
-    return false;
+    boardDataset = null;
+    throw err;
   }
 }
 el("capacity-form").onsubmit = event => {
@@ -1116,7 +1116,7 @@ el("capacity-form").onsubmit = event => {
   el("capacity-dialog").close("ok");
 };
 async function localAnswer(entry, question, only) {
-  let job = await request("data_ask_begin", {question, style:answerStyle});
+  let job = await request("data_ask_begin", {question, style:answerStyle, local_only:true});
   const seen = new Set(), deadline = Date.now() + 120000;
   for (;;) {
     if (Date.now() > deadline) throw new Error("The analysis took too long. Try again.");
@@ -1172,7 +1172,9 @@ async function boardAnswer(entry, question) {
 function askData(question) {
   run(async () => {
     const entry = pendingEntry();
-    const board = await prepareBoardDataset();
+    let board;
+    try {board = await prepareBoardDataset();}
+    catch (err) {el("live-question").value = question; throw err;}
     if (board) entry.styles = STYLE_ORDER;
     const asked = {role:"user", text:question};
     messages.push(asked, entry); renderMessages(); show("");
@@ -1440,6 +1442,9 @@ function applyProfile(data) {
 async function importData(name, text) {
   show("Reading " + name + "…");
   const data = await request("import_data", {name, text});
+  await useImportedData(data, text);
+}
+async function useImportedData(data, text) {
   applyProfile(data);
   lastCsvText = text;
   show("");
@@ -1450,10 +1455,7 @@ async function importData(name, text) {
 }
 async function importSample(id) {
   const data = await request("load_sample", {id});
-  applyProfile(data);
-  show("");
-  await pathPlay(data.timings, [0, 1]);
-  await persistSession();
+  await useImportedData(data, data.csv);
 }
 const HELP = {
   notes:"Jot down what you notice. Notes save with this session.",
