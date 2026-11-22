@@ -625,7 +625,9 @@ def make_server(host="127.0.0.1", port=DEFAULT_PORT, data_dir=DATA_DIR):
     if host != "127.0.0.1":
         raise ValueError("The Mac app must use the local loopback address.")
     simulated = os.environ.get("PYNQ_SIM_BOARD") == "1"
-    transport = SimulatedBoard() if simulated else BoardTransport()
+    if simulated:
+        from .board_twin import make_board
+    transport = make_board(os.environ.get("PYNQ_SIM_PLAIN") == "1") if simulated else BoardTransport()
     server = None
     for candidate in ([port + offset for offset in range(SIGN_IN_PORTS)] if port else []) + [0]:
         try:

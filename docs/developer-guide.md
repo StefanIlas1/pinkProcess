@@ -84,6 +84,26 @@ The app listens on port 53530 so the callback stays stable. If that port is take
 4. To show a new edit being created, open **Synthesize model**, pick a starting point, and enter a unique name. The board calibrates on the imported recording. Astra needs a signed-in Codex CLI on the Mac. Use a saved edit for the time-limited version of this demo.
 5. Export the session, then sign out and back in to check that the conversation appears in the session list.
 
+## Board twin on the Mac
+
+The board twin runs the real board language service on your Mac. It loads the same INT8 checkpoints the PYNQ-Z2 serves, scores the queue forecast with the same INT8 weight rows, and answers from the readings in the file you uploaded. Use it to rehearse without the board.
+
+Three quantized checkpoints ship as deltas over FLAN-T5-small, and the twin offers every one it finds:
+
+| Name in the app | Folder | Trained for |
+| --- | --- | --- |
+| original | `diagnostic-install` | Full diagnosis: current queue, peak, forecast, what to measure next |
+| Queue history v2 | `queue-history-v2` | Same, plus how the queue moved across the window |
+| Telemetry v1 | `resident` | Short one-line status reads |
+
+Install them once (about 300 MB download, a few minutes):
+
+```sh
+kit/install-checkpoints.sh
+```
+
+They land in `~/Library/Application Support/PYNQ Process/checkpoints`. The twin also finds `build/flan` in the repo, or any folder named by `PYNQ_CHECKPOINTS`. Then start the backend with `PYNQ_SIM_BOARD=1`. The original checkpoint is loaded and warmed at startup, so the first question answers in about a second. `PYNQ_SIM_PLAIN=1` keeps the old scripted simulator for screenshots.
+
 ## Data on your Mac
 
 All under `~/Library/Application Support/PYNQ Process/`:
