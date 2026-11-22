@@ -171,7 +171,9 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
 button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .avatar{width:40px;height:40px;font-size:1rem}
 .menu{top:48px}.menu span{display:block;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.top-right{gap:24px}
+.top-right{--control-gap:1rem;gap:var(--control-gap)}
+.top-right #connection{gap:var(--control-gap);padding-inline-end:0}
+.top-right #login{padding-inline-start:0}
 .toolbar{padding:16px max(var(--gutter),calc((100% - var(--col))/2))}
 #messages{padding:24px max(var(--gutter),calc((100% - var(--col))/2));gap:16px}
 .empty{padding:clamp(24px,9vh,96px) max(var(--gutter),calc((100% - var(--col))/2)) 0}
@@ -194,6 +196,7 @@ button.pill{font-size:.9rem;padding:8px 12px;max-width:260px;overflow:hidden;tex
 @media(prefers-reduced-motion:reduce){.peek-panel{transition:none}.peek .peek-panel:before{animation:none}}
 .peek-panel .sub{display:none}
 .peek-panel .node{grid-template-columns:12px 1fr auto;column-gap:8px;font-size:.74rem}
+.peek-panel .nm,#empty-sub{font-size:1rem}
 #data-chip{max-width:min(60%,420px)}
 #chat-list .chat-item{min-width:0}
 </style>
