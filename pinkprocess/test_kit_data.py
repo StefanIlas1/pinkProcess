@@ -38,36 +38,49 @@ class AnalystTest(unittest.TestCase):
         row = top_row("checkout-api-10k")[0]
         start, end, _, signal, _, _, moved, top = row
         self.assertEqual(signal, "latency")
-        self.assertTrue("14:08" <= start <= "14:14", start)
-        self.assertTrue("14:30" <= end <= "14:36", end)
+        self.assertTrue("14:10" <= start <= "14:14", start)
+        self.assertTrue("14:29" <= end <= "14:34", end)
         self.assertEqual(top.split(" (")[0], "/checkout in eu-west")
         self.assertIn("DB pool wait", moved)
-        self.assertIn("errors", moved)
-        answer = answer_question(parse_table(sample_csv("checkout-api-10k"), "x"), WRONG, "short")["answer"]
-        self.assertTrue(answer.startswith("Latency hit"))
-        self.assertIn("/checkout in eu-west", answer)
+        self.assertIn("error rate went from 0.", moved)
+        summary = answer_question(parse_table(sample_csv("checkout-api-10k"), "x"), WRONG, "summary")["answer"]
+        lines = summary.splitlines()
+        self.assertTrue(lines[0].startswith("Latency went from 141 ms to"))
+        self.assertIn("/checkout in eu-west", lines[0])
+        self.assertTrue(lines[1].startswith("Likely cause: DB pool wait, which went from 6"))
+        self.assertNotIn("x normal", summary)
 
     def test_cold_chain_failure_is_truck_t07_and_the_doors_are_second(self):
         rows = top_row("cold-chain-10k")
         start, end, _, signal, peak, _, moved, top = rows[0]
         self.assertEqual(signal, "temperature")
-        self.assertTrue("Nov 19 13:30" <= start <= "Nov 19 14:30", start)
-        self.assertTrue("Nov 19 19:00" <= end <= "Nov 19 21:30", end)
+        self.assertTrue("Nov 19 13:50" <= start <= "Nov 19 14:15", start)
+        self.assertTrue("Nov 19 19:00" <= end <= "Nov 19 19:30", end)
         self.assertIn("T07", top)
         self.assertIn("compressor", moved)
         self.assertGreater(float(peak.split()[0]), 8)
         self.assertIn("T03", rows[1][7])
         self.assertIn("door open", rows[1][6])
         self.assertLess(float(rows[1][4].split()[0]), 7)
+        summary = answer_question(parse_table(sample_csv("cold-chain-10k"), "x"), WRONG, "summary")["answer"].splitlines()
+        self.assertTrue(summary[1].startswith("Compressor went from 6.4"))
+        self.assertIn("at Nov 19 14:00, then temperature rose", summary[1])
+        self.assertTrue(any(line.startswith("Smaller: truck T03") and "normal handling" in line for line in summary))
 
     def test_card_outage_is_found_in_one_region_and_cash_is_left_alone(self):
         rows = top_row("store-sales-10k")
         start, end, _, signal, _, _, _, top = rows[0]
         self.assertIn(signal, ("orders", "revenue"))
-        self.assertTrue("Oct 30 10:00" <= start <= "Oct 30 12:30", start)
-        self.assertTrue("Oct 30 16:30" <= end <= "Oct 30 18:30", end)
+        self.assertTrue("Oct 30 11:30" <= start <= "Oct 30 12:30", start)
+        self.assertTrue("Oct 30 16:30" <= end <= "Oct 30 17:30", end)
         self.assertEqual(top.split(" (")[0], "card in north")
         self.assertNotIn("cash", " ".join(row[7] for row in rows))
+        self.assertIn("orders went from", rows[0][6])
+        self.assertIn("per hour", rows[0][4])
+        summary = answer_question(parse_table(sample_csv("store-sales-10k"), "x"), WRONG, "summary")["answer"]
+        self.assertIn("stayed normal for cash in north", summary)
+        self.assertIn("on card in north", summary)
+        self.assertRegex(summary, r"Orders went from 1\d per hour to [0-2] per hour")
 
     def test_errors_move_with_the_api_latency_bursts(self):
         rows = top_row("api-latency")
@@ -87,7 +100,7 @@ class AnalystTest(unittest.TestCase):
     def test_epoch_and_relative_times_read_as_clock_and_offsets(self):
         logs = answer_question(parse_table(sample_csv("log-events"), "log-events.jsonl"), WRONG, "table")["table"]["rows"][0]
         self.assertTrue("t+11:30" <= logs[0] <= "t+11:50", logs[0])
-        self.assertIn("errors", logs[6])
+        self.assertIn("error rate", logs[6])
         epoch = "\n".join(["ts,value"] + [f"{1_700_000_000_000 + index * 60_000},{10 if not 40 <= index < 60 else 90}" for index in range(120)])
         rows = answer_question(parse_table(epoch, "epoch.csv"), WRONG, "table")["table"]["rows"]
         self.assertRegex(rows[0][0], r"^\d\d:\d\d$")
