@@ -1,4 +1,6 @@
 import json
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from threading import Thread
 import unittest
 from urllib.error import HTTPError
@@ -252,6 +254,86 @@ class KitTest(unittest.TestCase):
                     self.assertEqual(json.load(response)["boards"], self.transport.discover())
             finally:
                 server.shutdown()
+
+    def test_data_ask_uses_the_board_for_queue_data_and_falls_back(self):
+        self.kit.action({"action": "load_sample", "id": "pool"})
+        local = self.kit.action({"action": "data_ask", "question": "now?", "style": "short"})
+        self.assertEqual(local["where"], "this Mac")
+        self.kit.action({"action": "connect", "host": "pynq.local"})
+        onboard = self.kit.action({"action": "data_ask", "question": "now?", "style": "short"})
+        self.assertEqual(onboard["where"], "PYNQ-Z2")
+        self.assertIn("The board's forecast", onboard["answer"])
+        self.assertGreater(onboard["timings"]["fabric_ms"], 0)
+        for failure in (OSError("link down"), RuntimeError("busy"), ValueError("no"), KeyError("rows")):
+            self.kit.host = "pynq.local"
+            with patch.object(self.transport, "request", side_effect=failure):
+                result = self.kit.action({"action": "data_ask", "question": "now?", "style": "short"})
+            self.assertEqual((result["where"], result["timings"]["fabric_ms"]), ("this Mac", 0.0))
+            self.assertNotIn("board's forecast", result["answer"])
+        self.kit.host = "pynq.local"
+        with patch.object(self.kit, "analyze", return_value={"rows": []}):
+            self.assertEqual(self.kit.action({"action": "data_ask", "question": "now?", "style": "short"})["where"], "this Mac")
+
+    def serve(self, data_dir):
+        server = make_server(data_dir=data_dir)
+        server.kit.transport = self.transport
+        server.kit.store.directory = Path(data_dir)
+        thread = Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        self.addCleanup(thread.join)
+        self.addCleanup(server.shutdown)
+        self.addCleanup(server.server_close)
+        origin = f"http://127.0.0.1:{server.server_port}"
+        return server, origin
+
+    def post(self, origin, path, body):
+        headers = {"Content-Type": "application/json", "Origin": origin}
+        try:
+            with urlopen(Request(origin + path, body if isinstance(body, bytes) else json.dumps(body).encode(), headers)) as response:
+                return response.status, json.load(response)
+        except HTTPError as failure:
+            with failure:
+                return failure.code, json.load(failure)
+
+    def test_export_mcp_limits_and_logout_over_http(self):
+        with TemporaryDirectory() as directory:
+            server, origin = self.serve(directory)
+            server.accounts.history_dir = Path(directory) / "history"
+            self.post(origin, "/api/account", {"action": "local_login", "name": "Ana"})
+            saved = self.post(origin, "/api/account", {"action": "history_save", "question": "Peak?", "answer": "19", "dataset": "d.csv"})[1]
+            status, exported = self.post(origin, "/api/action", {"action": "export", "session_id": saved["chat_id"], "format": "md"})
+            self.assertEqual(status, 200)
+            self.assertEqual(set(exported), {"filename", "mime", "content"})
+            self.assertIn("Peak?", exported["content"])
+            self.assertEqual(self.post(origin, "/api/action", {"action": "export", "session_id": saved["chat_id"], "format": "exe"})[0], 400)
+            self.assertEqual(self.post(origin, "/api/action", {"action": "export", "session_id": None, "session": {"title": "x"}, "format": "json"})[0], 200)
+            with urlopen(origin + "/api/mcp") as response:
+                config = json.load(response)
+            self.assertEqual(set(config) & {"command", "args", "env", "config_json"}, {"command", "args", "env", "config_json"})
+            self.assertIn("pynq-process", json.loads(config["config_json"])["mcpServers"])
+            self.assertEqual(self.post(origin, "/api/action", b"[1]")[0], 400)
+            self.assertEqual(self.post(origin, "/api/action", b"{broken")[0], 400)
+            self.assertEqual(self.post(origin, "/api/action", b"[" * 200000)[0], 400)
+            self.assertEqual(self.post(origin, "/api/action", {"action": "import_data", "name": "x.csv", "text": "t,v\n1,2\n"})[0], 200)
+            self.assertEqual(self.post(origin, "/api/action", {"action": "load_sample", "id": "nope"})[0], 400)
+            self.assertEqual(self.post(origin, "/api/action", {"action": "connect", "host": "pynq.local"})[0], 200)
+            self.post(origin, "/api/account", {"action": "logout"})
+            self.assertEqual(server.kit.host, "pynq.local")
+            self.assertEqual(self.post(origin, "/api/action", {"action": "status"})[1]["host"], "pynq.local")
+            self.assertEqual(self.post(origin, "/api/action", {"action": "export", "session_id": saved["chat_id"], "format": "md"})[0], 400)
+
+    def test_oversized_request_is_refused_and_callback_errors_are_friendly(self):
+        with TemporaryDirectory() as directory:
+            server, origin = self.serve(directory)
+            headers = {"Content-Type": "application/json", "Origin": origin, "Content-Length": str(21 * 1024 * 1024)}
+            with self.assertRaises(HTTPError) as failure:
+                urlopen(Request(origin + "/api/action", b"{}", headers))
+            self.assertEqual(failure.exception.code, 413)
+            self.assertIn("20 MB", json.load(failure.exception)["error"])
+            with self.assertRaises(HTTPError) as failure:
+                urlopen(origin + "/auth/callback?error=access_denied&state=nope")
+            self.assertEqual(failure.exception.code, 400)
+            failure.exception.close()
 
 
 if __name__ == "__main__":

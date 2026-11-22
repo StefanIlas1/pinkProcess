@@ -32,8 +32,10 @@ browser. **Watch demo instead** walks through the whole story without a board.
    to slide out Data, Profile, Model, PYNQ-Z2 and Answer with the time each stage
    took. While a question runs, the answer shows a skeleton with the current
    stage in bold. With no board connected, the fabric stage reads This Mac.
-4. **Ask.** Type a question and pick the answer style: Short answer, Summary,
-   Transcript (timestamped events) or Table. Open **Readings behind this answer**
+4. **Ask.** Type a question and pick the answer style above the input: Short
+   answer, Summary, Transcript (timestamped events) or Table. Press Enter or the
+   pink key to send. **Export** saves the session as Markdown, CSV or JSON, and
+   **Connect to Claude** shows the config to paste into Claude Desktop. Open **Readings behind this answer**
    to check it. Queue-ready data also gets the board's forecast when a board is
    connected.
 5. **Write notes.** The Notes tab on the right saves your own notes with the
@@ -218,6 +220,23 @@ fixed-point reference. The restored board weight hash matched the initial hash.
 These counts measure how the profiles differ. Assess the forecast quality with
 labeled queue episodes. The recorded responses are in
 [the board report](build/pynq/telemetry-kit-physical.json).
+
+## Export and MCP
+
+Export a saved session as Markdown, CSV or JSON with
+`POST /api/action {"action":"export","session_id":"<id>","format":"md"}`. Send
+`"session_id": null` and a `"session"` object to export an unsaved session. The
+reply is `{filename, mime, content}`. Imports are limited to 20 MB, and the last
+ten imported files are kept next to the history in
+`~/Library/Application Support/PYNQ Process/datasets/`.
+
+To let Claude Desktop read your sessions and ask questions about your data, run
+`curl http://127.0.0.1:<port>/api/mcp` while the app is open and paste its
+`config_json` into the `mcpServers` section of Claude Desktop's config. The
+connector is `python3 -m pinkprocess.mcp_server` with `PYTHONPATH` set to this
+checkout. Set `PYNQ_USER` to choose a profile, otherwise the most recently used
+one is read. Tools: `list_sessions`, `get_session`, `list_datasets`,
+`profile_dataset` and `ask_data`.
 
 ## Measured SQLite pool workload
 

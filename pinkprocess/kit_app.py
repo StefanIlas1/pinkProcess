@@ -13,8 +13,9 @@ from .backlog import VERSION as BACKLOG_VERSION
 from .kit_dataset import DEMO_CAPACITY, demo_csv, prepare_dataset
 from .astra_edit import propose
 from .kit_transport import BoardTransport
-from .kit_data import SAMPLES, STYLES, answer_question, parse_table, profile_table, sample_csv, timed
+from .kit_data import DATA_DIR, MAX_IMPORT_BYTES, SAMPLES, STYLES, DatasetStore, answer_question, parse_table, profile_table, sample_csv, timed
 from .kit_accounts import CALLBACK_PATH, MODEL_LIBRARY, Accounts
+from .kit_export import export_action
 from .kit_evidence import analyst_evidence, live_answer
 from time import sleep
 
@@ -27,7 +28,8 @@ QUESTIONS = {
     "backlog": "Will the current queue persist or grow over the next ten seconds?",
     "warnings": "Which readings triggered a ten-second queue warning?",
 }
-MAX_BODY_BYTES = 2 * 1024 * 1024
+MAX_BODY_BYTES = MAX_IMPORT_BYTES + 64 * 1024
+REQUEST_TIMEOUT_SECONDS = 30
 DIAGNOSIS_EXAMPLE = "What looks wrong with our system, and what should I check next?"
 QUICK_READS = {
     "How many requests are waiting now?": ("stream_status", None, ["waiting"]),
@@ -39,22 +41,35 @@ LIVE_EXAMPLES = (DIAGNOSIS_EXAMPLE, *QUICK_READS)
 
 
 class Kit:
-    def __init__(self, transport, prepare=prepare_dataset):
+    def __init__(self, transport, prepare=prepare_dataset, store=None):
         self.prepare = prepare
         self.transport = transport
+        self.store = store
         self.host = None
         self.evidence_supported = False
+        self.lm_supported = False
         self.table = None
         self.table_name = ""
         self.table_profile = None
         self.lock = Lock()
+        self.data_lock = Lock()
 
-    def import_data(self, name, text):
+    def import_data(self, name, text, remember=True):
         if not isinstance(name, str) or not name.strip() or len(name) > 200:
             raise ValueError("Choose a file to import.")
+        if not isinstance(text, str):
+            raise ValueError("Choose a CSV or JSON lines file.")
+        if len(text) > MAX_IMPORT_BYTES:
+            raise ValueError("This file is larger than 20 MB. Import a smaller file.")
         table, parse_ms = timed(parse_table, text, name)
         profile, profile_ms = timed(profile_table, table, name.strip())
-        self.table, self.table_name, self.table_profile = table, name.strip(), profile
+        with self.data_lock:
+            self.table, self.table_name, self.table_profile = table, name.strip(), profile
+        if remember and self.store is not None:
+            try:
+                self.store.save(name, text)
+            except (OSError, ValueError):
+                pass
         return dict(profile=profile, timings=dict(data_ms=parse_ms, profile_ms=profile_ms))
 
     def ask_data(self, data):
@@ -65,9 +80,10 @@ class Kit:
             raise ValueError("Enter a question of up to 500 characters.")
         if style not in STYLES:
             raise ValueError("Choose a short answer, summary, transcript or table.")
-        if self.table is None:
+        with self.data_lock:
+            table, profile = self.table, self.table_profile
+        if table is None:
             raise ValueError("Import data first.")
-        table, profile = self.table, self.table_profile
         result, answer_ms = timed(answer_question, table, question.strip(), style)
         where, fabric_ms, verdict = "this Mac", 0.0, None
         if self.host is not None and profile["queue_ready"]:
@@ -79,8 +95,9 @@ class Kit:
                 latest = forecast["rows"][-1]
                 verdict = ("The board's forecast: queue warning at " if latest["alert"] else "The board's forecast: no queue warning at ") + f"{latest['time_ms'] / 1000:.1f} s."
                 where = "PYNQ-Z2"
-            except (ValueError, RuntimeError, OSError):
+            except (ValueError, RuntimeError, OSError, KeyError, IndexError, TypeError):
                 verdict = None
+                fabric_ms = 0.0
         if verdict:
             result["answer"] += "\n" + verdict if result["style"] != "table" else ""
             result["readings"] += " " + verdict
@@ -89,6 +106,8 @@ class Kit:
 
     def disconnect(self):
         self.host = None
+        self.evidence_supported = False
+        self.lm_supported = False
         self.transport.close()
 
     def board(self, action, **params):
@@ -216,6 +235,8 @@ class Kit:
         if not isinstance(data, dict):
             raise ValueError("Expected a JSON object.")
         action = data.get("action")
+        if not isinstance(action, str):
+            raise ValueError("Choose an action.")
         if action == "lm_author":
             with self.lock:
                 address = self.host
@@ -237,7 +258,7 @@ class Kit:
             sample = next((item for item in SAMPLES if item["id"] == data.get("id")), None)
             if sample is None:
                 raise ValueError("Unknown sample.")
-            return self.import_data(sample["name"] + ".csv", sample_csv(sample["id"]))
+            return self.import_data(sample["name"] + ".csv", sample_csv(sample["id"]), remember=False)
         if action == "data_ask":
             return self.ask_data(data)
         with self.lock:
@@ -262,7 +283,7 @@ class Kit:
                 return {"host": self.host, "status": status}
             if action == "connect":
                 host = data.get("host")
-                if not isinstance(host, str) or not host.strip():
+                if not isinstance(host, str) or not host.strip() or len(host) > 255:
                     raise ValueError("Choose a board or enter its network address.")
                 self.disconnect()
                 try:
@@ -307,6 +328,11 @@ class Kit:
 
 
 class KitHandler(BaseHTTPRequestHandler):
+    timeout = REQUEST_TIMEOUT_SECONDS
+
+    def log_message(self, format, *args):
+        pass
+
     def reply(self, status, body, content_type="application/json"):
         if not isinstance(body, bytes):
             body = json.dumps(body, allow_nan=False).encode()
@@ -329,6 +355,10 @@ class KitHandler(BaseHTTPRequestHandler):
             return self.reply(200, {"examples": LIVE_EXAMPLES})
         if self.path == "/api/samples":
             return self.reply(200, {"samples": SAMPLES})
+        if self.path == "/api/mcp":
+            from .mcp_server import mcp_config
+
+            return self.reply(200, mcp_config())
         if self.path == "/api/models":
             return self.reply(200, {"models": MODEL_LIBRARY})
         if self.path == "/static/logo.png":
@@ -348,7 +378,8 @@ class KitHandler(BaseHTTPRequestHandler):
         if self.path.split("?")[0] == CALLBACK_PATH:
             query = parse_qs(urlsplit(self.path).query)
             try:
-                self.server.accounts.finish_login(query.get("code", [""])[0], query.get("state", [""])[0])
+                self.server.accounts.finish_login(query.get("code", [""])[0], query.get("state", [""])[0],
+                                                  query.get("error", [""])[0])
             except ValueError as exc:
                 return self.reply(400, {"error": str(exc)})
             except RuntimeError as exc:
@@ -366,19 +397,26 @@ class KitHandler(BaseHTTPRequestHandler):
         try:
             size = int(self.headers.get("Content-Length", "0"))
             if not 0 < size <= MAX_BODY_BYTES:
-                return self.reply(413, {"error": "The request exceeds the 2 MiB limit or is empty."})
-            data = json.loads(self.rfile.read(size))
+                return self.reply(413, {"error": "This request is empty or larger than 20 MB. Import a smaller file."})
+            raw = self.rfile.read(size)
+            if len(raw) != size:
+                raise ValueError("The request ended early. Try again.")
+            data = json.loads(raw)
+            if not isinstance(data, dict):
+                raise ValueError("Expected a JSON object.")
             if self.path == "/api/account":
-                if not isinstance(data, dict):
-                    raise ValueError("Expected a JSON object.")
                 result = self.server.accounts.action(data)
+            elif data.get("action") == "export":
+                result = export_action(data, self.server.accounts)
             else:
                 result = self.server.kit.action(data)
             self.reply(200, result)
-        except (ValueError, TypeError) as exc:
-            self.reply(400, {"error": str(exc)})
+        except (ValueError, TypeError, RecursionError) as exc:
+            self.reply(400, {"error": str(exc) if isinstance(exc, ValueError) else "This request could not be read."})
         except (OSError, RuntimeError) as exc:
             self.reply(503, {"error": str(exc)})
+        except Exception:
+            self.reply(500, {"error": "Something went wrong on this Mac. Try again."})
 
 
 class KitServer(ThreadingHTTPServer):
@@ -389,12 +427,12 @@ class KitServer(ThreadingHTTPServer):
                 self.kit.disconnect()
 
 
-def make_server(host="127.0.0.1", port=0):
+def make_server(host="127.0.0.1", port=0, data_dir=DATA_DIR):
     if host != "127.0.0.1":
         raise ValueError("The Mac app must use the local loopback address.")
     transport = BoardTransport()
     server = KitServer((host, port), KitHandler)
-    server.kit = Kit(transport)
+    server.kit = Kit(transport, store=DatasetStore(data_dir))
     server.accounts = Accounts()
     server.allowed_hosts = {f"127.0.0.1:{server.server_port}", f"localhost:{server.server_port}"}
     return server

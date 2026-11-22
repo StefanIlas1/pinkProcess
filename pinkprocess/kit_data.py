@@ -5,6 +5,11 @@ from datetime import datetime
 import io
 import json
 import math
+import os
+from pathlib import Path
+import re
+import tempfile
+from threading import Lock
 from statistics import fmean, pstdev
 from time import perf_counter
 
@@ -12,6 +17,11 @@ from .kit_dataset import demo_csv
 
 MAX_ROWS = 50000
 MAX_COLUMNS = 40
+MAX_CELL_CHARS = 5000
+MAX_IMPORT_BYTES = 20 * 1024 * 1024
+KEPT_IMPORTS = 10
+DATA_DIR = Path.home() / "Library" / "Application Support" / "PYNQ Process" / "datasets"
+MISSING = {"", "na", "n/a", "nan", "null", "none", "nil", "-", "--", "?"}
 STYLES = ("short", "summary", "transcript", "table")
 SIGNALS = (
     ("queue", ("waiting", "queue", "backlog", "pending")),
@@ -31,8 +41,23 @@ READABLE = {"queue": "queue", "connections": "connection", "latency": "latency",
 def parse_time(text):
     try:
         return datetime.fromisoformat(text.strip().replace("Z", "+00:00")).timestamp()
-    except ValueError:
+    except (ValueError, OverflowError, OSError):
         return None
+
+
+def is_missing(cell):
+    if cell is None:
+        return True
+    if isinstance(cell, float):
+        return not math.isfinite(cell)
+    return isinstance(cell, str) and cell.strip().lower() in MISSING
+
+
+def pick_delimiter(text):
+    first = text.lstrip().splitlines()[0] if text.strip() else ""
+    counts = {mark: first.count(mark) for mark in (",", ";", "\t")}
+    best = max(counts, key=counts.get)
+    return best if counts[best] and counts[best] > counts[","] else ","
 
 
 def parse_number(text):
@@ -49,36 +74,59 @@ def parse_number(text):
     return value if math.isfinite(value) else None
 
 
+def read_json_records(stripped):
+    try:
+        if stripped[0] == "[":
+            records = json.loads(stripped)
+        else:
+            records = []
+            for number, line in enumerate(stripped.splitlines(), 1):
+                if line.strip():
+                    try:
+                        records.append(json.loads(line))
+                    except ValueError as exc:
+                        raise ValueError(f"Line {number} is not valid JSON. Use one object per line.") from exc
+    except RecursionError as exc:
+        raise ValueError("This JSON file is nested too deeply to read.") from exc
+    except ValueError as exc:
+        if str(exc).startswith("Line "):
+            raise
+        raise ValueError("Could not read this JSON file. Use one object per line.") from exc
+    if not isinstance(records, list) or not records or not all(isinstance(record, dict) for record in records):
+        raise ValueError("Each JSON line must be an object like {\"time\": 1, \"value\": 2}.")
+    columns = list(dict.fromkeys(str(key) for record in records for key in record))
+    if len(columns) > MAX_COLUMNS:
+        raise ValueError(f"Use at most {MAX_COLUMNS} columns.")
+    return columns, [[record.get(column) for column in columns] for record in records], "JSON lines"
+
+
 def read_records(text, name):
-    text = text.removeprefix("﻿")
+    text = text.removeprefix("\ufeff").replace("\x00", "")
     stripped = text.lstrip()
     if not stripped:
         raise ValueError("The file is empty.")
     if stripped[0] in "{[":
-        try:
-            if stripped[0] == "[":
-                records = json.loads(stripped)
-            else:
-                records = [json.loads(line) for line in stripped.splitlines() if line.strip()]
-        except ValueError as exc:
-            raise ValueError("Could not read this JSON file. Use one object per line.") from exc
-        if not records or not all(isinstance(record, dict) for record in records):
-            raise ValueError("Each JSON line must be an object like {\"time\": 1, \"value\": 2}.")
-        columns = list(dict.fromkeys(key for record in records for key in record))
-        return columns, [[record.get(column) for column in columns] for record in records], "JSON lines"
+        return read_json_records(stripped)
     try:
-        rows = list(csv.reader(io.StringIO(text), strict=True))
+        rows = list(csv.reader(io.StringIO(text, newline=""), delimiter=pick_delimiter(text), strict=True))
     except csv.Error as exc:
-        raise ValueError("Could not read this CSV file.") from exc
-    rows = [row for row in rows if row]
-    if len(rows) < 2:
+        raise ValueError("Could not read this CSV file. Check for a stray quote mark or a very long cell.") from exc
+    numbered = [(number, row) for number, row in enumerate(rows, 1) if any(cell.strip() for cell in row)]
+    if len(numbered) < 2:
         raise ValueError("Add a header row and at least one row of data.")
-    header = [column.strip() for column in rows[0]]
+    header = [column.strip() for column in numbered[0][1]]
     if not all(header) or len(set(header)) != len(header):
         raise ValueError("Every column needs a unique name in the first row.")
-    if any(len(row) != len(header) for row in rows[1:]):
-        raise ValueError("Some rows have a different number of columns than the header.")
-    return header, rows[1:], "CSV"
+    if len(header) > MAX_COLUMNS:
+        raise ValueError(f"Use at most {MAX_COLUMNS} columns.")
+    body = []
+    for number, row in numbered[1:]:
+        while len(row) > len(header) and not row[-1].strip():
+            row = row[:-1]
+        if len(row) != len(header):
+            raise ValueError(f"Line {number} has {len(row)} columns but the header has {len(header)}.")
+        body.append(row)
+    return header, body, "CSV"
 
 
 def parse_table(text, name=""):
@@ -91,17 +139,19 @@ def parse_table(text, name=""):
         raise ValueError(f"Use at most {MAX_COLUMNS} columns.")
     data, types, time_column = {}, {}, None
     for index, column in enumerate(columns):
-        cells = [row[index] for row in rows]
+        cells = [None if is_missing(row[index]) else row[index] for row in rows]
+        if any(isinstance(cell, str) and len(cell) > MAX_CELL_CHARS for cell in cells):
+            raise ValueError(f"A cell in the {column} column is too long to read.")
         numbers = [parse_number(cell) for cell in cells]
-        present = [cell for cell in cells if cell not in (None, "")]
-        if present and all(number is not None for cell, number in zip(cells, numbers) if cell not in (None, "")):
+        present = [cell for cell in cells if cell is not None]
+        if present and all(number is not None for cell, number in zip(cells, numbers) if cell is not None):
             data[column], types[column] = numbers, "number"
             continue
         stamps = [parse_time(cell) if isinstance(cell, str) and cell else None for cell in cells]
-        if present and all(stamp is not None for cell, stamp in zip(cells, stamps) if cell not in (None, "")):
+        if present and all(stamp is not None for cell, stamp in zip(cells, stamps) if cell is not None):
             data[column], types[column] = stamps, "time"
         else:
-            data[column], types[column] = [None if cell in (None, "") else str(cell) for cell in cells], "text"
+            data[column], types[column] = [None if cell is None else str(cell) for cell in cells], "text"
     for column in columns:
         lowered = column.lower()
         named = lowered in TIME_NAMES or lowered.endswith(("_ms", "_time", "_at")) and "latency" not in lowered
@@ -116,13 +166,22 @@ def monotonic(values):
     return len(present) > 1 and all(b >= a for a, b in zip(present, present[1:]))
 
 
+def stamp_label(value):
+    if value is None:
+        return "?"
+    try:
+        return datetime.fromtimestamp(value).strftime("%Y-%m-%d %H:%M:%S")
+    except (ValueError, OverflowError, OSError):
+        return f"{value:g}"
+
+
 def time_labels(table):
     column = table["time"]
     if column is None:
         return [str(index + 1) for index in range(table["rows"])]
     values = table["data"][column]
     if table["types"][column] == "time":
-        return [datetime.fromtimestamp(value).strftime("%Y-%m-%d %H:%M:%S") if value is not None else "?" for value in values]
+        return [stamp_label(value) for value in values]
     if column.lower().endswith("ms"):
         return [f"{value / 1000:.1f} s" if value is not None else "?" for value in values]
     return [f"{value:g}" if value is not None else "?" for value in values]
@@ -166,7 +225,7 @@ def custom_plan(table):
 def queue_ready(table):
     if table["columns"][:3] != ["time_ms", "busy", "waiting"] or table["rows"] < 50:
         return False
-    return all(table["types"][column] == "number" for column in table["columns"][:3])
+    return all(table["types"][column] == "number" and None not in table["data"][column] for column in table["columns"][:3])
 
 
 def profile_table(table, name):
@@ -310,3 +369,56 @@ def timed(function, *args):
     started = perf_counter()
     result = function(*args)
     return result, round((perf_counter() - started) * 1000, 1)
+
+
+def safe_dataset_name(name):
+    stem = re.sub(r"[^A-Za-z0-9._ -]+", "_", Path(str(name)).name).strip(" .")[:80]
+    return stem or "dataset.csv"
+
+
+class DatasetStore:
+    def __init__(self, directory=DATA_DIR, keep=KEPT_IMPORTS):
+        self.directory = Path(directory)
+        self.keep = keep
+        self.lock = Lock()
+
+    def save(self, name, text):
+        safe = safe_dataset_name(name)
+        with self.lock:
+            self.directory.mkdir(parents=True, exist_ok=True)
+            descriptor, temporary = tempfile.mkstemp(dir=self.directory, prefix=".import.", suffix=".tmp")
+            try:
+                with os.fdopen(descriptor, "w", encoding="utf-8", newline="") as handle:
+                    handle.write(text)
+                os.replace(temporary, self.directory / safe)
+            except BaseException:
+                try:
+                    os.unlink(temporary)
+                except OSError:
+                    pass
+                raise
+            for stale in self.files()[self.keep:]:
+                try:
+                    stale.unlink()
+                except OSError:
+                    pass
+        return safe
+
+    def files(self):
+        try:
+            found = [path for path in self.directory.iterdir() if path.is_file() and not path.name.startswith(".")]
+            return sorted(found, key=lambda path: path.stat().st_mtime, reverse=True)
+        except OSError:
+            return []
+
+    def names(self):
+        return [path.name for path in self.files()]
+
+    def read(self, name):
+        path = self.directory / safe_dataset_name(name)
+        try:
+            if path.parent != self.directory or path.stat().st_size > MAX_IMPORT_BYTES:
+                raise ValueError("That dataset is not available.")
+            return path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            raise ValueError("That dataset is not available.") from None
