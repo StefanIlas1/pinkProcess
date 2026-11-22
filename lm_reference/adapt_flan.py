@@ -6,11 +6,17 @@ import random
 from lm_reference.flan_prompt import telemetry_prompt
 
 
-def example(rng, task, *, detailed=False, diagnostic=False):
+def example(rng, task, *, detailed=False, diagnostic=False, balanced_history=False):
     capacity = rng.choice([4, 6, 8, 12, 16, 24, 32, 64])
-    waiting = rng.choice([0, 0, rng.randint(1, 90)])
+    if balanced_history:
+        state = rng.choice(("queue_free", "recovered", "active"))
+        waiting = rng.randint(1, 90) if state == "active" else 0
+    else:
+        waiting = rng.choice([0, 0, rng.randint(1, 90)])
     busy = capacity if waiting else rng.randint(0, capacity)
     peak = max(waiting, rng.randint(0, 190))
+    if balanced_history:
+        peak = 0 if state == "queue_free" else max(1, peak)
     mean = round(rng.uniform(min(waiting, peak), peak), 1)
     age = rng.randint(1, 59)
     obs = {"peak_waiting": {"waiting": peak, "time_ms": (60 - age) * 1000},
@@ -97,6 +103,9 @@ def example(rng, task, *, detailed=False, diagnostic=False):
         status = ("The queue has cleared; 0 requests are waiting now." if peak else
                   "No backlog was observed; 0 requests are waiting now.") if not waiting else (
                   f"The backlog is ongoing: {waiting} requests are waiting now.")
+        if balanced_history and waiting and first != waiting:
+            direction = "rose" if waiting > first else "fell"
+            status = f"The backlog is active. Waiting {direction} from {first} to {waiting}."
         answers[0] = (f"{status} The peak was {peak}. {forecast} "
                       "The cause is unknown. Measure request arrivals and connection hold times.")
         answers[6] = forecast
@@ -113,7 +122,7 @@ def example(rng, task, *, detailed=False, diagnostic=False):
     return telemetry_prompt(rng.choice(questions[task]), e), answers[task]
 
 
-def train(source, tokenizer, out, steps, seed, detailed, diagnostic=False):
+def train(source, tokenizer, out, steps, seed, detailed, diagnostic=False, balanced_history=False):
     import sentencepiece as sp
     import torch
     from transformers import T5ForConditionalGeneration
@@ -160,7 +169,8 @@ def train(source, tokenizer, out, steps, seed, detailed, diagnostic=False):
     model.train()
     for i in range(steps):
         tasks = [0] * (16 if diagnostic else 3) + list(range(1, 11 if detailed else 7))
-        qa = [example(rng, rng.choice(tasks), detailed=detailed, diagnostic=diagnostic) for _ in range(8)]
+        qa = [example(rng, rng.choice(tasks), detailed=detailed, diagnostic=diagnostic,
+                      balanced_history=balanced_history) for _ in range(8)]
         inp, labels = zip(*qa)
         x = batch(inp, 0)
         loss = model(input_ids=x, attention_mask=x.ne(0), labels=batch(labels, -100), use_cache=False).loss
@@ -187,5 +197,9 @@ if __name__ == "__main__":
     p.add_argument("--seed", type=int, default=3717)
     p.add_argument("--detailed", action="store_true", help="Train with forecast, provenance, trend and coverage examples.")
     p.add_argument("--diagnostic", action="store_true", help="Train state, forecast, uncertainty and follow-up in one incident report.")
+    p.add_argument("--balanced-history", action="store_true",
+                   help="Train diagnostic examples with equal chances of queue-free, recovered and active histories.")
     args = p.parse_args()
-    train(args.source, args.tokenizer, args.out, args.steps, args.seed, args.detailed or args.diagnostic, args.diagnostic)
+    if args.balanced_history and not args.diagnostic:
+        p.error("--balanced-history requires --diagnostic")
+    train(args.source, args.tokenizer, args.out, args.steps, args.seed, args.detailed or args.diagnostic, args.diagnostic, args.balanced_history)
