@@ -3,201 +3,496 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>pinkProcess · FPGA workspace</title>
+<title>PYNQ Process</title>
 <style>
-:root{color-scheme:dark;--bg:#111416;--panel:#191d20;--line:#373c3d;--ink:#eff1eb;--dim:#acb5b0;--pink:#ffadc9;--mint:#a3dec1;font:15px/1.5 "Inter",-apple-system,BlinkMacSystemFont,sans-serif}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}main{max-width:1060px;margin:auto;padding:24px 28px 64px}
-header,.row,.spread,.buttons{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.spread,header{justify-content:space-between}
-header{padding-bottom:18px;border-bottom:1px solid var(--line)}.brand{font-weight:750;font-size:1.18rem;letter-spacing:-.055em}.brand span{color:var(--pink)}
-h1,h2,h3,p{margin:0}h1{font-size:clamp(1.8rem,4vw,2.65rem);letter-spacing:-.055em;line-height:1.15;margin:27px 0 17px}h2{font-size:1.2rem;letter-spacing:-.025em}h3{font-size:.96rem}
-button,input,select,textarea{font:inherit}button,input,select,textarea,.file{border-radius:7px;border:1px solid #545d60;color:var(--ink);background:#252a2d;padding:8px 12px;max-width:100%}button,.file{cursor:pointer;font-weight:600}
-button.primary{background:var(--pink);border-color:var(--pink);color:#27161e}button:disabled{opacity:.45;cursor:default}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,.file:focus-within{outline:2px solid var(--mint);outline-offset:3px}
-input,select{min-width:0}label.field{display:grid;gap:5px;color:var(--dim);font-size:.9rem}label.field>*{color:var(--ink)}
-.panel{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:20px;min-width:0}.boardrow{display:flex;align-items:flex-end;flex-wrap:wrap;gap:10px;margin-top:10px}.boardrow label{flex:1;min-width:165px}
-.grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(204px,1fr);gap:16px;margin-top:16px;align-items:start}.stack{display:grid;gap:14px;min-width:0}.muted,small{color:var(--dim)}small{font-size:.82rem}
-.pill{display:flex;align-items:center;gap:7px;color:var(--dim);font-size:.88rem}.pill:before{content:"";width:8px;height:8px;border-radius:50%;background:#747b78}.pill[data-online="true"]{color:var(--mint)}.pill[data-online="true"]:before{background:var(--mint)}
-.divider{border-top:1px solid var(--line);padding-top:14px}.file{position:relative;display:inline-block;font-size:.94rem}.file input{width:1px;height:1px;opacity:0;position:absolute}
-#source{overflow-wrap:anywhere}.capacity input{width:105px}.spread.end{align-items:flex-end}
-#trace{width:100%;height:76px;display:block;background:#14191a;border-radius:6px}
-code,time,.num{font-family:ui-monospace,Menlo,monospace;font-size:.88em}code{overflow-wrap:anywhere;color:var(--mint)}summary{cursor:pointer;color:var(--dim)}details p{margin-top:6px}
-#notice{margin:9px 0;color:var(--mint)}#notice:empty{display:none}#notice[data-error="true"]{color:var(--pink)}
-.answer{font-size:1.42rem;line-height:1.3;letter-spacing:-.025em}.result{margin-top:16px}table{width:100%;border-collapse:collapse;text-align:left}th,td{padding:7px 4px;border-bottom:1px solid var(--line);font-size:.9rem}th{color:var(--dim);font-weight:500}
-#live-answer{white-space:pre-line;font-size:1.1rem;line-height:1.5} .live-reading{border-top:1px solid var(--line);padding-top:12px}.live-reading .answer{font-size:1.15rem}
-.ask{display:flex;align-items:end;gap:8px;flex-wrap:wrap}.ask .field{flex:1;min-width:185px}
-.examples{gap:6px}.examples button{font-size:.83rem;font-weight:500;padding:4px 8px}
-#lm-version{overflow-wrap:anywhere}#lm-editor form{margin-top:14px}#lm-instruction{resize:vertical}
-#prior-answer-text,#saved-answer-text{white-space:pre-line}
-.csv-workspace{margin-top:16px}.csv-workspace>summary{font-weight:600}.csv-workspace h2{margin:10px 0 0}
-[hidden]{display:none!important}@media(max-width:675px){main{padding:16px}.grid{grid-template-columns:1fr}.panel{padding:16px}.boardrow label{flex-basis:100%}}
+:root{color-scheme:dark;--pink:#ff5fa2;--bg:#1c1e21;--panel:#222528;--ink:#eceef0;--dim:#9aa1a7;--line:#33373b;--field:#26292d;--green:#2fbf71;--mono:ui-monospace,"SF Mono",Menlo,monospace;font:16px/1.5 "Avenir Next",-apple-system,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:400;letter-spacing:0}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--bg);color:var(--ink)}
+h1,h2,h3,p{margin:0}h1,h2,h3,b,strong,th{font-weight:600}h1{font-size:2.3rem;line-height:1.2}h2{font-size:1rem}
+[hidden]{display:none!important}
+.mono,code,.strip,.timer,.chat-item small,.t,.chip{font-family:var(--mono)}
+.ambient{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.blob{position:absolute;border-radius:50%;will-change:transform;animation:drift 60s ease-in-out infinite alternate}
+.blob:nth-child(1){width:52vmax;height:52vmax;left:-12vmax;top:-14vmax;background:radial-gradient(closest-side,rgba(255,255,255,.07),transparent)}
+.blob:nth-child(2){width:42vmax;height:42vmax;right:-10vmax;top:18vmax;background:radial-gradient(closest-side,rgba(255,95,162,.06),transparent);animation-duration:75s;animation-delay:-20s}
+.blob:nth-child(3){width:36vmax;height:36vmax;left:30vmax;bottom:-16vmax;background:radial-gradient(closest-side,rgba(255,255,255,.05),transparent);animation-duration:90s;animation-delay:-40s}
+.blob:nth-child(4){width:18vmax;height:18vmax;left:12vmax;bottom:8vmax;background:radial-gradient(closest-side,rgba(255,95,162,.05),transparent);animation-duration:55s;animation-delay:-10s}
+.blob:nth-child(5){width:10vmax;height:10vmax;right:22vmax;top:6vmax;background:radial-gradient(closest-side,rgba(255,255,255,.06),transparent);animation-duration:48s}
+@keyframes drift{from{transform:translate3d(0,0,0)}to{transform:translate3d(9vmax,6vmax,0)}}
+@media(prefers-reduced-motion:reduce){.blob,.dots i,.led,.link.on:after,.node[data-state=active]{animation:none}}
+button,input,select,textarea{font:inherit;letter-spacing:inherit;color:var(--ink);background:var(--field);border:1px solid #3a3f44;border-radius:4px;padding:8px 14px;max-width:100%;min-width:0}
+button{cursor:pointer;font-weight:600;background:transparent}button:hover:not(:disabled){border-color:var(--ink)}button:disabled{opacity:.35;cursor:default}
+button.solid{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+button.big{padding:14px 34px;font-size:1.1rem}
+button.send{background:var(--pink);border-color:var(--pink);color:var(--bg)}button.send:disabled{opacity:.3}
+button.text{border:0;padding:6px 8px;color:var(--dim);font-weight:400}button.text:hover:not(:disabled){color:var(--ink);border:0}
+button.link{display:inline;border:0;padding:0;color:var(--ink);text-decoration:underline;font-weight:400}
+.help{width:18px;height:18px;padding:0;border-radius:50%;font:.7rem var(--mono);font-weight:400;color:var(--dim);border-color:#4a5056;line-height:16px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:1px solid var(--ink);outline-offset:2px}
+.dim,small{color:var(--dim)}small{font-size:.85rem}code{font-size:.8rem;overflow-wrap:anywhere}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.stack{display:grid;gap:12px}
+.panel{background:linear-gradient(180deg,#272a2e,#222528);border:1px solid var(--line);border-radius:4px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 8px 22px rgba(0,0,0,.3)}
+#tiny{display:none;height:100vh;place-items:center;text-align:center;padding:24px;font-size:1.05rem}
+body[data-boot] .app{visibility:hidden}
+.app{position:relative;z-index:1;display:grid;height:100vh;grid-template-rows:56px minmax(0,1fr) 30px;grid-template-columns:auto minmax(0,1fr) clamp(260px,26vw,360px)}
+.side{grid-column:1;grid-row:2;width:clamp(180px,18vw,260px)}.center{grid-column:2;grid-row:2}.rail{grid-column:3;grid-row:2}
+.wm{display:flex;align-items:flex-end;gap:1px;font:28px/1 "Arial Rounded MT Bold","Arial Rounded MT",sans-serif;letter-spacing:.5px;filter:drop-shadow(0 3px 2px rgba(0,0,0,.45)) drop-shadow(0 0 1px rgba(0,0,0,.3))}.wm i{font-style:normal;display:inline-block;background:linear-gradient(180deg,#ffd3ec 0%,#ff8cc6 22%,#ff5fa2 60%,#e8556f 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:.6px rgba(255,255,255,.25)}.wm b{width:9px}
+.app.nosidebar{grid-template-columns:0 minmax(0,1fr) clamp(250px,25vw,340px)}.app.nosidebar .side{display:none}
+@media(max-width:699px),(max-height:479px){.app{display:none}#tiny{display:grid}dialog{display:none!important}}
+.top{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:8px;user-select:none}.logo img{max-height:36px;max-width:200px;display:block}.logo svg{display:block}.logo .bear{width:32px;height:32px}.logo .word{height:36px;width:auto}
+.top-right{display:flex;align-items:center;gap:8px}
+.chip{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--dim);padding:0 10px}
+.chip svg{display:block}.leds{display:flex;gap:4px}.led{width:6px;height:6px;border-radius:50%;background:#3c4146}
+body.working .led{background:var(--green);animation:blink .5s infinite alternate}body.working .led:nth-child(2){animation-delay:.17s}body.working .led:nth-child(3){animation-delay:.34s}
+.online .led:first-child{background:var(--green)}
+@keyframes blink{from{opacity:.25}to{opacity:1}}
+.pill{display:flex;align-items:center;gap:8px;font:.8rem var(--mono)}.pill:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green)}.pill.off:before{background:#6b7278}
+.profile{position:relative}.avatar{width:30px;height:30px;padding:0;border-radius:50%;background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.menu{position:absolute;right:0;top:38px;z-index:5;min-width:170px;background:var(--panel);border:1px solid #3a3f44;border-radius:4px;padding:10px;display:grid;gap:8px;box-shadow:0 10px 24px rgba(0,0,0,.4)}.menu button{text-align:left}
+.side{display:flex;flex-direction:column;gap:12px;padding:16px;border-right:1px solid var(--line);min-height:0}
+#chat-list{flex:1;min-height:0;overflow-y:auto;display:grid;align-content:start;gap:2px}
+.chat-item{display:grid;gap:2px;text-align:left;border:0;border-radius:4px;padding:9px 10px;font-weight:400}.chat-item:hover:not(:disabled){background:var(--panel);border:0}.chat-item[aria-current="true"]{background:var(--panel)}
+.chat-item span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.chat-item small{font-size:.72rem}
+.center{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto auto auto;min-height:0;min-width:0;padding:0 0 14px}
+.databar{display:flex;align-items:center;gap:12px;padding:10px 24px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.databar .name{font:.9rem var(--mono)}.databar .meta{font:.78rem var(--mono);color:var(--dim)}.databar .grow{flex:1}
+.path{display:flex;align-items:stretch;gap:0;padding:14px 24px;border-bottom:1px solid var(--line)}
+.node{flex:1 1 0;min-width:0;display:grid;gap:2px;padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:linear-gradient(180deg,#272a2e,#202327);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 6px 14px rgba(0,0,0,.25);color:var(--dim)}
+.node b{display:flex;align-items:center;gap:8px;font-size:.92rem;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node .led{flex:none}.node .sub{font:.72rem var(--mono);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.node .t{font-size:.82rem;min-height:1.3em}
+.node[data-state=done]{color:var(--ink)}.node[data-state=done] .led{background:var(--green)}
+.node[data-state=active]{color:var(--ink);border-color:var(--green);animation:glow 1s infinite alternate}.node[data-state=active] .led{background:var(--green)}
+@keyframes glow{from{box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 0 0 rgba(47,191,113,0)}to{box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 0 16px rgba(47,191,113,.35)}}
+.link{flex:0 0 22px;align-self:center;height:2px;background:var(--line);position:relative;overflow:hidden}
+.link.on{background:#2c4a3b}.link.on:after{content:"";position:absolute;left:0;top:0;width:10px;height:100%;background:var(--green);animation:flow .8s linear infinite}
+@keyframes flow{from{transform:translateX(-10px)}to{transform:translateX(22px)}}
+.stage{min-height:0;position:relative;display:grid}
+#messages{overflow-y:auto;display:flex;flex-direction:column;gap:16px;padding:20px max(5%,calc((100% - 880px)/2))}
+.msg{max-width:88%;padding:12px 16px;border-radius:4px;overflow-wrap:anywhere;white-space:pre-line;border:1px solid var(--line)}
+.msg.user{align-self:flex-end;background:#2c3035}.msg.answer{align-self:flex-start;background:linear-gradient(180deg,#272a2e,#222528);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.msg.mono{font:.85rem/1.6 var(--mono)}
+.msg details{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}.msg summary{cursor:pointer;color:var(--dim);font-size:.85rem}.msg details p{margin-top:8px;font:.8rem/1.5 var(--mono);color:#b7bdc2}
+.msg .replay{margin-top:8px;padding:2px 0;font-size:.85rem}
+.msg .suggest{margin-top:10px;color:var(--dim)}
+.msg table{border-collapse:collapse;margin-top:6px;font:.8rem var(--mono);white-space:normal}.msg th,.msg td{text-align:left;padding:5px 12px 5px 0;border-bottom:1px solid var(--line)}.msg th{color:var(--dim)}
+.thinking{display:flex;align-items:center;gap:12px;color:var(--dim);font-size:.85rem;font-family:var(--mono)}
+.dots{display:inline-flex;gap:4px}.dots i{width:5px;height:5px;border-radius:50%;background:var(--pink);animation:pulse 1.2s infinite ease-in-out}.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1.1)}}
+.empty{position:absolute;inset:0;display:grid;align-content:center;justify-items:center;gap:16px;text-align:center;padding:24px}.empty p{color:var(--dim);max-width:460px}
+#samples{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;align-items:center}
+.offline-view{position:relative;z-index:1;display:none;height:100vh;align-content:center;justify-items:center;gap:16px;text-align:center;padding:24px}
+.offline-view p{color:var(--dim);max-width:520px}.offline-view .logo{margin-bottom:12px}.offline-view .logo .word{height:64px}.offline-view .logo .bear{width:56px;height:56px}
+body.offline .app{display:none}body.offline .offline-view{display:grid}
+@media(max-width:699px),(max-height:479px){body.offline .offline-view{display:none}}
+#notice{margin:0 auto;width:min(880px,90%);font-size:.9rem;color:var(--dim)}#notice:empty{display:none}#notice[data-error="true"]{color:var(--ink);font-weight:600}
+#ask-form{display:grid;gap:8px;width:min(880px,90%);margin:8px auto 0}.ask-row{display:flex;gap:10px}.ask-row input{flex:1;padding:12px 14px;font-size:1rem}.ask-row button{padding:12px 24px}
+.styles{display:flex;align-items:center;gap:4px;flex-wrap:wrap}.styles button{border:0;border-bottom:1px solid transparent;border-radius:0;padding:2px 8px;font-weight:400;color:var(--dim);font-size:.9rem}.styles button[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+.styles small{margin-left:8px}
+#login-note{width:min(880px,90%);margin:8px auto 0;font-size:.85rem;color:var(--dim)}
+.rail{display:flex;flex-direction:column;gap:14px;min-height:0;padding:16px;border-left:1px solid var(--line);overflow:hidden}
+.section{padding:14px 16px;display:grid;gap:10px}.section.fill{flex:1;min-height:0;overflow:hidden;align-content:start}
+.tabs{display:flex;gap:2px;align-items:center;flex-wrap:wrap}.tabs .help{margin-right:6px}
+.tabs button[role=tab]{border:0;border-bottom:1px solid transparent;border-radius:0;padding:3px 6px;font-size:.95rem;font-weight:400;color:var(--dim)}.tabs button[role=tab][aria-selected="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+#help-line{font-size:.85rem;color:var(--dim)}#help-line:empty{display:none}
+.section select{width:100%}.section label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}.section label .row{gap:6px;flex-wrap:nowrap}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}#lm-instruction,#notes{resize:none;width:100%}#notes{min-height:84px;height:100%}
+#rec p{font-size:.9rem}
+.strip{grid-column:1/-1;border-top:1px solid var(--line);padding:0 20px;line-height:29px;font-size:.76rem;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.strip:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:9px}
+@media(max-height:560px){#empty-sub,#samples small{display:none}}
+@media(max-height:640px){.app{grid-template-rows:48px minmax(0,1fr) 26px}.path{padding:8px 24px}.node{padding:6px 10px}.node .sub{display:none}.databar{padding:6px 24px}.section{padding:10px 12px;gap:8px}.rail,.side{padding:10px;gap:10px}h1{font-size:1.7rem}.empty{gap:10px}#ask-form{margin-top:4px}.styles small{display:none}.msg{padding:9px 12px}}
+dialog{border:1px solid #3a3f44;border-radius:4px;padding:22px;width:min(92vw,480px);max-height:calc(100vh - 24px);overflow:hidden;color:var(--ink);background:var(--panel);box-shadow:0 16px 40px rgba(0,0,0,.5)}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
+.model-item{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line)}.model-item:first-child{border-top:0}.model-item .mono{font-size:.88rem}
+.tag{font:.74rem var(--mono);color:var(--dim);border:1px solid var(--line);border-radius:4px;padding:2px 8px;white-space:nowrap}
+.google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;background:#2c3035}.google svg{display:block}
 </style>
 </head>
-<body><main>
-<header><div class="brand"><span>pink</span>Process</div><div id="connection" class="pill">Disconnected</div></header>
-<h1>Live FPGA workspace</h1>
-<section class="panel" aria-labelledby="board-heading">
-  <div class="spread"><h2 id="board-heading">Board connection</h2><button id="refresh">Find boards</button></div>
-  <div class="boardrow">
-    <label class="field" for="host">Kit or network address
-      <input id="host" list="known" placeholder="pynq.local" autocomplete="off" autocapitalize="none" spellcheck="false">
-    </label><datalist id="known"></datalist>
-    <button id="connect" class="primary">Connect FPGA</button><button id="disconnect" hidden>Disconnect</button>
-  </div>
-  <small id="discovery" role="status"></small>
-</section>
-<p id="notice" role="status" aria-live="polite"></p>
-<div class="grid">
-<section class="panel stack" aria-labelledby="live-heading">
-  <div><h2 id="live-heading">Board telemetry</h2><p class="muted" id="live-description">Ask about measurements and forecasts from the connected FPGA kit.</p></div>
-  <div class="live-reading"><p id="stream-state" class="answer">Connect to a board</p><p id="stream-meta" class="muted"></p></div>
-  <form class="ask" id="ask-form">
-    <label class="field" for="live-question">Question<input id="live-question" type="text" maxlength="500" placeholder="What looks wrong with our system?" required></label>
-    <button class="primary" id="ask-live" type="submit" disabled>Ask</button>
-  </form>
-  <div class="buttons examples" id="live-examples" aria-label="Example questions"></div>
-  <div id="saved-incidents" class="stack divider" hidden>
-    <label class="field" for="saved-incident">Saved incident<select id="saved-incident"></select></label>
-    <small id="saved-incident-meta"></small>
-    <details id="saved-answer" hidden><summary id="saved-answer-title">View first answer</summary><p id="saved-answer-text"></p></details>
-    <div class="buttons">
-      <button id="replay-saved" type="button">Replay with active weights</button>
-      <button id="more-incidents" type="button" hidden>Show older captures</button>
+<body data-boot>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<linearGradient id="lg" x1="0" y1="0" x2=".12" y2="1"><stop offset="0" stop-color="#f08ad6"/><stop offset=".5" stop-color="#ff5fa2"/><stop offset="1" stop-color="#f0675a"/></linearGradient>
+<linearGradient id="lh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<filter id="lblur" x="-10%" y="-30%" width="120%" height="170%"><feGaussianBlur stdDeviation="1.8"/></filter>
+<filter id="lsoft" x="-5%" y="-10%" width="110%" height="130%"><feGaussianBlur stdDeviation=".6"/></filter>
+<text id="ltext" font-family="'Arial Rounded MT Bold','Arial Rounded MT',Arial,sans-serif" font-size="31"><tspan x="5" y="32.5">P</tspan><tspan y="36">Y</tspan><tspan y="31">N</tspan><tspan y="35.5">Q</tspan> <tspan y="36">P</tspan><tspan y="31.5">r</tspan><tspan y="35.5">o</tspan><tspan y="32">c</tspan><tspan y="36">e</tspan><tspan y="31">s</tspan><tspan y="34.5">s</tspan></text>
+<g id="lmark"><use href="#ltext" fill="#000" fill-opacity=".5" stroke="#000" stroke-opacity=".5" stroke-width="4" stroke-linejoin="round" transform="translate(0,3)" filter="url(#lblur)"/><use href="#ltext" fill="url(#lg)" stroke="url(#lg)" stroke-width="4" stroke-linejoin="round"/><use href="#ltext" fill="url(#lh)" stroke="url(#lh)" stroke-width="1.6" stroke-linejoin="round" transform="translate(-.3,-1.1)" filter="url(#lsoft)"/></g>
+</defs></svg>
+<div class="ambient" aria-hidden="true"><i class="blob"></i><i class="blob"></i><i class="blob"></i><i class="blob"></i><i class="blob"></i></div>
+<div id="tiny">This window is too small for PYNQ Process. Make it bigger to continue.</div>
+<input id="file" type="file" accept=".csv,.json,.jsonl,.ndjson,text/csv,application/json" hidden>
+<div class="offline-view" id="offline">
+  <div class="logo"></div>
+  <h2>No board connected</h2>
+  <p id="discovery" role="status">Plug your PYNQ Process kit into this Mac, then find it here.</p>
+  <div class="row" style="justify-content:center"><button id="find" class="solid">Find boards</button><button id="import-offline">Import data</button><button id="watch-demo">Watch demo instead</button></div>
+  <small>Imported data is analyzed on this Mac, no board needed.</small>
+  <button id="open-connect" class="text">Connect by address</button>
+  <p id="offline-notice" role="status"></p>
+</div>
+<div class="app" id="app">
+<header class="top">
+  <div class="logo"></div>
+  <div class="top-right">
+    <span class="chip" id="chip"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="4" y="4" width="10" height="10" rx="1" fill="none" stroke="#9aa1a7"/><rect x="7" y="7" width="4" height="4" fill="#9aa1a7"/><path d="M6 1v3M9 1v3M12 1v3M6 14v3M9 14v3M12 14v3M1 6h3M1 9h3M1 12h3M14 6h3M14 9h3M14 12h3" stroke="#9aa1a7" stroke-width="1"/></svg><span class="leds"><i class="led"></i><i class="led"></i><i class="led"></i></span><span id="chip-text"></span></span>
+    <span id="connection" class="pill"></span>
+    <button id="disconnect" class="text" hidden>Disconnect</button>
+    <button id="find-top" class="text" hidden>Find a board</button>
+    <button id="login" class="text">Log in</button>
+    <div class="profile" id="profile" hidden>
+      <button id="profile-button" class="avatar" aria-label="Profile"></button>
+      <div class="menu" id="profile-menu" hidden><span id="profile-name"></span><button id="logout">Log out</button></div>
     </div>
   </div>
-  <div id="live-result" class="stack divider" role="status" hidden>
-    <h3 id="live-asked"></h3>
-    <p id="answer-timing" class="muted" aria-live="off" hidden></p>
-    <p id="live-answer" class="answer"></p><small id="live-evidence"></small>
-    <details id="answer-readings" hidden><summary>Readings behind this answer</summary><p id="answer-measurements"></p></details>
-    <div><button id="replay-live" type="button" hidden>Replay captured evidence</button></div>
-    <details id="prior-answer" hidden><summary id="prior-answer-title"></summary><p id="prior-answer-text"></p></details>
+</header>
+<aside class="side">
+  <button id="new-chat">New session</button>
+  <div id="chat-list" aria-label="Past sessions"></div>
+  <small id="history-hint"></small>
+</aside>
+<section class="center">
+  <div class="databar" id="databar" hidden>
+    <span class="name" id="data-name"></span><span class="meta" id="data-meta"></span><span class="grow"></span>
+    <button id="import-more" class="text">Import data</button><button id="reset" class="text">New session</button>
   </div>
+  <div class="path" id="path" aria-label="How your question travels">
+    <div class="node" data-stage="0"><b><i class="led"></i>Data</b><span class="sub"></span><span class="t"></span></div><span class="link"></span>
+    <div class="node" data-stage="1"><b><i class="led"></i>Profile</b><span class="sub"></span><span class="t"></span></div><span class="link"></span>
+    <div class="node" data-stage="2"><b><i class="led"></i>Model</b><span class="sub"></span><span class="t"></span></div><span class="link"></span>
+    <div class="node" data-stage="3"><b><i class="led"></i><span class="fabric-name">PYNQ-Z2 fabric</span></b><span class="sub"></span><span class="t"></span></div><span class="link"></span>
+    <div class="node" data-stage="4"><b><i class="led"></i>Answer</b><span class="sub"></span><span class="t"></span></div>
+  </div>
+  <div class="stage">
+    <div id="messages" aria-live="polite"></div>
+    <div class="empty" id="empty" hidden>
+      <h1 id="greeting"></h1><p id="empty-sub"></p>
+      <button id="import-big" class="solid big">Import data</button>
+      <div id="samples"><small>or try a sample:</small></div>
+    </div>
+  </div>
+  <p id="notice" role="status" aria-live="polite"></p>
+  <form id="ask-form">
+    <div class="ask-row"><input id="live-question" type="text" maxlength="500" placeholder="Ask about your data" aria-label="Your question" autocomplete="off" required>
+    <button class="send" id="ask-live" type="submit" disabled>Ask</button></div>
+    <div class="styles" id="styles"><button type="button" data-style="short" aria-pressed="true">Short answer</button><button type="button" data-style="summary" aria-pressed="false">Summary</button><button type="button" data-style="transcript" aria-pressed="false">Transcript</button><button type="button" data-style="table" aria-pressed="false">Table</button><small id="style-hint"></small></div>
+  </form>
+  <p id="login-note" hidden>You're not logged in, so this session won't be saved. <button id="note-login" class="link" type="button">Log in</button></p>
 </section>
-<aside class="stack">
-<section id="lm-versions" class="panel stack" aria-labelledby="lm-versions-heading" hidden>
-  <h2 id="lm-versions-heading">Language model weights</h2>
-  <div><small>Active version</small><p id="lm-version" aria-live="polite"></p></div>
-  <details><summary>Checkpoint SHA-256</summary><code id="lm-hash"></code></details>
-  <label class="field divider" for="lm-selection">Saved version<select id="lm-selection"></select></label>
-  <div class="buttons">
-    <button id="lm-select">Load version</button><button id="lm-restore">Restore original</button>
-  </div>
-  <details id="lm-editor" class="divider"><summary>Create a weight version</summary>
-    <form id="lm-author-form" class="stack">
-      <label class="field" for="lm-name">Version name<input id="lm-name" maxlength="80" required></label>
-      <label class="field" for="lm-row">Target word or token ID<input id="lm-row" type="text" placeholder="e.g. Warning" maxlength="80" required></label>
-      <label class="field" for="lm-instruction">Edit request<textarea id="lm-instruction" maxlength="1000" rows="3" aria-describedby="lm-calibration"></textarea></label>
-      <small id="lm-calibration">Ask the board a calibration question before asking Astra to edit the weights.</small>
-      <div class="buttons"><button id="lm-author" type="submit">Ask Astra and save</button></div>
-      <label class="field" for="lm-artifact">Astra response JSON<input id="lm-artifact" type="file" accept=".json,application/json"></label>
-      <div class="buttons"><button id="lm-save" type="button">Save from JSON</button></div>
+<aside class="rail">
+  <section class="section panel">
+    <h2>Model</h2>
+    <p id="model-line"></p>
+    <div id="rec" class="stack" hidden>
+      <p id="rec-reason"></p>
+      <div class="row"><button id="accept" class="solid">Use this model</button><button id="pick-other">Pick another</button></div>
+      <button id="make-own" class="link" type="button">Make my own model</button>
+    </div>
+    <div class="row"><button id="open-library">Model library</button></div>
+  </section>
+  <section class="section panel fill">
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="notes">Notes</button><button class="help" type="button" data-help="Write your own notes about this data. They are saved with this session when you are logged in.">?</button>
+      <button role="tab" data-tab="incidents" id="tab-incidents">Replay</button><button class="help" type="button" data-help="Ask the same question again about something that already happened.">?</button>
+      <button role="tab" data-tab="weights">Skills</button><button class="help" type="button" data-help="Pick which skills the board uses to warn you and to answer.">?</button>
+      <button role="tab" data-tab="create">Teach</button><button class="help" type="button" data-help="Create a new answer skill by telling the board what to do differently.">?</button>
+    </div>
+    <p id="help-line"></p>
+    <div data-panel="notes" class="stack">
+      <textarea id="notes" placeholder="Write what you notice about this data" aria-label="Notes"></textarea>
+      <small id="notes-hint"></small>
+    </div>
+    <div data-panel="incidents" class="stack" hidden>
+      <label>Past event<select id="saved-incident"></select></label>
+      <small id="saved-incident-meta"></small>
+      <p id="saved-answer-text" class="dim" hidden></p>
+      <div class="row"><button id="replay-saved" type="button">Replay</button><button id="more-incidents" type="button" hidden>Older</button></div>
+    </div>
+    <div data-panel="weights" class="stack" hidden>
+      <label><span class="row">Early-warning skill<button class="help" type="button" data-help="Decides when the board warns you that requests are starting to pile up.">?</button></span><select id="weight"></select></label>
+      <label id="lm-label"><span class="row">Answer skill<button class="help" type="button" data-help="Decides how the board explains what is going wrong in plain words.">?</button></span><select id="lm-selection"></select></label>
+      <div><code id="hash"></code></div>
+      <div id="lm-fingerprint" hidden><code id="lm-hash"></code></div>
+      <div class="row"><button id="rollback">Reset warning skill</button><button id="lm-restore">Reset answer skill</button></div>
+    </div>
+    <form data-panel="create" id="lm-author-form" class="stack" hidden>
+      <div class="two"><label>Skill name<input id="lm-name" maxlength="80" required></label>
+      <label>Word to change<input id="lm-row" type="text" placeholder="Warning" maxlength="80" required></label></div>
+      <label>What should it do differently?<textarea id="lm-instruction" maxlength="1000" rows="2"></textarea></label>
+      <div class="row"><button id="lm-author" type="submit">Teach and save</button></div>
+      <div class="two"><label>Saved lesson file<input id="lm-artifact" type="file" accept=".json,application/json"></label>
+      <div class="row" style="align-items:end"><button id="lm-save" type="button">Save lesson</button></div></div>
     </form>
-  </details>
-</section>
-<section class="panel stack" aria-labelledby="model-heading">
-  <h2 id="model-heading">Queue-onset model</h2><div><small>Active version</small><p id="version">Connect a board to read its model.</p></div>
-  <div id="resident" class="stack" hidden><div><small>Model</small><p id="model"></p></div>
-  <details><summary>Weight fingerprint</summary><code id="hash"></code></details>
-  <label class="field divider" for="weight">Queue-onset weight profile<select id="weight"></select></label>
-  <div class="buttons"><button id="apply">Apply weights</button><button id="rollback">Restore base</button></div></div>
-</section></aside></div>
-<details class="panel csv-workspace" id="csv-workspace">
-<summary>CSV analysis on this Mac</summary>
-<section class="stack" aria-labelledby="query-heading">
-  <h2 id="query-heading">Query a CSV dataset</h2>
-  <div class="spread end"><div><small>Dataset</small><p id="source">Loading sample…</p></div>
-    <label class="field capacity">Pool capacity<input id="capacity" type="number" min="1" step="1" required></label></div>
-  <div class="buttons"><label class="file">Import CSV<input id="upload" type="file" accept=".csv,text/csv" aria-label="Import telemetry CSV"></label><button id="demo">Use sample</button><button id="watch" hidden>Watch local CSV…</button><button id="unwatch" hidden>Stop watching</button></div>
-  <details><summary>CSV format</summary><p>Supply 50 to 2,097 readings at 100 ms intervals. Use integer columns <code>time_ms,busy,waiting</code> for the timestamp, occupied connections and queued requests.</p></details>
-  <div><canvas id="trace" aria-label="Busy connections over the dataset" role="img"></canvas>
-  <div class="spread"><small>Busy connections</small><small id="range"></small></div></div>
-  <label class="field divider" for="question">Question<select id="question"></select></label>
-  <div><button id="query" class="primary" disabled>Analyze CSV on FPGA</button></div>
-</section>
-<section id="result" class="panel result stack" aria-labelledby="result-heading" hidden>
-  <h2 id="result-heading">CSV analysis result</h2><p id="answer" class="answer"></p><p id="measure"></p>
-  <small id="provenance"></small><div id="window-list" hidden><table><thead><tr><th>Reading time</th><th>Model score</th><th>Forecast horizon</th></tr></thead><tbody id="values"></tbody></table>
-    <button id="more" hidden>Show more warnings</button></div>
-</section></details>
-</main>
+  </section>
+</aside>
+<div class="strip" id="strip"></div>
+</div>
+
+<dialog id="connect-dialog">
+  <div class="head"><h2>Connect by address</h2><button class="text" data-close>Close</button></div>
+  <div class="stack">
+    <label>Kit or network address<input id="host" list="known" placeholder="pynq.local" autocomplete="off" autocapitalize="none" spellcheck="false"></label><datalist id="known"></datalist>
+    <div class="row"><button id="connect" class="solid">Connect</button></div>
+  </div>
+</dialog>
+
+<dialog id="login-dialog">
+  <div class="head"><h2>Log in</h2><button class="text" data-close>Close</button></div>
+  <button id="google" class="google"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C.9 16.5 0 20.1 0 24s.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>Continue with Google</button>
+</dialog>
+
+<dialog id="library-dialog">
+  <div class="head"><h2>Model library</h2><button class="text" data-close>Close</button></div>
+  <div id="library-list"></div>
+</dialog>
+
+<dialog id="plan-dialog">
+  <div class="head"><h2>Make my own model</h2><button class="text" data-close>Close</button></div>
+  <p class="dim" id="plan-intro"></p>
+  <div id="plan-list"></div>
+</dialog>
+
 <script>
 "use strict";
 const el = id => document.getElementById(id);
 const seconds = ms => (ms / 1000).toLocaleString(undefined, {minimumFractionDigits:1,maximumFractionDigits:3}) + " s";
-let setup = null, status = null, address = "", csv = "", datasetName = "", busy = true;
-let result = null, visibleWarnings = 0, fileRevision = 0;
-let answerSnapshot = null, latestStream = null, pollPending = false, interaction = 0, nextModelCheck = 0;
-let answerCapture = null, languageWeights = null;
-let savedCaptures = [], olderCaptures = null;
-let autoUsb = true;
-const watcher = window.webkit?.messageHandlers?.watchCSV;
-let liveName = null, livePending = false;
-function stopWatching() {
-  if (liveName !== null) watcher?.postMessage("stop");
-  liveName = null; livePending = false;
-}
-function liveQuery() {
-  if (!livePending || busy || !status || !csv || !liveName) return;
-  livePending = false;
-  run(async () => {
-    const feed = liveName, question = el("question").value;
-    const data = await request("query",{csv,capacity:Number(el("capacity").value),question});
-    if (liveName === feed && question === el("question").value) {displayAnswer(data);show("");}
-  });
-}
-window.pinkProcessLiveStatus = name => {
-  fileRevision++; liveName = name; csv = ""; livePending = false;
-  setDataset("", "Watched CSV · " + name); if (el("question").value === "warnings") el("question").value = "latest";
-  show("Watching for 50 complete readings.");
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const STAGE_PHRASES = [
+  ["Reading the last 30 seconds of the queue","Pulling the newest reading off the wire","Counting requests in the queue","Checking how many connections are busy","Reading the saved readings back","Measuring how long requests wait","Looking at busy versus waiting","Sending the question to the board"],
+  ["Looking for the start of the pile-up","Comparing against the quiet baseline","Looking at the trend over ten seconds","Spotting where the queue began to grow","Packing readings into 8-bit numbers","Lining up the data for the logic fabric","Checking nothing has changed mid-question","Finding what changed first"],
+  ["Loading INT8 weights onto the board","Checking the weights fingerprint","Handing readings to the model","Waking the FPGA","Warming up the clock at 100 MHz","Reading the board's memory","Balancing speed and accuracy on the chip","Checking the board clock"],
+  ["Streaming 64 KB to fabric","Running the encoder on the board","Multiplying matrices in hardware","Crunching numbers in parallel","Scoring the last few readings","Checking the forecast","Reading the queue forecast","Double-checking the warning threshold"],
+  ["Running the decoder, one word at a time","Picking the most likely next word","Tying the readings to a likely cause","Trimming the answer to the point","Writing the answer in plain words","Almost there, the board is still working","Hang tight, this runs on the board itself","Checking the board is still healthy"]
+];
+const STYLE_HINTS = {
+  short:"One sentence you can act on.",
+  summary:"A few lines on what the data shows.",
+  transcript:"Timestamped events, like notes from a listener.",
+  table:"The key moments in rows and columns."
 };
-window.pinkProcessLiveCSV = (text, name) => {
-  if (liveName !== name) return;
-  csv = text; drawTrace(); livePending = true; controls(); liveQuery();
+const ON_TOPIC = /queue|request|connection|load|busy|wait|latenc|slow|system|server|traffic|capacity|pool|fpga|board|error|outage|\bdown\b|fail|spike|forecast|warn|peak|health|status|wrong|problem|issue|trend|grow|drain|backlog|arriv|timeout|check next|\bdata\b|reading|average|\bmean\b|\bmax\b|\bmin\b|temperature|sales|revenue|order|events?|summar|happen|unusual|anomal|\bnow\b|latest|\brows?\b|column/i;
+const LOGO_BEAR = '<svg class="bear" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="17" r="15" fill="#ff5fa2"/><circle cx="9" cy="6" r="4.5" fill="#ff5fa2"/><circle cx="31" cy="6" r="4.5" fill="#ff5fa2"/><circle cx="14.5" cy="16" r="1.9" fill="#111"/><circle cx="25.5" cy="16" r="1.9" fill="#111"/><path d="M17 21.5 q3 2.4 6 0" fill="none" stroke="#111" stroke-width="1.4" stroke-linecap="round"/><path d="M9 29 l11 4 l11 -4 l2 10 h-26 z" fill="#e9ecef"/><path d="M15 30.5 l5 3 l5 -3 l-5 -2 z" fill="#1c1e21"/><path d="M20 32 l-1.8 2 l1.8 6 l1.8 -6 z" fill="#ff5fa2"/></svg>';
+const LOGO_WORD = '<span class="wm" role="img" aria-label="PYNQ Process"><i style="transform:translateY(0px)">P</i><i style="transform:translateY(-3px)">Y</i><i style="transform:translateY(1px)">N</i><i style="transform:translateY(-2px)">Q</i><b></b><i style="transform:translateY(-2px)">P</i><i style="transform:translateY(1px)">r</i><i style="transform:translateY(-1px)">o</i><i style="transform:translateY(2px)">c</i><i style="transform:translateY(-2px)">e</i><i style="transform:translateY(0px)">s</i><i style="transform:translateY(-3px)">s</i></span>';
+const demoProfile = {
+  name:"pool-telemetry.csv", format:"CSV", rows:6000, time_column:"time_ms", signals:["connections","queue"], queue_ready:true, capacity:20,
+  columns:[{name:"time_ms", type:"number"}, {name:"busy", type:"number"}, {name:"waiting", type:"number"}],
+  recommendation:{model_id:"queue-onset-logistic", reason:"Looks like connection-pool telemetry → Queue-onset INT8"},
+  custom_plan:[
+    {step:"Start from FLAN-T5-small", where:"runs on the board", ready:true},
+    {step:"Label examples from your 6,000 rows", where:"runs on this Mac", ready:true},
+    {step:"Write a skill for your data with Astra and save it as INT8", where:"runs on the board", ready:true},
+    {step:"Fine-tune on your labels", where:"coming soon", ready:false},
+    {step:"Quantize the tuned model and load it on the FPGA", where:"coming soon", ready:false}
+  ]
 };
-window.pinkProcessLiveError = message => {livePending = false; clearAnswer(); csv = ""; drawTrace(); controls(); show(message,true);};
+const demoChats = [
+  {id:"demo-1", title:"pool-telemetry.csv", dataset:"pool-telemetry.csv", model:"queue-onset-logistic", notes:"Pool size was 20. Ask ops about retries.", updated_ms:Date.now() - 86400000, questions:2, messages:[
+    {role:"user", text:"What was the peak queue?"},
+    {role:"answer", text:"The queue peaked at 9 at 14.5 s and then drained.", readings:"6,000 readings of waiting. Highest 9."},
+    {role:"user", text:"Why did requests wait?"},
+    {role:"answer", text:"All 20 connections were busy and new requests arrived faster than they finished.", readings:"busy 20 of 20 from 13.5 s to 15.3 s."}]}
+];
+let status = null, address = "", busy = true, interaction = 0, pollPending = false, nextModelCheck = 0, autoUsb = true;
+let languageWeights = null, savedCaptures = [], olderCaptures = null, latestStream = null, answerCapture = null;
+let messages = [], chatId = null, chats = [], user = null, auth0 = false, demo = false, loginWatch = null, models = null, samples = [];
+let dataset = null, datasetLabel = "", chosenModel = null, accepted = false, notes = "", notesTimer = null;
+let answerStyle = "short", lastLatency = null, activeTab = "notes";
+const path = {begin:0, starts:[0, 0, 0, 0, 0], state:["idle", "idle", "idle", "idle", "idle"]};
+
+function shuffled(items) {
+  const copy = [...items];
+  for (let index = copy.length - 1; index > 0; index--) {
+    const swap = Math.floor(Math.random() * (index + 1));
+    [copy[index], copy[swap]] = [copy[swap], copy[index]];
+  }
+  return copy;
+}
+function setLogo(useImage) {
+  for (const logo of document.querySelectorAll(".logo")) {
+    if (useImage) {
+      const image = document.createElement("img"); image.src = "/static/logo.png"; image.alt = "PYNQ Process";
+      logo.replaceChildren(image);
+    } else {
+      logo.innerHTML = LOGO_BEAR + LOGO_WORD;
+    }
+  }
+}
+function friendlyVersion(version) {
+  const match = /v(\d+)/.exec(version || "");
+  return match ? "Queue-onset model v" + match[1] : (version || "");
+}
 function show(message, error=false) {
   el("notice").textContent = message;
   el("notice").dataset.error = String(error);
+  el("offline-notice").textContent = message;
 }
+async function post(url, action, extra) {
+  const response = await fetch(url, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({action,...extra})});
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Something went wrong.");
+  return data;
+}
+const request = (action, extra={}) => post("/api/action", action, extra);
+const account = (action, extra={}) => post("/api/account", action, extra);
+const fmtMs = ms => ms < 1000 ? Math.round(ms) + " ms" : (ms / 1000).toFixed(1) + " s";
+const modelName = id => models?.find(model => model.id === id)?.name || id || "";
+
+function pathReset() {
+  path.state = ["idle", "idle", "idle", "idle", "idle"];
+  for (const node of document.querySelectorAll(".node")) {node.dataset.state = "idle"; node.querySelector(".t").textContent = "";}
+  paintLinks();
+}
+function paintLinks() {
+  const links = document.querySelectorAll(".link");
+  links.forEach((link, index) => link.classList.toggle("on", path.state[index + 1] === "active"));
+}
+function pathMark(index, state, ms=null) {
+  path.state[index] = state;
+  const node = document.querySelector('.node[data-stage="' + index + '"]');
+  node.dataset.state = state;
+  if (ms !== null) node.querySelector(".t").textContent = fmtMs(ms);
+  paintLinks();
+}
+function pathBegin() {
+  pathReset();
+  path.begin = Date.now(); path.starts = [path.begin, 0, 0, 0, 0];
+  pathMark(0, "active");
+  document.body.classList.add("working");
+}
+function pathAdvance(index) {
+  const now = Date.now();
+  for (let stage = 0; stage < index; stage++) {
+    if (path.state[stage] !== "done") pathMark(stage, "done", now - (path.starts[stage] || path.begin));
+  }
+  if (path.state[index] === "idle") {path.starts[index] = now; pathMark(index, "active");}
+}
+function pathFinish() {
+  pathAdvance(4);
+  pathMark(4, "done", Date.now() - path.starts[4]);
+  document.body.classList.remove("working");
+}
+async function pathPlay(timings, stages=[0, 1, 2, 3, 4]) {
+  const values = [timings.data_ms, timings.profile_ms, timings.model_ms, timings.fabric_ms, timings.answer_ms];
+  document.body.classList.add("working");
+  for (const stage of stages) {
+    pathMark(stage, "active");
+    await sleep(Math.min(Math.max(values[stage], 350), 900));
+    pathMark(stage, "done", values[stage]);
+  }
+  document.body.classList.remove("working");
+}
+function pathLabels() {
+  const nodes = document.querySelectorAll(".node");
+  const online = Boolean(status);
+  nodes[0].querySelector(".sub").textContent = dataset ? dataset.name : online ? "live stream" : "";
+  nodes[1].querySelector(".sub").textContent = dataset ? dataset.rows.toLocaleString() + " rows · " + dataset.columns.length + " cols" : "";
+  nodes[2].querySelector(".sub").textContent = chosenModel ? chosenModel.name : online ? "INT8 weights" : "";
+  document.querySelector(".fabric-name").textContent = online ? "PYNQ-Z2 fabric" : "This Mac";
+  nodes[3].querySelector(".sub").textContent = online ? "100 MHz" : "no board";
+  nodes[4].querySelector(".sub").textContent = {short:"short answer", summary:"summary", transcript:"transcript", table:"table"}[answerStyle];
+}
+
 function controls() {
-  el("connection").textContent = status ? status.backend + " connected" : "Disconnected";
-  el("connection").dataset.online = String(Boolean(status));
-  el("refresh").disabled = busy || Boolean(status);
-  el("host").disabled = busy || Boolean(status);
-  el("connect").hidden = Boolean(status);
-  el("connect").disabled = busy || !el("host").value.trim();
-  el("disconnect").hidden = !status;
+  const online = Boolean(status);
+  const hasData = Boolean(dataset || datasetLabel);
+  document.body.classList.toggle("offline", !online && !hasData);
+  el("app").classList.toggle("nosidebar", !user);
+  el("chip").classList.toggle("online", online);
+  el("chip-text").textContent = online ? "100 MHz · " + (status.temp_c != null ? status.temp_c + " °C" : "-- °C") : "no board";
+  el("connection").textContent = online ? (status.board_name || status.board || "PYNQ-Z2") + " connected" : "No board · analyzing on this Mac";
+  el("connection").classList.toggle("off", !online);
+  el("disconnect").hidden = !online;
   el("disconnect").disabled = busy;
-  el("ask-live").disabled = busy || !status?.stream_supported || !el("live-question").value.trim();
-  for (const button of el("live-examples").children) button.disabled = busy || !status?.stream_supported;
-  el("query").disabled = busy || !status || !csv || !el("capacity").value || !el("question").value;
-  el("apply").disabled = busy || !status || !el("weight").value || el("weight").value === status.version;
-  el("rollback").disabled = busy || !status || status.version === "pool-logistic-v1";
+  el("find-top").hidden = online;
+  el("find-top").disabled = busy;
+  el("login").hidden = Boolean(user);
+  el("profile").hidden = !user;
+  el("profile-button").textContent = user ? user.name.trim().charAt(0).toUpperCase() : "";
+  el("profile-name").textContent = user ? user.name : "";
+  el("find").disabled = busy;
+  el("import-offline").disabled = busy;
+  el("connect").disabled = busy || !el("host").value.trim();
+  el("databar").hidden = !hasData;
+  el("data-name").textContent = dataset?.name || datasetLabel;
+  el("data-meta").textContent = dataset ? dataset.format + " · " + dataset.rows.toLocaleString() + " rows · " + dataset.columns.length + " columns" + (dataset.time_column ? " · time: " + dataset.time_column : "") : datasetLabel ? "Import it again to ask new questions" : "";
+  el("import-more").disabled = busy;
+  el("reset").disabled = busy;
+  el("login-note").hidden = Boolean(user);
+  el("ask-live").disabled = busy || !(dataset || status?.stream_supported) || !el("live-question").value.trim();
+  for (const button of document.querySelectorAll("#styles button")) button.setAttribute("aria-pressed", String(button.dataset.style === answerStyle));
+  el("style-hint").textContent = STYLE_HINTS[answerStyle];
+  el("messages").hidden = !messages.length;
+  el("empty").hidden = messages.length > 0;
+  el("greeting").textContent = user ? "Welcome back, " + user.name.trim().split(/\s+/)[0] : "Hey hacker!";
+  el("empty-sub").textContent = dataset ? "Your data is loaded. Ask a question below and pick how you want the answer." : "Bring your data. Get a quantized model for it. Ask it anything.";
+  el("import-big").hidden = Boolean(dataset);
+  el("import-big").disabled = busy;
+  el("samples").hidden = Boolean(dataset) || !samples.length;
+  el("new-chat").disabled = busy;
   const languageAvailable = !busy && Boolean(status?.lm_supported && languageWeights);
-  const versionNamed = el("lm-name").value.trim() && el("lm-row").value !== "" && el("lm-row").validity.valid;
+  el("weight").disabled = busy || !online;
+  el("lm-label").hidden = !status?.lm_supported;
   el("lm-selection").disabled = !languageAvailable;
-  el("lm-select").disabled = !languageAvailable || el("lm-selection").value === languageWeights?.active.name;
+  el("rollback").disabled = busy || !online || status.version === "pool-logistic-v1";
+  el("lm-restore").hidden = !status?.lm_supported;
   el("lm-restore").disabled = !languageAvailable || languageWeights?.active.name === "original";
+  const versionNamed = el("lm-name").value.trim() && el("lm-row").value !== "" && el("lm-row").validity.valid;
   for (const id of ["lm-name", "lm-row", "lm-instruction", "lm-artifact"]) el(id).disabled = !languageAvailable;
   el("lm-author").disabled = !languageAvailable || !versionNamed || !el("lm-instruction").value.trim();
   el("lm-save").disabled = !languageAvailable || !versionNamed || !el("lm-artifact").files.length;
-  el("replay-live").disabled = busy || !status?.lm_supported || !answerCapture;
   el("saved-incident").disabled = busy || !savedCaptures.length;
   el("replay-saved").disabled = busy || !status?.lm_supported || !el("saved-incident").value;
   el("more-incidents").disabled = busy;
-  for (const id of ["demo","upload","capacity","watch"]) el(id).disabled = busy || !setup;
-  el("weight").disabled = busy;
-  el("question").disabled = busy;
-  const historical = el("question").querySelector('option[value="warnings"]');
-  if (historical) historical.disabled = Boolean(liveName);
-  el("watch").hidden = !watcher || liveName !== null;
-  el("unwatch").hidden = !watcher || liveName === null;
+  el("tab-incidents").hidden = !languageWeights?.capture_listing_supported && !demo;
+  el("lm-fingerprint").hidden = !languageWeights;
+  el("notes-hint").textContent = user ? "Saved with this session." : "Log in to keep your notes.";
+  if (el("tab-incidents").hidden && activeTab === "incidents") selectTab("notes");
+  renderModel();
+  renderHistory();
+  renderStrip();
+  pathLabels();
+  for (const button of el("library-list").querySelectorAll("button[data-model]")) button.disabled = busy || !loadable(button.dataset.model);
 }
-async function request(action, extra={}) {
-  const response = await fetch("/api/action", {method:"POST", headers:{"Content-Type":"application/json"},body:JSON.stringify({action,...extra})});
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "Unable to reach the kit.");
-  return data;
+function renderStrip() {
+  if (!status) {el("strip").textContent = dataset ? "this Mac · no board connected" : ""; return;}
+  const parts = ["PYNQ-Z2", "INT8", "100 MHz", "weights 64 KB"];
+  if (demo) parts.unshift("demo");
+  if (latestStream?.latest) parts.push(latestStream.latest.waiting + " waiting", latestStream.latest.busy + "/" + latestStream.capacity + " busy");
+  if (latestStream?.state === "stale") parts.push("stale");
+  if (lastLatency !== null) parts.push("latency " + lastLatency + " s");
+  el("strip").textContent = parts.join(" · ");
+}
+function renderModel() {
+  const recommendation = dataset?.recommendation;
+  el("rec").hidden = !recommendation;
+  if (recommendation && !chosenModel && models) chosenModel = models.find(model => model.id === recommendation.model_id) || null;
+  el("open-library").hidden = Boolean(recommendation);
+  if (recommendation) {
+    const same = chosenModel?.id === recommendation.model_id;
+    el("rec-reason").replaceChildren(
+      accepted ? "Using " : "Recommended: ", Object.assign(document.createElement("span"), {className:"mono", textContent:chosenModel?.name || modelName(recommendation.model_id)}),
+      same ? ". " + recommendation.reason : ". You picked this instead of the recommended " + modelName(recommendation.model_id) + ".");
+    el("accept").hidden = accepted;
+    el("accept").disabled = busy || !chosenModel;
+  }
+  if (status) {
+    const name = Object.assign(document.createElement("span"), {className:"mono", textContent:friendlyVersion(status.version)});
+    el("model-line").replaceChildren("The board runs: ", name, " — spots when requests start piling up");
+    el("hash").textContent = status.weights_sha256 || "";
+    el("weight").replaceChildren(...status.versions.map(version => new Option(version, version)));
+    el("weight").value = status.version;
+  } else {
+    el("model-line").textContent = recommendation ? "" : "No board connected.";
+  }
+  el("model-line").hidden = !el("model-line").textContent && !el("model-line").childNodes.length;
+}
+function renderLanguageSelect() {
+  const selector = el("lm-selection");
+  const versions = languageWeights?.versions || [];
+  selector.replaceChildren(...versions.map(version => new Option(version.name, version.name)));
+  selector.value = languageWeights?.active?.name || "";
+  el("lm-hash").textContent = languageWeights?.active?.checkpoint_sha256 || "";
 }
 function setState(data) {
   if (data.host !== address || !data.status?.lm_supported) {
@@ -205,39 +500,13 @@ function setState(data) {
     displaySavedCaptures();
   }
   status = data.status; address = data.host || "";
-  el("lm-versions").hidden = !status?.lm_supported;
-  el("live-description").textContent = status?.lm_supported ?
-    "Ask about the system. The kit’s language model reads the measurements and forecasts." :
-    "Ask about measurements and forecasts from the connected FPGA kit.";
   if (address) el("host").value = address;
-  el("resident").hidden = !status;
-  el("version").textContent = status ? status.version : "Connect a board to read its model.";
-  if (status) {
-    el("model").textContent = status.model;
-    el("hash").textContent = status.weights_sha256;
-    const previous = el("weight").value;
-    el("weight").replaceChildren(...status.versions.map(v => new Option(v, v)));
-    if (previous !== status.version && status.versions.includes(previous)) el("weight").value = previous;
-    else el("weight").value = status.versions.find(v => v !== status.version) || status.version;
-  }
   if (!status?.stream_supported) displayStream(null);
   controls();
 }
-function clearLiveAnswer() {
-  el("live-result").hidden = true;
-  answerSnapshot = null;
-  answerCapture = null;
-}
 function displayWeightVersions(data) {
   languageWeights = data;
-  const selector = el("lm-selection");
-  const previous = selector.value;
-  const versions = data?.versions || [];
-  const active = data?.active;
-  selector.replaceChildren(...versions.map(version => new Option(version.name, version.name)));
-  selector.value = versions.some(version => version.name === previous) ? previous : active?.name || "";
-  el("lm-version").textContent = active?.name || "Reading board versions…";
-  el("lm-hash").textContent = active?.checkpoint_sha256 || "";
+  renderLanguageSelect();
   controls();
 }
 async function refreshWeightVersions() {
@@ -250,17 +519,13 @@ function savedCapture() {
   return savedCaptures.find(capture => capture.id === el("saved-incident").value);
 }
 function captureTime(capture) {
-  return capture.captured_at_ms == null ? "Capture date unavailable" :
-    new Date(capture.captured_at_ms).toLocaleString();
+  return capture.captured_at_ms == null ? "Capture date unavailable" : new Date(capture.captured_at_ms).toLocaleString();
 }
 function showSavedCaptureDetails() {
   const capture = savedCapture();
   const first = capture?.baseline;
-  const details = el("saved-answer");
-  details.hidden = !first;
-  if (!first) details.open = false;
-  el("saved-answer-title").textContent = first ? "View first answer · " + first.version.name : "";
-  el("saved-answer-text").textContent = first?.answer || "";
+  el("saved-answer-text").hidden = !first;
+  el("saved-answer-text").textContent = first ? "First answer (" + first.version.name + "): " + first.answer : "";
   el("saved-incident-meta").textContent = capture ?
     "Reading at " + seconds(capture.reading_time_ms) + (first ? "" : " · First answer unavailable") :
     "Ask a question to capture an incident on the board.";
@@ -271,16 +536,13 @@ function displaySavedCaptures(data=null, append=false) {
   const previous = selector.value;
   savedCaptures = append ? [...savedCaptures, ...data.captures] : data?.captures || [];
   olderCaptures = data?.before ?? null;
-  el("saved-incidents").hidden = !data;
   el("more-incidents").hidden = olderCaptures === null;
-  selector.replaceChildren(...savedCaptures.map(capture =>
-    new Option(captureTime(capture) + " · " + capture.question, capture.id)));
+  selector.replaceChildren(...savedCaptures.map(capture => new Option(captureTime(capture) + " · " + capture.question, capture.id)));
   if (savedCaptures.some(capture => capture.id === previous)) selector.value = previous;
   showSavedCaptureDetails();
 }
 async function refreshSavedCaptures(before=null) {
-  const data = await request("lm_captures", before === null ? {} : {before});
-  displaySavedCaptures(data, before !== null);
+  displaySavedCaptures(await request("lm_captures", before === null ? {} : {before}), before !== null);
 }
 function streamSource(data) {
   const source = data.source || "Telemetry source";
@@ -304,204 +566,516 @@ function answerTiming(capture, stream) {
   const gap = minutes ? minutes + " min" + (remaining ? " " + remaining + " s" : "") : seconds(elapsed);
   return times + " · Captured " + gap + " before the latest reading";
 }
-function displayAnswerTiming() {
-  const label = el("answer-timing");
-  label.textContent = answerTiming(answerSnapshot, latestStream);
-  label.hidden = !label.textContent;
-}
 function displayStream(data) {
   latestStream = data;
-  displayAnswerTiming();
-  const labels = {
-    idle:"Waiting for telemetry",
-    warming:"Collecting forecast history",
-    ready:"Forecast ready",
-    stale:"Telemetry is stale"
-  };
-  el("stream-state").textContent = data ? (labels[data.state] || "Board connected")
-    : status ? (status.stream_supported ? "Reading board telemetry…" : "Board update needed for live telemetry")
-      : "Connect to a board";
-  const details = [];
-  if (data?.latest) {
-    details.push(streamSource(data), data.latest.busy + " of " + data.capacity + " busy",
-      data.latest.waiting + " waiting", data.sample_count + " readings");
-    if (data.age_ms != null) details.push("Last reading " + seconds(data.age_ms) + " ago");
-    if (data.session) details.push("Session " + data.session.slice(0, 8));
-  }
-  el("stream-meta").textContent = details.join(" · ");
+  renderStrip();
 }
 async function refreshStream() {
   if (!status?.stream_supported) return;
-  const data = await request("stream_status");
-  displayStream(data.snapshot);
+  displayStream((await request("stream_status")).snapshot);
 }
-function clearAnswer() {result = null; el("result").hidden = true;}
 async function run(task) {
   if (busy) return;
   interaction++;
   busy = true; controls();
   try { await task(); }
   catch (err) {
-    if (liveName) clearAnswer();
     show(err.message, true);
     if (status) {
-      try {
-        setState(await request("status"));
-        if (!status) {clearAnswer(); clearLiveAnswer();}
-      } catch {setState({status:null}); clearAnswer(); clearLiveAnswer();}
+      try { setState(await request("status")); }
+      catch { setState({status:null}); }
     }
-  } finally {busy = false; controls(); queueMicrotask(liveQuery);}
+  } finally {busy = false; controls();}
 }
-async function discover() {
+async function discover(connectSingle=false) {
   el("discovery").textContent = "Looking for kits…";
   const data = await request("discover");
   el("known").replaceChildren(...data.boards.map(board => new Option(board.name, board.host)));
   if (!el("host").value || data.boards.length === 1) el("host").value = data.boards[0]?.host || "";
-  el("discovery").textContent = data.boards.length === 1 ? "One kit found." : data.boards.length ? data.boards.length + " kits found. Select a network address." : (watcher ? "No kits found. Connect a provisioned USB kit or check Ethernet and macOS Local Network access. For a new kit, choose pinkProcess → Import Kit Pairing…." : "No kits found. Check power, Ethernet and the kit pairing, or enter the board address.");
+  el("discovery").textContent = data.boards.length === 1 ? "One kit found." : data.boards.length ? data.boards.length + " kits found. Use Connect by address to pick one." : "No kits found. Connect a provisioned USB kit or check Ethernet and macOS Local Network access. For a new kit, choose PYNQ Process → Import Kit Pairing….";
+  if (connectSingle && data.boards.length === 1) await connectBoard(data.boards[0].host);
 }
-function drawTrace() {
-  const points = csv.trim().split(/\r?\n/).slice(1).map(row => row.split(",").map(Number));
-  const valid = points.length && points.every(p => p.length === 3 && p.every(Number.isFinite));
-  const canvas = el("trace"), width = canvas.clientWidth || 450, height = 76, scale = window.devicePixelRatio || 1;
-  canvas.width = width * scale; canvas.height = height * scale;
-  const ctx = canvas.getContext("2d"); ctx.scale(scale, scale);
-  el("range").textContent = valid ? seconds(points[0][0]) + " – " + seconds(points.at(-1)[0]) : "";
-  if (!valid) return;
-  const max = points.reduce((m,p) => Math.max(m,p[1]), Number(el("capacity").value) || 1);
-  ctx.strokeStyle="#a3dec1";ctx.lineWidth=1.7;ctx.beginPath();
-  points.forEach((p,i) => {const x=4+(width-8)*i/Math.max(1,points.length-1),y=height-5-(height-10)*p[1]/max;i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);});
-  ctx.stroke();
+async function connectBoard(host) {
+  show("Connecting to the board…");
+  setState(await request("connect", {host}));
+  autoUsb = address === "127.0.0.1";
+  el("discovery").textContent = "";
+  await refreshStream(); await refreshWeightVersions(); show("");
 }
-function setDataset(text, name) {
-  csv = text; datasetName = name; el("source").textContent = name; clearAnswer(); drawTrace(); controls();
+function dateLabel(ms) {
+  return new Date(ms).toLocaleDateString(undefined, {month:"short", day:"numeric"});
 }
-function renderWarnings() {
-  const alerts = result.rows.filter(row => row.alert);
-  const shown = alerts.slice(visibleWarnings, visibleWarnings + 20);
-  for (const row of shown) {
-    const tr = document.createElement("tr");
-    for (const value of [seconds(row.time_ms), (row.score/result.score_scale).toFixed(3), seconds(row.time_ms) + " – " + seconds(row.time_ms + 10000)]) {
-      const cell = document.createElement("td"); cell.textContent = value; tr.append(cell);
+function renderHistory() {
+  const list = !user ? [] : demo ? demoChats : chats;
+  el("chat-list").replaceChildren(...list.map(chat => {
+    const item = document.createElement("button");
+    item.className = "chat-item"; item.type = "button"; item.disabled = busy;
+    item.setAttribute("aria-current", String(chat.id === chatId));
+    const title = document.createElement("span"); title.textContent = chat.title;
+    const when = document.createElement("small");
+    when.textContent = [dateLabel(chat.updated_ms), chat.model ? modelName(chat.model) : "", (chat.questions || 0) + " q"].filter(Boolean).join(" · ");
+    item.append(title, when);
+    item.onclick = () => openChat(chat.id);
+    return item;
+  }));
+  el("history-hint").textContent = user && !list.length ? "Your sessions will show up here." : "";
+}
+async function refreshChats() {
+  chats = user ? (await account("history_list")).chats : [];
+  controls();
+}
+async function openChat(id) {
+  try {
+    const chat = demo ? demoChats.find(item => item.id === id) : (await account("history_get", {chat_id:id})).chat;
+    messages = chat.messages.map(message => ({role:message.role, text:message.text, readings:message.readings || "", table:message.table, mono:message.mono}));
+    chatId = chat.id; notes = chat.notes || ""; el("notes").value = notes;
+    dataset = null; datasetLabel = chat.dataset || "";
+    chosenModel = models?.find(model => model.id === chat.model) || null; accepted = Boolean(chosenModel);
+    pathReset(); show(""); renderMessages(); controls();
+  } catch (err) {show(err.message, true);}
+}
+function newSession() {
+  messages = []; chatId = null; dataset = null; datasetLabel = ""; chosenModel = null; accepted = false; notes = ""; el("notes").value = "";
+  pathReset(); show(""); renderMessages(); controls();
+  el("live-question").focus();
+}
+function renderMessages() {
+  el("messages").replaceChildren(...messages.map((message, index) => {
+    const bubble = document.createElement("div");
+    bubble.className = "msg " + message.role + (message.mono ? " mono" : "");
+    if (message.pending) {
+      if (message.partial) bubble.append(message.partial);
+      const thinking = document.createElement("div");
+      thinking.className = "thinking"; thinking.dataset.index = index;
+      thinking.innerHTML = '<span class="dots"><i></i><i></i><i></i></span><span class="phase"></span><span class="timer"></span>';
+      bubble.append(thinking);
+      return bubble;
     }
-    el("values").append(tr);
-  }
-  visibleWarnings += shown.length;
-  el("more").hidden = visibleWarnings >= alerts.length;
+    bubble.append(message.text);
+    if (message.table) {
+      const grid = document.createElement("table");
+      const head = document.createElement("tr");
+      for (const column of message.table.columns) head.append(Object.assign(document.createElement("th"), {textContent:column}));
+      grid.append(head);
+      for (const row of message.table.rows) {
+        const line = document.createElement("tr");
+        for (const cell of row) line.append(Object.assign(document.createElement("td"), {textContent:cell}));
+        grid.append(line);
+      }
+      bubble.append(grid);
+    }
+    if (message.role === "answer" && message.readings) {
+      const details = document.createElement("details");
+      const summary = document.createElement("summary"); summary.textContent = "Readings behind this answer";
+      const body = document.createElement("p"); body.textContent = message.readings;
+      details.append(summary, body); bubble.append(details);
+    }
+    if (message.offTopic) {
+      const model = suggestedModel();
+      const note = document.createElement("p"); note.className = "suggest";
+      note.append("This board is tuned for system health, so this may be outside what it does best." + (model ? " For this kind of question, try " : ""));
+      if (model) {
+        note.append(Object.assign(document.createElement("span"), {className:"mono", textContent:model.name}), " (" + model.task.toLowerCase() + "). ");
+        const open = document.createElement("button"); open.type = "button"; open.className = "link"; open.textContent = "Open library";
+        open.onclick = openLibrary; note.append(open);
+      }
+      bubble.append(note);
+    }
+    if (message.capture) {
+      const replay = document.createElement("button");
+      replay.className = "text replay"; replay.type = "button"; replay.textContent = "Replay these readings";
+      replay.onclick = () => askLive(message.capture.question, message.capture);
+      bubble.append(replay);
+    }
+    return bubble;
+  }));
+  updateThinking();
+  el("messages").scrollTop = el("messages").scrollHeight;
 }
-function displayAnswer(data) {
-  result = data;
-  if (data.question === "backlog") {
-    const n = data.dataset.waiting;
-    el("answer").textContent = n ? (data.persists ? "Queue predicted to remain nonempty for ten seconds." : "Queue predicted to drain at least once within ten seconds.") : "No requests are waiting.";
-    el("measure").textContent = n ? n + " waiting now. At the end of ten seconds the model predicts " + (data.grows ? "more than " : "at most ") + n + " waiting." : "This forecast starts when a queue forms.";
-    el("provenance").textContent = datasetName + " · " + seconds(data.dataset.end_ms) + " · " + data.backend + " · " + data.version;
-    el("values").replaceChildren(); el("window-list").hidden=true; el("result").hidden=false;
+function updateThinking() {
+  for (const node of document.querySelectorAll(".thinking")) {
+    const entry = messages[Number(node.dataset.index)];
+    if (!entry?.start) continue;
+    const now = Date.now(), stage = entry.stage || 0;
+    const group = STAGE_PHRASES[stage], order = entry.order[stage];
+    node.querySelector(".phase").textContent = group[order[Math.floor((now - (entry.stageStart || entry.start)) / 5000) % group.length]] + "…";
+    const total = Math.floor((now - entry.start) / 1000);
+    node.querySelector(".timer").textContent = Math.floor(total / 60) + ":" + String(total % 60).padStart(2, "0");
+  }
+}
+function pendingEntry() {
+  return {role:"answer", text:"", pending:true, readings:"", start:Date.now(), stage:0, stageStart:Date.now(), order:STAGE_PHRASES.map(group => shuffled(group.map((_, index) => index)))};
+}
+function entryStage(entry, stage) {
+  if (stage > (entry.stage || 0)) {entry.stage = stage; entry.stageStart = Date.now();}
+  pathAdvance(stage);
+}
+function suggestedModel() {
+  return models?.find(model => !model.available && model.kind === "language") || models?.find(model => !model.available) || models?.[0] || null;
+}
+function applySession(data) {
+  user = data.user; auth0 = data.auth0;
+  if (!user) {
+    chats = [];
+    if (chatId) chatId = null;
+  }
+  controls();
+  if (user && !demo) refreshChats().catch(err => show(err.message, true));
+}
+function startLogin() {
+  el("login-dialog").showModal();
+}
+async function continueWithGoogle() {
+  if (!auth0) {
+    try {
+      applySession(await account("local_login", {name:"Demo user"}));
+      el("login-dialog").close();
+    } catch (err) {show(err.message, true);}
     return;
   }
-  const latest = data.rows.at(-1), single = data.question === "latest";
-  el("answer").textContent = single ? (latest.alert ? "Queue warning" : "No queue warning") + " at " + seconds(latest.time_ms) : data.warnings.toLocaleString() + " of " + data.windows.toLocaleString() + " eligible readings triggered a warning.";
-  el("measure").textContent = single ? "At the latest eligible reading, the board scored " + (latest.score / data.score_scale).toFixed(3) + " against a warning threshold of " + (data.threshold / data.score_scale).toFixed(3) + ". The forecast covers the following ten seconds." : "Each forecast uses five seconds of history. Consecutive warnings can refer to the same queue episode.";
-  if (single && latest.time_ms < data.dataset.end_ms) {
-    el("answer").textContent = "Requests are already waiting at " + seconds(data.dataset.end_ms) + ".";
-    el("measure").textContent = "The last eligible forecast at " + seconds(latest.time_ms) + (latest.alert ? " triggered a warning." : " returned no warning.") + " The model issues forecasts when the queue is empty.";
-  }
-  el("provenance").textContent = datasetName + " · " + data.dataset.sample_count + " readings through " + seconds(data.dataset.end_ms) + " · " + data.backend + " at " + data.host + " · " + data.version;
-  el("values").replaceChildren(); visibleWarnings = 0;
-  el("window-list").hidden = single || !data.warnings;
-  if (!el("window-list").hidden) renderWarnings();
-  el("result").hidden = false;
+  clearInterval(loginWatch);
+  const until = Date.now() + 180000;
+  loginWatch = setInterval(async () => {
+    try {
+      const data = await account("session");
+      if (data.user || Date.now() > until) {clearInterval(loginWatch); el("login-dialog").close(); applySession(data);}
+    } catch {clearInterval(loginWatch);}
+  }, 2000);
+  window.location.href = "/auth/login";
 }
-el("refresh").onclick = () => run(discover);
-el("host").oninput = controls;
-el("connect").onclick = () => run(async () => {
-  show("Connecting to the board…"); setState(await request("connect",{host:el("host").value.trim()})); livePending = Boolean(liveName && csv);
-  autoUsb = address === "127.0.0.1";
-  el("discovery").textContent = ""; clearAnswer(); clearLiveAnswer(); await refreshStream(); await refreshWeightVersions(); show("");
-});
-el("disconnect").onclick = () => run(async () => {autoUsb = false; setState(await request("disconnect")); clearAnswer(); clearLiveAnswer(); show("Board disconnected.");});
-el("live-question").oninput = controls;
+async function persistSession(extra={}) {
+  if (!user || demo) return;
+  try {
+    const saved = await account(extra.question ? "history_save" : "session_save", {chat_id:chatId, dataset:dataset?.name || datasetLabel, model:chosenModel?.id || "", notes, ...extra});
+    chatId = saved.chat_id;
+    await refreshChats();
+  } catch (err) {show(err.message, true);}
+}
+function readingsText(data, captured, baseline) {
+  const parts = [];
+  const snapshot = data.snapshot;
+  if (snapshot?.latest) {
+    parts.push(snapshot.latest.busy + " of " + snapshot.capacity + " connections busy and " + snapshot.latest.waiting + " requests waiting at " + seconds(snapshot.latest.time_ms) + ".");
+    const window = snapshot.observations;
+    if (window?.peak_waiting) parts.push("Peak queue: " + window.peak_waiting.waiting + " across " + window.sample_count + " readings from " + seconds(window.start_ms) + " to " + seconds(window.end_ms) + ".");
+  }
+  const timing = answerTiming(snapshot, latestStream);
+  if (timing) parts.push(timing);
+  const evidence = [status.backend + " at " + data.host];
+  if (snapshot?.session) evidence.unshift(streamSource(snapshot), "Session " + snapshot.session.slice(0, 8));
+  if (snapshot?.forecast) evidence.push(snapshot.forecast.version);
+  if (data.analyst_model) evidence.push(data.analyst_model + " · " + data.analyst_location);
+  if (data.active?.name) evidence.push("Weight version " + data.active.name);
+  parts.push(evidence.join(" · "));
+  if (captured) parts.push(baseline ? "First answer (" + baseline.version.name + "): " + baseline.answer : "This capture has no stored first answer.");
+  return parts.join("\n");
+}
+function shapeLive(style, data) {
+  const snapshot = data.snapshot, latest = snapshot?.latest, text = data.answer;
+  if (style === "short") return {text:text.split(/(?<=[.!?])\s/)[0]};
+  if (style === "summary") return {text};
+  const peak = snapshot?.observations?.peak_waiting;
+  if (style === "transcript") {
+    const lines = [];
+    if (peak) lines.push("PEAK  waiting " + peak.waiting);
+    if (latest) lines.push(seconds(latest.time_ms) + "  NOW   waiting " + latest.waiting + ", busy " + latest.busy + "/" + snapshot.capacity);
+    lines.push("NOTE  " + text.split(/(?<=[.!?])\s/)[0]);
+    return {text:lines.join("\n"), mono:true};
+  }
+  const rows = [];
+  if (latest) rows.push(["Waiting now", String(latest.waiting)], ["Busy", latest.busy + " of " + snapshot.capacity]);
+  if (peak) rows.push(["Peak waiting", String(peak.waiting)]);
+  rows.push(["Answer", text.split(/(?<=[.!?])\s/)[0]]);
+  return {text:"", table:{columns:["Reading", "Value"], rows}};
+}
 function askLive(question, captured=null) {
   run(async () => {
-    clearLiveAnswer();
-    show(captured ? "Replaying captured evidence…" : "Reading board evidence and preparing your answer…");
-    const fields = captured ? {question, capture_id:captured.id} : {question};
-    let data = await request(status?.lm_supported ? "ask_begin" : "ask_live", fields);
-    if (data.job_id) {
-      const snapshot = data.snapshot;
-      answerSnapshot = snapshot;
-      displayAnswerTiming();
-      el("live-asked").textContent = question;
-      el("live-answer").textContent = captured ? "Replaying on the FPGA…" : "Generating on the FPGA…";
-      el("live-evidence").textContent = "";
-      for (const id of ["answer-readings", "replay-live", "prior-answer"]) el(id).hidden = true;
-      el("live-result").hidden = false;
-      try {
+    const entry = pendingEntry();
+    const asked = {role:"user", text:question};
+    messages.push(asked, entry); renderMessages(); show("");
+    pathBegin();
+    try {
+      const fields = captured ? {question, capture_id:captured.id} : {question};
+      let data = await request(status?.lm_supported ? "ask_begin" : "ask_live", fields);
+      entryStage(entry, 1);
+      if (data.job_id) {
+        const snapshot = data.snapshot;
         while (data.state === "running") {
-          show(data.partial_answer || "");
+          const elapsed = Date.now() - entry.start;
+          entryStage(entry, data.partial_answer ? 4 : elapsed < 1500 ? 1 : elapsed < 3000 ? 2 : 3);
+          if (data.partial_answer && data.partial_answer !== entry.partial) {entry.partial = data.partial_answer; renderMessages();}
           await refreshStream();
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          await sleep(1500);
           data = await request("answer_progress", {job_id:data.job_id});
         }
         if (data.state !== "complete") throw new Error(data.error || "Board inference stopped.");
-      } catch (err) {
-        clearLiveAnswer();
-        throw err;
+        data = {...data, snapshot, analyst_model:data.model, analyst_location:"PYNQ-Z2"};
       }
-      data = {...data, snapshot, analyst_model:data.model, analyst_location:"PYNQ-Z2"};
+      const baseline = data.baseline || (captured ? captured.baseline : {answer:data.answer, version:data.active});
+      const captureId = data.capture_id || captured?.id;
+      answerCapture = typeof captureId === "string" ? {id:captureId, question, baseline} : null;
+      const shaped = shapeLive(answerStyle, data);
+      Object.assign(entry, shaped, {pending:false, partial:""});
+      if (!shaped.text) entry.text = "";
+      lastLatency = Math.round((Date.now() - entry.start) / 1000);
+      entry.readings = readingsText(data, captured, captured ? baseline : null);
+      entry.capture = answerCapture;
+      entry.offTopic = !ON_TOPIC.test(question);
+      pathFinish();
+    } catch (err) {
+      messages.splice(messages.indexOf(asked), 2); renderMessages();
+      el("live-question").value = question;
+      pathReset(); document.body.classList.remove("working");
+      throw err;
     }
-    answerSnapshot = data.snapshot;
-    displayAnswerTiming();
-    const version = data.active?.name;
-    const baseline = data.baseline || (captured ? captured.baseline : {answer:data.answer, version:data.active});
-    const captureId = data.capture_id || captured?.id;
-    answerCapture = typeof captureId === "string" ? {id:captureId, question, baseline} : null;
-    el("replay-live").hidden = !answerCapture;
-    el("prior-answer").hidden = !captured;
-    if (captured) {
-      el("prior-answer").open = true;
-      el("prior-answer-title").textContent = baseline ? "First answer · " + baseline.version.name : "First answer unavailable";
-      el("prior-answer-text").textContent = baseline?.answer || "This capture has no stored first answer.";
-    }
-    const evidence = [status.backend + " at " + data.host];
-    if (data.snapshot.session) evidence.unshift(streamSource(data.snapshot), "Session " + data.snapshot.session.slice(0, 8));
-    if (data.snapshot.forecast) evidence.push(data.snapshot.forecast.version);
-    if (data.analyst_model) evidence.push(data.analyst_model + " · " + data.analyst_location);
-    if (version) evidence.push("Weight version " + version);
-    el("live-asked").textContent = question;
-    el("live-answer").textContent = data.answer;
-    el("live-evidence").textContent = evidence.join(" · ");
-    const snapshot = data.snapshot;
-    el("answer-readings").hidden = !data.analyst_model || !snapshot.latest;
-    el("answer-readings").open = false;
-    if (snapshot.latest) {
-      const facts = [snapshot.latest.busy + " of " + snapshot.capacity + " connections busy and " +
-        snapshot.latest.waiting + " requests waiting at " + seconds(snapshot.latest.time_ms) + "."];
-      const window = snapshot.observations;
-      if (window?.peak_waiting) facts.push("Peak queue: " + window.peak_waiting.waiting +
-        " across " + window.sample_count + " readings from " + seconds(window.start_ms) +
-        " to " + seconds(window.end_ms) + ".");
-      el("answer-measurements").textContent = facts.join(" ");
-    }
-    el("live-result").hidden = false;
-    if (!data.job_id) await refreshStream();
+    renderMessages();
+    if (!entry.capture?.id) entry.capture = null;
+    await refreshStream().catch(() => {});
     if (answerCapture && !captured && languageWeights?.capture_listing_supported) await refreshSavedCaptures();
+    if (!captured) await persistSession({question, answer:entry.text || entry.table?.rows.map(row => row.join(": ")).join("; ") || "", readings:entry.readings, table:entry.table, mono:entry.mono});
     show("");
   });
 }
+function askData(question) {
+  run(async () => {
+    const entry = pendingEntry();
+    const asked = {role:"user", text:question};
+    messages.push(asked, entry); renderMessages(); show("");
+    accepted = true;
+    pathBegin();
+    try {
+      const data = await request("data_ask", {question, style:answerStyle});
+      const times = data.timings;
+      times.data_ms = dataset.timings?.data_ms ?? 0; times.profile_ms = dataset.timings?.profile_ms ?? 0;
+      times.model_ms = Math.max(times.model_ms, 0.5);
+      const stages = [0, 1, 2, 3, 4];
+      const values = [times.data_ms, times.profile_ms, times.model_ms, times.fabric_ms, times.answer_ms];
+      document.body.classList.add("working");
+      for (const stage of stages) {
+        entryStage(entry, stage);
+        pathMark(stage, "active");
+        await sleep(Math.min(Math.max(values[stage], 450), 1000));
+        pathMark(stage, "done", values[stage]);
+      }
+      document.body.classList.remove("working");
+      lastLatency = Math.round(Object.values(times).reduce((total, value) => total + value, 0) / 100) / 10;
+      Object.assign(entry, {pending:false, text:data.answer, readings:data.readings + " Answered on " + data.where + ".", table:data.table, mono:data.style === "transcript"});
+      if (data.table) entry.text = data.answer;
+      entry.offTopic = !ON_TOPIC.test(question);
+    } catch (err) {
+      messages.splice(messages.indexOf(asked), 2); renderMessages();
+      el("live-question").value = question;
+      pathReset(); document.body.classList.remove("working");
+      throw err;
+    }
+    renderMessages();
+    await persistSession({question, answer:entry.text, readings:entry.readings, table:entry.table, mono:entry.mono});
+  });
+}
+const DEMO_ANSWERS = {
+  short:{text:"The queue is still growing: 14 requests are waiting and all 20 connections are busy."},
+  summary:{text:"The queue is still growing. 14 requests are waiting and all 20 connections are busy, up from 3 waiting 30 seconds ago.\nThe board expects more than 20 waiting within ten seconds.\nCheck whether more requests are arriving or connections are being held longer."},
+  transcript:{mono:true, text:"00:00.0  START  waiting 0\n00:13.5  SPIKE  waiting jumps to 13\n00:14.5  PEAK   highest waiting, 19\n00:15.3  CALM   waiting eases to 12\n00:20.0  NOW    waiting 14, rising"},
+  table:{text:"", table:{columns:["Time", "Event", "Waiting"], rows:[["0.0 s", "start", "0"], ["13.5 s", "spike", "13"], ["14.5 s", "peak", "19"], ["20.0 s", "now", "14"]]}}
+};
+function demoAnswer(question) {
+  const entry = pendingEntry();
+  messages.push({role:"user", text:question}, entry); renderMessages();
+  accepted = true;
+  pathBegin();
+  const finalTimes = [120, 210, 380, 3900, 1300];
+  const at = [0, 900, 1800, 2700, 4800];
+  at.forEach((delay, stage) => { if (stage) setTimeout(() => entryStage(entry, stage), delay); });
+  setTimeout(() => {
+    pathFinish();
+    finalTimes.forEach((ms, stage) => pathMark(stage, "done", ms));
+    lastLatency = 6;
+    Object.assign(entry, {pending:false});
+    if (!ON_TOPIC.test(question)) {
+      entry.text = "I only read this board's system health, so I can't answer that one well.";
+      entry.offTopic = true;
+    } else {
+      Object.assign(entry, DEMO_ANSWERS[answerStyle]);
+      entry.readings = "t-30s waiting 3 · t-20s waiting 6 · t-10s waiting 10 · now waiting 14 · busy 20 of 20\nPredicted: queue onset in 2 s (p 0.91). Answered in 6 s · demo";
+    }
+    renderMessages(); controls();
+  }, 6000);
+}
+async function changeQueueWeights(action, version) {
+  const supportsStream = status.stream_supported, supportsLanguageModel = status.lm_supported;
+  const update = await request(action, action === "apply" ? {version} : {});
+  update.status.stream_supported ??= supportsStream;
+  update.status.lm_supported ??= supportsLanguageModel;
+  setState(update); await refreshStream(); show("Model updated.");
+}
+async function changeLanguageWeights(action, name) {
+  const data = await request("lm_" + action, action === "select" ? {name} : {});
+  displayWeightVersions(data);
+  show("Explanations now use " + data.active.name + ".");
+}
+function demoNotice() {
+  show("This is demo data. Nothing changed on a board.");
+}
+function loadable(id) {
+  const model = models?.find(item => item.id === id);
+  return Boolean(model?.available);
+}
+async function loadModels() {
+  if (!models) models = (await (await fetch("/api/models")).json()).models;
+}
+async function loadSamples() {
+  samples = (await (await fetch("/api/samples")).json()).samples;
+  el("samples").append(...samples.map(sample => {
+    const button = document.createElement("button");
+    button.type = "button"; button.className = "text"; button.textContent = sample.name; button.title = sample.description;
+    button.onclick = () => run(() => importSample(sample.id));
+    return button;
+  }));
+  controls();
+}
+async function openLibrary() {
+  el("library-dialog").showModal();
+  try {await loadModels();}
+  catch {el("library-list").textContent = "The model library is unavailable."; return;}
+  el("library-list").replaceChildren(...models.map(model => {
+    const row = document.createElement("div"); row.className = "model-item";
+    const text = document.createElement("div");
+    const name = document.createElement("div"); name.className = "mono"; name.textContent = model.name;
+    const task = document.createElement("small"); task.textContent = model.task;
+    text.append(name, task);
+    let action;
+    if (model.available) {
+      action = document.createElement("button"); action.textContent = "Use"; action.dataset.model = model.id;
+      action.onclick = () => {
+        el("library-dialog").close();
+        chosenModel = model; accepted = true;
+        if (demo) {controls(); return demoNotice();}
+        controls();
+        if (status && model.kind === "queue") run(() => changeQueueWeights("rollback"));
+        else if (status?.lm_supported && model.kind === "language") run(() => changeLanguageWeights("restore"));
+      };
+    } else {
+      action = document.createElement("span"); action.className = "tag"; action.textContent = "Coming soon";
+    }
+    row.append(text, action);
+    return row;
+  }));
+  controls();
+}
+function openPlan() {
+  const plan = dataset?.custom_plan || [];
+  el("plan-intro").textContent = "A guided path to a model made for " + (dataset?.name || "your data") + ".";
+  el("plan-list").replaceChildren(...plan.map(item => {
+    const row = document.createElement("div"); row.className = "model-item";
+    row.append(Object.assign(document.createElement("div"), {textContent:item.step}), Object.assign(document.createElement("span"), {className:"tag", textContent:item.where}));
+    return row;
+  }));
+  el("plan-dialog").showModal();
+}
+function selectTab(name) {
+  activeTab = name;
+  for (const button of document.querySelectorAll("[data-tab]")) button.setAttribute("aria-selected", String(button.dataset.tab === name));
+  for (const panel of document.querySelectorAll("[data-panel]")) panel.hidden = panel.dataset.panel !== name;
+}
+function applyProfile(data) {
+  dataset = {...data.profile, timings:data.timings};
+  datasetLabel = "";
+  chosenModel = models?.find(model => model.id === dataset.recommendation.model_id) || null;
+  accepted = false; messages = []; chatId = null; notes = ""; el("notes").value = "";
+  renderMessages(); pathReset();
+  controls();
+}
+async function importData(name, text) {
+  show("Reading " + name + "…");
+  const data = await request("import_data", {name, text});
+  applyProfile(data);
+  show("");
+  await pathPlay(data.timings, [0, 1]);
+  pathMark(2, "idle");
+  await persistSession();
+}
+async function importSample(id) {
+  const data = await request("load_sample", {id});
+  applyProfile(data);
+  show("");
+  await pathPlay(data.timings, [0, 1]);
+  await persistSession();
+}
+for (const button of document.querySelectorAll(".help")) {
+  button.title = button.dataset.help; button.setAttribute("aria-label", "Help");
+  button.onclick = event => {
+    event.preventDefault();
+    const line = el("help-line");
+    line.textContent = line.textContent === button.dataset.help ? "" : button.dataset.help;
+  };
+}
+for (const button of document.querySelectorAll("[data-tab]")) button.onclick = () => selectTab(button.dataset.tab);
+for (const button of document.querySelectorAll("[data-close]")) button.onclick = () => button.closest("dialog").close();
+for (const button of document.querySelectorAll("#styles button")) button.onclick = () => {answerStyle = button.dataset.style; controls();};
+const pickFile = () => el("file").click();
+el("import-big").onclick = pickFile;
+el("import-offline").onclick = pickFile;
+el("import-more").onclick = pickFile;
+el("file").onchange = async event => {
+  const file = event.target.files[0];
+  event.target.value = "";
+  if (!file) return;
+  if (file.size > 1.9 * 1024 * 1024) {show("Choose a file smaller than 1.9 MiB.", true); return;}
+  if (demo) {show("Leave the demo to import your own data."); return;}
+  run(async () => importData(file.name, await file.text()));
+};
+el("accept").onclick = () => {
+  accepted = true; pathMark(2, "done"); controls();
+  if (chosenModel && status && !demo) {
+    if (chosenModel.kind === "queue") run(() => changeQueueWeights("rollback"));
+  }
+};
+el("pick-other").onclick = openLibrary;
+el("make-own").onclick = openPlan;
+el("open-library").onclick = openLibrary;
+el("open-connect").onclick = () => el("connect-dialog").showModal();
+el("find").onclick = () => run(() => discover(true));
+el("find-top").onclick = () => run(() => discover(true));
+el("host").oninput = controls;
+el("connect").onclick = () => {
+  const host = el("host").value.trim();
+  el("connect-dialog").close();
+  run(() => connectBoard(host));
+};
+el("disconnect").onclick = () => {
+  if (demo) {
+    demo = false; address = ""; el("host").value = ""; lastLatency = null; show("");
+    displayWeightVersions(null); displaySavedCaptures(); setState({status:null});
+    newSession();
+    return;
+  }
+  run(async () => {autoUsb = false; setState(await request("disconnect")); show("Board disconnected.");});
+};
+el("live-question").oninput = controls;
 el("ask-form").onsubmit = event => {
   event.preventDefault();
-  if (!el("ask-live").disabled) askLive(el("live-question").value.trim());
+  const question = el("live-question").value.trim();
+  if (el("ask-live").disabled || !question) return;
+  el("live-question").value = ""; controls();
+  if (demo) return demoAnswer(question);
+  if (dataset) return askData(question);
+  askLive(question);
 };
-el("replay-live").onclick = () => {
-  if (answerCapture) askLive(answerCapture.question, answerCapture);
+el("new-chat").onclick = newSession;
+el("reset").onclick = newSession;
+el("notes").oninput = () => {
+  notes = el("notes").value;
+  clearTimeout(notesTimer);
+  notesTimer = setTimeout(() => persistSession(), 900);
 };
 el("saved-incident").onchange = showSavedCaptureDetails;
 el("replay-saved").onclick = () => {
   const capture = savedCapture();
+  if (demo) return demoNotice();
   if (capture) askLive(capture.question, capture);
 };
 el("more-incidents").onclick = () => run(() => refreshSavedCaptures(olderCaptures));
-for (const id of ["lm-name","lm-row","lm-instruction","lm-artifact","lm-selection"]) {
+for (const id of ["lm-name", "lm-row", "lm-instruction", "lm-artifact"]) {
   el(id).addEventListener("input", controls);
   el(id).addEventListener("change", controls);
 }
@@ -513,7 +1087,6 @@ el("lm-author-form").onsubmit = event => {
     const draft = weightDraft();
     show("Asking Astra to propose an INT8 row…");
     displayWeightVersions(await request("lm_author", {...draft, instruction:el("lm-instruction").value.trim()}));
-    el("lm-selection").value = draft.name;
     show("Saved weight version " + draft.name + ".");
   });
 };
@@ -522,74 +1095,76 @@ el("lm-save").onclick = () => run(async () => {
   if (file.size > 128 * 1024) throw new Error("Choose an Astra response JSON smaller than 128 KiB.");
   const response = JSON.parse(await file.text());
   displayWeightVersions(await request("lm_save", {...draft, response}));
-  el("lm-selection").value = draft.name;
   el("lm-artifact").value = "";
   show("Saved weight version " + draft.name + ".");
 });
-for (const action of ["select", "restore"]) el("lm-" + action).onclick = () => run(async () => {
-  const fields = action === "select" ? {name:el("lm-selection").value} : {};
-  const data = await request("lm_" + action, fields);
-  displayWeightVersions(data);
-  el("lm-selection").value = data.active.name;
-  show("Active language model version is " + data.active.name + ".");
-});
-el("watch").onclick = () => watcher.postMessage("pick");
-el("unwatch").onclick = () => {const name=liveName;stopWatching();fileRevision++;setDataset(csv,"Snapshot · " + name);show("Stopped watching the CSV.");};
-el("demo").onclick = () => {stopWatching(); fileRevision++; el("upload").value=""; el("capacity").value=setup.capacity; setDataset(setup.csv,"Simulated pool telemetry"); show("");};
-el("upload").onchange = async event => {
-  const file = event.target.files[0]; if (!file) return;
-  const revision = ++fileRevision;
-  if (file.size > 1.9 * 1024 * 1024) {show("Choose a CSV smaller than 1.9 MiB.",true); return;}
-  try {const text = await file.text(); if (revision === fileRevision) {stopWatching();setDataset(text,file.name);show("");}} catch (err) {show(err.message,true);}
+el("lm-selection").onchange = () => {
+  if (demo) {languageWeights.active = languageWeights.versions.find(version => version.name === el("lm-selection").value); controls(); return demoNotice();}
+  if (el("lm-selection").value && el("lm-selection").value !== languageWeights?.active.name) run(() => changeLanguageWeights("select", el("lm-selection").value));
 };
-el("capacity").oninput = () => {clearAnswer();drawTrace();controls(); if (liveName && el("capacity").validity.valid) {livePending=true;liveQuery();}};
-el("question").onchange = () => {clearAnswer();livePending=Boolean(liveName && csv);liveQuery();};
-el("weight").onchange = controls;
-for (const action of ["apply","rollback"]) el(action).onclick = () => run(async () => {
-  const supportsStream = status.stream_supported;
-  const supportsLanguageModel = status.lm_supported;
-  const update = await request(action,{version:el("weight").value});
-  update.status.stream_supported ??= supportsStream;
-  update.status.lm_supported ??= supportsLanguageModel;
-  setState(update); clearAnswer(); clearLiveAnswer(); await refreshStream(); livePending = Boolean(liveName && csv); show("Active board weights updated.");
+el("weight").onchange = () => {
+  const version = el("weight").value;
+  if (demo) {status.version = version; controls(); return demoNotice();}
+  if (version && version !== status.version) run(() => changeQueueWeights("apply", version));
+};
+el("rollback").onclick = () => {
+  if (demo) return demoNotice();
+  run(() => changeQueueWeights("rollback"));
+};
+el("lm-restore").onclick = () => {
+  if (demo) return demoNotice();
+  run(() => changeLanguageWeights("restore"));
+};
+el("login").onclick = startLogin;
+el("note-login").onclick = startLogin;
+el("google").onclick = continueWithGoogle;
+el("profile-button").onclick = () => {el("profile-menu").hidden = !el("profile-menu").hidden;};
+document.addEventListener("click", event => {
+  if (!event.target.closest("#profile")) el("profile-menu").hidden = true;
 });
-el("query").onclick = () => run(async () => {
-  clearAnswer(); show("Querying the FPGA…");
-  displayAnswer(await request("query",{csv,capacity:Number(el("capacity").value),question:el("question").value})); show("");
-});
-el("more").onclick = renderWarnings;
-window.addEventListener("resize", drawTrace);
+el("logout").onclick = async () => {
+  el("profile-menu").hidden = true;
+  try {
+    applySession(await account("logout"));
+    if (chatId === null) renderHistory();
+  } catch (err) {show(err.message, true);}
+};
+setLogo(false);
+const logoProbe = new Image();
+logoProbe.onload = () => setLogo(true);
+logoProbe.src = "/static/logo.png";
+el("watch-demo").onclick = async () => {
+  demo = true;
+  try {await loadModels();} catch {}
+  languageWeights = {active:{name:"original", checkpoint_sha256:"demo"}, versions:[{name:"original"}, {name:"tighter-warnings"}], capture_listing_supported:true};
+  setState({host:"demo.local", status:{backend:"Demo kit", board_name:"PYNQ-Z2", temp_c:47, stream_supported:true, lm_supported:true, version:"pool-logistic-v1", versions:["pool-logistic-v1", "pool-logistic-v2"], model:"Queue-onset logistic, INT8 on FPGA", weights_sha256:"demo"}});
+  renderLanguageSelect();
+  displaySavedCaptures({captures:[{id:"demo", captured_at_ms:Date.now() - 3600000, question:"Why are requests waiting?", reading_time_ms:84200, baseline:{answer:"All connections were busy.", version:{name:"original"}}}]});
+  displayStream({state:"ready", origin:"demo", latest:{waiting:14, busy:20}, capacity:20, age_ms:1000});
+  dataset = {...demoProfile, timings:{data_ms:42, profile_ms:18}};
+  chosenModel = models?.find(model => model.id === demoProfile.recommendation.model_id) || null; accepted = false;
+  messages = []; chatId = null; notes = ""; el("notes").value = ""; lastLatency = 41; renderMessages(); show("");
+  controls();
+  pathReset();
+  await pathPlay({data_ms:42, profile_ms:18}, [0, 1]);
+};
 async function start() {
   controls();
   try {
-    const response = await fetch("/api/live-setup");
-    if (!response.ok) throw new Error("Unable to load the workspace.");
-    const data = await response.json();
-    for (const question of data.examples) {
-      const button = document.createElement("button");
-      button.type = "button"; button.textContent = question;
-      button.onclick = () => {el("live-question").value = question; controls(); el("ask-form").requestSubmit();};
-      el("live-examples").append(button);
-    }
+    applySession(await account("session"));
     setState(await request("status"));
     if (status) {await refreshStream(); await refreshWeightVersions();}
     else await discover();
-  } catch (err) {show(err.message,true);}
-  finally {busy=false; controls();}
+  } catch (err) {show(err.message, true);}
+  finally {busy = false; delete document.body.dataset.boot; controls();}
 }
-el("csv-workspace").ontoggle = async event => {
-  if (setup || !event.target.open) return;
-  try {
-    const response = await fetch("/api/setup");
-    if (!response.ok) throw new Error("Unable to load the CSV workspace.");
-    setup = await response.json();
-    el("question").replaceChildren(...Object.entries(setup.questions).map(([id,label]) => new Option(label,id)));
-    el("capacity").value = setup.capacity; setDataset(setup.csv,"Simulated pool telemetry");
-  } catch (err) {show(err.message,true);}
-};
+selectTab("notes");
+loadModels().then(controls, () => {});
+loadSamples().catch(() => {});
 start();
+setInterval(updateThinking, 500);
 setInterval(async () => {
-  if (busy || pollPending || document.hidden) return;
+  if (demo || busy || pollPending || document.hidden) return;
   const startedAt = interaction;
   if (!status) {
     if (!autoUsb) return;
@@ -615,9 +1190,6 @@ setInterval(async () => {
     if (checkModel) {
       const data = await request("status");
       if (startedAt !== interaction) return;
-      if (status.weights_sha256 !== data.status?.weights_sha256) {
-        clearAnswer(); clearLiveAnswer();
-      }
       setState(data);
       if (status?.lm_supported) {
         const versions = await request("lm_versions");
@@ -630,9 +1202,7 @@ setInterval(async () => {
       if (startedAt === interaction) displayStream(data.snapshot);
     }
   } catch (err) {
-    if (startedAt === interaction) {
-      setState({status:null}); clearAnswer(); clearLiveAnswer(); show(err.message,true);
-    }
+    if (startedAt === interaction) {setState({status:null}); show(err.message, true);}
   } finally {pollPending = false;}
-},1500);
+}, 1500);
 </script></body></html>

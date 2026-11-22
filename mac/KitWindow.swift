@@ -4,26 +4,22 @@ import Security
 import CryptoKit
 import UniformTypeIdentifiers
 
-final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler {
+final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigationDelegate {
     private let service = Process()
     private var window: NSWindow!
     private var origin: URL?
     private var closing = false
-    private var timer: Timer?
-    private var stream: LiveCSV?
-    private var streamName = ""
     private var view: WKWebView!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let config = WKWebViewConfiguration()
-        config.userContentController.add(self, name: "watchCSV")
         view = WKWebView(frame: .zero, configuration: config)
         view.uiDelegate = self
         view.navigationDelegate = self
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1024, height: 760),
                           styleMask: [.titled, .closable, .miniaturizable, .resizable],
                           backing: .buffered, defer: false)
-        window.title = "pinkProcess"
+        window.title = "PYNQ Process"
         window.minSize = NSSize(width: 640, height: 480)
         window.contentView = view
         window.center()
@@ -35,7 +31,7 @@ final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigati
         service.standardOutput = pipe
         service.terminationHandler = { _ in
             DispatchQueue.main.async {
-                if !self.closing { self.fail("The local service stopped. Reopen pinkProcess to reconnect.") }
+                if !self.closing { self.fail("The local service stopped. Reopen PYNQ Process to reconnect.") }
             }
         }
         do {
@@ -59,6 +55,7 @@ final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigati
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         guard let url = navigationAction.request.url, let origin = origin,
               url.scheme == origin.scheme, url.host == origin.host, url.port == origin.port else {
+            if let external = navigationAction.request.url, external.scheme == "https" { NSWorkspace.shared.open(external) }
             decisionHandler(.cancel)
             return
         }
@@ -71,46 +68,6 @@ final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigati
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         panel.beginSheetModal(for: window) { result in completionHandler(result == .OK ? panel.urls : nil) }
-    }
-
-    func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard message.frameInfo.isMainFrame, message.frameInfo.request.url?.port == origin?.port,
-              let action = message.body as? String else { return }
-        if action == "stop" {
-            timer?.invalidate()
-            stream = nil
-            return
-        }
-        guard action == "pick" else { return }
-        let panel = NSOpenPanel()
-        panel.canChooseDirectories = false
-        panel.allowedContentTypes = [.commaSeparatedText]
-        panel.allowsMultipleSelection = false
-        panel.beginSheetModal(for: window) { response in
-            guard response == .OK, let url = panel.url else { return }
-            self.timer?.invalidate()
-            self.stream = LiveCSV(url: url)
-            self.streamName = url.lastPathComponent
-            self.notifyPage("window.pinkProcessLiveStatus?.(name)", ["name": self.streamName])
-            self.timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in self.poll() }
-            self.poll()
-        }
-    }
-
-    private func notifyPage(_ code: String, _ arguments: [String: Any]) {
-        view.callAsyncJavaScript(code, arguments: arguments, in: nil, in: .page, completionHandler: nil)
-    }
-
-    private func poll() {
-        do {
-            if let csv = try stream?.poll() {
-                notifyPage("window.pinkProcessLiveCSV?.(csv, name)", ["csv": csv, "name": streamName])
-            }
-        } catch {
-            timer?.invalidate()
-            stream = nil
-            notifyPage("window.pinkProcessLiveError?.(message)", ["message": error.localizedDescription])
-        }
     }
 
     @objc func pairKit(_ sender: Any?) {
@@ -164,7 +121,7 @@ final class KitWindow: NSObject, NSApplicationDelegate, WKUIDelegate, WKNavigati
 
     private func fail(_ message: String) {
         let alert = NSAlert()
-        alert.messageText = "pinkProcess could not start"
+        alert.messageText = "PYNQ Process could not start"
         alert.informativeText = message
         alert.runModal()
         NSApp.terminate(nil)
@@ -188,7 +145,7 @@ let actions = NSMenu()
 let pairing = actions.addItem(withTitle: "Import Kit Pairing…", action: #selector(KitWindow.pairKit(_:)), keyEquivalent: "i")
 pairing.target = delegate
 actions.addItem(.separator())
-actions.addItem(withTitle: "Quit pinkProcess", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+actions.addItem(withTitle: "Quit PYNQ Process", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
 item.submenu = actions
 let editItem = NSMenuItem()
 menu.addItem(editItem)

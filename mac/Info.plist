@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-<key>CFBundleName</key><string>pinkProcess</string>
+<key>CFBundleName</key><string>PYNQ Process</string>
+<key>CFBundleDisplayName</key><string>PYNQ Process</string>
 <key>CFBundleIdentifier</key><string>dev.pinkprocess.kit</string>
 <key>CFBundleExecutable</key><string>pinkProcess</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleVersion</key><string>1</string>
 <key>CFBundleShortVersionString</key><string>0.1</string>
-<key>NSLocalNetworkUsageDescription</key><string>Find your pinkProcess FPGA kit and query its installed model.</string>
+<key>NSLocalNetworkUsageDescription</key><string>Find your PYNQ Process FPGA kit and query its installed model.</string>
 <key>NSBonjourServices</key><array><string>_pinkprocess._tcp</string></array>
 <key>NSAppTransportSecurity</key><dict><key>NSAllowsLocalNetworking</key><true/></dict>
 </dict></plist>

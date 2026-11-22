@@ -1,10 +1,11 @@
-"""Mac operator for the board-resident pinkProcess telemetry model."""
+"""Mac operator for the board-resident PYNQ Process telemetry model."""
 
 import argparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
 from threading import Lock
+from urllib.parse import parse_qs, urlsplit
 import webbrowser
 
 from .live_analyst import analyze as analyze_live_evidence
@@ -12,11 +13,15 @@ from .backlog import VERSION as BACKLOG_VERSION
 from .kit_dataset import DEMO_CAPACITY, demo_csv, prepare_dataset
 from .astra_edit import propose
 from .kit_transport import BoardTransport
+from .kit_data import SAMPLES, STYLES, answer_question, parse_table, profile_table, sample_csv, timed
+from .kit_accounts import CALLBACK_PATH, MODEL_LIBRARY, Accounts
 from .kit_evidence import analyst_evidence, live_answer
 from time import sleep
 
 
 PAGE = Path(__file__).with_name("kit.html")
+LOGO = Path(__file__).with_name("static") / "logo.png"
+SIGNED_IN_PAGE = b"<!doctype html><meta charset=utf-8><title>PYNQ Process</title><body style=\"font:16px -apple-system,Helvetica Neue,sans-serif;padding:48px\">You are logged in. Return to PYNQ Process.</body>"
 QUESTIONS = {
     "latest": "Will requests start waiting in the next ten seconds?",
     "backlog": "Will the current queue persist or grow over the next ten seconds?",
@@ -39,7 +44,48 @@ class Kit:
         self.transport = transport
         self.host = None
         self.evidence_supported = False
+        self.table = None
+        self.table_name = ""
+        self.table_profile = None
         self.lock = Lock()
+
+    def import_data(self, name, text):
+        if not isinstance(name, str) or not name.strip() or len(name) > 200:
+            raise ValueError("Choose a file to import.")
+        table, parse_ms = timed(parse_table, text, name)
+        profile, profile_ms = timed(profile_table, table, name.strip())
+        self.table, self.table_name, self.table_profile = table, name.strip(), profile
+        return dict(profile=profile, timings=dict(data_ms=parse_ms, profile_ms=profile_ms))
+
+    def ask_data(self, data):
+        if set(data) - {"action", "question", "style"}:
+            raise ValueError("Data questions accept only a question and an answer style.")
+        question, style = data.get("question"), data.get("style", "short")
+        if not isinstance(question, str) or not 0 < len(question.strip()) <= 500:
+            raise ValueError("Enter a question of up to 500 characters.")
+        if style not in STYLES:
+            raise ValueError("Choose a short answer, summary, transcript or table.")
+        if self.table is None:
+            raise ValueError("Import data first.")
+        table, profile = self.table, self.table_profile
+        result, answer_ms = timed(answer_question, table, question.strip(), style)
+        where, fabric_ms, verdict = "this Mac", 0.0, None
+        if self.host is not None and profile["queue_ready"]:
+            csv_text = "time_ms,busy,waiting\n" + "".join(
+                f"{int(t)},{int(b)},{int(w)}\n" for t, b, w in zip(table["data"]["time_ms"], table["data"]["busy"], table["data"]["waiting"]))
+            try:
+                with self.lock:
+                    forecast, fabric_ms = timed(self.analyze, dict(question="latest", csv=csv_text, capacity=profile["capacity"]))
+                latest = forecast["rows"][-1]
+                verdict = ("The board's forecast: queue warning at " if latest["alert"] else "The board's forecast: no queue warning at ") + f"{latest['time_ms'] / 1000:.1f} s."
+                where = "PYNQ-Z2"
+            except (ValueError, RuntimeError, OSError):
+                verdict = None
+        if verdict:
+            result["answer"] += "\n" + verdict if result["style"] != "table" else ""
+            result["readings"] += " " + verdict
+        return dict(result, where=where, model=profile["recommendation"]["model_id"],
+                    timings=dict(data_ms=0.0, profile_ms=0.0, model_ms=0.0, fabric_ms=fabric_ms, answer_ms=answer_ms))
 
     def disconnect(self):
         self.host = None
@@ -183,6 +229,17 @@ class Kit:
                             base_sha256=context["base_sha256"]))
         if action in ("ask_live", "ask_begin"):
             return self.query_live(data)
+        if action == "import_data":
+            if set(data) != {"action", "name", "text"}:
+                raise ValueError("Importing data takes a name and the file text.")
+            return self.import_data(data["name"], data["text"])
+        if action == "load_sample":
+            sample = next((item for item in SAMPLES if item["id"] == data.get("id")), None)
+            if sample is None:
+                raise ValueError("Unknown sample.")
+            return self.import_data(sample["name"] + ".csv", sample_csv(sample["id"]))
+        if action == "data_ask":
+            return self.ask_data(data)
         with self.lock:
             if action == "answer_progress":
                 return {**self.board("lm_result", job_id=data.get("job_id")), "host": self.host}
@@ -270,21 +327,53 @@ class KitHandler(BaseHTTPRequestHandler):
             return self.reply(200, {"questions": QUESTIONS, "capacity": DEMO_CAPACITY, "csv": demo_csv()})
         if self.path == "/api/live-setup":
             return self.reply(200, {"examples": LIVE_EXAMPLES})
+        if self.path == "/api/samples":
+            return self.reply(200, {"samples": SAMPLES})
+        if self.path == "/api/models":
+            return self.reply(200, {"models": MODEL_LIBRARY})
+        if self.path == "/static/logo.png":
+            if not LOGO.is_file():
+                return self.reply(404, {"error": "No logo."})
+            return self.reply(200, LOGO.read_bytes(), "image/png")
+        if self.path == "/auth/login":
+            try:
+                url = self.server.accounts.login_url(f"http://{self.headers.get('Host')}")
+            except ValueError as exc:
+                return self.reply(400, {"error": str(exc)})
+            self.send_response(302)
+            self.send_header("Location", url)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
+        if self.path.split("?")[0] == CALLBACK_PATH:
+            query = parse_qs(urlsplit(self.path).query)
+            try:
+                self.server.accounts.finish_login(query.get("code", [""])[0], query.get("state", [""])[0])
+            except ValueError as exc:
+                return self.reply(400, {"error": str(exc)})
+            except RuntimeError as exc:
+                return self.reply(503, {"error": str(exc)})
+            return self.reply(200, SIGNED_IN_PAGE, "text/html; charset=utf-8")
         return self.reply(404, {"error": "Page unavailable."})
 
     def do_POST(self):
         host = self.headers.get("Host")
         if (host not in self.server.allowed_hosts or self.headers.get("Origin") != f"http://{host}"
                 or self.headers.get_content_type() != "application/json"):
-            return self.reply(403, {"error": "Use the pinkProcess app on this Mac."})
-        if self.path != "/api/action":
+            return self.reply(403, {"error": "Use the PYNQ Process app on this Mac."})
+        if self.path not in ("/api/action", "/api/account"):
             return self.reply(404, {"error": "Unknown endpoint."})
         try:
             size = int(self.headers.get("Content-Length", "0"))
             if not 0 < size <= MAX_BODY_BYTES:
                 return self.reply(413, {"error": "The request exceeds the 2 MiB limit or is empty."})
             data = json.loads(self.rfile.read(size))
-            result = self.server.kit.action(data)
+            if self.path == "/api/account":
+                if not isinstance(data, dict):
+                    raise ValueError("Expected a JSON object.")
+                result = self.server.accounts.action(data)
+            else:
+                result = self.server.kit.action(data)
             self.reply(200, result)
         except (ValueError, TypeError) as exc:
             self.reply(400, {"error": str(exc)})
@@ -306,6 +395,7 @@ def make_server(host="127.0.0.1", port=0):
     transport = BoardTransport()
     server = KitServer((host, port), KitHandler)
     server.kit = Kit(transport)
+    server.accounts = Accounts()
     server.allowed_hosts = {f"127.0.0.1:{server.server_port}", f"localhost:{server.server_port}"}
     return server
 
@@ -317,7 +407,7 @@ def main():
     args = parser.parse_args()
     with make_server(port=args.port) as server:
         url = f"http://127.0.0.1:{server.server_port}/"
-        print(f"pinkProcess at {url}", flush=True)
+        print(f"PYNQ Process at {url}", flush=True)
         if args.open:
             webbrowser.open(url)
         try:

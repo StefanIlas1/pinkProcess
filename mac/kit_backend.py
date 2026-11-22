@@ -1,4 +1,4 @@
-"""Private loopback server for the native pinkProcess window."""
+"""Private loopback server for the native PYNQ Process window."""
 
 from pinkprocess.kit_app import make_server
 

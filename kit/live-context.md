@@ -7,7 +7,7 @@ A telemetry producer sends pool capacity and timestamped busy/waiting counts dir
 - `README.md` describes the operator workflow and recorded physical-board results. `kit/forecast_acceptance.md` defines the separate forecast-quality study.
 - `pinkprocess/kit_server.py` and `kit_transport.py` implement the board service and paired transport. `telemetry_device.py` owns hardware rows and profile updates.
 - `pinkprocess/kit_dataset.py` and `backlog.py` implement the existing feature and eligibility rules. Compare both empty-queue onset and nonempty-queue outlook paths against these rules.
-- `mac/KitWindow.swift` and `mac/kit_backend.py` connect the native UI to the kit. `mac/LiveCSV.swift` provides the existing Mac-watched CSV workflow.
+- `mac/KitWindow.swift` and `mac/kit_backend.py` connect the native UI to the kit. `pinkprocess/kit_data.py` profiles imported data and answers questions about it on the Mac.
 - `kit/provision.py` and `kit/install-board.sh` package and install board-side code. A working local import alone does not establish that the board deployment contains every dependency.
 
 - **Live questions.** `pinkprocess/board_language.py` captures a question together with one board telemetry snapshot. `pinkprocess/kit_evidence.py` and `lm_reference/flan_prompt.py` prepare the measured history and forecast for the board’s quantized FLAN-T5-small model. The capture remains available for replay as new readings arrive.

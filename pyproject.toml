@@ -13,4 +13,4 @@ dependencies = []
 packages = ["pinkprocess"]
 
 [tool.setuptools.package-data]
-pinkprocess = ["kit.html"]
+pinkprocess = ["kit.html", "static/*"]

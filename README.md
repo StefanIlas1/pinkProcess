@@ -1,10 +1,55 @@
 # pinkProcess
 
-pinkProcess is a Mac app that queries a connected PYNQ-Z2 about connection-pool
+PYNQ Process is the Mac app in this repo. It is a tool for live data: you bring
+a stream or a file, it picks a small quantized model for that data, and you ask
+questions about it. It queries a connected PYNQ-Z2 about connection-pool
 telemetry. The kit scores incoming readings and uses a quantized FLAN-T5-small
 language model to answer questions about a captured incident. The Mac app
 shows the live stream alongside that capture and lets you save, select and
 restore language-model weights.
+
+## PYNQ Process app
+
+Think of it as a voice notebook for data. It annotates what it sees, answers in
+plain words, and keeps your own notes next to the readings.
+
+**How to run it.** Build the app with `mac/build_kit.sh` and open
+`build/mac-kit/pinkProcess.app`. To work on the interface, run
+`PYTHONPATH=$PWD python3 mac/kit_backend.py` and open the printed address in a
+browser. **Watch demo instead** walks through the whole story without a board.
+
+**The flow.**
+
+1. **Import data.** Press **Import data** and choose a CSV or JSON lines file,
+   or start from a sample. This works without a board and is analyzed on this
+   Mac. The app reads the columns, types, row count and time column and spots
+   likely signals such as queue, latency, errors, temperature or sales.
+2. **Pick a model.** The app recommends a quantized model from the library with a
+   one-line reason, for example "Looks like connection-pool telemetry, Queue-onset
+   INT8". Accept it, pick another from **Model library**, or open **Make my own
+   model** for a guided plan. Steps that are not built yet are marked coming soon.
+3. **Watch the hot path.** The strip at the top lights up Data, Profile, Model,
+   PYNQ-Z2 fabric and Answer while a question runs and shows the time each stage
+   took. With no board connected, the fabric stage reads This Mac.
+4. **Ask.** Type a question and pick the answer style: Short answer, Summary,
+   Transcript (timestamped events) or Table. Open **Readings behind this answer**
+   to check it. Queue-ready data also gets the board's forecast when a board is
+   connected.
+5. **Write notes.** The Notes tab on the right saves your own notes with the
+   session when you are logged in.
+
+**Sessions.** When you are logged in, the left sidebar lists past sessions with
+the dataset, the model and how many questions you asked. Logged-out users can
+still use everything but nothing is saved. Sessions are stored on this Mac in
+`~/Library/Application Support/PYNQ Process/history/<user>.json`.
+
+**Logging in.** The app uses Auth0 Universal Login with Google. Set
+`PYNQ_AUTH0_DOMAIN` and `PYNQ_AUTH0_CLIENT_ID` before launching and allow
+`http://127.0.0.1:<port>/auth/callback` as a callback URL in the Auth0 application.
+Without them, **Continue with Google** creates a local stand-in profile so you
+can try the flow.
+
+**Logo.** Drop a file at `pinkprocess/static/logo.png` to replace the built-in logo.
 
 ## Product goal
 
@@ -12,7 +57,7 @@ The kit generates answers about live data using a quantized language model
 whose inference runs on the FPGA. The Mac provides the operator interface.
 The first domain is connection-pool telemetry.
 
-- With the Mac’s model runtime turned off, I can plug in the kit, open pinkProcess, and ask an unfamiliar question while new data keeps arriving.
+- With the Mac’s model runtime turned off, I can plug in the kit, open PYNQ Process, and ask an unfamiliar question while new data keeps arriving.
 - On incidents held out from development, the model can distinguish a problem that has cleared from one that is still happening. It cites the relevant readings, separates measurements from predictions, and tells me what to measure when the cause is uncertain.
 - I can replay the same incident and question before and after a weight edit, observe the intended behavior change, power-cycle the kit and verify the saved weights reload, then roll back and reproduce the original answer.
 - I can ask Astra to create a weight edit and save it as a named version. Selecting any saved version loads its exact weights for FPGA inference. The app confirms which version is active, and the kit reloads it after a power cycle.
@@ -48,10 +93,9 @@ alongside misses and false alarms.
 1. Power the provisioned kit. Connect its **PROG/UART** USB port to the paired
    Mac if the USB appliance relay is enabled, or use a reachable Ethernet
    network. Open **pinkProcess.app**. Allow macOS local-network access when
-   prompted. The app scans on launch. Select the kit
-   and press **Connect FPGA**. Use **Find boards** to scan again after plugging
-   in. The active model version comes from the board.
-2. In **Board telemetry**, check the source name, reading age and status. This
+   prompted. The app scans on launch. Press **Find boards**; a single kit connects
+   on its own, or use **Connect by address**. Press it again after plugging in. The active model version comes from the board.
+2. Check the status strip at the bottom of the window for the source name, reading age and status. This
    kit starts a SQLite connection-pool demo on the board. Its generated traffic
    is labeled **Simulated**. The board gathers data while the app is closed.
 3. Ask a question in your own words, such as **What looks wrong with our system,
@@ -108,9 +152,8 @@ python3 -m kit.publish_live --host BOARD --pairing /path/to/pairing.json \
 
 The publisher reads standard input. Send the header `time_ms,busy,waiting`
 followed by a reading every 100 ms. An authenticated live source takes
-precedence over the demo. To analyze a file on the Mac instead, expand
-**CSV analysis on this Mac** and use **Import CSV**, **Use sample**, or
-**Watch live CSV…**.
+precedence over the demo. To analyze a file on the Mac instead, press
+**Import data** or pick a sample. See the PYNQ Process app section above.
 
 If the Mac is on Wi-Fi and the board is on wall Ethernet, select **Find boards**
 after moving the kit. A network route between the two devices is required for
@@ -139,7 +182,7 @@ Factory provisioning requires a PYNQ-Z2 with the PYNQ environment and the
 matching `.bit` and `.hwh`. Run `python3 kit/provision.py --install USER@HOST`
 from the checkout. This installs the boot service and pairs the provisioning
 Mac. Add `--sqlite-demo` to enable generated board-local traffic. For another Mac, transfer the kit's pairing JSON privately, then select
-**pinkProcess → Import Kit Pairing…**. The file grants access to query the kit
+**PYNQ Process → Import Kit Pairing…**. The file grants access to query the kit
 and change its active profile.
 
 For older kits without a resident language checkpoint, install Ollama on the Mac and download the local Qwen3
@@ -255,8 +298,9 @@ python3 -m kit.evaluate_delivery build/pool-study/new-delivery --all \
 
 ### Queue outlook while requests are waiting
 
-In **Question**, select **Will the current queue persist or grow over the next
-ten seconds?** Use an imported file or watch a live CSV. The first answer
+Import a pool telemetry CSV with the header `time_ms,busy,waiting` and ask
+whether the current queue will persist or grow over the next ten seconds. With a
+board connected the forecast comes from the FPGA. The first answer
 predicts whether the current queue will stay nonempty continuously. The second
 predicts whether more requests will be waiting at the ten-second endpoint than
 at the input timestamp. An empty latest reading reports that no requests are
