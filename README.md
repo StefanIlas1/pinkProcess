@@ -31,11 +31,10 @@ browser. **Watch demo instead** walks through the whole story without a board.
 2. **Pick a model.** The app recommends a quantized model from the library with a
    one-line reason and applies it as soon as the data loads. Use **Search models**
    to open the model library, a small marketplace you can filter by task, maker
-   and size. The recommended model carries a star. Every model runs on the board.
-   Use **Synthesize model** for a guided plan to make your own, and **Publish** a
+   and size. The recommended model carries a star icon. Every model runs on the board.
+   Use **Synthesize model** to build your own, and **Publish** a
    skill you trained so it shows up in your library. Published models are kept in
-   `~/Library/Application Support/PYNQ Process/models.json`. Online sharing is
-   coming soon. Steps that are not built yet are marked coming soon.
+   `~/Library/Application Support/PYNQ Process/models.json`.
 3. **Watch the hot path.** A thin strip on the left edge shows five dots. Hover it
    to slide out Data, Profile, Model, PYNQ-Z2 and Answer with the time each stage
    took. While a question runs, the answer shows a skeleton with the current
@@ -145,8 +144,9 @@ The app connects to a provisioned PYNQ-Z2.
    measurements that let you check the answer.
 3. Under **Skills**, pick a saved **Answer skill** for this dataset, or choose
    **Synthesize model**. To synthesize
-   a version, supply a name, a single-token target (e.g. `Now`), and an edit
-   request. The kit calibrates on this CSV if needed. The signed-in Codex CLI
+   a version, pick a starting point, give it a name, and describe what it should do
+   differently. The starting point sets the single token the edit targets (for
+   example `Now`), and your description becomes the edit request. The kit calibrates on this CSV if needed. The signed-in Codex CLI
    on the Mac asks Astra to design an edit, then the kit saves the quantized
    output row under that name and selects it for this dataset. Synthesis
    reuses the provisioned FPGA circuit and the original FLAN checkpoint.
@@ -256,7 +256,7 @@ python3 kit/provision.py --install USER@HOST \
 Follow the [projection configuration](#benchmark-the-flan-projection-accelerator)
 to enable all learned projections on the fabric. Provisioning installs the
 boot service and pairs the provisioning Mac. Add `--sqlite-demo` to enable generated board-local traffic. For another Mac, transfer the kit's pairing JSON privately, then select
-**PYNQ Process → Import Kit Pairing…**. The file grants access to query the kit
+**PYNQ Process, then Import Kit Pairing…**. The file grants access to query the kit
 and change its active profile.
 
 For older kits without a resident language checkpoint, install Ollama on the Mac and download the local Qwen3
@@ -573,7 +573,7 @@ sum independently in Python.
 
 ### One-row edit and rollback
 
-Add `--edit-demo` to the reference command to include an A → B → A trial in
+Add `--edit-demo` to the reference command to include an A, B, A trial in
 the exported JSON. The trial uses greedy decoding with the fixed prompt
 `Once upon a time, there was a little girl named`. It confirms that appending
 ` Tim` adds exactly one token, then replaces the 64 INT8 weights of row 326
@@ -969,7 +969,7 @@ classifier.
 The 50 MHz board rejected a wrong-model bundle and a 63-byte payload.
 Board readback preserved the base weights after both rejections and the
 edited weights when the short payload was tried again during activation.
-The valid bundle produced Lily → Tim → Lily across `generate`, `apply`,
+The valid bundle produced Lily, then Tim, then Lily across `generate`, `apply`,
 and `rollback`, with all 49,152 scores matching the C reference. Full
 matrix readback after rollback matched the original SHA-256. The
 session also restored the row when it received `quit` with an active

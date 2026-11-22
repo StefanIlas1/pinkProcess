@@ -202,24 +202,14 @@ def signals_for(table):
 def recommend(table, found):
     numeric = [column for column in table["columns"] if table["types"][column] == "number" and column != table["time"]]
     if "queue" in found or {"connections", "queue"} <= set(found):
-        return dict(model_id="queue-onset-logistic", reason="Looks like connection-pool telemetry → Queue-onset INT8",
+        return dict(model_id="queue-onset-logistic", reason="Looks like connection-pool telemetry, so Queue-onset INT8 fits",
                     alternatives=["flan-t5-small-int8"])
     if numeric:
         label = next((READABLE[signal] for signal in FOCUS_ORDER if signal in found), "numeric")
-        return dict(model_id="timeseries-anomaly-int8", reason=f"Looks like {label} readings → Anomaly spotter INT8",
-                    alternatives=["flan-t5-small-int8"])
-    return dict(model_id="flan-t5-small-int8", reason="Mostly text → FLAN-T5-small INT8 to explain what happened",
+        return dict(model_id="flan-t5-small-int8", reason=f"Looks like {label} readings, so FLAN-T5-small INT8 can explain them",
+                    alternatives=[])
+    return dict(model_id="flan-t5-small-int8", reason="Mostly text, so FLAN-T5-small INT8 can explain what happened",
                 alternatives=[])
-
-
-def custom_plan(table):
-    return [
-        dict(step="Start from FLAN-T5-small", where="runs on the board", ready=True),
-        dict(step=f"Label examples from your {table['rows']:,} rows", where="runs on the board", ready=True),
-        dict(step="Write a skill for your data with Astra and save it as INT8", where="runs on the board", ready=True),
-        dict(step="Fine-tune on your labels", where="coming soon", ready=False),
-        dict(step="Quantize the tuned model and load it on the FPGA", where="coming soon", ready=False),
-    ]
 
 
 def queue_ready(table):
@@ -239,7 +229,7 @@ def profile_table(table, name):
                 info.update(min=min(values), max=max(values), mean=round(fmean(values), 3))
         columns.append(info)
     result = dict(name=name, format=table["format"], rows=table["rows"], columns=columns, time_column=table["time"],
-                  signals=sorted(found), recommendation=recommend(table, found), custom_plan=custom_plan(table),
+                  signals=sorted(found), recommendation=recommend(table, found),
                   queue_ready=queue_ready(table))
     if result["queue_ready"]:
         result["capacity"] = max(int(max(table["data"]["busy"])), 1)

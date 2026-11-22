@@ -27,7 +27,7 @@ class DataTest(unittest.TestCase):
         self.assertIn("latency", self.profile("latency")["signals"])
         self.assertIn("temperature", self.profile("temperature")["signals"])
         self.assertIn("sales", self.profile("sales")["signals"])
-        self.assertEqual(self.profile("sales")["recommendation"]["model_id"], "timeseries-anomaly-int8")
+        self.assertEqual(self.profile("sales")["recommendation"]["model_id"], "flan-t5-small-int8")
         self.assertEqual(self.profile("temperature")["time_column"], "timestamp")
 
     def test_json_lines_are_read(self):

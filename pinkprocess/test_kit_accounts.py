@@ -81,7 +81,7 @@ class AccountsTest(unittest.TestCase):
     def test_pkce_and_library(self):
         verifier, challenge = pkce_pair()
         self.assertNotEqual(verifier, challenge)
-        self.assertTrue(any(not model["available"] for model in MODEL_LIBRARY))
+        self.assertTrue(all(model["available"] for model in MODEL_LIBRARY))
 
     def state_of(self, accounts):
         url = accounts.login_url("http://127.0.0.1:1")

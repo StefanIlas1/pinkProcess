@@ -16,12 +16,6 @@ BUILT_IN = [
      "task_tag": "early warning", "kind": "queue", "available": True, "maker": "Stefan Ilas", "size_kb": 1, "size": "tiny"},
     {"id": "flan-t5-small-int8", "name": "FLAN-T5-small INT8", "task": "Explains what is going wrong",
      "task_tag": "explain", "kind": "language", "available": True, "maker": "PYNQ team", "size_kb": 64000, "size": "small"},
-    {"id": "flan-t5-small-int8-runbook", "name": "FLAN-T5-small INT8 runbook", "task": "Suggests the next step to fix a problem",
-     "task_tag": "explain", "kind": "language", "available": False, "maker": "PYNQ team", "size_kb": 64000, "size": "small"},
-    {"id": "timeseries-anomaly-int8", "name": "Anomaly spotter INT8", "task": "Spots unusual readings in any number stream",
-     "task_tag": "anomaly", "kind": "anomaly", "available": False, "maker": "community", "size_kb": 8, "size": "tiny"},
-    {"id": "queue-onset-logistic-long", "name": "Queue-onset logistic long range", "task": "Early warning a full minute ahead",
-     "task_tag": "early warning", "kind": "queue", "available": False, "maker": "Stefan Ilas", "size_kb": 2, "size": "tiny"},
 ]
 
 

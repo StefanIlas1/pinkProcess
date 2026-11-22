@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PYNQ Process</title>
 <style>
-:root{color-scheme:dark;--pink:#ff5fa2;--bg:#1c1e21;--panel:#222528;--ink:#eceef0;--dim:#9aa1a7;--line:#33373b;--field:#26292d;--green:#2fbf71;--mono:ui-monospace,"SF Mono",Menlo,monospace;font:16px/1.5 "Avenir Next",-apple-system,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:400;letter-spacing:0}
+:root{--topbar:60px;color-scheme:dark;--pink:#ffb5d0;--bg:#1c1e21;--panel:#222528;--ink:#eceef0;--dim:#9aa1a7;--line:#33373b;--field:#26292d;--green:#2fbf71;--mono:ui-monospace,"SF Mono",Menlo,monospace;font:16px/1.5 "Avenir Next",-apple-system,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;font-weight:400;letter-spacing:0}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;overflow:hidden}
 body{background:var(--bg);color:var(--ink)}
@@ -15,9 +15,9 @@ h1,h2,h3,p{margin:0}h1,h2,h3,b,strong,th{font-weight:600}h1{font-size:2.3rem;lin
 .ambient{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
 .blob{position:absolute;border-radius:50%;will-change:transform;animation:drift 60s ease-in-out infinite alternate}
 .blob:nth-child(1){width:52vmax;height:52vmax;left:-12vmax;top:-14vmax;background:radial-gradient(closest-side,rgba(255,255,255,.07),transparent)}
-.blob:nth-child(2){width:42vmax;height:42vmax;right:-10vmax;top:18vmax;background:radial-gradient(closest-side,rgba(255,95,162,.06),transparent);animation-duration:75s;animation-delay:-20s}
+.blob:nth-child(2){width:42vmax;height:42vmax;right:-10vmax;top:18vmax;background:radial-gradient(closest-side,rgba(255,181,208,.06),transparent);animation-duration:75s;animation-delay:-20s}
 .blob:nth-child(3){width:36vmax;height:36vmax;left:30vmax;bottom:-16vmax;background:radial-gradient(closest-side,rgba(255,255,255,.05),transparent);animation-duration:90s;animation-delay:-40s}
-.blob:nth-child(4){width:18vmax;height:18vmax;left:12vmax;bottom:8vmax;background:radial-gradient(closest-side,rgba(255,95,162,.05),transparent);animation-duration:55s;animation-delay:-10s}
+.blob:nth-child(4){width:18vmax;height:18vmax;left:12vmax;bottom:8vmax;background:radial-gradient(closest-side,rgba(255,181,208,.05),transparent);animation-duration:55s;animation-delay:-10s}
 .blob:nth-child(5){width:10vmax;height:10vmax;right:22vmax;top:6vmax;background:radial-gradient(closest-side,rgba(255,255,255,.06),transparent);animation-duration:48s}
 @keyframes drift{from{transform:translate3d(0,0,0)}to{transform:translate3d(9vmax,6vmax,0)}}
 button,input,select,textarea{font:inherit;letter-spacing:inherit;color:var(--ink);background:var(--field);border:1px solid #3a3f44;border-radius:var(--rc,8px);padding:8px 14px;max-width:100%;min-width:0}
@@ -35,9 +35,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.stack{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;justify-items:start}.stack>*{justify-self:stretch}.stack>button,.stack>.row{justify-self:start}
 #tiny{display:none;height:100vh;place-items:center;text-align:center;padding:24px;font-size:1.05rem}
 body[data-boot] .app{visibility:hidden}
-.app{position:relative;z-index:1;display:grid;height:100vh;grid-template-rows:60px minmax(0,1fr) 30px;grid-template-columns:26px auto minmax(0,1fr) clamp(280px,24vw,420px)}
+.app{position:relative;z-index:1;display:grid;height:100vh;grid-template-rows:var(--topbar) minmax(0,1fr) 30px;grid-template-columns:26px auto minmax(0,1fr) clamp(280px,24vw,420px)}
 .side{grid-column:2;grid-row:2;width:clamp(200px,16vw,320px)}.center{grid-column:3;grid-row:2}.rail{grid-column:4;grid-row:2}.peek{grid-column:1;grid-row:2}
-.app.nosidebar{grid-template-columns:26px 0 minmax(0,1fr) clamp(280px,24vw,420px)}.app.nosidebar .center{padding-left:calc(var(--peek-w) - 12px)}.app.nosidebar .side{display:none}
+.app.nosidebar{grid-template-columns:26px 0 minmax(0,1fr) clamp(280px,24vw,420px)}.app.nosidebar .side{display:none}
 @media(max-width:699px),(max-height:479px){.app{display:none}#tiny{display:grid}dialog{display:none!important}}
 .top{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 28px;border-bottom:1px solid var(--line)}
 .logo{display:flex;align-items:center;gap:12px;user-select:none;white-space:nowrap}.logo img{max-height:34px;max-width:200px;display:block}.logo .brandmark{display:block;height:30px;width:auto}
@@ -58,26 +58,22 @@ button.pill{display:flex;align-items:center;gap:8px;font:.8rem var(--mono);font-
 #chat-list{flex:1;min-height:0;overflow-y:auto;display:grid;align-content:start;gap:2px}
 .chat-item{display:grid;gap:2px;text-align:left;border:0;border-radius:8px;padding:10px 12px;font-weight:400}.chat-item:hover:not(:disabled){background:var(--panel);border:0}.chat-item[aria-current="true"]{background:var(--panel)}
 .chat-item span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.chat-item small{font-size:.72rem}
-.app{--peek-w:188px}
-.peek{position:relative;z-index:4}
-.peek-pill{position:absolute;left:6px;top:50%;transform:translateY(-50%);width:16px;padding:10px 0;border-radius:12px;background:rgba(47,191,113,.1);border:1px solid rgba(47,191,113,.3);box-shadow:0 6px 20px rgba(0,0,0,.35);overflow:hidden;transition:width .28s cubic-bezier(.2,.8,.2,1),background .2s,border-color .2s;animation:breathe 4s ease-in-out infinite}
-.peek:hover .peek-pill,.peek:focus-within .peek-pill,.peek.open .peek-pill{width:var(--peek-w);background:#1f2327;border-color:#3a3f44;animation:none}
-.peek.open .peek-pill,.peek.open .node .nm,.peek.open .node .t{transition:none}
-.peek.pulse .peek-pill{animation:pulsepill .9s ease-out 2}
-@keyframes breathe{0%,100%{box-shadow:0 6px 20px rgba(0,0,0,.35),0 0 0 rgba(47,191,113,0)}50%{box-shadow:0 6px 20px rgba(0,0,0,.35),0 0 14px rgba(47,191,113,.35)}}
-@keyframes pulsepill{0%{box-shadow:0 0 22px rgba(47,191,113,.85)}100%{box-shadow:0 6px 20px rgba(0,0,0,.35)}}
-.node{position:relative;display:grid;grid-template-columns:14px 1fr auto;column-gap:10px;align-items:center;height:30px;padding:0 12px 0 0;font:.8rem/1 var(--mono);color:var(--dim)}
-.node:before{content:"";position:absolute;left:6px;top:50%;height:100%;width:2px;background:#3a3f44}.node:last-of-type:before{display:none}
-.node[data-state=done]:before{background:var(--green)}
-.node .dot{position:relative;z-index:1;width:10px;height:10px;border-radius:50%;border:1.5px solid #5c636a;background:#1f2327;justify-self:center}
-.node[data-state=done] .dot{background:var(--green);border-color:var(--green)}
-.node[data-state=active] .dot{background:var(--green);border-color:var(--green);box-shadow:0 0 10px rgba(47,191,113,.9);animation:blink .6s infinite alternate}
-.node .nm,.node .t{opacity:0;transition:opacity .18s;white-space:nowrap}.node .t{text-align:right}
-.peek:hover .node .nm,.peek:hover .node .t,.peek:focus-within .node .nm,.peek:focus-within .node .t,.peek.open .node .nm,.peek.open .node .t{opacity:1;transition-delay:.12s}
-.node[data-state=done],.node[data-state=active]{color:var(--ink)}.node[data-state=active] .nm{font-weight:600}
-.peek-chev{position:absolute;left:3px;bottom:3px;color:#9fe3bd;transition:opacity .15s;animation:nudge 2.4s ease-in-out infinite}
-.peek:hover .peek-chev,.peek.open .peek-chev{opacity:0}
-@keyframes nudge{0%,100%{transform:translateX(-1px);opacity:.45}50%{transform:translateX(2px);opacity:1}}
+.peek{position:relative;z-index:4;border-right:1px solid var(--line);background:rgba(255,255,255,.02)}
+.peek:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(47,191,113,.16),transparent);opacity:.5;animation:breathe 4s ease-in-out infinite}
+.peek.pulse:before{animation:pulseglow .9s ease-out 2}
+@keyframes breathe{0%,100%{opacity:.25}50%{opacity:.8}}
+@keyframes pulseglow{0%{opacity:1;background:linear-gradient(90deg,rgba(47,191,113,.7),transparent)}100%{opacity:.4}}
+.peek-dots{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.peek-chev{margin-top:8px;color:#b4bcc2;animation:nudge 2.4s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateX(-1px);opacity:.5}50%{transform:translateX(2px);opacity:1}}
+.pdot{width:7px;height:7px;border-radius:50%;background:#464c52;opacity:.7}.pdot[data-state=done]{background:var(--green);opacity:.8}.pdot[data-state=active]{background:var(--green);opacity:1;box-shadow:0 0 8px rgba(47,191,113,.7);animation:blink .6s infinite alternate}
+.peek-panel{position:absolute;left:0;top:0;bottom:0;width:300px;max-width:80vw;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:16px 18px;background:#1a1c1f;border-right:1px solid var(--line);border-radius:0 12px 12px 0;box-shadow:12px 0 32px rgba(0,0,0,.45);transform:translateX(-100%);visibility:hidden;transition:transform .22s ease,visibility .22s}
+.peek:hover .peek-panel,.peek:focus-within .peek-panel,.peek.open .peek-panel{transform:none;visibility:visible}
+.peek.open .peek-panel{transition:none}
+.node{display:grid;grid-template-columns:12px 1fr auto;column-gap:10px;align-items:baseline;padding:8px 0;font:.82rem/1.4 var(--mono);color:var(--dim)}
+.node .led{align-self:center}.node .nm{white-space:nowrap}.node .t{text-align:right}.node .sub{grid-column:2/4;font-size:.72rem;opacity:.75;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.node[data-state=done]{color:var(--ink)}.node[data-state=done] .led{background:var(--green)}
+.node[data-state=active]{color:var(--ink);font-weight:600}.node[data-state=active] .led{background:var(--green);animation:blink .6s infinite alternate}
 .center{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto auto auto;min-height:0;min-width:0;padding:0 0 18px}
 .toolbar{display:flex;align-items:center;gap:10px;padding:10px 28px;border-bottom:1px solid var(--line)}
 .dchip{position:relative;display:inline-flex;align-items:center;gap:8px;font:.82rem var(--mono);color:var(--ink);padding:5px 12px;border:1px solid var(--line);border-radius:999px;flex:0 1 auto;min-width:0;max-width:60%;white-space:nowrap}.dchip span{overflow:hidden;text-overflow:ellipsis}.dchip svg{flex:none;color:var(--dim)}
@@ -105,11 +101,12 @@ button.icon{width:32px;height:32px;padding:0;border-radius:50%;font-size:1.1rem;
 .thinking{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--dim);font:.82rem var(--mono)}.thinking .phase{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.thinking .timer{flex:none;white-space:nowrap}
 .bars{display:grid;gap:9px}.bars i{display:block;height:12px;border-radius:6px;background:linear-gradient(100deg,var(--c) 0%,var(--c) 35%,var(--h) 50%,var(--c) 65%,var(--c) 100%);background-size:260% 100%;animation:sweep 3s linear infinite}
 @keyframes sweep{from{background-position:130% 0}to{background-position:-130% 0}}
-@media(prefers-reduced-motion:reduce){.blob,.led,.node .dot,.bars i,.peek-pill,.peek-chev,.vt i{animation:none!important}}
+@media(prefers-reduced-motion:reduce){.blob,.led,.pdot,.node .led,.bars i,.peek-chev,.vt i{animation:none!important}}
 .empty{position:absolute;inset:0;display:grid;align-content:start;justify-items:start;gap:16px;text-align:left;padding:clamp(16px,10vh,120px) max(5%,calc((100% - 960px)/2)) 0}.empty p{color:var(--dim);max-width:520px}
 #samples{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-start;align-items:center}
 .offline-view{position:relative;z-index:1;display:none;height:100vh;align-content:center;justify-items:center;gap:16px;text-align:center;padding:24px}
-.offline-view p{color:var(--dim);max-width:520px}.offline-view .logo{margin-bottom:12px}.offline-view .brandmark{height:56px}.offline-view .logo img{max-height:56px}
+.offline-view p{color:var(--dim);max-width:520px}.offline-view .logo{margin-bottom:12px}.offline-view>.logo .brandmark{height:56px}.offline-view .logo img{max-height:56px}
+.offline-top .logo{margin:0}.offline-top{position:absolute;left:0;right:0;top:0;height:var(--topbar);display:flex;align-items:center;padding:0 28px;border-bottom:1px solid var(--line)}
 body.offline .app{display:none}body.offline .offline-view{display:grid}
 @media(max-width:699px),(max-height:479px){body.offline .offline-view{display:none}}
 #notice{margin:0 auto;width:min(960px,90%);font-size:.9rem;color:var(--dim)}#notice:empty{display:none}#notice[data-error="true"]{color:var(--ink);font-weight:600}
@@ -135,21 +132,23 @@ body.offline .app{display:none}body.offline .offline-view{display:grid}
 .mname{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}.mname .mono{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.star{position:relative;color:#e6c46b;font-size:.95rem;line-height:1;cursor:default}.star:hover:after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 8px);z-index:9;width:max-content;max-width:230px;white-space:normal;background:#2c3035;border:1px solid #3a3f44;border-radius:8px;padding:7px 10px;color:var(--ink);font:.78rem/1.4 var(--font,inherit);box-shadow:0 10px 24px rgba(0,0,0,.45)}#model-meta{font-size:.76rem}.mname .mono{font-size:.95rem}#model-use{font-size:.88rem}
 code{display:none}@media(min-height:780px){code{display:block}}
 .strip{grid-column:1/-1;grid-row:3;width:100%;border-top:1px solid var(--line);padding:0 28px;line-height:29px;font-size:.76rem;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.strip:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:9px}
-@media(max-width:900px){.app{--peek-w:140px}.pair .x{display:none}.tabs{gap:0}.tabs button[role=tab]{padding:4px 3px;font-size:.82rem}.tabs .grow{flex:0 0 4px}.toolbar .lbl{display:none}.toolbar button svg{margin-right:0}.app{grid-template-columns:26px auto minmax(0,1fr) 230px}.app.nosidebar{grid-template-columns:26px 0 minmax(0,1fr) 230px}.side{width:150px;padding:14px 10px}#new-chat{white-space:nowrap;padding:8px 10px}.tabs button[role=tab]{padding:4px 5px;font-size:.9rem}.top{padding:0 14px;gap:12px}.top-right{gap:12px}#chip-text{display:none}.section{padding:14px 16px}.toolbar,.strip{padding-left:16px;padding-right:16px}}
+@media(max-width:900px){.mname .mono{font-size:.8rem}.pair .x{display:none}.tabs{gap:0}.tabs button[role=tab]{padding:4px 3px;font-size:.82rem}.tabs .grow{flex:0 0 4px}.toolbar .lbl{display:none}.toolbar button svg{margin-right:0}.app{grid-template-columns:26px auto minmax(0,1fr) 230px}.app.nosidebar{grid-template-columns:26px 0 minmax(0,1fr) 230px}.side{width:150px;padding:14px 10px}#new-chat{white-space:nowrap;padding:8px 10px}.tabs button[role=tab]{padding:4px 5px;font-size:.9rem}.top{padding:0 14px;gap:12px}.top-right{gap:12px}#chip-text{display:none}.section{padding:14px 16px}.toolbar,.strip{padding-left:16px;padding-right:16px}}
 #connection,.chip,#chip-text{white-space:nowrap}
 @media(max-height:560px){.section>h2,#model-note,#model-meta{display:none}.section{padding:10px 14px;gap:8px}.rail .section button{padding:4px 10px;font-size:.85rem}.rail .section select,.rail .section input,.rail .section textarea{padding:4px 8px}.section.fill{padding-top:8px}.tabs button[role=tab]{padding:2px 5px}.stack{gap:6px}#lm-instruction{min-height:40px}.rail .section .row{gap:6px}.rail .section.fill{gap:6px}#notes-hint,.bars i:nth-child(n+3){display:none}.skeleton{gap:6px}#empty-sub,#samples small{display:none}.empty{padding-top:12px}.toolbar{padding:6px 28px}#login-note{margin-top:4px}.section.fill{padding-top:10px}#model-use{display:none}}
 @media(max-height:780px){.section>h2,#model-note{display:none}.section{padding:14px 18px;gap:8px}.rail .section button{padding:6px 12px}.rail .section select,.rail .section input,.rail .section textarea{padding:6px 10px}.stack{gap:8px}.section label{gap:4px}}
-@media(max-height:640px){.app{grid-template-rows:50px minmax(0,1fr) 26px}.toolbar{padding:6px 28px}.section{padding:12px 18px;gap:8px}.side{padding:12px}h1{font-size:1.7rem}.empty{gap:10px}#ask-form{margin-top:4px}.msg{padding:9px 12px}.skeleton{gap:8px}}
+@media(max-height:640px){:root{--topbar:50px}.app{grid-template-rows:var(--topbar) minmax(0,1fr) 26px}.toolbar{padding:6px 28px}.section{padding:12px 18px;gap:8px}.side{padding:12px}h1{font-size:1.7rem}.empty{gap:10px}#ask-form{margin-top:4px}.msg{padding:9px 12px}.skeleton{gap:8px}}
 #library-dialog{width:min(94vw,640px)}
-#plan-list{max-height:28vh;overflow-y:auto}#synth-form textarea{resize:none;width:100%}
+.sheet[open]{display:flex;flex-direction:column;padding:0;--rc:8px}.sheet .head{margin:0;padding:16px 20px;border-bottom:1px solid var(--line)}
+.sheet-body{padding:14px 20px 18px;overflow-y:auto;display:grid;gap:10px;align-content:start;min-height:0}.sheet-body p{margin:0}.sheet-body textarea{resize:none;width:100%}.sheet-body label{display:grid;gap:4px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:6px}.opt{display:grid;gap:2px;text-align:left;padding:6px 10px;font-weight:400;border-color:var(--line)}.opt b{font-weight:600}.opt small{font-size:.76rem}.opt[aria-pressed="true"]{border-color:var(--ink);background:#2c3035}
 .mic{width:34px;height:34px;padding:0;border:0;border-radius:50%;display:inline-grid;place-items:center;color:var(--dim);background:transparent;flex:none}.mic:hover:not(:disabled){color:var(--ink);background:#2c3035;border:0}.mic.on{color:var(--green);animation:blink .6s infinite alternate}
 .lib-tools{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;margin-bottom:10px}.lib-tools select,.lib-tools input{padding:6px 10px;font-size:.85rem}
 #library-list{max-height:min(46vh,360px);overflow-y:auto}
 .model-item .meta{font:.74rem var(--mono);color:var(--dim);margin:2px 0}.model-item .acts{display:flex;align-items:center;gap:8px;flex:none}
 .rank{font:.74rem var(--mono);color:#e6c46b}
 .quiet{margin-top:10px;font-size:.8rem;color:var(--dim)}
-dialog{--r:20px;--p:18px;--rc:max(0px,calc(var(--r) - var(--p)));border:1px solid #3a3f44;border-radius:var(--r);padding:var(--p);width:min(92vw,480px);max-height:calc(100vh - 24px);overflow:hidden;color:var(--ink);background:var(--panel);box-shadow:0 16px 40px rgba(0,0,0,.5)}
-dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog{--r:20px;--p:18px;--rc:max(0px,calc(var(--r) - var(--p)));border:1px solid #3a3f44;border-radius:var(--r);padding:var(--p);width:min(92vw,480px);top:var(--topbar);max-height:calc(100vh - var(--topbar) - 20px);overflow:hidden;color:var(--ink);background:var(--panel);box-shadow:0 16px 40px rgba(0,0,0,.5)}
+dialog::backdrop{background:rgba(0,0,0,.6);top:var(--topbar)}
 dialog .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
 #mcp-config{margin:0 0 14px;padding:12px;border:1px solid var(--line);border-radius:8px;background:#1a1c1f;font-size:.74rem;white-space:pre-wrap;overflow:auto;max-height:46vh;overflow-wrap:anywhere}
@@ -164,6 +163,7 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
 <div id="tiny">This window is too small for PYNQ Process. Make it bigger to continue.</div>
 <input id="file" type="file" accept=".csv,.json,.jsonl,.ndjson,text/csv,application/json" hidden>
 <div class="offline-view" id="offline">
+  <div class="offline-top"><div class="logo"></div></div>
   <div class="logo"></div>
   <h2>No board connected</h2>
   <p id="discovery" role="status">Plug your PYNQ Process kit into this Mac, then find it here.</p>
@@ -189,13 +189,13 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
   </div>
 </header>
 <aside class="peek" id="path" tabindex="0" aria-label="How your question travels">
-  <div class="peek-pill">
-    <div class="node" data-stage="0"><i class="dot"></i><span class="nm">Data</span><span class="t"></span></div>
-    <div class="node" data-stage="1"><i class="dot"></i><span class="nm">Profile</span><span class="t"></span></div>
-    <div class="node" data-stage="2"><i class="dot"></i><span class="nm">Model</span><span class="t"></span></div>
-    <div class="node" data-stage="3"><i class="dot"></i><span class="nm fabric-name">PYNQ-Z2</span><span class="t"></span></div>
-    <div class="node" data-stage="4"><i class="dot"></i><span class="nm">Answer</span><span class="t"></span></div>
-    <svg class="peek-chev" width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><path d="M2 2l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="peek-dots"><i class="pdot" data-stage="0"></i><i class="pdot" data-stage="1"></i><i class="pdot" data-stage="2"></i><i class="pdot" data-stage="3"></i><i class="pdot" data-stage="4"></i><svg class="peek-chev" width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><path d="M2 2l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="peek-panel">
+    <div class="node" data-stage="0"><i class="led"></i><span class="nm">Data</span><span class="t"></span><span class="sub"></span></div>
+    <div class="node" data-stage="1"><i class="led"></i><span class="nm">Profile</span><span class="t"></span><span class="sub"></span></div>
+    <div class="node" data-stage="2"><i class="led"></i><span class="nm">Model</span><span class="t"></span><span class="sub"></span></div>
+    <div class="node" data-stage="3"><i class="led"></i><span class="nm fabric-name">PYNQ-Z2</span><span class="t"></span><span class="sub"></span></div>
+    <div class="node" data-stage="4"><i class="led"></i><span class="nm">Answer</span><span class="t"></span><span class="sub"></span></div>
   </div>
 </aside>
 <aside class="side">
@@ -230,7 +230,7 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
     <div class="bar">
       <input id="live-question" type="text" maxlength="500" placeholder="Ask about your data" aria-label="Your question" autocomplete="off" required>
       <button class="mic" id="mic" type="button" aria-label="Dictate" title="Dictate" hidden><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="1.5" width="5" height="8" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5v2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
-      <button class="send" id="ask-live" type="submit" aria-label="Send" title="Send" disabled>&crarr;</button>
+      <button class="send" id="ask-live" type="submit" aria-label="Send" title="Send" disabled><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M15 3v6a2 2 0 0 1-2 2H4M7 7.5L3.5 11 7 14.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
   </form>
   <p id="login-note" hidden>Not logged in, so this won't be saved. <button id="note-login" class="link" type="button">Log in</button></p>
@@ -238,7 +238,7 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
 <aside class="rail">
   <section class="section">
     <h2>Model</h2>
-    <div class="mname"><span id="model-name" class="mono"></span><span id="model-star" class="star" tabindex="0" hidden>&#9733;</span></div>
+    <div class="mname"><span id="model-name" class="mono"></span><span id="model-star" class="star" tabindex="0" hidden><svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.2l2.1 4.5 4.9.6-3.6 3.4.9 4.8L8 12l-4.3 2.5.9-4.8L1 6.3l4.9-.6z" fill="currentColor"/></svg></span></div>
     <p id="model-meta" class="mono dim"></p>
     <p id="model-use" class="dim"></p>
     <small id="model-note" class="dim" hidden>Recommended for your data</small>
@@ -297,19 +297,18 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
   <div class="head"><h2>Model library</h2><button class="text" data-close>Close</button></div>
   <div class="lib-tools">
     <input id="lib-search" type="search" placeholder="Search models" aria-label="Search models">
-    <select id="lib-task" aria-label="Task"><option value="">Any task</option><option>early warning</option><option>explain</option><option>anomaly</option><option>custom</option></select>
+    <select id="lib-task" aria-label="Task"><option value="">Any task</option><option>early warning</option><option>explain</option><option>custom</option></select>
     <select id="lib-maker" aria-label="Maker"><option value="">Any maker</option><option>PYNQ team</option><option>Stefan Ilas</option><option>you</option><option>community</option></select>
     <select id="lib-size" aria-label="Size"><option value="">Any size</option><option>tiny</option><option>small</option><option>large</option></select>
   </div>
   <div id="library-list"></div>
-  <p class="quiet">Online sharing is coming soon.</p>
 </dialog>
 
 <dialog id="mcp-dialog">
   <div class="head"><h2>Connect to Claude</h2><button class="text" data-close>Close</button></div>
   <pre id="mcp-config" class="mono"></pre>
   <small id="mcp-note" class="dim" hidden></small>
-  <div class="row"><button id="mcp-copy" class="solid">Copy</button><small>Coming soon: one-click setup</small></div>
+  <div class="row"><button id="mcp-copy" class="solid">Copy</button></div>
 </dialog>
 
 <dialog id="capacity-dialog">
@@ -321,13 +320,15 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
   </form>
 </dialog>
 
-<dialog id="plan-dialog">
+<dialog id="plan-dialog" class="sheet">
   <div class="head"><h2>Synthesize model</h2><button class="text" data-close>Close</button></div>
-  <p class="dim" id="plan-intro"></p>
-  <div id="plan-list"></div>
-  <form id="synth-form" class="stack" style="margin-top:12px">
-    <div class="two"><label>Name<input id="synth-name" maxlength="80" required></label><label>Word<input id="synth-target" maxlength="80" placeholder="Now" required></label></div>
-    <label>What should it do differently?<textarea id="synth-instruction" maxlength="1000" rows="2" required></textarea></label>
+  <form id="synth-form" class="sheet-body">
+    <p id="synth-current"></p>
+    <p id="synth-base" class="dim"></p>
+    <div class="stack"><span class="dim">Starting point</span><div id="synth-starts" class="opts"></div></div>
+    <label>Name<input id="synth-name" maxlength="80" required></label>
+    <label>What should it do differently?<textarea id="synth-instruction" maxlength="900" rows="3"></textarea></label>
+    <small id="synth-limit" class="dim">It can change how answers are worded and what it focuses on. It cannot change the board's readings.</small>
     <div class="row"><button id="synth-run" class="solid" type="submit">Synthesize</button><small id="synth-status"></small></div>
   </form>
 </dialog>
@@ -345,7 +346,7 @@ const STAGE_PHRASES = [
   ["Running the decoder, one word at a time","Picking the most likely next word","Tying the readings to a likely cause","Trimming the answer to the point","Writing the answer in plain words","Almost there, the board is still working","Hang tight, this runs on the board itself","Checking the board is still healthy"]
 ];
 const ON_TOPIC = /queue|request|connection|load|busy|wait|latenc|slow|system|server|traffic|capacity|pool|fpga|board|error|outage|\bdown\b|fail|spike|forecast|warn|peak|health|status|wrong|problem|issue|trend|grow|drain|backlog|arriv|timeout|check next|\bdata\b|reading|average|\bmean\b|\bmax\b|\bmin\b|temperature|sales|revenue|order|events?|summar|happen|unusual|anomal|\bnow\b|latest|\brows?\b|column/i;
-const LOGO_WORD = '<svg class="brandmark" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PYNQ Process" viewBox="0 0 202 46" fill="none"><title>PYNQ Process</title><g stroke-linecap="round" stroke-linejoin="round"><path d="M6 18v22m0-16c0-10 14-11 14 0 0 9-10 12-14 5 M29 18v14m.1-24v.1 M39 18v14m0-8c0-9 13-11 13-1v9 M62 7v25m12-15-11 9m5-4 8 10" stroke="#db759a" stroke-width="7.1"/><path d="M6 18v22m0-16c0-10 14-11 14 0 0 9-10 12-14 5 M29 18v14m.1-24v.1 M39 18v14m0-8c0-9 13-11 13-1v9 M62 7v25m12-15-11 9m5-4 8 10" stroke="#ffb5d0" stroke-width="5.7"/><g transform="translate(4 0) scale(.92 1)"><path d="M88 32V9h7c13 0 12 16 0 16h-7 M110 18v14m0-8c1-5 4-7 8-7 M137 24.5c0 11-15 11-15 0s15-11 15 0z M155 19c-10-7-18 10-7 13 2 1 5 0 7-1 M162 25h12c0-10-13-10-14-1-1 8 7 11 13 7 M190 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#dfa0b7" stroke-width="7.1"/><path d="M88 32V9h7c13 0 12 16 0 16h-7 M110 18v14m0-8c1-5 4-7 8-7 M137 24.5c0 11-15 11-15 0s15-11 15 0z M155 19c-10-7-18 10-7 13 2 1 5 0 7-1 M162 25h12c0-10-13-10-14-1-1 8 7 11 13 7 M190 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#fff1f5" stroke-width="5.7"/><path d="M205 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#dfa0b7" stroke-width="7.1"/><path d="M205 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#fff1f5" stroke-width="5.7"/><g transform="translate(136 15) rotate(17)" fill="#ff8ab6" stroke="#632d46" stroke-width="1.2"><path d="M0 0c-2-3-6-5-7-3s0 6 2 6l5-2 5 2c2 0 3-4 2-6s-5 0-7 3z"/><circle r="1.8" fill="#ffd1e3"/></g></g><path d="m68 9 3-4m2 7 5-3m-4 6 5-.4" stroke="#ffb5d0" stroke-width="1.4"/></g></svg>';
+const LOGO_WORD = '<svg class="brandmark" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PYNQ Process" viewBox="0 0 202 46" fill="none"><title>PYNQ Process</title><g stroke-linecap="round" stroke-linejoin="round"><path d="M6 18v22m0-16c0-10 14-11 14 0 0 9-10 12-14 5 M29 18v14m.1-24v.1 M39 18v14m0-8c0-9 13-11 13-1v9 M62 7v25m12-15-11 9m5-4 8 10" stroke="#db759a" stroke-width="7.1"/><path d="M6 18v22m0-16c0-10 14-11 14 0 0 9-10 12-14 5 M29 18v14m.1-24v.1 M39 18v14m0-8c0-9 13-11 13-1v9 M62 7v25m12-15-11 9m5-4 8 10" stroke="#ffb5d0" stroke-width="5.7"/><g transform="translate(4 0) scale(.92 1)"><path d="M88 32V9h7c13 0 12 16 0 16h-7 M110 18v14m0-8c1-5 4-7 8-7 M137 24.5c0 11-15 11-15 0s15-11 15 0z M155 19c-10-7-18 10-7 13 2 1 5 0 7-1 M162 25h12c0-10-13-10-14-1-1 8 7 11 13 7 M190 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#dfa0b7" stroke-width="7.1"/><path d="M88 32V9h7c13 0 12 16 0 16h-7 M110 18v14m0-8c1-5 4-7 8-7 M137 24.5c0 11-15 11-15 0s15-11 15 0z M155 19c-10-7-18 10-7 13 2 1 5 0 7-1 M162 25h12c0-10-13-10-14-1-1 8 7 11 13 7 M190 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#fff1f5" stroke-width="5.7"/><path d="M205 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#dfa0b7" stroke-width="7.1"/><path d="M205 18c-9-5-16 4-6 6 12 2 5 12-5 7" stroke="#fff1f5" stroke-width="5.7"/><g transform="translate(136 15) rotate(17)" fill="#ff8ab6" stroke="#632d46" stroke-width="1.2"><path d="M0 0c-2-3-6-5-7-3s0 6 2 6l5-2 5 2c2 0 3-4 2-6s-5 0-7 3z"/><circle r="1.8" fill="#ffd1e3"/></g></g><path transform="translate(118 0)" d="m68 9 3-4m2 7 5-3m-4 6 5-.4" stroke="#ffb5d0" stroke-width="1.4"/></g></svg>';
 const BEST_FOR = {
   "queue-onset-logistic":"spotting queue build-up in connection pools",
   "flan-t5-small-int8":"explaining what went wrong in plain words",
@@ -353,25 +354,11 @@ const BEST_FOR = {
   "flan-t5-small-int8-runbook":"suggesting the next step to fix a problem",
   "queue-onset-logistic-long":"warning a full minute ahead"
 };
-const GENERIC_PLAN = [
-  {step:"Start from FLAN-T5-small", where:"runs on the board", ready:true},
-  {step:"Label examples from your data", where:"runs on the board", ready:true},
-  {step:"Write a skill with Astra and save it as INT8", where:"runs on the board", ready:true},
-  {step:"Fine-tune on your labels", where:"coming soon", ready:false},
-  {step:"Quantize the tuned model and load it on the FPGA", where:"coming soon", ready:false}
-];
 const bestFor = model => "Best for: " + (BEST_FOR[model.id] || model.task.charAt(0).toLowerCase() + model.task.slice(1));
 const demoProfile = {
   name:"pool-telemetry.csv", format:"CSV", rows:6000, time_column:"time_ms", signals:["connections","queue"], queue_ready:true, capacity:20,
   columns:[{name:"time_ms", type:"number"}, {name:"busy", type:"number"}, {name:"waiting", type:"number"}],
-  recommendation:{model_id:"queue-onset-logistic", reason:"Looks like connection-pool telemetry → Queue-onset INT8"},
-  custom_plan:[
-    {step:"Start from FLAN-T5-small", where:"runs on the board", ready:true},
-    {step:"Label examples from your 6,000 rows", where:"runs on the board", ready:true},
-    {step:"Write a skill for your data with Astra and save it as INT8", where:"runs on the board", ready:true},
-    {step:"Fine-tune on your labels", where:"coming soon", ready:false},
-    {step:"Quantize the tuned model and load it on the FPGA", where:"coming soon", ready:false}
-  ]
+  recommendation:{model_id:"queue-onset-logistic", reason:"Looks like connection-pool telemetry, so Queue-onset INT8 fits"}
 };
 const demoChats = [
   {id:"demo-1", title:"pool-telemetry.csv", dataset:"pool-telemetry.csv", model:"queue-onset-logistic", notes:"Pool size was 20. Ask ops about retries.", updated_ms:Date.now() - 86400000, questions:2, messages:[
@@ -427,7 +414,7 @@ async function post(url, action, extra) {
 }
 const request = (action, extra={}) => post("/api/action", action, extra);
 const account = (action, extra={}) => post("/api/account", action, extra);
-const fmtMs = ms => ms < 1000 ? Math.round(ms) + " ms" : (ms / 1000).toFixed(1) + " s";
+const fmtMs = ms => Math.round(ms).toLocaleString("en-US") + " ms";
 const modelName = id => models?.find(model => model.id === id)?.name || id || "";
 
 function timingsFromPath() {
@@ -438,6 +425,7 @@ function pathReset() {
   path.ms = [null, null, null, null, null];
   path.state = ["idle", "idle", "idle", "idle", "idle"];
   for (const node of document.querySelectorAll(".node")) {node.dataset.state = "idle"; node.querySelector(".t").textContent = "";}
+  for (const dot of document.querySelectorAll(".pdot")) dot.dataset.state = "idle";
 }
 function peekPulse() {
   const peek = el("path");
@@ -448,6 +436,7 @@ function pathMark(index, state, ms=null) {
   if (state === "active") {peekPulse(); if (demo) blinkLed();}
   const node = document.querySelector('.node[data-stage="' + index + '"]');
   node.dataset.state = state;
+  document.querySelector('.pdot[data-stage="' + index + '"]').dataset.state = state;
   if (ms !== null) {node.querySelector(".t").textContent = fmtMs(ms); path.ms[index] = ms;}
 }
 function pathBegin() {
@@ -479,7 +468,14 @@ async function pathPlay(timings, stages=[0, 1, 2, 3, 4]) {
   document.body.classList.remove("working");
 }
 function pathLabels() {
-  document.querySelector(".fabric-name").textContent = status ? "PYNQ-Z2" : "This Mac";
+  const nodes = document.querySelectorAll(".node");
+  const online = Boolean(status);
+  nodes[0].querySelector(".sub").textContent = dataset ? dataset.name : online ? "live stream" : "";
+  nodes[1].querySelector(".sub").textContent = dataset ? dataset.rows.toLocaleString() + " rows, " + dataset.columns.length + " cols" : "";
+  nodes[2].querySelector(".sub").textContent = chosenModel ? chosenModel.name : online ? "INT8 weights" : "";
+  document.querySelector(".fabric-name").textContent = online ? "PYNQ-Z2" : "This Mac";
+  nodes[3].querySelector(".sub").textContent = online ? "100 MHz" : "no board";
+  nodes[4].querySelector(".sub").textContent = "plain words";
 }
 
 function controls() {
@@ -488,8 +484,8 @@ function controls() {
   document.body.classList.toggle("offline", !online && !hasData);
   el("app").classList.toggle("nosidebar", !user);
   el("chip").classList.toggle("online", online);
-  el("chip").dataset.tip = online ? "Board clock: 100 MHz\nBoard temperature: " + (status.temp_c != null ? status.temp_c + " °C" : "not reported") + "\nLast answer latency: " + (lastLatency !== null ? lastLatency + " s" : "none yet") + "\nLEDs: link, activity, answering" : "No board connected";
-  el("chip-text").textContent = online ? "100 MHz · " + (status.temp_c != null ? status.temp_c + " °C" : "-- °C") + (lastLatency !== null ? " · latency " + lastLatency + " s" : "") : "no board";
+  el("chip").dataset.tip = online ? "Board clock: 100 MHz\nBoard temperature: " + (status.temp_c != null ? status.temp_c + " °C" : "not reported") + "\nLast answer latency: " + (lastLatency !== null ? fmtMs(lastLatency) : "none yet") + "\nLEDs: link, activity, answering" : "No board connected";
+  el("chip-text").textContent = online ? "100 MHz · " + (status.temp_c != null ? status.temp_c + " °C" : "-- °C") + (lastLatency !== null ? " · latency " + fmtMs(lastLatency) : "") : "no board";
   el("connection").textContent = online ? (status.board_name || status.board || "PYNQ-Z2") + " connected" : "No board · this Mac";
   el("connection").classList.toggle("off", !online);
   el("disconnect").hidden = !online;
@@ -534,9 +530,9 @@ function controls() {
   el("lm-save").disabled = !languageAvailable || !versionNamed;
   el("publish-skill").disabled = busy || !skillToPublish();
   const synthReady = !busy && Boolean(boardDataset);
-  for (const id of ["synth-name", "synth-target", "synth-instruction"]) el(id).disabled = !synthReady;
-  el("synth-run").disabled = !synthReady || ["synth-name", "synth-target", "synth-instruction"].some(id => !el(id).value.trim());
-  if (!el("synth-status").dataset.live) el("synth-status").textContent = synthReady ? "" : "Upload a queue CSV to a connected board to synthesize.";
+  for (const id of ["synth-name", "synth-instruction"]) el(id).disabled = !synthReady;
+  el("synth-run").disabled = !synthReady || !el("synth-name").value.trim();
+  if (!el("synth-status").dataset.live) el("synth-status").textContent = synthReady ? "" : "Connect a board and import a queue CSV to build a model for your data.";
   el("mic").disabled = busy || ["requesting", "stopping"].includes(voiceState);
   el("live-question").readOnly = ["requesting", "listening", "stopping"].includes(voiceState);
   el("saved-incident").disabled = busy || !savedCaptures.length;
@@ -551,13 +547,14 @@ function controls() {
   pathLabels();
   for (const button of el("library-list").querySelectorAll("button[data-model]")) button.disabled = busy || !loadable(button.dataset.model);
 }
+window.addEventListener("resize", () => renderStrip());
 function renderStrip() {
   if (!status) {el("strip").textContent = dataset ? "this Mac · no board connected" : ""; return;}
-  const parts = ["PYNQ-Z2", "INT8", "100 MHz", "weights 64 KB"];
+  const parts = window.innerWidth < 900 ? ["PYNQ-Z2", "100 MHz"] : ["PYNQ-Z2", "INT8", "100 MHz", "weights 64 KB"];
   if (demo) parts.unshift("demo");
   if (latestStream?.latest) parts.push(latestStream.latest.waiting + " waiting", latestStream.latest.busy + "/" + latestStream.capacity + " busy");
   if (latestStream?.state === "stale") parts.push("stale");
-  if (lastLatency !== null) parts.push("latency " + lastLatency + " s");
+  if (lastLatency !== null) parts.push("latency " + fmtMs(lastLatency));
   el("strip").textContent = parts.join(" · ");
 }
 const makerLabel = model => model.maker === "community" ? "community" : "by " + (model.maker || "PYNQ team");
@@ -700,7 +697,7 @@ async function discover(connectSingle=false) {
   const data = await request("discover");
   el("known").replaceChildren(...data.boards.map(board => new Option(board.name, board.host)));
   if (!el("host").value || data.boards.length === 1) el("host").value = data.boards[0]?.host || "";
-  el("discovery").textContent = data.boards.length === 1 ? "One kit found." : data.boards.length ? data.boards.length + " kits found. Choose one with Connect by address." : "No kits found. Connect a provisioned USB kit or check Ethernet and macOS Local Network access. For a new kit, choose PYNQ Process → Import Kit Pairing….";
+  el("discovery").textContent = data.boards.length === 1 ? "One kit found." : data.boards.length ? data.boards.length + " kits found. Choose one with Connect by address." : "No kits found. Connect a provisioned USB kit or check Ethernet and macOS Local Network access. For a new kit, choose PYNQ Process, then Import Kit Pairing….";
   if (connectSingle && data.boards.length === 1) await connectBoard(data.boards[0].host);
 }
 async function connectBoard(host) {
@@ -996,7 +993,7 @@ function askLive(question, captured=null) {
         }
         if (data.state !== "complete") throw new Error(data.error || "Board inference stopped.");
         data = {...data, snapshot, analyst_model:data.model, analyst_location:"PYNQ-Z2"};
-        const seconds = at => ((at - entry.start) / 1000).toFixed(1) + " s";
+        const seconds = at => fmtMs(at - entry.start);
         const doneAt = Date.now();
         entry.genTiming = "First text " + seconds(entry.firstTextAt ?? doneAt) + " \u00b7 Complete answer " + seconds(doneAt);
       }
@@ -1005,7 +1002,7 @@ function askLive(question, captured=null) {
       answerCapture = typeof captureId === "string" ? {id:captureId, question, baseline} : null;
       for (const style of LOCAL_STYLES) setVariant(entry, style, shapeLive(style, data));
       entry.pending = false; entry.partial = "";
-      lastLatency = Math.round((Date.now() - entry.start) / 1000);
+      lastLatency = Date.now() - entry.start;
       entry.readings = readingsText(data, captured, captured ? baseline : null);
       entry.capture = answerCapture;
       entry.offTopic = !ON_TOPIC.test(question);
@@ -1137,7 +1134,7 @@ async function boardAnswer(entry, question) {
   setVariant(entry, "summary", {text:extractiveSummary(text, sentences)});
   setVariant(entry, "final", {text});
   boardCalibrated = true;
-  const done = Date.now(), took = at => ((at - startedAt) / 1000).toFixed(1) + " s";
+  const done = Date.now(), took = at => fmtMs(at - startedAt);
   entry.genTiming = "First text " + took(entry.firstTextAt ?? done) + " \u00b7 Complete answer " + took(done);
   entry.readings = boardObservations(boardDataset) + "\nAnswered on PYNQ-Z2 with " + boardDataset.selected_model + (stage === "followup" ? " using the previous exchange." : ".");
   return done - startedAt;
@@ -1159,11 +1156,11 @@ function askData(question) {
       const values = [dataset.timings?.data_ms ?? 0, dataset.timings?.profile_ms ?? 0, Math.max(times.model_ms, 0.5), board ? boardMs : times.fabric_ms, times.answer_ms];
       values.forEach((value, stage) => pathMark(stage, "done", value));
       document.body.classList.remove("working");
-      lastLatency = Math.round(values.reduce((total, value) => total + value, 0) / 100) / 10;
+      lastLatency = Math.round(values.reduce((total, value) => total + value, 0));
       entry.pending = false;
       entry.offTopic = !ON_TOPIC.test(question);
       entry.style = entry.defaultStyle; entry.timings = lastTimings = timingsFromPath();
-      if (board) show("Final answer completed in " + (boardMs / 1000).toFixed(1) + " s.");
+      if (board) show("Final answer completed in " + fmtMs(boardMs) + ".");
     } catch (err) {
       messages.splice(messages.indexOf(asked), 2); renderMessages();
       el("live-question").value = question;
@@ -1193,11 +1190,11 @@ function demoAnswer(question) {
     const item = offTopic ? {text:"I only read this board's system health, so I can't answer that one well."} : DEMO_ANSWERS[style];
     setVariant(entry, style, {...item});
     if (offTopic) for (const other of LOCAL_STYLES) entry.variants[other] = {...item};
-    entry.readings = "t-30s waiting 3 \u00b7 t-20s waiting 6 \u00b7 t-10s waiting 10 \u00b7 now waiting 14 \u00b7 busy 20 of 20\nPredicted: queue onset in 2 s (p 0.91). Answered in 7 s \u00b7 demo";
+    entry.readings = "t-30s waiting 3 \u00b7 t-20s waiting 6 \u00b7 t-10s waiting 10 \u00b7 now waiting 14 \u00b7 busy 20 of 20\nPredicted: queue onset in 2 s (p 0.91). Answered in 7,000 ms \u00b7 demo";
     if (offTopic || style === "table") {
       pathFinish();
       [120, 210, 380, 3900, 1300].forEach((ms, index) => pathMark(index, "done", ms));
-      lastLatency = 7;
+      lastLatency = 7000;
       entry.pending = false; entry.style = entry.defaultStyle; entry.offTopic = offTopic;
       entry.timings = lastTimings = timingsFromPath();
     }
@@ -1257,7 +1254,7 @@ function renderLibrary() {
     const text = document.createElement("div");
     const name = document.createElement("div"); name.className = "mono"; name.textContent = model.name;
     const info = rankInfo(model);
-    if (info?.rank === 1) name.append(" ", Object.assign(document.createElement("span"), {className:"star", tabIndex:0, textContent:"\u2605"}));
+    if (info?.rank === 1) name.append(" ", Object.assign(document.createElement("span"), {className:"star", tabIndex:0, innerHTML:"<svg width=\"13\" height=\"13\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M8 1.2l2.1 4.5 4.9.6-3.6 3.4.9 4.8L8 12l-4.3 2.5.9-4.8L1 6.3l4.9-.6z\" fill=\"currentColor\"/></svg>"}));
     if (info?.rank === 1) name.lastChild.dataset.tip = info.tip;
     if (info && info.rank > 1) name.append(" ", Object.assign(document.createElement("span"), {className:"rank", textContent:info.rank === 2 ? "2nd choice" : "3rd choice", title:info.tip}));
     const meta = document.createElement("div"); meta.className = "meta";
@@ -1279,7 +1276,7 @@ function renderLibrary() {
     }
     if (model.available && model.id === activeId) {
       acts.append(Object.assign(document.createElement("span"), {className:"tag", textContent:"Active"}));
-    } else if (model.available) {
+    } else {
       const action = document.createElement("button"); action.textContent = "Switch"; action.dataset.model = model.id;
       action.onclick = () => {
         el("library-dialog").close();
@@ -1290,8 +1287,6 @@ function renderLibrary() {
         else if (status?.lm_supported && model.kind === "language") run(() => changeLanguageWeights("restore"));
       };
       acts.append(action);
-    } else {
-      acts.append(Object.assign(document.createElement("span"), {className:"tag", textContent:"Coming soon"}));
     }
     row.append(text, acts);
     return row;
@@ -1304,14 +1299,44 @@ async function openLibrary() {
   renderLibrary();
   controls();
 }
-function openPlan() {
-  const plan = dataset?.custom_plan || GENERIC_PLAN;
-  el("plan-intro").textContent = "A guided path to a model made for " + (dataset?.name || "your data") + ".";
-  el("plan-list").replaceChildren(...plan.map(item => {
-    const row = document.createElement("div"); row.className = "model-item";
-    row.append(Object.assign(document.createElement("div"), {textContent:item.step}), Object.assign(document.createElement("span"), {className:"tag", textContent:item.where}));
-    return row;
+const STARTS = [
+  {id:"explain", name:"Plain explanations", good:"Short, calm answers for the whole floor.", target:"Now", prompt:"Answer in plain, calm words and lead with what is happening now.", example:"Example: Lead with how many requests are waiting and say if it is getting worse."},
+  {id:"warn", name:"Early warnings", good:"Flags a building queue sooner.", target:"Warning", prompt:"Warn sooner when the queue starts to build.", example:"Example: Warn me as soon as requests start waiting more than a few seconds."},
+  {id:"cause", name:"What to check first", good:"Points to the first thing to look at.", target:"Check", prompt:"Say what to check first when the queue grows.", example:"Example: Always say whether connections are all busy or requests are arriving faster."},
+  {id:"clear", name:"All clear", good:"Confirms when things are back to normal.", target:"Clear", prompt:"Say clearly when the queue has drained and things look normal.", example:"Example: Tell me when it is safe to stop watching."},
+  {id:"numbers", name:"Numbers first", good:"Leads with the readings and the peak.", target:"Peak", prompt:"Lead with the peak and the latest readings before any explanation.", example:"Example: Start with the peak waiting count and when it happened."}
+];
+let startIndex = 0, nameTouched = false;
+function suggestedName() {
+  const taken = new Set((boardDataset?.models || []).map(model => model.name.toLowerCase()));
+  let name = STARTS[startIndex].name, count = 2;
+  while (taken.has(name.toLowerCase())) name = STARTS[startIndex].name + " " + count++;
+  return name;
+}
+function renderStarts() {
+  el("synth-starts").replaceChildren(...STARTS.map((start, index) => {
+    const option = document.createElement("button");
+    option.type = "button"; option.className = "opt"; option.setAttribute("aria-pressed", String(index === startIndex));
+    option.innerHTML = "<b></b><small></small>";
+    option.firstChild.textContent = start.name; option.lastChild.textContent = start.good;
+    option.onclick = () => {
+      startIndex = index;
+      if (!nameTouched) el("synth-name").value = suggestedName();
+      el("synth-instruction").placeholder = STARTS[index].example;
+      renderStarts(); controls();
+    };
+    return option;
   }));
+}
+function openPlan() {
+  const shown = chosenModel || (status ? models?.find(model => model.id === "queue-onset-logistic") : null);
+  el("synth-current").textContent = shown ? "Current model: " + shown.name + ", " + shown.task.charAt(0).toLowerCase() + shown.task.slice(1) : "Current model: none yet";
+  const picked = boardDataset?.selected_model;
+  el("synth-base").textContent = "Building on: FLAN-T5-small INT8" + (picked && picked !== "original" ? ", starting from " + picked : "");
+  nameTouched = false;
+  el("synth-name").value = suggestedName();
+  el("synth-instruction").placeholder = STARTS[startIndex].example;
+  renderStarts();
   el("plan-dialog").showModal();
   controls();
 }
@@ -1497,13 +1522,13 @@ el("publish-skill").onclick = async () => {
     show("Published " + name + " to your marketplace.");
   } catch (err) {show(err.message, true);}
 };
-for (const id of ["synth-name", "synth-target", "synth-instruction"]) el(id).addEventListener("input", controls);
+el("synth-name").addEventListener("input", () => {nameTouched = true; controls();});
+el("synth-instruction").addEventListener("input", controls);
 el("synth-form").onsubmit = event => {
   event.preventDefault();
   if (el("synth-run").disabled) return;
-  const name = el("synth-name").value.trim(), target = el("synth-target").value.trim();
-  const target_row = /^\d+$/.test(target) ? Number(target) : target;
-  const instruction = el("synth-instruction").value.trim();
+  const name = el("synth-name").value.trim(), target_row = STARTS[startIndex].target;
+  const instruction = [STARTS[startIndex].prompt, el("synth-instruction").value.trim()].filter(Boolean).join(" ").slice(0, 1000);
   const note = el("synth-status");
   run(async () => {
     note.dataset.live = "1"; note.textContent = "Starting model synthesis\u2026";
@@ -1643,7 +1668,7 @@ el("watch-demo").onclick = async () => {
   displayStream({state:"ready", origin:"demo", latest:{waiting:14, busy:20}, capacity:20, age_ms:1000});
   dataset = {...demoProfile, timings:{data_ms:42, profile_ms:18}};
   chosenModel = models?.find(model => model.id === demoProfile.recommendation.model_id) || null; accepted = true;
-  messages = []; chatId = null; notes = ""; el("notes").value = ""; lastLatency = 41; renderMessages(); show("");
+  messages = []; chatId = null; notes = ""; el("notes").value = ""; lastLatency = 41200; renderMessages(); show("");
   controls();
   pathReset();
   await pathPlay({data_ms:42, profile_ms:18}, [0, 1]);
