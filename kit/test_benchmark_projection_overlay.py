@@ -8,10 +8,12 @@ from threading import Event, Thread
 from time import monotonic, sleep
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
 from kit import benchmark_projection_overlay as benchmark
+from lm_reference import projection_argmax as argmax
 from lm_reference import projection_overlay as projection
 
 
@@ -113,6 +115,43 @@ class ProjectionOverlayTest(unittest.TestCase):
         random = np.random.default_rng(9)
         self.w = random.integers(-128, 128, (65, 19), dtype=np.int8)
         self.a = random.integers(-128, 128, (9, 19), dtype=np.int8)
+
+    def test_segmented_head_uses_device_scores_and_preserves_first_tie(self):
+        class ArgmaxMMIO:
+            registers = {argmax.CONTROL: 0, argmax.CORE_ID: argmax.ARGMAX_ID}
+
+            def read(self, address):
+                return self.registers[address]
+
+            def write(self, address, value):
+                self.registers[address] = value
+                if address != argmax.CONTROL:
+                    return
+                rows = self.registers[argmax.ROWS]
+                scales = overlay.buffers[self.registers[argmax.SCALE_ADDRESS]][:rows]
+                dots = overlay.buffers[self.registers[argmax.SCORE_ADDRESS]][:rows]
+                activation = np.uint32(self.registers[argmax.ACTIVATION_SCALE]).view(np.float32)
+                logits = dots.astype(np.float32) * activation * scales
+                winner = int(np.argmax(logits))
+                self.registers.update({argmax.CONTROL: argmax.DONE, argmax.WINNER: winner,
+                                       argmax.WINNER_SCORE: int(logits[winner].view(np.uint32))})
+
+        overlay = FakeOverlay()
+        reducer = ArgmaxMMIO()
+        overlay.projection_argmax = SimpleNamespace(mmio=reducer)
+        self.assertIs(argmax.require_argmax_mmio(overlay), reducer)
+        runner = projection.OverlayProjection(overlay, overlay.allocate, scope="all", argmax_mmio=reducer)
+        self.addCleanup(runner.close)
+        weights = np.tile(np.array([8, -1], dtype=np.int8), (129, 1))
+        activations = np.array([[1, 0]], dtype=np.int8)
+        scales = np.ones(129, dtype=np.float32)
+        scales[-1] = scales[64] = 4
+        with patch.object(projection, "MAX_SEGMENT_BUFFER_BYTES", 256):
+            self.assertEqual(runner.head_argmax(weights, activations, np.float32(0.5), scales), 64)
+            self.assertEqual(runner.profile()["argmax_commands"], 3)
+            self.assertFalse(any(event[0] == "invalidate" for event in overlay.events))
+            scales[-1] = 5
+            self.assertEqual(runner.head_argmax(weights, activations, np.float32(0.5), scales), 128)
 
     def test_encoder_and_decoder_partial_tiles(self):
         for activations, mode, positions, outputs in ((self.a, "encode", 2, 9), (self.a[:1], "decode", 1, 2)):

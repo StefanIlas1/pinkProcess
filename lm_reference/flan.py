@@ -2,6 +2,7 @@
 import hashlib
 import json
 from pathlib import Path
+from time import perf_counter_ns
 import unicodedata
 
 import numpy as np
@@ -76,6 +77,7 @@ class Flan:
         self.fabric_projections = 0
         self.accelerated_projections = 0
         self.partial_answer = ""
+        self.generation_timing = {}
 
     def restore_head(self):
         if self._original is not None:
@@ -214,21 +216,45 @@ class Flan:
         self.partial_answer = ""
         if self.query_projection is not None:
             self.query_projection.start_generation()
+        start = perf_counter_ns()
         ids = self.tokenizer.encode(prompt)
+        self.generation_timing = {"tokenize_ns": perf_counter_ns() - start, "encoder_stack_ns": 0,
+                                  "decoder_stacks_ns": 0, "vocabulary_ns": 0, "decode_text_ns": 0}
         if len(ids) > 512:
             raise ValueError("The evidence and question exceed the model's 512-token input.")
+        start = perf_counter_ns()
         encoder = self.stack("encoder", ids, {})
+        self.generation_timing["encoder_stack_ns"] += perf_counter_ns() - start
         cache = {}
         tokens = []
         previous = 0
         for step in range(max_tokens):
+            start = perf_counter_ns()
             hidden = self.stack("decoder", [previous], cache, encoder, step)
-            previous = int(np.argmax(self.linear("lm_head", hidden)))
+            self.generation_timing["decoder_stacks_ns"] += perf_counter_ns() - start
+            start = perf_counter_ns()
+            # Named row edits use the first raw-score maximum and quantized input.
+            if step and getattr(self.query_projection, "argmax_mmio", None) is not None:
+                q, scale = self.quantize_activations(hidden)
+                previous = self.query_projection.head_argmax(
+                    self.t["lm_head.weight"], q, scale[0, 0], self.t["lm_head.weight.scale"],
+                )
+                self.fabric_projections += 1
+                self.accelerated_projections += 1
+            else:
+                previous = int(np.argmax(self.linear("lm_head", hidden)))
+            self.generation_timing["vocabulary_ns"] += perf_counter_ns() - start
             if previous == 1:
                 break
             tokens.append(previous)
+            start = perf_counter_ns()
             self.partial_answer = self.tokenizer.decode(tokens)
-        return self.tokenizer.decode(tokens)
+            self.generation_timing["decode_text_ns"] += perf_counter_ns() - start
+        start = perf_counter_ns()
+        answer = self.tokenizer.decode(tokens)
+        self.generation_timing["decode_text_ns"] += perf_counter_ns() - start
+        return answer
 
     def projection_profile(self):
-        return self.query_projection.profile() if self.query_projection is not None else {}
+        phases = self.query_projection.profile() if self.query_projection is not None else {}
+        return {**phases, **self.generation_timing}
