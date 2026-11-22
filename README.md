@@ -25,9 +25,9 @@ browser. **Watch demo instead** walks through the whole story without a board.
    Mac. The app reads the columns, types, row count and time column and spots
    likely signals such as queue, latency, errors, temperature or sales.
 2. **Pick a model.** The app recommends a quantized model from the library with a
-   one-line reason, for example "Looks like connection-pool telemetry, Queue-onset
-   INT8". Accept it, pick another from **Model library**, or open **Make my own
-   model** for a guided plan. Steps that are not built yet are marked coming soon.
+   one-line reason and applies it as soon as the data loads. Use **Search models**
+   to switch to another one, or **Synthesize model** for a guided plan to make
+   your own. Steps that are not built yet are marked coming soon.
 3. **Watch the hot path.** A thin strip on the left edge shows five dots. Hover it
    to slide out Data, Profile, Model, PYNQ-Z2 and Answer with the time each stage
    took. While a question runs, the answer shows a skeleton with the current

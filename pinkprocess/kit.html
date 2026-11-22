@@ -27,7 +27,8 @@ button.big{padding:14px 34px;font-size:1.1rem}
 button.send{background:var(--pink);border-color:var(--pink);color:var(--bg)}button.send:disabled{opacity:.3}
 button.text{border:0;padding:6px 8px;color:var(--dim);font-weight:400}button.text:hover:not(:disabled){color:var(--ink);border:0}
 button.link{display:inline;border:0;padding:0;color:var(--ink);text-decoration:underline;font-weight:400}
-.help{width:16px;height:16px;padding:0;border:0;border-radius:50%;background:transparent;font:.7rem var(--mono);font-weight:400;color:#656c72;line-height:16px;flex:none}.help:hover:not(:disabled),.help.on{color:var(--ink);border:0;background:rgba(255,255,255,.08)}
+.help{display:inline-grid;place-items:center;width:18px;height:18px;padding:0;border:1px solid #4a5056;border-radius:50%;background:transparent;font:11px/1 var(--mono);font-weight:400;color:#7d858b;flex:none;box-sizing:border-box}.help:hover:not(:disabled),.help.on{color:var(--ink);border-color:#8d959b;background:rgba(255,255,255,.06)}
+.pop{position:fixed;z-index:30;max-width:240px;padding:9px 12px;border-radius:8px;background:#2c3035;border:1px solid #3a3f44;box-shadow:0 10px 24px rgba(0,0,0,.45);font-size:.82rem;line-height:1.4;color:var(--ink)}
 [data-close]:focus-visible{outline:1px solid #4a5056}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:1px solid var(--ink);outline-offset:2px}
 .dim,small{color:var(--dim)}small{font-size:.85rem}code{font-size:.8rem;overflow-wrap:anywhere}
@@ -104,7 +105,7 @@ body.offline .app{display:none}body.offline .offline-view{display:grid}
 .askmeta{display:flex;align-items:center;gap:8px;padding:0 2px 8px;flex-wrap:wrap}.askmeta .grow{flex:1}
 .styles{display:flex;gap:2px}
 .styles button{border:0;padding:3px 9px;border-radius:999px;font-weight:400;color:var(--dim);font-size:.82rem}.styles button[aria-pressed="true"]{background:#2c3035;color:var(--ink);font-weight:600}.styles button:hover:not(:disabled){background:#26292d}
-.xport{position:relative}.xport>button{font-size:.82rem;padding:3px 10px}
+.xport{position:relative}.pillbtn{display:inline-flex;align-items:center;gap:6px;border:0;padding:3px 10px;border-radius:999px;font-weight:400;color:var(--dim);font-size:.82rem;line-height:1.5;background:transparent}.pillbtn:hover:not(:disabled){background:#26292d;border:0;color:var(--dim)}.pillbtn svg{flex:none}
 .menu.up{top:auto;bottom:34px;right:0;min-width:190px}.menu hr{border:0;border-top:1px solid var(--line);margin:2px 0;width:100%}
 .bar{--r:14px;--p:6px;--rc:max(0px,calc(var(--r) - var(--p)));display:flex;align-items:center;gap:8px;padding:var(--p) var(--p) var(--p) 14px;border:1px solid #3a3f44;border-radius:var(--r);background:var(--field)}.bar:focus-within{border-color:#6b7278}
 .bar input{flex:1;border:0;background:transparent;padding:10px 6px;font-size:1rem;border-radius:0}.bar input:focus-visible{outline:0}
@@ -112,9 +113,10 @@ body.offline .app{display:none}body.offline .offline-view{display:grid}
 #login-note{width:min(960px,90%);margin:10px auto 0;font-size:.85rem;color:var(--dim)}
 .rail{display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--line);overflow:hidden}
 .section{padding:20px 22px;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;justify-items:start;border-bottom:1px solid var(--line)}.section>*{justify-self:stretch}.section>.row,.section>button{justify-self:start}.section.fill{flex:1;min-height:0;overflow:hidden;align-content:start;border-bottom:0}
-.tabs{display:flex;gap:2px;align-items:center}.tabs .grow{flex:1}
-.tabs button[role=tab]{border:0;border-bottom:1px solid transparent;border-radius:0;padding:4px 8px;font-size:.95rem;font-weight:400;color:var(--dim)}.tabs button[role=tab]:first-child{padding-left:0}.tabs .help{margin-left:4px}.tabs button[role=tab][aria-selected="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
-#help-line{height:2.8em;margin-top:-4px;font-size:.85rem;line-height:1.4;color:var(--dim);overflow:hidden}
+.tabs{display:flex;gap:2px;align-items:center;min-height:30px}.tabs .grow{flex:1}
+.tabs button[role=tab]{border:0;border-bottom:1px solid transparent;border-radius:0;padding:4px 8px;font-size:.95rem;font-weight:400;color:var(--dim)}.tabs button[role=tab]:first-child{padding-left:0}.tabs button[role=tab][aria-selected="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}.pair button{width:100%;min-width:0;white-space:nowrap;padding:7px 6px;font-size:.88rem}
+@media(max-width:1200px){.pair{gap:6px}.pair button{font-size:.8rem;padding:7px 2px}}
 .section select{width:100%}.section label{display:grid;gap:6px;color:var(--dim);font-size:.85rem}.section label .row{gap:6px;flex-wrap:nowrap}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}#lm-instruction,#notes{resize:none;width:100%}#notes{min-height:84px;height:100%}
 .mname{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.mname .mono{font-size:.95rem}#model-use{font-size:.88rem}
@@ -122,8 +124,8 @@ code{display:none}@media(min-height:780px){code{display:block}}
 .strip{grid-column:1/-1;grid-row:3;width:100%;border-top:1px solid var(--line);padding:0 28px;line-height:29px;font-size:.76rem;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.strip:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:9px}
 @media(max-width:900px){.toolbar .lbl{display:none}.toolbar button svg{margin-right:0}.app{grid-template-columns:26px auto minmax(0,1fr) 230px}.app.nosidebar{grid-template-columns:26px 0 minmax(0,1fr) 230px}.side{width:150px;padding:14px 10px}#new-chat{white-space:nowrap;padding:8px 10px}.tabs button[role=tab]{padding:4px 5px;font-size:.9rem}.top{padding:0 14px;gap:12px}.top-right{gap:12px}#chip-text{display:none}.section{padding:14px 16px}.toolbar,.strip{padding-left:16px;padding-right:16px}}
 #connection,.chip,#chip-text{white-space:nowrap}
-@media(max-height:560px){.section>h2,#model-tag{display:none}.section{padding:10px 14px;gap:8px}.rail .section button{padding:4px 10px;font-size:.85rem}.rail .section select,.rail .section input,.rail .section textarea{padding:4px 8px}.section.fill{padding-top:8px}.tabs button[role=tab]{padding:2px 5px}.stack{gap:6px}#lm-instruction{min-height:40px}.rail .section .row{gap:6px}.rail .section.fill{gap:6px}#notes-hint,.bars i:nth-child(n+3){display:none}.skeleton{gap:6px}#empty-sub,#samples small,#help-line,.tabs .help{display:none}.empty{padding-top:12px}.toolbar{padding:6px 28px}#login-note{margin-top:4px}.section.fill{padding-top:10px}#model-use{display:none}}
-@media(max-height:780px){.section>h2,#model-tag{display:none}.section{padding:14px 18px;gap:8px}.rail .section button{padding:6px 12px}.rail .section select,.rail .section input,.rail .section textarea{padding:6px 10px}.stack{gap:8px}.section label{gap:4px}}
+@media(max-height:560px){.section>h2,#model-note{display:none}.section{padding:10px 14px;gap:8px}.rail .section button{padding:4px 10px;font-size:.85rem}.rail .section select,.rail .section input,.rail .section textarea{padding:4px 8px}.section.fill{padding-top:8px}.tabs button[role=tab]{padding:2px 5px}.stack{gap:6px}#lm-instruction{min-height:40px}.rail .section .row{gap:6px}.rail .section.fill{gap:6px}#notes-hint,.bars i:nth-child(n+3){display:none}.skeleton{gap:6px}#empty-sub,#samples small{display:none}.empty{padding-top:12px}.toolbar{padding:6px 28px}#login-note{margin-top:4px}.section.fill{padding-top:10px}#model-use{display:none}}
+@media(max-height:780px){.section>h2,#model-note{display:none}.section{padding:14px 18px;gap:8px}.rail .section button{padding:6px 12px}.rail .section select,.rail .section input,.rail .section textarea{padding:6px 10px}.stack{gap:8px}.section label{gap:4px}}
 @media(max-height:640px){.app{grid-template-rows:50px minmax(0,1fr) 26px}.toolbar{padding:6px 28px}.section{padding:12px 18px;gap:8px}.side{padding:12px}h1{font-size:1.7rem}.empty{gap:10px}#ask-form{margin-top:4px}.msg{padding:9px 12px}.skeleton{gap:8px}}
 dialog{--r:20px;--p:18px;--rc:max(0px,calc(var(--r) - var(--p)));border:1px solid #3a3f44;border-radius:var(--r);padding:var(--p);width:min(92vw,480px);max-height:calc(100vh - 24px);overflow:hidden;color:var(--ink);background:var(--panel);box-shadow:0 16px 40px rgba(0,0,0,.5)}
 dialog::backdrop{background:rgba(0,0,0,.6)}
@@ -200,7 +202,7 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
       <div class="styles" id="styles" role="group" aria-label="Answer style"><button type="button" data-style="short" title="Short answer" aria-pressed="true">Short</button><button type="button" data-style="summary" aria-pressed="false">Summary</button><button type="button" data-style="transcript" aria-pressed="false">Transcript</button><button type="button" data-style="table" aria-pressed="false">Table</button></div>
       <span class="grow"></span>
       <div class="xport">
-        <button id="export-btn" class="text" type="button" aria-haspopup="true">Export</button>
+        <button id="export-btn" class="pillbtn" type="button" aria-haspopup="true"><svg width="12" height="12" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 2v7M4 6l3 3 3-3M2 12h10" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>Export</button>
         <div class="menu up" id="export-menu" hidden><button type="button" data-export="md">Markdown</button><button type="button" data-export="csv">CSV</button><button type="button" data-export="json">JSON</button><hr><button type="button" id="mcp-open">Connect to Claude</button></div>
       </div>
     </div>
@@ -214,10 +216,10 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
 <aside class="rail">
   <section class="section">
     <h2>Model</h2>
-    <div class="mname"><span id="model-name" class="mono"></span><span id="model-tag" class="tag" hidden></span></div>
+    <div class="mname"><span id="model-name" class="mono"></span></div>
     <p id="model-use" class="dim"></p>
-    <div class="row"><button id="accept" class="solid">Use</button><button id="open-library">Other models</button></div>
-    <button id="make-own" class="link" type="button">Make my own model</button>
+    <small id="model-note" class="dim" hidden>Recommended for your data</small>
+    <div class="pair"><button id="open-library" type="button">Search models</button><button id="make-own" type="button">Synthesize model</button></div>
   </section>
   <section class="section fill">
     <div class="tabs" role="tablist">
@@ -228,7 +230,6 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
       <span class="grow"></span>
       <button class="help" type="button" data-help="Notes: jot things down. Replay: redo an event. Skills: pick one. Teach: add one." aria-label="Help">?</button>
     </div>
-    <p id="help-line"></p>
     <div data-panel="notes" class="stack">
       <textarea id="notes" placeholder="Write what you notice about this data" aria-label="Notes"></textarea>
       <small id="notes-hint" class="dim"></small>
@@ -284,7 +285,7 @@ dialog label{display:grid;gap:4px;color:var(--dim);font-size:.85rem}
 </dialog>
 
 <dialog id="plan-dialog">
-  <div class="head"><h2>Make my own model</h2><button class="text" data-close>Close</button></div>
+  <div class="head"><h2>Synthesize model</h2><button class="text" data-close>Close</button></div>
   <p class="dim" id="plan-intro"></p>
   <div id="plan-list"></div>
 </dialog>
@@ -516,11 +517,7 @@ function renderModel() {
   const shown = chosenModel || (status ? models?.find(model => model.id === "queue-onset-logistic") : null);
   el("model-name").textContent = shown ? shown.name : status ? friendlyVersion(status.version) : "No model yet";
   el("model-use").textContent = shown ? bestFor(shown) : "Import data to get a recommendation.";
-  const recommended = Boolean(recommendation && shown?.id === recommendation.model_id);
-  el("model-tag").hidden = !(recommended || accepted);
-  el("model-tag").textContent = accepted ? "In use" : "Recommended";
-  el("accept").hidden = accepted || !chosenModel;
-  el("accept").disabled = busy || !chosenModel;
+  el("model-note").hidden = !(recommendation && shown?.id === recommendation.model_id);
   if (status) {
     el("hash").textContent = status.weights_sha256 || "";
     el("weight").replaceChildren(...status.versions.map(version => new Option(version, version)));
@@ -632,7 +629,7 @@ async function discover(connectSingle=false) {
   const data = await request("discover");
   el("known").replaceChildren(...data.boards.map(board => new Option(board.name, board.host)));
   if (!el("host").value || data.boards.length === 1) el("host").value = data.boards[0]?.host || "";
-  el("discovery").textContent = data.boards.length === 1 ? "One kit found." : data.boards.length ? data.boards.length + " kits found. Use Connect by address to pick one." : "No kits found. Connect a provisioned USB kit or check Ethernet and macOS Local Network access. For a new kit, choose PYNQ Process → Import Kit Pairing….";
+  el("discovery").textContent = data.boards.length === 1 ? "One kit found." : data.boards.length ? data.boards.length + " kits found. Choose one with Connect by address." : "No kits found. Connect a provisioned USB kit or check Ethernet and macOS Local Network access. For a new kit, choose PYNQ Process → Import Kit Pairing….";
   if (connectSingle && data.boards.length === 1) await connectBoard(data.boards[0].host);
 }
 async function connectBoard(host) {
@@ -1007,8 +1004,11 @@ async function openLibrary() {
     const task = document.createElement("small"); task.textContent = bestFor(model);
     text.append(name, task);
     let action;
-    if (model.available) {
-      action = document.createElement("button"); action.textContent = "Use"; action.dataset.model = model.id;
+    const activeId = chosenModel?.id || (status ? "queue-onset-logistic" : "");
+    if (model.available && model.id === activeId) {
+      action = document.createElement("span"); action.className = "tag"; action.textContent = "Active";
+    } else if (model.available) {
+      action = document.createElement("button"); action.textContent = "Switch"; action.dataset.model = model.id;
       action.onclick = () => {
         el("library-dialog").close();
         chosenModel = model; accepted = true; peekPulse();
@@ -1080,8 +1080,7 @@ async function openMcp() {
 }
 function selectTab(name) {
   activeTab = name;
-  el("help-line").textContent = "";
-  for (const other of document.querySelectorAll(".help")) other.classList.remove("on");
+  if (typeof closeHelp === "function") closeHelp();
   for (const button of document.querySelectorAll("[data-tab]")) button.setAttribute("aria-selected", String(button.dataset.tab === name));
   for (const panel of document.querySelectorAll("[data-panel]")) panel.hidden = panel.dataset.panel !== name;
 }
@@ -1089,7 +1088,7 @@ function applyProfile(data) {
   dataset = {...data.profile, timings:data.timings};
   datasetLabel = "";
   chosenModel = models?.find(model => model.id === dataset.recommendation.model_id) || null;
-  accepted = false; messages = []; chatId = null; notes = ""; el("notes").value = "";
+  accepted = true; messages = []; chatId = null; notes = ""; el("notes").value = "";
   renderMessages(); pathReset(); peekPulse();
   controls();
 }
@@ -1099,7 +1098,7 @@ async function importData(name, text) {
   applyProfile(data);
   show("");
   await pathPlay(data.timings, [0, 1]);
-  pathMark(2, "idle");
+  pathMark(2, "done", 1);
   await persistSession();
 }
 async function importSample(id) {
@@ -1109,15 +1108,25 @@ async function importSample(id) {
   await pathPlay(data.timings, [0, 1]);
   await persistSession();
 }
+const helpPop = Object.assign(document.createElement("div"), {className:"pop", hidden:true});
+document.body.append(helpPop);
+function closeHelp() {
+  helpPop.hidden = true;
+  for (const other of document.querySelectorAll(".help")) other.classList.remove("on");
+}
 for (const button of document.querySelectorAll(".help")) {
   button.setAttribute("aria-label", "Help");
   button.onclick = event => {
-    event.preventDefault();
-    const line = el("help-line");
-    const open = line.textContent !== button.dataset.help;
-    for (const other of document.querySelectorAll(".help")) other.classList.remove("on");
-    line.textContent = open ? button.dataset.help : "";
-    button.classList.toggle("on", open);
+    event.preventDefault(); event.stopPropagation();
+    const open = helpPop.hidden || helpPop.dataset.for !== button.dataset.help;
+    closeHelp();
+    if (!open) return;
+    helpPop.textContent = button.dataset.help; helpPop.dataset.for = button.dataset.help;
+    helpPop.hidden = false;
+    const box = button.getBoundingClientRect(), width = helpPop.offsetWidth;
+    helpPop.style.left = Math.max(8, Math.min(box.right - width, window.innerWidth - width - 8)) + "px";
+    helpPop.style.top = box.bottom + 8 + "px";
+    button.classList.add("on");
   };
 }
 for (const button of document.querySelectorAll("[data-tab]")) button.onclick = () => selectTab(button.dataset.tab);
@@ -1134,12 +1143,6 @@ el("file").onchange = async event => {
   if (file.size > 1.9 * 1024 * 1024) {show("Choose a file smaller than 1.9 MiB.", true); return;}
   if (demo) {show("Leave the demo to import your own data."); return;}
   run(async () => importData(file.name, await file.text()));
-};
-el("accept").onclick = () => {
-  accepted = true; pathMark(2, "done"); controls(); peekPulse();
-  if (chosenModel && status && !demo) {
-    if (chosenModel.kind === "queue") run(() => changeQueueWeights("rollback"));
-  }
 };
 el("make-own").onclick = openPlan;
 el("open-library").onclick = openLibrary;
@@ -1243,6 +1246,7 @@ el("connection").onclick = () => {el("conn-menu").hidden = !el("conn-menu").hidd
 document.addEventListener("click", event => {
   if (!event.target.closest(".conn")) el("conn-menu").hidden = true;
   if (!event.target.closest(".xport")) el("export-menu").hidden = true;
+  if (!event.target.closest(".pop")) closeHelp();
   if (!event.target.closest("#profile")) el("profile-menu").hidden = true;
 });
 el("logout").onclick = async () => {
@@ -1259,17 +1263,18 @@ logoProbe.src = "/static/logo.png";
 el("watch-demo").onclick = async () => {
   demo = true;
   try {await loadModels();} catch {}
-  languageWeights = {active:{name:"original", checkpoint_sha256:"demo"}, versions:[{name:"original"}, {name:"tighter-warnings"}], capture_listing_supported:true};
   setState({host:"demo.local", status:{backend:"Demo kit", board_name:"PYNQ-Z2", temp_c:47, stream_supported:true, lm_supported:true, version:"pool-logistic-v1", versions:["pool-logistic-v1", "pool-logistic-v2"], model:"Queue-onset logistic, INT8 on FPGA", weights_sha256:"demo"}});
-  renderLanguageSelect();
+  languageWeights = {active:{name:"original", checkpoint_sha256:"demo"}, versions:[{name:"original"}, {name:"tighter-warnings"}], capture_listing_supported:true};
+  renderLanguageSelect(); controls();
   displaySavedCaptures({captures:[{id:"demo", captured_at_ms:Date.now() - 3600000, question:"Why are requests waiting?", reading_time_ms:84200, baseline:{answer:"All connections were busy.", version:{name:"original"}}}]});
   displayStream({state:"ready", origin:"demo", latest:{waiting:14, busy:20}, capacity:20, age_ms:1000});
   dataset = {...demoProfile, timings:{data_ms:42, profile_ms:18}};
-  chosenModel = models?.find(model => model.id === demoProfile.recommendation.model_id) || null; accepted = false;
+  chosenModel = models?.find(model => model.id === demoProfile.recommendation.model_id) || null; accepted = true;
   messages = []; chatId = null; notes = ""; el("notes").value = ""; lastLatency = 41; renderMessages(); show("");
   controls();
   pathReset();
   await pathPlay({data_ms:42, profile_ms:18}, [0, 1]);
+  pathMark(2, "done", 1);
 };
 async function start() {
   controls();
@@ -1296,6 +1301,7 @@ async function devStart() {
   if (query.get("dialog") === "plan") openPlan();
   if (query.get("dialog") === "login") startLogin();
   if (query.get("menu") === "export") el("export-btn").click();
+  if (query.has("help")) document.querySelector(".tabs .help").click();
   if (query.get("menu") === "late") setTimeout(() => {el("export-btn").click();}, 6600);
   if (query.has("ask")) {
     el("live-question").value = "What looks wrong with our system?";
