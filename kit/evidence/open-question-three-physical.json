@@ -1,0 +1,1270 @@
+{
+  "question": "What's wrong with my system?",
+  "utc_recorded": "2026-11-22T07:21:23.712097+00:00",
+  "installed_app_release": "c29f81d",
+  "protocol": "One original-weights Ask per synthetic 60-sample, 100 ms connection-pool CSV, pool capacity four. Chrome drove the installed Mac app\u2019s packaged loopback API and UI over the paired board connection. Elapsed time runs from clicking Ask to rendered completion. First text is the first observed poll with a partial answer. Live status sampled before, during, and after each Ask. Runtime timing phases are measured on the board; nested counters must not be added to their enclosing phases.",
+  "cases": {
+    "recovery": {
+      "live_before": {
+        "session": "29ab761c-d9b4-4df1-85fa-03053a8b4439",
+        "fresh": true,
+        "latest": {
+          "time_ms": 1716200,
+          "busy": 3,
+          "waiting": 0
+        },
+        "fpga_submissions": 17114,
+        "sample_count": 600
+      },
+      "live_at_14_seconds": {
+        "session": "29ab761c-d9b4-4df1-85fa-03053a8b4439",
+        "fresh": true,
+        "latest": {
+          "time_ms": 1730700,
+          "busy": 4,
+          "waiting": 75
+        },
+        "fpga_submissions": 17259,
+        "sample_count": 600
+      },
+      "live_after": {
+        "session": "29ab761c-d9b4-4df1-85fa-03053a8b4439",
+        "fresh": true,
+        "latest": {
+          "time_ms": 1757000,
+          "busy": 0,
+          "waiting": 0
+        },
+        "fpga_submissions": 17522,
+        "sample_count": 600
+      },
+      "question": "What's wrong with my system?",
+      "elapsed_wall_seconds": 40.39,
+      "first_partial_poll_seconds": 6.99,
+      "board_job": {
+        "fabric_projections": 3576,
+        "accelerated_projections": 3576,
+        "state": "complete",
+        "dataset_id": "a14998d8041944f8a0ff71ea173ac386",
+        "stage": "final",
+        "projection_phases": {
+          "native_commands": 1936,
+          "allocations": 0,
+          "allocate_ns": 0,
+          "weight_cache_hits": 3576,
+          "weight_cache_misses": 0,
+          "pack_weights_ns": 0,
+          "pack_activations_ns": 566627040,
+          "upload_activations_ns": 548821791,
+          "activation_bytes": 13246464,
+          "shared_activation_uploads_saved": 1184,
+          "upload_weights_ns": 4094802626,
+          "weight_bytes": 1078984704,
+          "device_roundtrip_ns": 20210684025,
+          "queue_runs": 792,
+          "commands": 3912,
+          "download_ns": 855154517,
+          "score_bytes": 33202176,
+          "unpack_ns": 1326827039,
+          "resident_weight_hits": 384,
+          "packed_weight_bytes": 60489728,
+          "workspace_bytes": 4456448,
+          "resident_weight_bytes": 16449536,
+          "tokenize_ns": 16512578,
+          "encoder_stack_ns": 5138898486,
+          "decoder_stacks_ns": 26597620906,
+          "vocabulary_ns": 7673021083,
+          "decode_text_ns": 9224528
+        },
+        "active": {
+          "name": "original",
+          "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+          "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+          "target_row": null
+        }
+      },
+      "views": {
+        "transcript": "What's wrong with my system?",
+        "generalization": "60 readings from 0 to 5900 ms.\nLast reading: 2 of 4 connections busy; 0 waiting.\nPeak queue: 12 waiting at 2200 ms.\nThese measurements do not identify a cause or request-level latency.",
+        "short_answer": "The queue has cleared; 0 requests are waiting now.",
+        "summary": "The queue has cleared; 0 requests are waiting now.\nMeasure request arrivals and connection hold times.",
+        "final": "The queue has cleared; 0 requests are waiting now. The peak was 12. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times."
+      },
+      "fpga_ask_requests": [
+        "final"
+      ],
+      "model": "original",
+      "kit": "PYNQ-Z2 connected",
+      "csv_sha256": "60c2b619930cc8040230e91737bf4c1612c89fd1f7e7d5bfbcbe986ca4a66d08",
+      "input_readings": [
+        [
+          0,
+          2,
+          0
+        ],
+        [
+          100,
+          2,
+          0
+        ],
+        [
+          200,
+          2,
+          0
+        ],
+        [
+          300,
+          2,
+          0
+        ],
+        [
+          400,
+          2,
+          0
+        ],
+        [
+          500,
+          2,
+          0
+        ],
+        [
+          600,
+          2,
+          0
+        ],
+        [
+          700,
+          2,
+          0
+        ],
+        [
+          800,
+          2,
+          0
+        ],
+        [
+          900,
+          2,
+          0
+        ],
+        [
+          1000,
+          4,
+          0
+        ],
+        [
+          1100,
+          4,
+          1
+        ],
+        [
+          1200,
+          4,
+          2
+        ],
+        [
+          1300,
+          4,
+          3
+        ],
+        [
+          1400,
+          4,
+          4
+        ],
+        [
+          1500,
+          4,
+          5
+        ],
+        [
+          1600,
+          4,
+          6
+        ],
+        [
+          1700,
+          4,
+          7
+        ],
+        [
+          1800,
+          4,
+          8
+        ],
+        [
+          1900,
+          4,
+          9
+        ],
+        [
+          2000,
+          4,
+          10
+        ],
+        [
+          2100,
+          4,
+          11
+        ],
+        [
+          2200,
+          4,
+          12
+        ],
+        [
+          2300,
+          4,
+          12
+        ],
+        [
+          2400,
+          4,
+          12
+        ],
+        [
+          2500,
+          4,
+          12
+        ],
+        [
+          2600,
+          4,
+          12
+        ],
+        [
+          2700,
+          4,
+          12
+        ],
+        [
+          2800,
+          4,
+          12
+        ],
+        [
+          2900,
+          4,
+          12
+        ],
+        [
+          3000,
+          4,
+          12
+        ],
+        [
+          3100,
+          4,
+          12
+        ],
+        [
+          3200,
+          4,
+          12
+        ],
+        [
+          3300,
+          4,
+          12
+        ],
+        [
+          3400,
+          4,
+          12
+        ],
+        [
+          3500,
+          4,
+          12
+        ],
+        [
+          3600,
+          4,
+          12
+        ],
+        [
+          3700,
+          4,
+          12
+        ],
+        [
+          3800,
+          4,
+          12
+        ],
+        [
+          3900,
+          4,
+          11
+        ],
+        [
+          4000,
+          4,
+          10
+        ],
+        [
+          4100,
+          4,
+          9
+        ],
+        [
+          4200,
+          4,
+          8
+        ],
+        [
+          4300,
+          4,
+          7
+        ],
+        [
+          4400,
+          4,
+          6
+        ],
+        [
+          4500,
+          4,
+          5
+        ],
+        [
+          4600,
+          4,
+          4
+        ],
+        [
+          4700,
+          4,
+          3
+        ],
+        [
+          4800,
+          4,
+          2
+        ],
+        [
+          4900,
+          4,
+          1
+        ],
+        [
+          5000,
+          2,
+          0
+        ],
+        [
+          5100,
+          2,
+          0
+        ],
+        [
+          5200,
+          2,
+          0
+        ],
+        [
+          5300,
+          2,
+          0
+        ],
+        [
+          5400,
+          2,
+          0
+        ],
+        [
+          5500,
+          2,
+          0
+        ],
+        [
+          5600,
+          2,
+          0
+        ],
+        [
+          5700,
+          2,
+          0
+        ],
+        [
+          5800,
+          2,
+          0
+        ],
+        [
+          5900,
+          2,
+          0
+        ]
+      ],
+      "input_columns": [
+        "time_ms",
+        "busy",
+        "waiting"
+      ],
+      "board_forecast": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "model": "pool_wait_logistic",
+        "version": "pool-logistic-v1",
+        "weights_sha256": "164be8f44f45b9d0d18b8303b856eb37dd904af3c8a909a4631bddd2aaeabe81",
+        "threshold": -11248,
+        "versions": [
+          "pool-logistic-v1",
+          "service-b-astra-v1"
+        ],
+        "backlog_version": "queue-outlook-v2",
+        "score_scale": 65536,
+        "horizon_ms": 10000,
+        "time_ms": 5900,
+        "score": -1334,
+        "alert": true
+      },
+      "time_after_first_text_seconds": 33.4
+    },
+    "growing": {
+      "live_before": {
+        "session": "29ab761c-d9b4-4df1-85fa-03053a8b4439",
+        "fresh": true,
+        "latest": {
+          "time_ms": 1763300,
+          "busy": 4,
+          "waiting": 13
+        },
+        "fpga_submissions": 17585,
+        "sample_count": 600
+      },
+      "live_at_14_seconds": {
+        "session": "29ab761c-d9b4-4df1-85fa-03053a8b4439",
+        "fresh": true,
+        "latest": {
+          "time_ms": 1777700,
+          "busy": 4,
+          "waiting": 18
+        },
+        "fpga_submissions": 17729,
+        "sample_count": 600
+      },
+      "live_after": {
+        "session": "29ab761c-d9b4-4df1-85fa-03053a8b4439",
+        "fresh": true,
+        "latest": {
+          "time_ms": 1807100,
+          "busy": 4,
+          "waiting": 44
+        },
+        "fpga_submissions": 18023,
+        "sample_count": 600
+      },
+      "question": "What's wrong with my system?",
+      "elapsed_wall_seconds": 43.41,
+      "first_partial_poll_seconds": 8.96,
+      "board_job": {
+        "fabric_projections": 3722,
+        "accelerated_projections": 3722,
+        "state": "complete",
+        "dataset_id": "2f6b3fdd6252449bb8a611933f1bdc03",
+        "stage": "final",
+        "projection_phases": {
+          "native_commands": 2016,
+          "allocations": 0,
+          "allocate_ns": 0,
+          "weight_cache_hits": 3722,
+          "weight_cache_misses": 0,
+          "pack_weights_ns": 0,
+          "pack_activations_ns": 593663796,
+          "upload_activations_ns": 569074025,
+          "activation_bytes": 14057472,
+          "shared_activation_uploads_saved": 1232,
+          "upload_weights_ns": 4285952548,
+          "weight_bytes": 1123024896,
+          "device_roundtrip_ns": 21352538674,
+          "queue_runs": 824,
+          "commands": 4072,
+          "download_ns": 883564367,
+          "score_bytes": 36342784,
+          "unpack_ns": 1443165518,
+          "resident_weight_hits": 400,
+          "packed_weight_bytes": 60489728,
+          "workspace_bytes": 4456448,
+          "resident_weight_bytes": 16449536,
+          "tokenize_ns": 18203567,
+          "encoder_stack_ns": 6189543346,
+          "decoder_stacks_ns": 27961122582,
+          "vocabulary_ns": 8055788281,
+          "decode_text_ns": 9802261
+        },
+        "active": {
+          "name": "original",
+          "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+          "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+          "target_row": null
+        }
+      },
+      "views": {
+        "transcript": "What's wrong with my system?",
+        "generalization": "60 readings from 0 to 5900 ms.\nLast reading: 4 of 4 connections busy; 19 waiting.\nPeak queue: 19 waiting at 5900 ms.\nThese measurements do not identify a cause or request-level latency.",
+        "short_answer": "The backlog is ongoing: 19 requests are waiting now.",
+        "summary": "The backlog is ongoing: 19 requests are waiting now.\nMeasure request arrivals and connection hold times.",
+        "final": "The backlog is ongoing: 19 requests are waiting now. The peak was 19. The FPGA predicts the queue will remain nonempty over the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times."
+      },
+      "fpga_ask_requests": [
+        "final"
+      ],
+      "model": "original",
+      "kit": "PYNQ-Z2 connected",
+      "csv_sha256": "18401febd0f128f7148f6976594e97c453bfe57ae328910f5ba0eea0d3506ba5",
+      "input_readings": [
+        [
+          0,
+          4,
+          0
+        ],
+        [
+          100,
+          4,
+          0
+        ],
+        [
+          200,
+          4,
+          0
+        ],
+        [
+          300,
+          4,
+          0
+        ],
+        [
+          400,
+          4,
+          0
+        ],
+        [
+          500,
+          4,
+          0
+        ],
+        [
+          600,
+          4,
+          0
+        ],
+        [
+          700,
+          4,
+          0
+        ],
+        [
+          800,
+          4,
+          0
+        ],
+        [
+          900,
+          4,
+          0
+        ],
+        [
+          1000,
+          4,
+          0
+        ],
+        [
+          1100,
+          4,
+          0
+        ],
+        [
+          1200,
+          4,
+          0
+        ],
+        [
+          1300,
+          4,
+          0
+        ],
+        [
+          1400,
+          4,
+          0
+        ],
+        [
+          1500,
+          4,
+          0
+        ],
+        [
+          1600,
+          4,
+          0
+        ],
+        [
+          1700,
+          4,
+          0
+        ],
+        [
+          1800,
+          4,
+          0
+        ],
+        [
+          1900,
+          4,
+          0
+        ],
+        [
+          2000,
+          4,
+          0
+        ],
+        [
+          2100,
+          4,
+          0
+        ],
+        [
+          2200,
+          4,
+          0
+        ],
+        [
+          2300,
+          4,
+          0
+        ],
+        [
+          2400,
+          4,
+          0
+        ],
+        [
+          2500,
+          4,
+          0
+        ],
+        [
+          2600,
+          4,
+          0
+        ],
+        [
+          2700,
+          4,
+          0
+        ],
+        [
+          2800,
+          4,
+          0
+        ],
+        [
+          2900,
+          4,
+          0
+        ],
+        [
+          3000,
+          4,
+          0
+        ],
+        [
+          3100,
+          4,
+          0
+        ],
+        [
+          3200,
+          4,
+          0
+        ],
+        [
+          3300,
+          4,
+          0
+        ],
+        [
+          3400,
+          4,
+          0
+        ],
+        [
+          3500,
+          4,
+          0
+        ],
+        [
+          3600,
+          4,
+          0
+        ],
+        [
+          3700,
+          4,
+          0
+        ],
+        [
+          3800,
+          4,
+          0
+        ],
+        [
+          3900,
+          4,
+          0
+        ],
+        [
+          4000,
+          4,
+          0
+        ],
+        [
+          4100,
+          4,
+          1
+        ],
+        [
+          4200,
+          4,
+          2
+        ],
+        [
+          4300,
+          4,
+          3
+        ],
+        [
+          4400,
+          4,
+          4
+        ],
+        [
+          4500,
+          4,
+          5
+        ],
+        [
+          4600,
+          4,
+          6
+        ],
+        [
+          4700,
+          4,
+          7
+        ],
+        [
+          4800,
+          4,
+          8
+        ],
+        [
+          4900,
+          4,
+          9
+        ],
+        [
+          5000,
+          4,
+          10
+        ],
+        [
+          5100,
+          4,
+          11
+        ],
+        [
+          5200,
+          4,
+          12
+        ],
+        [
+          5300,
+          4,
+          13
+        ],
+        [
+          5400,
+          4,
+          14
+        ],
+        [
+          5500,
+          4,
+          15
+        ],
+        [
+          5600,
+          4,
+          16
+        ],
+        [
+          5700,
+          4,
+          17
+        ],
+        [
+          5800,
+          4,
+          18
+        ],
+        [
+          5900,
+          4,
+          19
+        ]
+      ],
+      "input_columns": [
+        "time_ms",
+        "busy",
+        "waiting"
+      ],
+      "board_forecast": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "model": "queue_outlook",
+        "version": "queue-outlook-v2",
+        "weights_sha256": "13c28113cc4ef20b76d3c746f4c1192f33bd2341240ba4ed1e878b13ad4b6ce6",
+        "scores": [
+          265,
+          18
+        ],
+        "horizon_ms": 10000,
+        "time_ms": 5900,
+        "targets": [
+          "persists",
+          "grows"
+        ]
+      },
+      "time_after_first_text_seconds": 34.45
+    },
+    "healthy": {
+      "live_before": {
+        "session": "29ab761c-d9b4-4df1-85fa-03053a8b4439",
+        "fresh": true,
+        "latest": {
+          "time_ms": 1813200,
+          "busy": 4,
+          "waiting": 60
+        },
+        "fpga_submissions": 18084,
+        "sample_count": 600
+      },
+      "live_at_14_seconds": {
+        "session": "29ab761c-d9b4-4df1-85fa-03053a8b4439",
+        "fresh": true,
+        "latest": {
+          "time_ms": 1827700,
+          "busy": 0,
+          "waiting": 0
+        },
+        "fpga_submissions": 18229,
+        "sample_count": 600
+      },
+      "live_after": {
+        "session": "29ab761c-d9b4-4df1-85fa-03053a8b4439",
+        "fresh": true,
+        "latest": {
+          "time_ms": 1856100,
+          "busy": 4,
+          "waiting": 24
+        },
+        "fpga_submissions": 18513,
+        "sample_count": 600
+      },
+      "question": "What's wrong with my system?",
+      "elapsed_wall_seconds": 42.44,
+      "first_partial_poll_seconds": 9.1,
+      "board_job": {
+        "fabric_projections": 3576,
+        "accelerated_projections": 3576,
+        "state": "complete",
+        "dataset_id": "1c031880198d49a7965b4a46de66bcad",
+        "stage": "final",
+        "projection_phases": {
+          "native_commands": 1936,
+          "allocations": 0,
+          "allocate_ns": 0,
+          "weight_cache_hits": 3576,
+          "weight_cache_misses": 0,
+          "pack_weights_ns": 0,
+          "pack_activations_ns": 568313488,
+          "upload_activations_ns": 548980146,
+          "activation_bytes": 13246464,
+          "shared_activation_uploads_saved": 1184,
+          "upload_weights_ns": 4077352010,
+          "weight_bytes": 1078984704,
+          "device_roundtrip_ns": 20221030808,
+          "queue_runs": 792,
+          "commands": 3912,
+          "download_ns": 855433538,
+          "score_bytes": 33202176,
+          "unpack_ns": 1427507731,
+          "resident_weight_hits": 384,
+          "packed_weight_bytes": 60489728,
+          "workspace_bytes": 4456448,
+          "resident_weight_bytes": 16449536,
+          "tokenize_ns": 16071824,
+          "encoder_stack_ns": 5138506834,
+          "decoder_stacks_ns": 26845126619,
+          "vocabulary_ns": 7722400804,
+          "decode_text_ns": 9319987
+        },
+        "active": {
+          "name": "original",
+          "checkpoint_sha256": "23061a44fa9a5835c2cdb7e1968ec3ab4389047e77f97e6313e80dcb082aff2b",
+          "classifier_sha256": "a80b138049645633a5eedbf9977dd4edb432240a8a83d30314a93e52ce962643",
+          "target_row": null
+        }
+      },
+      "views": {
+        "transcript": "What's wrong with my system?",
+        "generalization": "60 readings from 0 to 5900 ms.\nLast reading: 2 of 4 connections busy; 0 waiting.\nPeak queue: 0 waiting at 0 ms.\nThese measurements do not identify a cause or request-level latency.",
+        "short_answer": "The queue has cleared; 0 requests are waiting now.",
+        "summary": "The queue has cleared; 0 requests are waiting now.\nMeasure request arrivals and connection hold times.",
+        "final": "The queue has cleared; 0 requests are waiting now. The peak was 0. The FPGA warns that requests may start waiting within the next ten seconds. The cause is unknown. Measure request arrivals and connection hold times."
+      },
+      "fpga_ask_requests": [
+        "final"
+      ],
+      "model": "original",
+      "kit": "PYNQ-Z2 connected",
+      "csv_sha256": "9312a4ece3de5baecc9083f68213f637701e0461cb278917f0518f82fbf79cff",
+      "input_readings": [
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          100,
+          2,
+          0
+        ],
+        [
+          200,
+          1,
+          0
+        ],
+        [
+          300,
+          2,
+          0
+        ],
+        [
+          400,
+          1,
+          0
+        ],
+        [
+          500,
+          2,
+          0
+        ],
+        [
+          600,
+          1,
+          0
+        ],
+        [
+          700,
+          2,
+          0
+        ],
+        [
+          800,
+          1,
+          0
+        ],
+        [
+          900,
+          2,
+          0
+        ],
+        [
+          1000,
+          1,
+          0
+        ],
+        [
+          1100,
+          2,
+          0
+        ],
+        [
+          1200,
+          1,
+          0
+        ],
+        [
+          1300,
+          2,
+          0
+        ],
+        [
+          1400,
+          1,
+          0
+        ],
+        [
+          1500,
+          2,
+          0
+        ],
+        [
+          1600,
+          1,
+          0
+        ],
+        [
+          1700,
+          2,
+          0
+        ],
+        [
+          1800,
+          1,
+          0
+        ],
+        [
+          1900,
+          2,
+          0
+        ],
+        [
+          2000,
+          1,
+          0
+        ],
+        [
+          2100,
+          2,
+          0
+        ],
+        [
+          2200,
+          1,
+          0
+        ],
+        [
+          2300,
+          2,
+          0
+        ],
+        [
+          2400,
+          1,
+          0
+        ],
+        [
+          2500,
+          2,
+          0
+        ],
+        [
+          2600,
+          1,
+          0
+        ],
+        [
+          2700,
+          2,
+          0
+        ],
+        [
+          2800,
+          1,
+          0
+        ],
+        [
+          2900,
+          2,
+          0
+        ],
+        [
+          3000,
+          1,
+          0
+        ],
+        [
+          3100,
+          2,
+          0
+        ],
+        [
+          3200,
+          1,
+          0
+        ],
+        [
+          3300,
+          2,
+          0
+        ],
+        [
+          3400,
+          1,
+          0
+        ],
+        [
+          3500,
+          2,
+          0
+        ],
+        [
+          3600,
+          1,
+          0
+        ],
+        [
+          3700,
+          2,
+          0
+        ],
+        [
+          3800,
+          1,
+          0
+        ],
+        [
+          3900,
+          2,
+          0
+        ],
+        [
+          4000,
+          1,
+          0
+        ],
+        [
+          4100,
+          2,
+          0
+        ],
+        [
+          4200,
+          1,
+          0
+        ],
+        [
+          4300,
+          2,
+          0
+        ],
+        [
+          4400,
+          1,
+          0
+        ],
+        [
+          4500,
+          2,
+          0
+        ],
+        [
+          4600,
+          1,
+          0
+        ],
+        [
+          4700,
+          2,
+          0
+        ],
+        [
+          4800,
+          1,
+          0
+        ],
+        [
+          4900,
+          2,
+          0
+        ],
+        [
+          5000,
+          1,
+          0
+        ],
+        [
+          5100,
+          2,
+          0
+        ],
+        [
+          5200,
+          1,
+          0
+        ],
+        [
+          5300,
+          2,
+          0
+        ],
+        [
+          5400,
+          1,
+          0
+        ],
+        [
+          5500,
+          2,
+          0
+        ],
+        [
+          5600,
+          1,
+          0
+        ],
+        [
+          5700,
+          2,
+          0
+        ],
+        [
+          5800,
+          1,
+          0
+        ],
+        [
+          5900,
+          2,
+          0
+        ]
+      ],
+      "input_columns": [
+        "time_ms",
+        "busy",
+        "waiting"
+      ],
+      "board_forecast": {
+        "ok": true,
+        "backend": "PYNQ-Z2",
+        "model": "pool_wait_logistic",
+        "version": "pool-logistic-v1",
+        "weights_sha256": "164be8f44f45b9d0d18b8303b856eb37dd904af3c8a909a4631bddd2aaeabe81",
+        "threshold": -11248,
+        "versions": [
+          "pool-logistic-v1",
+          "service-b-astra-v1"
+        ],
+        "backlog_version": "queue-outlook-v2",
+        "score_scale": 65536,
+        "horizon_ms": 10000,
+        "time_ms": 5900,
+        "score": 27722,
+        "alert": true
+      },
+      "time_after_first_text_seconds": 33.34
+    }
+  },
+  "assessment": {
+    "recovery": "Correct recovery and peak. Verbatim match to prior physical run.",
+    "growing": "Correct active backlog and magnitude. Omits the observed growth trend and the positive FPGA growth prediction.",
+    "healthy": "Correct latest and peak counts, both zero. Incorrectly implies a historical queue cleared, although waiting was zero throughout. The onset warning did come from the FPGA. Its ten-second outcome is outside the capture.",
+    "scope": "One physical run per synthetic trace. Runtime baseline for future optimization replays."
+  }
+}
