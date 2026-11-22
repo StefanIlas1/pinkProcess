@@ -300,6 +300,37 @@ module projection_system_tb;
         end
     endtask
 
+    // Use the decoder fixture left by run_projection. Check descriptor snapshots,
+    // a failed first descriptor suppressing its successor, and retry after error.
+    task check_queue(input bit fault);
+        reg [31:0] status;
+        integer i;
+        begin
+            inject_write_error = fault;
+            injected_error = 0;
+            for (i = 0; i < 64; i = i + 1) begin
+                ddr[Y/8+i] = UNWRITTEN;
+                ddr[Y/8+i+128] = UNWRITTEN;
+            end
+            control_write('h1c, Y);
+            control_write('h24, 1);
+            control_write('h1c, Y + 1024);
+            control_write('h24, 1);
+            control_write('h24, 2);
+            control_write('h24, 0, 4'hf, 2'b10);
+            control_read(0, status);
+            while (status[0]) control_read(0, status);
+            if (status[2:0] !== {fault,2'b10}) $fatal(1, "Queue termination %h", status);
+            for (i = 0; i < 64; i = i + 1) begin
+                if (ddr[Y/8+i] !== oracle[i]) $fatal(1, "First descriptor mismatch");
+                if (ddr[Y/8+i+128] !== (fault ? UNWRITTEN : oracle[i]))
+                    $fatal(1, "Second descriptor mismatch");
+            end
+            control_read('h24, status);
+            if (status[7:0] !== (fault ? 0 : 16)) $fatal(1, "Wrong terminal index");
+        end
+    endtask
+
     task run_capture;
         integer mode, depth, positions, outputs, a_words, w_words, y_words;
         begin
@@ -332,6 +363,15 @@ module projection_system_tb;
             run_projection(0, 0, 2, 2);
             run_projection(1, 1, 1, 2);
             run_projection(1, 0, 1, 2);
+            control_read('h28, id);
+            if (id !== 32'h51554538) $fatal(1, "Queue capability missing");
+            control_write('h24, 2, 4'hf, 2'b10);
+            repeat (8) control_write('h24, 1);
+            control_write('h24, 1, 4'hf, 2'b10);
+            control_write('h24, 0);
+            check_queue(1);
+            check_queue(0);
+            $display("Verified descriptor batching, bounds, DMA failure and retry");
             if (read_crossing == 0 || write_crossing == 0 || full_read == 0 || full_write == 0 ||
                 read_stalls == 0 || write_stalls == 0 || early_write == 0)
                 $fatal(1, "Required DMA boundary or backpressure case was not exercised");
