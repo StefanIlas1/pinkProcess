@@ -19,6 +19,10 @@ A_ADDRESS = 0x14
 W_ADDRESS = 0x18
 Y_ADDRESS = 0x1C
 CORE_ID = 0x20
+QUEUE_CONTROL = 0x24
+QUEUE_ID = 0x28
+PROJECTION_QUEUE_ID = 0x51554538
+QUEUE_CLEAR, QUEUE_PUSH, QUEUE_RUN = 0, 1, 2
 PROJECTION_ID = 0x50504A31
 BUSY, DONE, ERROR = 1, 2, 4
 MAX_SEGMENT_BUFFER_BYTES = 2 * 1024 * 1024
@@ -97,8 +101,8 @@ def _configure(mmio, addresses, decode, depth, position_tiles, output_tiles):
         mmio.write(register, value)
 
 
-def _launch(mmio, timeout):
-    mmio.write(CONTROL, 1)
+def _launch(mmio, timeout, register=CONTROL, command=1):
+    mmio.write(register, command)
     deadline = monotonic() + timeout
     while True:
         status = mmio.read(CONTROL)
@@ -152,13 +156,16 @@ def run_projection(mmio, allocate, a, w, decode, timeout, retain):
 class OverlayProjection:
     """Offload either the first self-attention queries or every learned projection."""
 
-    def __init__(self, mmio, allocate, *, scope="query", timeout=2):
+    def __init__(self, mmio, allocate, *, scope="query", timeout=2, queue=False):
         if scope not in ("query", "all"):
             raise ValueError("Projection scope must be query or all.")
         self.mmio = mmio
         self.allocate = allocate
         self.scope = scope
         self.timeout = timeout
+        if queue and mmio.read(QUEUE_ID) != PROJECTION_QUEUE_ID:
+            raise RuntimeError("The programmed overlay does not expose the expected projection queue.")
+        self.queue = queue
         self.lock = Lock()
         self.disabled = False
         self.pending = False
@@ -219,16 +226,7 @@ class OverlayProjection:
             if tiles == 0:
                 raise ValueError("One projection tile exceeds the CMA segment budget.")
 
-            a = self._buffer("a", (position_tiles, depth, 8), np.int8)
-            start = perf_counter_ns()
-            pack_a = self.native.pack_activations if self.native is not None else _pack_activations
-            pack_a(a, activations)
-            self.phases["pack_activations_ns"] += perf_counter_ns() - start
-            start = perf_counter_ns()
-            a.flush()
-            self.phases["upload_activations_ns"] += perf_counter_ns() - start
-            self.phases["activation_bytes"] += a.nbytes
-
+            a = self._upload_activations(activations, position_tiles, depth)
             packed = self._cached_weights(name, weights, decode, (output_tiles, depth, output_lanes))
             rows_per_segment = tiles * output_lanes
             result = np.empty((batch, len(weights)), dtype=np.int32)
@@ -243,6 +241,92 @@ class OverlayProjection:
                     segment = packed[first_tile:last_tile]
                 self._project_segment(a, segment, packed is not None, shape, result[:, start:stop], decode)
             return result
+
+    def project_many(self, matrices, activations):
+        """Project independent weights with one shared activation upload."""
+        if self.scope != "all" or not 2 <= len(matrices) <= 8:
+            return [self.project(name, weights, activations) for name, weights in matrices]
+
+        batch, depth = activations.shape
+        decode = batch == 1
+        positions = (batch + 7) // 8
+        lanes = 64 if decode else 8
+        tiles = [(len(weights) + lanes - 1) // lanes for _, weights in matrices]
+        weight_sizes = [count * depth * lanes for count in tiles]
+        score_sizes = [positions * count * 64 for count in tiles]
+        if (not 0 < depth <= 65535 or not 0 < positions <= 65535
+                or any(not 0 < count <= 65535 for count in tiles)
+                or max(weight_sizes) > MAX_SEGMENT_BUFFER_BYTES
+                or max(score_sizes) * 4 > MAX_SEGMENT_BUFFER_BYTES):
+            return [self.project(name, weights, activations) for name, weights in matrices]
+
+        # Every configuration address remains 64-byte aligned even with odd K.
+        weight_spans = [(size + 63) // 64 * 64 for size in weight_sizes]
+        queued = (self.queue and sum(weight_spans) <= MAX_SEGMENT_BUFFER_BYTES
+                  and sum(score_sizes) * 4 <= MAX_SEGMENT_BUFFER_BYTES)
+        with self.lock:
+            if self.disabled:
+                raise RuntimeError("The all-projection accelerator is unavailable.")
+            if self.mmio.read(CONTROL) & BUSY:
+                raise RuntimeError("Projection accelerator is already busy.")
+            a = self._upload_activations(activations, positions, depth)
+            self.phases["shared_activation_uploads_saved"] += len(matrices) - 1
+            if queued:
+                w_space = self._buffer("w", (sum(weight_spans),), np.int8)
+                y_space = self._buffer("y", (sum(score_sizes),), np.dtype("<i4"))
+                self.mmio.write(QUEUE_CONTROL, QUEUE_CLEAR)
+            commands = []
+            weight_offset = score_offset = 0
+            for (name, weights), count, weight_size, weight_span, score_size in zip(
+                matrices, tiles, weight_sizes, weight_spans, score_sizes
+            ):
+                shape = (count, depth, lanes)
+                packed = self._cached_weights(name, weights, decode, shape)
+                result = np.empty((batch, len(weights)), dtype=np.int32)
+                segment = weights if packed is None else packed
+                if not queued:
+                    self._project_segment(a, segment, packed is not None, shape, result, decode)
+                    commands.append((None, result))
+                    continue
+                w = w_space[weight_offset:weight_offset + weight_size].reshape(shape)
+                y = y_space[score_offset:score_offset + score_size].reshape(positions, count, 64)
+                self._upload_weights(w, segment, packed is not None, decode)
+                addresses = [_buffer_address(buffer) for buffer in (a, w, y)]
+                _configure(self.mmio, addresses, decode, depth, positions, count)
+                self.mmio.write(QUEUE_CONTROL, QUEUE_PUSH)
+                commands.append((y, result))
+                weight_offset += weight_span
+                score_offset += score_size
+
+            if queued:
+                if self.mmio.read(QUEUE_CONTROL) & 0xf != len(commands):
+                    raise RuntimeError("Projection queue did not accept all staged descriptors.")
+                start = perf_counter_ns()
+                try:
+                    status = _launch(self.mmio, self.timeout * len(commands), QUEUE_CONTROL, QUEUE_RUN)
+                except BaseException:
+                    self._retain()
+                    raise
+                self.phases["device_roundtrip_ns"] += perf_counter_ns() - start
+                self.phases["queue_runs"] += 1
+                self.phases["commands"] += len(commands)
+                if status & ERROR:
+                    raise RuntimeError(f"Projection queue reported status {status:#x}.")
+                for y, result in commands:
+                    self._consume_scores(y, result)
+            return [result for _, result in commands]
+
+    def _upload_activations(self, activations, positions, depth):
+        a = self._buffer("a", (positions, depth, 8), np.int8)
+        start = perf_counter_ns()
+        pack_a = self.native.pack_activations if self.native is not None else _pack_activations
+        pack_a(a, activations)
+        self.phases["pack_activations_ns"] += perf_counter_ns() - start
+        start = perf_counter_ns()
+        a.flush()
+        self.phases["upload_activations_ns"] += perf_counter_ns() - start
+        self.phases["activation_bytes"] += a.nbytes
+        return a
 
     def _buffer(self, name, shape, dtype):
         elements = prod(shape)
@@ -297,14 +381,7 @@ class OverlayProjection:
     def _project_segment(self, a, segment, packed, shape, destination, decode):
         w = self._buffer("w", shape, np.int8)
         y = self._buffer("y", (len(a), len(w), 64), np.dtype("<i4"))
-        if not packed:
-            self._pack_weight_data(w, segment, decode)
-        start = perf_counter_ns()
-        if packed:
-            w[:] = segment
-        w.flush()
-        self.phases["upload_weights_ns"] += perf_counter_ns() - start
-        self.phases["weight_bytes"] += w.nbytes
+        self._upload_weights(w, segment, packed, decode)
 
         addresses = [int(buffer.device_address) for buffer in (a, w, y)]
         start = perf_counter_ns()
@@ -324,6 +401,19 @@ class OverlayProjection:
         if status & ERROR:
             raise RuntimeError(f"Projection accelerator reported status {status:#x}.")
 
+        self._consume_scores(y, destination)
+
+    def _upload_weights(self, w, segment, packed, decode):
+        if not packed:
+            self._pack_weight_data(w, segment, decode)
+        start = perf_counter_ns()
+        if packed:
+            w[:] = segment
+        w.flush()
+        self.phases["upload_weights_ns"] += perf_counter_ns() - start
+        self.phases["weight_bytes"] += w.nbytes
+
+    def _consume_scores(self, y, destination):
         start = perf_counter_ns()
         y.invalidate()
         self.phases["download_ns"] += perf_counter_ns() - start

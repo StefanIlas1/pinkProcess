@@ -107,10 +107,14 @@ class Flan:
             raise ValueError("Loaded FLAN classifier differs from the selected version.")
         return digest
 
+    @staticmethod
+    def quantize_activations(x):
+        scale = np.maximum(abs(x).max(axis=1, keepdims=True) / np.float32(127), np.float32(1e-30))
+        return np.rint(x / scale).clip(-127, 127).astype("int8"), scale
+
     def linear(self, name, x):
         w = self.t[name + ".weight"]
-        scale = np.maximum(abs(x).max(axis=1, keepdims=True) / np.float32(127), np.float32(1e-30))
-        q = np.rint(x / scale).clip(-127, 127).astype("int8")
+        q, scale = self.quantize_activations(x)
         if name == "lm_head" and self.first_output_activation is None:
             self.first_output_activation = q[0].tolist()
         if self.fabric is None:
@@ -129,6 +133,18 @@ class Flan:
         if name == "lm_head" and self.first_output_max is None:
             self.first_output_max = float((dots[0] * row_scales).max())
         return dots * scale * row_scales
+
+    def linear_group(self, names, x):
+        runner = self.query_projection
+        if runner is None or runner.scope != "all":
+            return [self.linear(name, x) for name in names]
+        q, scale = self.quantize_activations(x)
+        dots = runner.project_many([(name, self.t[name + ".weight"]) for name in names], q)
+        results = [d.astype("float32") * scale * self.t[name + ".weight.scale"]
+                   for name, d in zip(names, dots)]
+        self.fabric_projections += len(results)
+        self.accelerated_projections += len(results)
+        return results
 
     def head_row_scale(self, index):
         return float(self.t["lm_head.weight.scale"][index])
@@ -149,17 +165,22 @@ class Flan:
         return self.t[side + ".block.0.layer.0.SelfAttention.relative_attention_bias.weight"][bucket].transpose(2, 0, 1)
 
     def attention(self, name, x, source, bias, cache, incremental):
-        def project(k, value):
-            return self.linear(name + "." + k, value).reshape(-1, 6, 64).transpose(1, 0, 2)
-        q = project("q", x)
+        def heads(values):
+            return values.reshape(-1, 6, 64).transpose(1, 0, 2)
+
         key = cache.get(name)
         if key is None or incremental:
-            k, v = project("k", source), project("v", source)
+            if source is x:
+                q, k, v = map(heads, self.linear_group([name + suffix for suffix in (".q", ".k", ".v")], x))
+            else:
+                q = heads(self.linear(name + ".q", x))
+                k, v = map(heads, self.linear_group([name + ".k", name + ".v"], source))
             if key is not None:
                 k = np.concatenate((key[0], k), axis=1)
                 v = np.concatenate((key[1], v), axis=1)
             cache[name] = (k, v)
         else:
+            q = heads(self.linear(name + ".q", x))
             k, v = key
         scores = q @ k.transpose(0, 2, 1) + bias
         p = np.exp(scores - scores.max(axis=2, keepdims=True))
@@ -180,9 +201,9 @@ class Flan:
                 ff = "2"
             n = self.norm(base + ff + ".layer_norm", x)
             dense = base + ff + ".DenseReluDense."
-            a = self.linear(dense + "wi_0", n)
+            a, up = self.linear_group((dense + "wi_0", dense + "wi_1"), n)
             gelu = 0.5 * a * (1 + np.tanh(0.79788456 * (a + 0.044715 * a**3)))
-            x += self.linear(dense + "wo", gelu * self.linear(dense + "wi_1", n))
+            x += self.linear(dense + "wo", gelu * up)
         return self.norm(side + ".final_layer_norm", x)
 
     def generate(self, prompt, max_tokens=64):
