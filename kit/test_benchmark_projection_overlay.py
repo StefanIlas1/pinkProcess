@@ -262,6 +262,31 @@ class ProjectionOverlayTest(unittest.TestCase):
         self.assertEqual(edited[0, 4096], -128 * 127 * 512)
         self.assertEqual(np.count_nonzero(edited != first), 1)
 
+    def test_resident_host_staging_failure_packs_directly_and_tracks_row_edits(self):
+        overlay = FakeOverlay()
+        runner = projection.OverlayProjection(overlay, overlay.allocate, scope="all", resident_head_mib=1)
+        self.addCleanup(runner.close)
+        weights = np.full((64, 32), -2, np.int8)
+        activations = np.ones((1, 32), np.int8)
+        runner.bind_model({"lm_head.weight": weights})
+        allocate_host = np.empty
+
+        def limited_heap(shape, *args, **kwargs):
+            if shape == (1, 32, 64):
+                raise MemoryError("No host memory for optional packed weights.")
+            return allocate_host(shape, *args, **kwargs)
+
+        with patch.object(projection.np, "empty", side_effect=limited_heap):
+            for value in (3, -7):
+                weights[7] = value
+                runner.invalidate_weights("lm_head")
+                expected = activations.astype(np.int32) @ weights.astype(np.int32).T
+                for _ in range(2):
+                    np.testing.assert_array_equal(runner.project("lm_head", weights, activations), expected)
+        self.assertEqual(runner.profile()["resident_direct_packs"], 2)
+        self.assertEqual(runner.profile()["resident_weight_hits"], 2)
+        self.assertEqual(runner.profile()["resident_weight_uploads"], 2)
+
     def test_resident_allocation_failure_keeps_scratch_and_does_not_retry_each_token(self):
         overlay = FakeOverlay()
         attempts = []

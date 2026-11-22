@@ -13,4 +13,4 @@ python3 -m http.server 5330 -d website
 
 ## Deploy
 
-Point a Vercel project at the `website` folder. `vercel.json` runs the sync script on build, so every deploy serves the zip from the same commit. Screenshots in `assets/shots/` come from the app running against the simulated board (`PYNQ_SIM_BOARD=1`); retake them when the interface changes.
+Point a Vercel project at the `website` folder. `vercel.json` runs the sync script on build, so every deploy serves the zip from the same commit. The how-it-works walkthrough is an HTML mock of the app animated in `main.js`; update it when the interface changes.
