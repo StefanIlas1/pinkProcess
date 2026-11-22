@@ -88,6 +88,13 @@ h3{font:600 26px/1.15 var(--round)}
 .case-reading strong{font:600 clamp(24px,2.6vw,36px)/1.1 var(--round)}
 .case-reading span{font:13px var(--mono)}
 .case-note{margin-top:12px;line-height:1.5;max-width:52ch}
+/* Use the first question line as the printout's alignment baseline. */
+@media(min-width:761px){
+  .use-cases{align-items:first baseline}
+  .case-slip{padding-top:80px}
+  .case-file{position:absolute;top:32px;inset-inline:clamp(20px,4vw,54px)}
+  .case-slip h3{margin-top:0}
+}
 @media(max-width:760px){
   .use-cases{grid-template-columns:1fr;gap:22px}
   .case-index fieldset{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:20px;max-width:none}
