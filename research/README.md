@@ -22,3 +22,5 @@ On the 18 frozen queue-history inputs, a later software-reference trial added pr
 - [Supplemental experiment records](experiments/) preserve the intermediate protocols, CSV traces, captures, model evaluations and synthesis reports recovered from project work directories. The [experiment guide](experiments/README.md) maps those files to the studies.
 - [Historical cartridge study](../docs/earlier-prototype.md) covers the earlier card-based prototype. Its [original specification](https://github.com/StefanIlas1/pinkProcess/blob/b75186a6457ca29208714bda422539796302a9f2/SPEC.md) and [Hack Western plan](https://github.com/StefanIlas1/pinkProcess/blob/b75186a6457ca29208714bda422539796302a9f2/docs/hack-western.md) remain available at the cartridge branch revision.
 - [Original design materials](design-history/README.md) include the team plan, simulator, enclosure designs and brand concepts.
+- [Validation history](validation-history/) includes operator screenshots, browser checks and FPGA overlay qualification scripts.
+- [Historical checkpoint replay](experiments/checkpoint-replay.md) documents how to recover both archived model candidates and verify their weights.

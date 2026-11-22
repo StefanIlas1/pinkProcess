@@ -13,3 +13,5 @@ These files preserve development and qualification runs from November 2026. Dire
 | [Workbench captures](workbench/) | Local model comparison, Mac UI results and board catalog snapshots from the project’s temporary work area. Local network identifiers in these snapshots are generalized. |
 
 The supplemental archive omits byte-identical copies of files already tracked on the remote. A home-directory prefix in a Mac suite record is shortened to a tilde.
+
+[Replay the archived research checkpoints](checkpoint-replay.md) to reconstruct the quantized models used for the early telemetry domain study and the rejected 160-step balanced-history candidate.
