@@ -287,8 +287,6 @@ class KitTest(unittest.TestCase):
                 server.shutdown()
 
     def test_queue_sample_carries_source_for_board_upload(self):
-        from .kit_data import sample_csv
-
         queue = self.kit.action({"action": "load_sample", "id": "pool-recovery"})
         self.assertEqual(queue["queue_csv"], sample_csv("pool-recovery"))
         local = self.kit.action({"action": "load_sample", "id": "api-latency"})
@@ -314,9 +312,9 @@ class KitTest(unittest.TestCase):
             self.assertEqual(self.kit.action({"action": "data_ask", "question": "now?", "style": "short"})["where"], "this Mac")
 
     def test_pool_sample_can_be_uploaded_and_local_styles_do_not_query_the_board(self):
-        loaded = self.kit.action({"action": "load_sample", "id": "pool"})
+        loaded = self.kit.action({"action": "load_sample", "id": "pool-recovery"})
         self.assertTrue(loaded["profile"]["queue_ready"])
-        self.assertEqual(loaded["csv"], sample_csv("pool"))
+        self.assertEqual(loaded["queue_csv"], sample_csv("pool-recovery"))
         self.kit.action({"action": "connect", "host": "pynq.local"})
         with patch.object(self.transport, "request") as request:
             job = self.kit.action(dict(action="data_ask_begin", question="What happened?", local_only=True))
